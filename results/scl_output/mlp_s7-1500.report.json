@@ -1,0 +1,21 @@
+{
+  "graph_name": "mlp",
+  "target_plc_kb": 1500,
+  "memory": {
+    "weights_kb": 9.1,
+    "lut_kb": 0.0,
+    "code_kb": 3.5,
+    "variables_kb": 0.5,
+    "array_blocks": 4,
+    "total_kb": 13.2
+  },
+  "flops": {
+    "matmul": 4512,
+    "bspline_lut": 0,
+    "activation": 48,
+    "softmax": 12,
+    "total_per_inference": 4572
+  },
+  "budget_utilization_pct": 0.9,
+  "fits_budget": true
+}

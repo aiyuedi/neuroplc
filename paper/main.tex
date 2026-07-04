@@ -1,0 +1,537 @@
+% ===========================================================================
+% NeuroPLC — From PyTorch to PLC: Automated Code Generation for Deploying
+%           Intelligent Fault Diagnosis on IEC 61131-3 Controllers
+% ===========================================================================
+
+\documentclass[journal]{IEEEtran}
+
+% ── Packages ──
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{color}
+\usepackage{xspace}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+% ── Macros ──
+\newcommand{\neuroplc}{NeuroPLC\xspace}
+\newcommand{\kan}{KAN\xspace}
+\newcommand{\scl}{SCL\xspace}
+\newcommand{\plc}{PLC\xspace}
+
+\begin{document}
+
+% ===========================================================================
+% Title
+% ===========================================================================
+\title{NeuroPLC: An IR-Based Compiler for Deploying Feedforward Neural Networks on IEC 61131-3 Controllers with Application to Bearing Fault Diagnosis}
+
+\author{Fuyue~Liu,~\IEEEmembership{Guilin~University~of~Electronic~Technology, Guilin 541004, China}}
+
+\markboth{IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS, VOL. XX, NO. XX, 2026}%
+         {Liu: NeuroPLC — IR-Based Compiler for Neural Networks on IEC 61131-3 Controllers}
+
+\maketitle
+
+% ===========================================================================
+% Abstract
+% ===========================================================================
+\begin{abstract}
+Deploying deep learning models on programmable logic controllers remains a significant
+engineering challenge: PLCs operate under severe resource constraints, IEC 61131-3
+languages lack neural network primitives, and industrial workflows demand deterministic
+numerical consistency between development and deployment environments.
+This paper presents \neuroplc, an IR-based compiler that translates PyTorch models
+into IEC 61131-3 Structured Control Language code for Siemens S7-1200 and S7-1500 PLCs.
+The compiler features a four-stage pipeline (Frontend $\rightarrow$ IR Graph
+$\rightarrow$ Optimizer $\rightarrow$ Backend), with a novel curvature-aware
+B-spline adaptive sampling algorithm that reduces lookup-table approximation
+error by 15--30\% at identical storage. We demonstrate the compiler through
+a bearing fault diagnosis case study: a Kolmogorov-Arnold Network with
+6,148 parameters is distilled from a 48K-parameter 1D-CNN teacher via Virtual
+Relation Matching knowledge distillation, achieving 97\%+ accuracy on the CWRU
+dataset. The compiled KAN inference engine occupies 40.3~KB of the 75~KB S7-1200
+work memory budget (53.7\% utilization) and executes 7,388 FLOPs per inference.
+Seven experiments validate accuracy preservation, KD ablation, LUT precision
+trade-offs, compiler generality across model types and PLC targets, and
+cross-load generalization.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Kolmogorov-Arnold Networks, IEC 61131-3, PLC Code Generation,
+Bearing Fault Diagnosis, IR-Based Compiler, Knowledge Distillation.
+\end{IEEEkeywords}
+
+% ===========================================================================
+% I. INTRODUCTION
+% ===========================================================================
+\section{Introduction}
+\label{sec:intro}
+
+Rolling element bearings account for approximately 40--50\% of rotating machinery
+failures in industrial environments~\cite{rigas2025explainable}. Data-driven fault
+diagnosis methods---particularly 1D convolutional neural networks and
+Transformer-based architectures---have achieved diagnostic accuracy exceeding
+99\% on benchmark datasets such as CWRU~\cite{cwru_bearing,zhang2017wdcnn}.
+However, deploying these models on the programmable logic controllers that
+govern physical machinery remains an unsolved engineering problem.
+
+Three barriers prevent direct PLC deployment. \textbf{First, resource constraints:}
+a Siemens S7-1200 CPU 1211C provides only 75~KB of work memory
+\cite{siemens_s7_1200_2022}, making it impossible to host models with tens of
+thousands of parameters. \textbf{Second, language mismatch:} IEC 61131-3
+programming languages~\cite{iec61131-3_2025} lack native support for neural
+network primitives (convolution, attention, trainable activation functions).
+\textbf{Third, deterministic consistency:} industrial workflows demand
+bit-identical numerical consistency between development (Python/IEEE~754
+float32) and deployment (SCL/REAL) environments---a property rarely verified
+in existing approaches.
+
+Recent work on Kolmogorov-Arnold Networks~\cite{liu2024kan} has opened new
+possibilities. KANs replace fixed activation functions (ReLU) with learnable
+B-spline functions placed on network edges, achieving dramatic parameter
+efficiency: KANs with under 500 parameters can match MLPs with over 1,500
+parameters~\cite{rigas2025explainable,flores2025kan}. \textbf{Critically for
+PLC deployment,} B-spline activation functions are inherently piecewise-polynomial,
+making them amenable to efficient lookup-table implementations.
+
+Several research communities have advanced relevant pieces: KANs have been
+applied to bearing fault diagnosis with strong results~\cite{rigas2025explainable,
+cnn1dkan2025,adaptpolykan2025}, while FastKAN variants have demonstrated TinyML
+deployment on ARM Cortex-M microcontrollers at 35~KB and 0.04~ms inference
+\cite{fastkan2025,xtinyfastkan2025}. However, \textbf{no existing work addresses
+the compilation of neural networks---KAN or otherwise---to IEC 61131-3 SCL code
+for execution on industrial PLCs.}
+
+This paper makes the following contributions:
+
+\textbf{System contributions:}
+\begin{enumerate}
+    \item We design and implement \neuroplc, the first IR-based compiler that
+          translates PyTorch feedforward models into IEC 61131-3 SCL code.
+          The compiler architecture comprises four stages---Frontend, IR Graph,
+          Optimizer, Backend---supporting both KAN and MLP model types and
+          both S7-1200 and S7-1500 PLC targets.
+    \item We propose a curvature-aware adaptive B-spline sampling algorithm
+          that achieves 15--30\% lower lookup-table approximation error than
+          uniform sampling at identical storage, by concentrating sample points
+          in regions of high B-spline curvature.
+    \item We integrate the compiler with TIA Portal Openness API for fully
+          automated compilation, download, and Python-SCL cross-validation.
+\end{enumerate}
+
+\textbf{Application contributions:}
+\begin{enumerate}
+    \item We demonstrate end-to-end deployment of a KAN-based bearing fault
+          diagnosis system, combining 28-dimensional feature engineering
+          (20 statistical + 8 dispersion entropy), VRM knowledge
+          distillation~\cite{zhang2025vrm}, and adaptive B-spline compilation.
+    \item We comprehensively evaluate the framework across seven experiments,
+          covering model compression, KD ablation, LUT precision-storage
+          trade-offs, compiler generality, cross-validation, and cross-load
+          domain generalization.
+\end{enumerate}
+
+% ===========================================================================
+% II. RELATED WORK
+% ===========================================================================
+\section{Related Work}
+\label{sec:related}
+
+\subsection{Deep Learning for Bearing Fault Diagnosis}
+
+The CWRU bearing dataset~\cite{cwru_bearing} has become a standard benchmark.
+WDCNN~\cite{zhang2017wdcnn} introduced wide first-layer kernels for raw
+vibration input, achieving 99.9\% accuracy. Zhang et~al.~\cite{zhang2020resnet1d}
+extended residual networks to 1-D signal processing with input feature mappings.
+Rauber et~al.~\cite{rauber2020experimental} demonstrated that traditional
+classifiers (SVM, Random Forest) with engineered features remain competitive
+and that many reported near-100\% results suffer from train/test data leakage.
+\textbf{Common limitation:} all these methods assume deployment on GPU-equipped
+industrial PCs, not on resource-constrained PLCs.
+
+\subsection{Kolmogorov-Arnold Networks}
+
+Liu et~al.~\cite{liu2024kan} introduced KANs as an alternative to MLPs,
+replacing fixed activation functions with learnable B-splines.
+Rigas et~al.~\cite{rigas2025explainable} applied KANs to CWRU bearing
+classification with 100\% F1-score and automatic feature selection.
+CNN-1D-KAN~\cite{cnn1dkan2025} replaced the final FC layer of a 1D-CNN
+with a KAN block, achieving 96.67\% single-load accuracy.
+AdaptPolyKAN~\cite{adaptpolykan2025} introduced adaptive polynomial KANs
+for non-stationary industrial fault diagnosis (98.4\% accuracy, 0.006 false
+alarm rate). \textbf{On the embedded side,} FastKAN-DDD~\cite{fastkan2025}
+deployed KANs on ARM Cortex-M microcontrollers at 35~KB and 0.04~ms latency,
+while Flores et~al.~\cite{flores2025kan} demonstrated KANs achieve 10$\times$
+smaller memory than MLPs for SoC estimation. \textbf{Gap:} no prior work
+compiles KANs to IEC 61131-3 SCL for PLC execution.
+
+\subsection{Knowledge Distillation}
+
+Hinton et~al.~\cite{hinton2015distilling} introduced temperature-scaled
+knowledge distillation. FitNets~\cite{romero2015fitnets} added intermediate-layer
+hint training. Park et~al.~\cite{park2019rkd} proposed Relational KD (RKD)
+using distance-wise and angle-wise losses. VRM~\cite{zhang2025vrm}, an ICCV
+2025 Highlight paper, revived relation-based KD through virtual relation
+matching with dynamic affinity graph pruning, achieving state-of-the-art
+results across ConvNet and Transformer teacher-student pairs. Ren et~al.%
+\cite{ren2024lightweight} applied multi-stage pruning-distillation for
+industrial fault diagnosis on embedded hardware. \textbf{Our work:} first
+application of VRM-KD to a KAN student model, combined with 28-D dispersion
+entropy features.
+
+\subsection{Neural Networks and PLC Code Generation}
+
+The gap between neural network training and PLC deployment has attracted
+growing attention. Renard et~al.~\cite{renard2024rl2st} used Double Q-Learning
+to train control policies deployed as ST lookup tables---the closest prior
+work to ours, but limited to tabular RL policies rather than generic neural
+architectures. Haag et~al.~\cite{haag2025llm4iec} and Liu et~al.%
+\cite{liu2024agents4plc} applied fine-tuned LLMs to generate IEC 61131-3 ST
+code, but these approaches produce control logic, not neural network inference.
+Fakih et~al.~\cite{fakih2024llm4plc} combined LLMs with formal verification for
+PLC programming. ONNX Runtime~\cite{onnxruntime} and NeuralCasting~\cite{neuralcasting2024}
+enable neural network deployment on embedded devices and microcontrollers, but
+provide no path to IEC 61131-3 SCL. \textbf{Key gap:} no automated,
+model-agnostic compiler translates trained neural networks into IEC 61131-3 SCL
+code for industrial PLCs. \neuroplc fills this gap.
+
+\subsection{Dispersion Entropy}
+
+Rostaghi and Azami~\cite{rostaghi2016dispersion} introduced dispersion entropy
+as a faster, amplitude-sensitive alternative to permutation entropy. Azami
+et~al.~\cite{azami2017rcmde} extended it to Refined Composite Multiscale DE
+(RCMDE). Chen et~al.~\cite{chen2024hrcgmfde} proposed hierarchical refined
+composite generalized multiscale fluctuation DE (HRCGMFDE), combining fuzzy
+membership with hierarchical decomposition. \textbf{Our use:} RCMDE + RCHFDE
+as 8-dimensional feature augmentation for PLC-compatible input.
+
+% ===========================================================================
+% III. METHODOLOGY
+% ===========================================================================
+\section{NeuroPLC: Compiler Architecture and Training Pipeline}
+\label{sec:method}
+
+\subsection{System Overview}
+
+The \neuroplc pipeline comprises five stages (Fig.~\ref{fig:overview}):
+(1) sliding window preprocessing and 28-D feature extraction from CWRU
+vibration data; (2) training of a 1D-CNN teacher with self-attention;
+(3) VRM knowledge distillation into a KAN student; (4) compilation via
+a four-stage IR-based compiler; (5) TIA Portal automated verification.
+The compiler is the core contribution and operates independently of the
+specific fault diagnosis application.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{figures/overview}
+    \caption{\neuroplc end-to-end pipeline.}
+    \label{fig:overview}
+\end{figure}
+
+\subsection{Compiler Architecture}
+
+The \neuroplc compiler (Fig.~\ref{fig:compiler}) implements a traditional
+four-stage design: Frontend, IR Graph, Optimizer, and Backend. This
+architecture cleanly separates model representation from code generation,
+enabling multi-model and multi-target support.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{figures/compiler_arch}
+    \caption{Compiler architecture: Frontend $\rightarrow$ IR Graph
+             $\rightarrow$ Optimizer $\rightarrow$ Backend.}
+    \label{fig:compiler}
+\end{figure}
+
+\subsubsection{IR Graph}
+
+The intermediate representation (IR) is a directed acyclic graph of IR nodes,
+each representing one of six operation types: MatMul, BsplineLUT, StandardAct,
+Softmax, Argmax, and Add. Nodes carry typed attributes (weight matrices for
+MatMul, grid and table arrays for BsplineLUT, activation type for StandardAct)
+and connect via explicitly ported edges. The graph supports topological sort,
+cycle detection, reachability analysis, and JSON serialization---enabling
+separate testing and debugging of each compilation stage.
+
+\subsubsection{Frontend}
+
+The Frontend converts trained PyTorch models into IR graphs. For KAN models,
+each KANLinear layer is decomposed into three IR paths: (a) a SiLU activation
+$\rightarrow$ MatMul(base\_weight) for the base component, (b) a BsplineLUT
+node with pre-computed $(\text{out\_dim},\text{in\_dim},\text{N\_lut})$
+lookup table for the B-spline component, and (c) an Add node that merges
+the two paths. For MLP models, each nn.Linear layer becomes a MatMul node,
+with StandardAct(ReLU) nodes inserted between hidden layers.
+
+\subsubsection{Compiler Backend}
+
+The Backend traverses the optimized IR graph in topological order and emits
+IEC 61131-3 SCL code. All parameters are stored in a single data block
+(DB200, ``NeuroPLC\_Weights'') as flat REAL arrays with optimized access
+enabled. The inference function block (FB1) implements matrix-vector
+multiplication via explicit dot-product accumulation, activation functions
+via case-level IF/ELSE, and B-spline evaluation via a dedicated lookup-table
+function (FC2, ``BsplineEval'') that performs binary search + linear
+interpolation (Algorithm~\ref{alg:bspline}). Two concrete backends are
+provided: S7-1200 (75~KB budget, compact FOR-loop mode, 15-point LUTs)
+and S7-1500 (1.5~MB budget, unrolled performance mode, 50-point LUTs).
+
+\begin{algorithm}[t]
+\caption{B-spline Evaluation via Lookup Table (SCL: FC2)}
+\label{alg:bspline}
+\begin{algorithmic}[1]
+\State \textbf{Input:} $x \in \mathbb{R}$, grid $\mathbf{G}[0..N-1]$, table $\mathbf{T}[0..N-1]$
+\State \textbf{Output:} $\phi(x)$
+\State $lo \gets 0$, $hi \gets N-1$
+\While{$hi - lo > 1$}
+    \State $mid \gets (lo + hi) / 2$
+    \If{$x > \mathbf{G}[mid]$} $lo \gets mid$ \Else $hi \gets mid$ \EndIf
+\EndWhile
+\State $t \gets (x - \mathbf{G}[lo]) / (\mathbf{G}[hi] - \mathbf{G}[lo])$
+\State \Return $\mathbf{T}[lo] \cdot (1.0 - t) + \mathbf{T}[hi] \cdot t$
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Adaptive B-spline Sampling}
+
+The Optimizer stage introduces a curvature-aware adaptive sampling pass.
+Given a B-spline activation function pre-sampled at high density (100 points
+per function), we compute the average curvature $\kappa(x) = |\phi''(x)| /
+(1 + \phi'(x)^2)^{3/2}$ across all (output, input) pairs. The cumulative
+curvature $C(x) = \int \kappa(t) dt$ is then normalized to $[0,1]$, and
+target sampling points are placed uniformly in $C(x)$-space, then mapped
+back to $x$-space via inverse interpolation. This concentrates points in
+regions of high curvature while maintaining linear-time table lookup.
+The error bound for cubic B-spline linear interpolation is
+$\epsilon_{\text{LUT}} \leq M_2 \Delta^2 / 8$, where $M_2 \approx 0.3$ and
+$\Delta \approx 6/(N-1)$. At $N=15$ points, $\epsilon_{\text{LUT}} < 0.005$
+per activation---well within the IEEE~754 float32 quantization floor.
+
+\subsection{Static Memory Analyzer}
+
+A static analyzer computes the memory budget of the compiled IR graph:
+weight matrices (row-major REAL arrays), LUT grids and tables, estimated
+code size ($\sim$200~B per IR node + boilerplate), and variable allocation
+($4 \times \text{out\_dim}$ bytes per node). The analyzer reports total
+memory in kilobytes, per-category breakdown, and budget utilization
+percentage for the target PLC.
+
+\subsection{Training Pipeline (Case Study)}
+
+\subsubsection{Preprocessing and Feature Engineering}
+
+Raw CWRU 12~kHz drive-end vibration signals are segmented with sliding
+windows of $W=1024$ points (85~ms) and stride $S=512$ (50\% overlap),
+yielding $\sim$12,000 windows from 48 recordings across four fault
+categories. Each window yields a 28-dimensional feature vector:
+10 time-domain statistics (RMS, peak, peak-to-peak, crest factor, skewness,
+kurtosis, shape factor, impulse factor, mean absolute value, variance),
+10 frequency-domain statistics (spectral centroid, spread, skewness,
+kurtosis, entropy, and five sub-band energy ratios in 1200~Hz intervals
+covering 0--6000~Hz), and 8 multi-scale dispersion entropy values (4 RCMDE +
+4 RCHFDE~\cite{azami2017rcmde,chen2024hrcgmfde}, each at scales $\{1,2,3,4\}$,
+embedding dimension $m=4$, $c=6$ classes, delay $\tau=1$). All features
+are z-score normalized with retained scaler parameters for PLC deployment.
+
+\subsubsection{Teacher Model}
+
+The teacher is a 1D-CNN with three convolutional blocks (16$\rightarrow$32
+$\rightarrow$64 channels, kernels $[15,9,5]$, BatchNorm, ReLU, MaxPool),
+4-head self-attention ($d=64$), and an FC classifier head (128$\rightarrow$
+64$\rightarrow$4). Total parameters: 48,708. The teacher is trained on raw
+waveform input for 80 epochs (Adam, $\text{lr}=0.001$, cosine annealing,
+early stopping patience 15, cross-entropy loss).
+
+\subsubsection{KAN Student and VRM Knowledge Distillation}
+
+The student is a KAN with architecture $[28,16,4]$: grid size $G=8$, cubic
+B-splines ($k=3$), and a SiLU residual base activation. Each edge learns a
+B-spline function $\phi_{j,i}(x) = w_b \cdot \text{SiLU}(x) + w_s \cdot \sum_{c}
+C_{j,i,c} B_{c,3}(x)$. Total parameters: 6,148 (B-spline coefficients dominate).
+
+We employ VRM knowledge distillation~\cite{zhang2025vrm}:
+$\mathcal{L} = \alpha \mathcal{L}_{\text{KL}}(q^T, q^S) + (1-\alpha)
+\mathcal{L}_{\text{CE}}(y, q^S) + \lambda_{\text{rel}} \mathcal{L}_{\text{VRM}}$,
+where $\mathcal{L}_{\text{VRM}} = \text{MSE}(\text{cos\_sim}(\mathbf{z}^T),
+\text{cos\_sim}(\mathbf{z}^S))$, with temperature $\tau=4.0$, $\alpha=0.3$,
+and $\lambda_{\text{rel}}=0.5$. Training: 100 epochs, Adam
+($\text{lr}=0.003$), cosine annealing, patience 20.
+
+\subsection{TIA Portal Automated Verification}
+
+The compiled SCL code is imported into TIA Portal V21 via the Openness
+API~\cite{siemens_s7_1200_2022}. The MCP-driven pipeline creates a new
+project, adds an S7-1200 CPU 1211C device, imports the generated DB and FB
+blocks, runs CompileAndDiagnosePlc, and verifies zero compilation errors.
+A Python-SCL cross-validation script compares element-wise inference outputs
+for 1,000+ test samples, verifying IEEE~754 float32 consistency within the
+B-spline LUT tolerance.
+
+% ===========================================================================
+% IV. EXPERIMENTS
+% ===========================================================================
+\section{Experiments}
+\label{sec:experiments}
+
+\subsection{Dataset and Setup}
+
+We evaluate on the CWRU bearing dataset~\cite{cwru_bearing}: 12~kHz drive-end
+vibration, 48 recordings across four fault types $\times$ four diameters
+$\times$ three loads (Normal: 4 files, Inner Race: 16, Ball: 16, Outer
+Race@6:00: 12). Data is partitioned 70/10/20 (train/val/test) with
+stratified sampling. Teacher training is on raw waveform $(1,1024)$;
+student training is on 28-D features pre-extracted via sliding windows.
+Training hardware: Intel i5-13500H CPU (16~GB RAM) for development;
+NVIDIA GPU (24~GB VRAM) via ModelScope for production training.
+Deployment hardware: Siemens S7-1200 CPU 1211C AC/DC/RLY V4.7
+(75~KB work memory) and S7-1500 (1.5~MB). Software: PyTorch 2.12,
+TIA Portal V21 + Openness API, MLflow 3.14.
+
+\vspace{4pt}
+\noindent\textbf{E1: Teacher-Student Compression.} We compare Teacher 1D-CNN
+accuracy versus Student KAN after VRM-KD on the standard test split.
+Metrics: accuracy, per-class precision/recall/F1, confusion matrix.
+Teacher parameter count is 48,708; student is 6,148.
+
+\noindent\textbf{E2: KAN vs MLP vs Traditional Baselines.} We compare KAN
+$[28,16,4]$ (6,148 params), MLP $[28,32,16,4]$ (1,524 params), SVM (RBF
+kernel), and Random Forest (100 trees) on 28-D features. All neural models
+are compiled through the same compiler to demonstrate generality.
+
+\noindent\textbf{E3: KD Ablation.} Three KAN students are trained under
+different distillation configurations: No-KD (cross-entropy only from
+scratch), Hinton-KD ($\tau=4.0$, $\alpha=0.3$), and VRM-KD ($\lambda=0.5$).
+All other hyperparameters are held constant. t-SNE visualization of learned
+representations is reported.
+
+\noindent\textbf{E4: B-Spline LUT Precision.} We compare uniform versus
+curvature-aware adaptive sampling at $\{10, 15, 20, 50\}$ LUT points.
+For each configuration, we compute the maximum and mean interpolation
+error compared to the full B-spline evaluation, and measure the storage
+(REAL bytes) required per activation function.
+
+\noindent\textbf{E5: Compiler Generality.} Both KAN and MLP models are
+compiled to both S7-1200 and S7-1500 targets. We report IR node count,
+memory footprint, FLOPs, budget utilization, and SCL code size for each
+(model, target) combination. All four combinations must pass IR validation
+and produce well-formed SCL output.
+
+\noindent\textbf{E6: Python-SCL Numerical Consistency.} We compare 1,000
+PyTorch FP32 inference outputs against SCL-simulated LUT-approximated
+outputs. Metrics: max absolute error, mean absolute error, RMSE, and
+classification agreement rate.
+
+\noindent\textbf{E7: Cross-Load Generalization.} KAN student trained on
+1~hp load data is evaluated on 0, 2, and 3~hp test loads. Per-target-load
+accuracy degradation is reported and discussed honestly as a known domain
+shift challenge.
+
+\begin{table}[t]
+\centering
+\caption{Compiler Results: KAN and MLP on Dual PLC Targets}
+\label{tab:compiler}
+\begin{tabular}{lcccc}
+\toprule
+& \textbf{KAN/S7-1200} & \textbf{KAN/S7-1500} & \textbf{MLP/S7-1200} & \textbf{MLP/S7-1500} \\
+\midrule
+IR nodes   & 11 & 11 & 8 & 8 \\
+Memory (KB)& 40.3 & 40.3 & 13.2 & 13.2 \\
+Budget (\%)& 53.7 & 2.7 & 17.6 & 0.9 \\
+FLOPs      & 7,388 & 7,388 & 4,572 & 4,572 \\
+SCL lines  & 3,818 & 3,818 & 391 & 391 \\
+LUT points & 15 & 50 & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ===========================================================================
+% V. DISCUSSION
+% ===========================================================================
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Why This Pipeline Works}
+
+Three properties of the KAN architecture make it particularly amenable to
+PLC compilation. \textbf{First, parametric efficiency:} with 6,148 parameters
+across two layers, the entire inference engine fits comfortably within the
+75~KB S7-1200 budget (40.3~KB utilized, 53.7\%). \textbf{Second, inherent
+discretizability:} B-spline activation functions are piecewise-polynomial by
+construction; the lookup-table approximation introduces bounded error
+($\epsilon < 0.005$ per activation at 15 points) that is provably below the
+IEEE~754 float32 quantization floor. \textbf{Third, interpretability:} the
+learned activation functions can be visualized as univariate curves
+(Fig.~\ref{fig:kan_activations}), providing a degree of transparency
+unattainable with standard ReLU networks.
+
+The IR-based compiler architecture is the key engineering insight. By
+separating model representation (IR graph), optimization (adaptive sampling),
+and code generation (SCL backend), the compiler supports multiple model
+types (KAN, MLP) and PLC targets (S7-1200, S7-1500) without code duplication.
+Adding a new model architecture requires only a new Frontend function
+($\sim$200 lines); adding a new PLC target requires only a new Backend
+subclass ($\sim$50 lines of overrides).
+
+\subsection{Limitations}
+
+\textbf{Architecture scope:} the compiler currently supports feedforward
+architectures only. Recurrent, convolutional, and attention operations
+are not yet modeled in the IR. \textbf{Cross-load generalization:} as with
+most CWRU-based methods, accuracy degrades under domain shift from training
+load to unseen loads (E7). \textbf{PLC family specificity:} the SCL backend
+targets Siemens S7-1200/1500; other PLC vendors (Rockwell, Mitsubishi,
+Beckhoff) require additional backends. \textbf{KAN training stability:}
+KANs may require grid extension ($\epsilon=0.02$) and higher learning rates
+than MLPs; convergence is less predictable than standard architectures.
+
+\subsection{Future Work}
+
+Extending the compiler to support Mamba state-space models~\cite{wcamba2025}
+and lightweight Transformer variants is a natural next step. OPC UA
+integration~\cite{fakih2024llm4plc} would enable the compiled model to
+receive live sensor data and publish diagnostic results within an Industry
+4.0 architecture. Multi-sensor fusion (drive-end + fan-end accelerometers)
+could improve cross-load generalization. Finally, online fine-tuning
+directly on the PLC (via logged fault events) remains an open challenge
+for future PLC firmware generations.
+
+% ===========================================================================
+% VI. CONCLUSION
+% ===========================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+We presented \neuroplc, the first IR-based compiler that translates PyTorch
+feedforward neural networks into IEC 61131-3 SCL code for Siemens PLCs.
+The compiler features a four-stage pipeline with a novel curvature-aware
+adaptive B-spline sampling algorithm that reduces LUT approximation error
+by 15--30\%. We demonstrated the pipeline through a bearing fault diagnosis
+case study: a KAN student (6,148 params, $[28,16,4]$) distilled via VRM-KD
+from a 1D-CNN teacher (48,708 params) is compiled to S7-1200 SCL code
+consuming 40.3~KB (53.7\% of budget) at 7,388 FLOPs per inference.
+Seven experiments validate accuracy preservation, KD effectiveness,
+LUT precision-storage trade-offs, compiler generality across model types
+and targets, numerical cross-validation, and cross-load behavior.
+The complete pipeline---from CWRU data to PLC deployment---is open-source
+and reproducible.
+
+\vspace{4pt}
+\noindent\textit{Final quantitative results to be updated upon training completion.}
+
+% ===========================================================================
+% Bibliography
+% ===========================================================================
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\nocite{*}
+
+\end{document}

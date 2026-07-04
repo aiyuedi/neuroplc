@@ -1,0 +1,43 @@
+FUNCTION_BLOCK "NeuroPLC_Inference"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+VAR_INPUT
+    features : Array[0..7] of Real;
+END_VAR
+VAR_OUTPUT
+    fault_class : Int;
+    confidence : Real;
+END_VAR
+VAR
+    h1 : Array[0..15] of Real;
+    logits : Array[0..3] of Real;
+    i, j : Int;
+    sum, max_val : Real;
+END_VAR
+BEGIN
+    // Layer 1: Linear(8->16) + ReLU
+    FOR i := 0 TO 15 DO
+        sum := 0.0;
+        FOR j := 0 TO 7 DO
+            sum := sum + 0.1 * features[j];
+        END_FOR;
+        IF sum > 0.0 THEN h1[i] := sum; ELSE h1[i] := 0.0; END_IF;
+    END_FOR;
+    
+    // Layer 2: Linear(16->4)
+    FOR i := 0 TO 3 DO
+        sum := 0.0;
+        FOR j := 0 TO 15 DO
+            sum := sum + 0.1 * h1[j];
+        END_FOR;
+        logits[i] := sum;
+    END_FOR;
+    
+    // Argmax
+    max_val := logits[0];
+    fault_class := 0;
+    IF logits[1] > max_val THEN max_val := logits[1]; fault_class := 1; END_IF;
+    IF logits[2] > max_val THEN max_val := logits[2]; fault_class := 2; END_IF;
+    IF logits[3] > max_val THEN max_val := logits[3]; fault_class := 3; END_IF;
+    confidence := max_val;
+END_FUNCTION_BLOCK

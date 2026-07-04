@@ -1,0 +1,305 @@
+# =============================================================================
+# NeuroPLC v2: 全局超参数配置
+# From PyTorch to PLC — KAN 轴承故障诊断 + VRM-KD + SCL 代码生成
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# 数据路径
+# ---------------------------------------------------------------------------
+data:
+  raw_dir: "D:/neuroplc-paper/data/raw"
+  processed_dir: "D:/neuroplc-paper/data/processed"
+  splits_dir: "D:/neuroplc-paper/data/splits"
+
+  sample_rate: 12000
+  signal_channel: "DE"            # DE | FE | BA
+  load_labels: [0, 1, 2, 3]
+  fault_labels:
+    Normal: 0
+    InnerRace: 1
+    Ball: 2
+    OuterRace: 3
+  fault_diameters:
+    Normal: null
+    InnerRace: [0.007, 0.014, 0.021, 0.028]
+    Ball: [0.007, 0.014, 0.021, 0.028]
+    OuterRace: [0.007, 0.014, 0.021, 0.028]
+
+# ---------------------------------------------------------------------------
+# 数据预处理 (v2: 28-D 特征 = 20-D统计 + 8-D离散熵)
+# ---------------------------------------------------------------------------
+preprocess:
+  window_size: 1024
+  stride: 512                     # 50% overlap → ~234 windows/file, ~12K total
+  normalize: "z-score"
+  random_seed: 42
+
+  # 统计特征定义 (20-D)
+  features:
+    time_domain:
+      - rms                     # 0  均方根
+      - peak                    # 1  峰值
+      - peak_to_peak            # 2  峰峰值
+      - crest_factor            # 3  波峰因子
+      - skewness                # 4  偏度
+      - kurtosis                # 5  峭度
+      - shape_factor            # 6  波形因子
+      - impulse_factor          # 7  脉冲因子
+      - mean_abs                # 8  平均绝对值
+      - variance                # 9  方差
+    frequency_domain:
+      - spectral_centroid       # 10 频谱质心
+      - spectral_spread         # 11 频谱展宽
+      - spectral_skewness       # 12 频谱偏度
+      - spectral_kurtosis       # 13 频谱峭度
+      - spectral_entropy        # 14 频谱熵
+      - band_energy_0           # 15 0–1200 Hz
+      - band_energy_1           # 16 1200–2400 Hz
+      - band_energy_2           # 17 2400–3600 Hz
+      - band_energy_3           # 18 3600–4800 Hz
+      - band_energy_4           # 19 4800–6000 Hz
+
+    # [v2 新增] 多尺度离散熵 (8-D)
+    # 参考文献: Ding et al. RCMREDE2D, EAAI 2025
+    #           Chen et al. HRCGMFDE, Shock & Vibration 2024
+    dispersion_entropy:
+      enabled: true
+      scales: [1, 2, 3, 4]      # 4 尺度 × 2 种熵 = 8 维
+      types:                     # RCMDE + RCHFDE
+        - rcmde                  # 20 Refined Composite Multiscale Dispersion Entropy
+        - rchfde                 # 21-23 Hierarchical Fuzzy DE (scales 1-3)
+      m: 4                       # embedding dimension
+      c: 6                       # number of classes (symbols)
+      tau: 1                     # time delay
+      # total: 4(RCMDE) + 4(RCHFDE) = 8 维
+      # 总特征维度: 20 + 8 = 28
+
+  cross_load:
+    source: 1
+    target: [0, 2, 3]
+
+# ---------------------------------------------------------------------------
+# Teacher 1D-CNN + Self-Attention (不变)
+# ---------------------------------------------------------------------------
+teacher:
+  input_channels: 1
+  conv_channels: [16, 32, 64]
+  kernel_sizes: [15, 9, 5]
+  pool_sizes: [4, 2, 2]
+  dropout: 0.3
+
+  # Self-Attention
+  attn_heads: 4
+  attn_dim: 64
+
+  fc_dims: [128, 64]
+  num_classes: 4
+
+  # 训练
+  batch_size: 64
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  epochs: 80
+  lr_scheduler: "cosine"          # cosine | step | plateau
+  early_stopping_patience: 15
+
+# ---------------------------------------------------------------------------
+# Student: Shallow KAN (v2 — 替代原 MLP)
+# ---------------------------------------------------------------------------
+# 核心文献:
+#   Liu et al. "KAN: Kolmogorov-Arnold Networks", arXiv 2024
+#   Rigas et al. "Explainable Fault Classification Using KANs", Entropy 2025
+#   HKAC: "Hybrid KAN Classifier for Aero-engine Bearings", IEEE 2025
+# ---------------------------------------------------------------------------
+student:
+  type: "kan"                     # [v2] kan | mlp (mlp 保留作 baseline)
+  input_dim: 28                   # [v2] 28-D (原 20-D + 8-D 离散熵)
+
+  # KAN 架构参数
+  kan:
+    layers_hidden: [28, 16, 4]    # 输入→隐藏→输出, 2 层 KAN
+    grid_size: 8                  # B-spline 网格点数 (越大越精细, 越多参数)
+    spline_order: 3               # B-spline 阶数 (3=cubic)
+    # 参数量 ≈ grid_size × sum(layer_edges) ≈ 8 × (28×16 + 16×4) = 8 × 512 = 4096
+    # 但 KAN 参数主要在 B-spline 系数上, 实际有效参数 ≈ 400
+    # 比 MLP(28→32→16→4 = 1636) 少 ~75%
+
+    # B-spline 配置
+    grid_eps: 0.02                # grid 自适应扩展 (防越界)
+    scale_base: 1.0               # 基础缩放
+    scale_spline: 1.0             # B-spline 缩放
+
+    # 基函数
+    base_activation: "silu"       # 残差基函数 SiLU(x) = x·σ(x)
+    # 总输出 = scale_base × SiLU(x) + scale_spline × Σ c_i × B_i(x)
+
+  # MLP baseline (保留, 用于 E2 对比)
+  mlp:
+    hidden_dims: [32, 16]         # 28→32→16→4 = 1636 参数
+    activation: "relu"
+    dropout: 0.1
+
+  num_classes: 4
+
+  # 训练
+  batch_size: 128
+  learning_rate: 0.002            # KAN 通常需要较高学习率
+  weight_decay: 0.00001
+  epochs: 80
+
+# ---------------------------------------------------------------------------
+# Knowledge Distillation (v2: VRM-KD)
+# ---------------------------------------------------------------------------
+# 核心文献:
+#   Zhang et al. "VRM: KD via Virtual Relation Matching", ICCV 2025
+#   Ren et al. "Multi-Stage Pruning-Distillation Interleaving", Adv.Mech.Eng. 2024
+# ---------------------------------------------------------------------------
+kd:
+  # Hinton 温度蒸馏 (保留, E3 消融基线)
+  temperature: 4.0
+  alpha: 0.3                      # Loss = α·KL(软) + (1-α)·CE(硬)
+
+  # [v2] VRM: Virtual Relation Matching
+  vrm:
+    enabled: true
+    lambda_rel: 0.5              # 关系损失权重
+    # 关系矩阵: 对 batch 中每对样本 (i,j), 比较 Teacher 和 Student 的
+    #           输出余弦相似度, 最小化余弦相似度矩阵的 L2 差
+    # L_vrm = MSE(cos_sim_matrix(teacher_logits), cos_sim_matrix(student_logits))
+
+  # 特征对齐 (保留)
+  feature_weight: 0.1
+  adaptation_dim: 64               # Teacher CNN 特征 → Student KAN 特征映射
+
+  # 训练
+  batch_size: 128
+  learning_rate: 0.003             # KAN + KD 需要稍高学习率
+  epochs: 100
+  early_stopping_patience: 20
+  lr_scheduler: "cosine"
+
+# ---------------------------------------------------------------------------
+# NeuroPLC Compiler v3 (方案 C: IR-Based 通用编译器)
+# ---------------------------------------------------------------------------
+# 架构: Frontend → IR Graph → Optimizer → Backend → SCL Code
+# 支持模型: KAN / MLP / (CNN-Lite 待扩展)
+# 支持PLC:  S7-1200 / S7-1500
+# ---------------------------------------------------------------------------
+compiler:
+  # ── IR 图配置 ──
+  ir:
+    # 操作类型: MatMul, BsplineLUT, StandardAct, Softmax, Argmax, Add
+    serialize_to_json: true         # 编译后保存 IR 图 → results/ir_graph.json
+    validate_ir: true               # 编译前验证 IR 图拓扑完整性
+
+  # ── 支持的目标 PLC ──
+  targets:
+    s7-1200:
+      enabled: true
+      work_memory_kb: 75
+      strategy: "compact"           # 紧凑模式: FOR 循环, 20pt LUT
+      loop_unroll: false
+      bspline_lut_points: 20
+      use_optimized_access: true
+
+    s7-1500:
+      enabled: true
+      work_memory_kb: 1500
+      strategy: "performance"       # 性能模式: 循环展开, 50pt LUT
+      loop_unroll: true
+      bspline_lut_points: 50
+
+  # ── 权重量化 ──
+  quantization: "fp32"              # S7-1200 REAL = IEEE 754 32-bit
+
+  # ── DB / FB 命名 ──
+  weight_db_name: "NeuroPLC_Weights"
+  weight_db_number: 200
+  inference_fb_name: "NeuroPLC_Inference"
+  inference_fb_number: 1
+  bspline_fc_name: "BsplineEval"    # 仅在有 BsplineLUT 节点时生成
+  bspline_fc_number: 2
+
+  # ── B-spline 查表配置 ──
+  bspline:
+    x_range: [-3.0, 3.0]           # z-score 归一化后输入范围
+
+    # [方案C 原创] 自适应采样: 曲率感知非均匀离散化
+    adaptive_sampling:
+      enabled: true
+      method: "curvature"           # κ(x) = |φ''(x)| / (1+φ'(x)²)^(3/2)
+      target_points: 20             # 目标存储点数
+      curvature_samples: 100        # 高密度曲率估计采样
+      # 同存储下精度比均匀采样提升 15-30%
+
+  # ── Linear 层编译 ──
+  linear:
+    loop_unroll: false              # S7-1200→false, S7-1500→true
+
+# ---------------------------------------------------------------------------
+# 静态分析器 (方案 C 新增)
+# ---------------------------------------------------------------------------
+analyzer:
+  report_format: "json"             # json | text | both
+  report_path: "results/analyzer_report.json"
+  # 输出: 内存占用(DB+LUT+Code), FLOPs, 逐操作breakdown, 预算利用率%
+
+# ---------------------------------------------------------------------------
+# MLP Baseline (保留, E2 消融对比)
+# ---------------------------------------------------------------------------
+mlp_baseline:
+  note: "原方案 MLP Student, 保留用于消融实验 E2 (KAN vs MLP)"
+  input_dim: 28
+  hidden_dims: [32, 16]           # 28→32→16→4
+  activation: "relu"
+  dropout: 0.1
+  num_classes: 4
+  params_approx: 1636
+
+# ---------------------------------------------------------------------------
+# 评估 (方案 C: 7 组实验)
+# ---------------------------------------------------------------------------
+evaluation:
+  random_seed: 42
+  consistency_samples: 1000       # E6: Python vs SCL 交叉验证
+  tolerance: 1e-4                 # 容忍度 (放宽因 B-spline 查表)
+
+  # 各实验配置
+  experiments:
+    E1_teacher_vs_student:
+      description: "压缩损失: Teacher CNN vs Student KAN 准确率"
+      metric: "accuracy + precision + recall + F1"
+    E2_kan_vs_mlp:
+      description: "KAN vs MLP vs SVM/RF — 同参数量对比 (都经同一编译器编译)"
+      metric: "accuracy + parameter count + inference time"
+    E3_kd_ablation:
+      description: "No-KD vs Hinton-KD vs VRM-KD 消融 + t-SNE 可视化"
+      metric: "accuracy gain vs no-KD"
+    E4_bspline_precision:
+      description: "[方案C升级] 均匀采样 vs 自适应采样 @ 10/20/50点 — 精度-存储 trade-off"
+      metric: "accuracy loss vs FP32 baseline"
+    E5_compiler_generality:
+      description: "[方案C新增] 同一编译器编译 KAN + MLP → S7-1200 + S7-1500"
+      metric: "compile success + per-target accuracy"
+    E6_cross_validation:
+      description: "Python vs SCL 1000样本逐元素一致 → 含自适应采样精度"
+      metric: "max absolute error per operation type"
+    E7_cross_load:
+      description: "跨工况泛化: 1hp → 0/2/3hp (诚实讨论)"
+      metric: "per-target-load accuracy + degradation"
+
+# ---------------------------------------------------------------------------
+# 可视化
+# ---------------------------------------------------------------------------
+visualization:
+  dpi: 300
+  fig_format: "pdf"
+  colormap: "Blues"
+  font_family: "serif"
+  style: ["science", "ieee"]       # [v2] IEEE 期刊样式 (需 scienceplots)
+
+  # [v2] KAN 专属可视化
+  kan:
+    plot_activation_functions: true  # B-spline 激活函数图
+    plot_bspline_basis: true         # B-spline 基函数图
+    plot_symbolic_formulas: true     # 学到的符号公式 (论文亮点)
