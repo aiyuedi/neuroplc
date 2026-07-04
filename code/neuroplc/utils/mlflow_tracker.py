@@ -40,8 +40,13 @@ from pathlib import Path
 from typing import Optional, Any
 from contextlib import ContextDecorator
 
-import mlflow
-import mlflow.pytorch
+try:
+    import mlflow
+    import mlflow.pytorch
+    HAS_MLFLOW = True
+except ImportError:
+    mlflow = None  # type: ignore
+    HAS_MLFLOW = False
 import numpy as np
 
 # ============================================================================
@@ -63,6 +68,9 @@ def configure_mlflow(tracking_uri: str = None,
         experiment_name: experiment name for this project
         artifact_location: custom artifact storage path
     """
+    if not HAS_MLFLOW:
+        return False
+
     uri = tracking_uri or DEFAULT_TRACKING_URI
     mlflow.set_tracking_uri(uri)
 
@@ -125,6 +133,10 @@ class ExperimentTracker(ContextDecorator):
         self._run = None
         self._start_time = None
 
+    @property
+    def _active(self):
+        return self.enabled and HAS_MLFLOW
+
     # ── Context Manager ──
 
     def __enter__(self):
@@ -139,7 +151,7 @@ class ExperimentTracker(ContextDecorator):
 
     def start(self):
         """Start an MLflow run."""
-        if not self.enabled:
+        if not self._active:
             return
 
         configure_mlflow(
@@ -156,7 +168,7 @@ class ExperimentTracker(ContextDecorator):
 
     def finish(self, status: str = "FINISHED"):
         """End the MLflow run."""
-        if not self.enabled or self._run is None:
+        if not self._active or self._run is None:
             return
 
         elapsed = time.time() - self._start_time if self._start_time else 0
@@ -172,31 +184,31 @@ class ExperimentTracker(ContextDecorator):
 
     def log_metric(self, key: str, value: float, step: Optional[int] = None):
         """Log a scalar metric."""
-        if not self.enabled:
+        if not self._active:
             return
         mlflow.log_metric(key, value, step=step)
 
     def log_metrics_batch(self, metrics: dict, step: Optional[int] = None):
         """Log multiple metrics at once."""
-        if not self.enabled:
+        if not self._active:
             return
         mlflow.log_metrics(metrics, step=step)
 
     def log_param(self, key: str, value: Any):
         """Log a single parameter."""
-        if not self.enabled:
+        if not self._active:
             return
         mlflow.log_param(key, str(value))
 
     def log_params(self, params: dict):
         """Log multiple parameters."""
-        if not self.enabled:
+        if not self._active:
             return
         self._log_params_flat(params)
 
     def log_model(self, model, artifact_path: str = "model"):
         """Log a PyTorch model."""
-        if not self.enabled:
+        if not self._active:
             return
         try:
             mlflow.pytorch.log_model(model, artifact_path)
@@ -205,7 +217,7 @@ class ExperimentTracker(ContextDecorator):
 
     def log_artifact(self, local_path: str, artifact_path: Optional[str] = None):
         """Log a file or directory as an artifact."""
-        if not self.enabled:
+        if not self._active:
             return
         try:
             mlflow.log_artifact(local_path, artifact_path)
@@ -214,7 +226,7 @@ class ExperimentTracker(ContextDecorator):
 
     def log_figure(self, fig, artifact_path: str):
         """Log a matplotlib figure."""
-        if not self.enabled:
+        if not self._active:
             return
         import matplotlib.pyplot as plt
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
@@ -224,7 +236,7 @@ class ExperimentTracker(ContextDecorator):
 
     def log_dict(self, d: dict, filename: str):
         """Log a dictionary as JSON artifact."""
-        if not self.enabled:
+        if not self._active:
             return
         with tempfile.NamedTemporaryFile(
             mode="w", suffix=".json", delete=False, encoding="utf-8"
@@ -237,7 +249,7 @@ class ExperimentTracker(ContextDecorator):
                                    class_names: list = None,
                                    step: Optional[int] = None):
         """Log classification metrics: accuracy, per-class precision/recall/F1."""
-        if not self.enabled:
+        if not self._active:
             return
         from sklearn.metrics import (
             accuracy_score, precision_recall_fscore_support,
@@ -344,7 +356,7 @@ def get_tracker(run_name: str, config: dict = None, **kwargs) -> ExperimentTrack
 if __name__ == "__main__":
     print("NeuroPLC MLflow Tracker — Sanity Check")
     print(f"  Tracking URI: {DEFAULT_TRACKING_URI}")
-    print(f"  MLflow version: {mlflow.__version__}")
+    print(f"  MLflow version: {mlflow.__version__ if HAS_MLFLOW else 'not installed'}")
 
     # Quick test
     configure_mlflow(experiment_name="neuroplc_test")

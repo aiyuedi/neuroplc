@@ -32,6 +32,7 @@ import matplotlib
 matplotlib.use("Agg")  # non-interactive backend
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.metrics import confusion_matrix
 
 try:
     import scienceplots  # noqa
@@ -50,6 +51,8 @@ if HAS_SCIENCEPLOTS:
 else:
     plt.style.use("seaborn-v0_8-paper")
     print("Note: scienceplots not available, using seaborn fallback.")
+
+plt.rcParams["text.usetex"] = False  # disable LaTeX (MikTeX incomplete on Windows)
 
 FIGSIZE_HALF = (3.5, 2.5)   # half-column width (IEEEtran)
 FIGSIZE_FULL = (7.0, 4.5)   # full-column width
@@ -215,12 +218,14 @@ def fig3_bspline_adaptive():
         y = (layer.scale_base * layer.base_weight.mean() * base_y
              + layer.scale_spline * spline_y)
 
-        ax.plot(xs.numpy(), y.numpy(), "k-", linewidth=1.5, label="B-spline φ(x)")
+        ys_np = y.detach().numpy() if isinstance(y, torch.Tensor) else y
+        ax.plot(xs.detach().numpy() if isinstance(xs, torch.Tensor) else xs,
+                ys_np, "k-", linewidth=1.5, label="B-spline φ(x)")
 
         # Sampling points
         if mode == "uniform":
             x_pts = np.linspace(-3, 3, 20)
-            y_pts = np.interp(x_pts, xs.numpy(), y.numpy())
+            y_pts = np.interp(x_pts, xs.detach().numpy() if isinstance(xs, torch.Tensor) else xs, ys_np)
         else:
             x_pts, y_pts = layer.get_adaptive_sample_points(20)
 
