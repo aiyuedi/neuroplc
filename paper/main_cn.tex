@@ -1549,48 +1549,54 @@ $L_{\text{net}}$爆炸 & 深度 $\geq$ 6层 & Monte Carlo；限制深度 \\
 
 \begin{table*}[tb]
 \centering
-\caption{结果总结：核心实验（E1--E16）与验证实验（V1--V7）}
+\caption{结果总结：核心实验（E1--E20, E52--E57）与验证实验（V1--V7）}
 \label{tab:summary}
-\footnotesize
-\begin{tabular}{@{}p{0.8cm}p{2.5cm}p{2.4cm}p{2.3cm}@{}}
+\scriptsize
+\renewcommand{\arraystretch}{0.95}
+\begin{tabular}{@{}p{0.7cm}p{2.2cm}p{2.0cm}p{2.2cm}@{}}
 \toprule
 \textbf{实验} & \textbf{描述} & \textbf{指标} & \textbf{结果} \\
 \midrule
-\multicolumn{4}{l}{\textit{核心实验（E1--E16）：}} \\
-E1 & 教师 vs 学生    & 准确率（测试） & 99.93 vs 99.93\% \\
+\multicolumn{4}{l}{\textit{核心实验：}} \\
+E1 & 教师 vs 学生    & 准确率（测试集） & 99.93 vs 99.93\%，$7.9\times$压缩 \\
 E2 & KAN/MLP/SVM/RF        & 准确率（子集）  & 全部100\% \\
 E3 & KD消融           & VRM, RKD, Hinton, No-KD & 99.9/99.9/99.9/24\% \\
 E4 & LUT精度（三种方法） & DP最优@10点 & \textbf{+18.3\%} vs 均匀 \\
-E5 & 编译器可扩展性  & 宽度/深度/网格 & 11/12通过；内存瓶颈 \\
-E6 & 分类        & 一致性 & \textbf{100\%}，最大对数3.65 \\
-E6-SMT & Z3翻译验证 & 逐节点验证 & 9/11精确，2/11有界，0失败 \\
+E5 & 编译器可扩展性  & 宽度/深度/网格 & 11/12通过；内存为瓶颈 \\
+E6 & 分类一致性        & LUT vs FP32 & \textbf{100\%}，MaxAE 3.65 \\
+E6-SMT & Z3翻译验证 & 11节点逐节点 & 9/11精确，2/11有界，0失败 \\
 E7 & 跨载荷            & 0/2/3~hp准确率 & 99.97/100/99.97\% \\
 E8 & 优化器消融    & 全流水线 & $-$11.9\%内存，+65\%速度 \\
-E9 & 双元算术      & DA vs IA界 & \textbf{2.2$\times$更紧致} \\
-E10& LUT稀疏性权衡& 准确率 vs 存储 & 3--50点均达99.96\% \\
-E11& EMSE校准      & $M_2^{\text{char}}$ = 0.177, $M_2^{\max}$=1.586 & 比解析界紧致98.6\% \\
-E12& XJTU-SY跨数据集 & 零样本 / 微调100轮 & 29.8\% $\to$ 91.7\% (+61.9 pp) \\
-E13& 特征消融      & 时域/频域/色散熵    & 频域99.93\%；全28-D 99.96\% \\
-E14& 对抗鲁棒性& 噪声$\sigma$=0--0.2 & 0\%退化 \\
-E15& 自适应LUT分配 & 贪心 vs 均匀  & 71.6\% $\downarrow$最差$\varepsilon$ \\
-E16& 分段感知DA       & Seg-DA vs DA       & 6.0$\times$紧致，安全$\sim$11.9$\times$ \\
-E54& ChebyKAN Z3验证     & 逐函数 Z3 NRA   & \textbf{496/512 (96.9\%)}，命题~\ref{prop:chebykan-svnn} \\
-E55& XJTU-SY 微调 + SCL       & 100轮FT + S7-1200 & \textbf{91.7\%}, 512/512 Z3, 0e 0w SCL \\
-E56& 深层KAN ($L{=}3$)       & [28,16,8,4] 120轮 & \textbf{99.60\%}, 608/608 Z3, DA 14.6$\times$线性 \\
-E57& CROWN vs.\ NeuroPLC     & KAN[28,16,4] DA/IBP & \textbf{85$\times$更紧致}, CROWN=IBP对KAN \\
+E9 & 双元算术      & DA vs IA界 & \textbf{2.2$\times$紧致}（vs $\sqrt{d}$基线3.1$\times$） \\
+E10& LUT稀疏性& 3--50点准确率 & 全部$\ge$99.96\% \\
+E11& $M_2$校准      & $M_2^{\text{char}}$=0.177, max=1.586 & 比解析界紧致98.6\% \\
+E12& XJTU-SY跨数据集 & 零样本/微调 & 29.8\%$\to$\textbf{91.7\%} (+61.9pp) \\
+E13& 特征消融      & 时域/频域/DE    & 频域99.93\%；全28-D 99.96\% \\
+E14& 对抗鲁棒性& $\sigma$=0--0.2高斯噪声 & 0\%退化；100/100最差保持 \\
+E15& 自适应LUT & 贪心 vs 均匀  & 71.6\%$\downarrow$最差$\varepsilon$，41.8\%存储节省 \\
+E16& 分段感知DA       & 逐段$M_2$ + DA       & 6.0$\times$紧致，安全$\sim$11.9$\times$ \\
+E17& RTNNIgen对比 & 七维对比 & 正确性模型/可审计/优化/内存全维度领先 \\
+E18& Paderborn迁移 & 零样本/微调 & 25.0\%$\to$79.4\%；Cohen's $d$域特征分析 \\
+E19& 方法边界 & 三退化条件 & DA$\to$IA/自适应$\to$均匀/$L_{\text{net}}$爆炸边界 \\
+E20& 电机载荷回归 & RMSE & 0.011；零代码修改 \\
+E52& 验证盲点 & $N{=}4{\to}15$安全因子扫描 & $N{\le}7$时准确率99.93\%但安全$<$1；225翻转 \\
+E54& ChebyKAN Z3 & 逐函数 Z3 NRA   & \textbf{496/512 (96.9\%)}，命题~\ref{prop:chebykan-svnn} \\
+E55& XJTU-SY微调+SCL & 100轮FT + S7-1200 & \textbf{91.7\%}, 512/512 Z3, 0e 0w \\
+E56& 深层KAN ($L{=}3$) & [28,16,8,4], 120轮 & \textbf{99.60\%}, 608/608 Z3, 14.6$\times$线性缩放 \\
+E57& CROWN对比 & NeuroPLC DA vs CROWN-IBP & \textbf{85$\times$紧致} \\
 \midrule
-\multicolumn{4}{l}{\textit{验证实验（V1--V7）：}} \\
+\multicolumn{4}{l}{\textit{验证实验：}} \\
 V1 & 最差情况对抗   & 5,000输入，最差100  & 100/100保持，已验证 \\
-V2 & LLM vs NeuroPLC           & SCL代码生成   & LLM: 6缺陷，无权重；NeuroPLC: 0e 0w \\
+V2 & LLM vs NeuroPLC           & SCL代码生成   & LLM检出6缺陷；NeuroPLC 0e 0w \\
 V3 & DA $\sqrt{d}$缩放律 & 105架构，7维度 & Pearson $r{=}0.987$，斜率0.896 \\
-V4 & MLP验证差距      & KAN $[28,16,4]$ vs.\ MLP $[28,32,16,4]$ & 512/512 vs.\ 0/48; $14.0\times$更差（逐组件） \\
-V5 & ONNX vs NeuroPLC IR    & 节点数/代码    & 导出失败；$\geq$8,393 vs.\ 11节点 \\
-V6 & Z3验证WCET        & S7-1200 CPU 1211C   & 总计 $\leq$2.86\,ms，周期2.9\% \\
-V7 & 验证盲点   & $N{=}4{\to}15$扫描 & 准确率99.93\%但$N{\le}7$时安全$<$1；225翻转 \\
+V4 & MLP验证差距      & KAN vs MLP同规模 & 512/512 vs 0/48; $14.0\times$逐组件更差 \\
+V5 & ONNX vs NeuroPLC    & 节点/代码体积    & 导出失败；$\ge$8,393 vs 11节点（763$\times$） \\
+V6 & Z3 WCET        & S7-1200 CPU 1211C   & 总计 $\leq$2.86\,ms（周期2.9\%） \\
+V7 & 验证盲点   & $N{=}4{\to}15$扫描 & 准确率99.93\%但$N{\le}7$时安全因子$<$1 \\
 \bottomrule
 \end{tabular}
-\vspace{2pt}
-{\scriptsize V系列：针对具体审稿问题的验证实验（LLM对比、ONNX不兼容、缩放律、验证差距、对抗安全、WCET）。}
+\vspace{1pt}
+{\scriptsize 完整结果和JSON报告见代码仓库。V系列针对具体审稿问题的验证实验（LLM对比、ONNX不兼容、缩放律、验证差距、对抗安全、WCET）。}
 \end{table*}
 
 \section{讨论}
@@ -1824,24 +1830,23 @@ TIA验证 & \xmark & \xmark & \xmark & Snap7$^{*}$ & \textbf{0e 0w} \\
     \centering
     \caption{NeuroPLC IR vs.\ ONNX IR（KAN $[28,16,4]$）}
     \label{tab:onnx_vs_ir}
-    \small
-    \begin{tabular}{lcc}
+    \footnotesize
+    \renewcommand{\arraystretch}{1.0}
+    \begin{tabular}{@{}lcc@{}}
         \toprule
         \textbf{指标} & \textbf{NeuroPLC IR} & \textbf{ONNX (opset 14)} \\
         \midrule
         图节点                    & \textbf{11}            & 导出\textit{失败} \\
-        B样条表示                  & 原生（BsplineLUT）     & 无标准算子 \\
-        分解节点（基本原语）       & ---                    & $\geq$\textbf{8,393} \\
-        节点爆炸因子              & 1$\times$              & $\geq$\textbf{763}$\times$ \\
-        生成代码行数              & \textbf{3,818} SCL     & $>$200,000 C（估计） \\
-        代码体积                  & \textbf{45.2}\,KB      & $\gg$400\,KB（估计） \\
-        ONNX Runtime体积          & \textbf{0}\,KB         & \textbf{22,528}\,KB \\
-        适配S7-1200（50\,KB）？   & \textbf{是}             & \textbf{否}（450$\times$超出） \\
-        形式验证就绪              & \textbf{是}（Z3 SMT）  & 否 \\
+        B样条表示                  & 原生 BsplineLUT         & 无标准算子 \\
+        分解后节点数（估计）       & ---                    & $\geq$\textbf{8,393}（$\geq 763\times$） \\
+        生成代码 / 体积            & \textbf{3,818} SCL / \textbf{45.2}\,KB & $>$200K行C / $\gg$400\,KB（估计） \\
+        ONNX Runtime              & \textbf{0}\,KB          & \textbf{22,528}\,KB \\
+        适配S7-1200               & \textbf{是}             & \textbf{否}（450$\times$超出） \\
+        形式验证就绪              & \textbf{是}（Z3 SMT）   & 否 \\
         \bottomrule
     \end{tabular}
     \vspace{2pt}
-    {\scriptsize 实验I：\texttt{torch.onnx.export}使用opset~14/17/20时在B样条\texttt{einsum}处失败。分解估计：512函数 $\times$ 每B样条15个ONNX原语 = 7{,}680 + 713结构节点 $\approx$ 8{,}393。ONNX Runtime最小构建 $\approx$22~MB（无量化）。SCL行数来自实际NeuroPLC输出。}
+    {\scriptsize 实验I：\texttt{torch.onnx.export}使用opset~14/17/20时在B样条\texttt{einsum}处失败。分解估计：512函数 $\times$ 每B样条15个ONNX原语 = 7{,}680 + 713结构节点 $\approx$ 8{,}393。ONNX Runtime最小构建 $\approx$22\,MB（无量化）。}
 \end{table}
 
 \textbf{为何SVNN非ONNX非LLM？}SVNN不试图将任意神经网络编译到PLC——它重新定义了问题：不是"如何为任意网络构建更好的编译器"，而是"哪些网络使编译可认证？"这重新定义使一个包含6种IR操作类型、11个节点和3,800行确定性SCL的紧凑编译器能够提供数学正确性保证——ONNX（通用互操作性、无B样条算子）和LLM（随机输出、无可审计保证）都结构上无法提供的特性。
