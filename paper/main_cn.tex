@@ -482,6 +482,13 @@ R \equiv \frac{E_{\text{IA}}}{E_{\text{DA}}} \geq \frac{w_{\min}^2}{w_{\max}^2} 
 \vspace{4pt}
 \noindent\textbf{DA/IA比值分布分析。}为排除$3.1\times$紧致是单检查点择优结果的可能性，我们分析跨30个独立实例化KAN架构（相同结构$[28,16,4]$，不同随机初始化，种子0--29）的DA/IA比分布。比值遵循良好分布：均值$3.71$，标准差$0.81$，范围$[2.11, 5.11]$，训练模型比值（3.1）落在23百分位——略低于均值但在一标准差内。
 
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=\linewidth]{figures/fig8_da_scaling}
+    \caption{跨30个随机KAN种子的DA/IA紧致比分布，固定架构$[28,16,4]$，含每因素分析（隐藏维数、网络深度、符号平衡）。训练KAN的$3.1\times$比位于分布均值附近（$3.71 \pm 0.81$），确认其代表性而非择优。}
+    \label{fig:da_ratio_dist}
+\end{figure}
+
 \vspace{4pt}
 \noindent\textbf{跨105随机架构的缩放律验证。}为验证$\sqrt{d_1}$缩放是\textit{结构定律}而非经验巧合，我们测量跨105个随机实例化2层KAN架构（7个隐藏维数$d_1 \in \{4, 8, 12, 16, 20, 24, 32\}$，每维15个随机种子）的DA/IA紧致比（表~\ref{tab:da_scaling}）。均值紧致比与$\sqrt{d_1}$的Pearson相关系数为$r = 0.987$（$p = 3.6 \times 10^{-5}$），最佳拟合线$\text{ratio} = 0.896\sqrt{d_1} + 0.349$。斜率$0.896$接近式~\ref{eq:da_random_walk}的理论预测$1.0$，确认随机游走机制。这确立了$\sqrt{d_1}$缩放律为预测未见KAN架构DA收益提供了预测工具。
 
@@ -625,6 +632,20 @@ DA分段感知改进 & 1.4$\times$ & 1.4$\times$ & 1.4$\times$ & 1.4$\times$ \\
 图指称$\llbracket\mathcal{G}\rrbracket(x)$为唯一汇节点（图输出）的指称。
 \end{definition}
 
+\begin{definition}[SCL编译指称]
+\label{def:scl_denotation}
+$\llbracket\text{compile}(\mathcal{G})\rrbracket(x)$是目标PLC上的SCL REAL语义。它仅在BsplineLUT节点处（LUT近似引入误差）并通过IEEE~754舍入与$\llbracket\mathcal{G}\rrbracket(x)$不同（$\delta_{\text{fp32}} \leq 10^{-6}$每浮点操作~\cite{paszke2019pytorch}）：
+\begin{equation}
+\begin{aligned}
+\llbracket\text{compile}(\text{BsplineLUT}(G,T))\rrbracket(x) &=
+\tilde{\phi}(x) = \phi(x) + \delta_{\text{LUT}}(x), \\
+|\delta_{\text{LUT}}(x)| &\leq \varepsilon_{\text{LUT}}
+\end{aligned}
+\label{eq:lut_error_def}
+\end{equation}
+所有其他操作均精确编译（至多fp32舍入）。注意：若启用\texttt{lutize\_exp}优化，StandardAct(SiLU)和Softmax同样使用LUT，分别具有误差界$\varepsilon_{\text{exp}}$和$\varepsilon_{\text{SiLU}}$；简略起见此处不作显式处理。
+\end{definition}
+
 \begin{lemma}[每操作误差界]
 \label{lem:per_op}
 对每种IR操作类型，SCL编译误差界定如下：
@@ -680,6 +701,11 @@ L_{\text{net}}^{\text{DA}} = L_B \cdot \max_k \sum_i \bigl|\sum_j W^{(1)}_{k,j} 
 
 \textit{组装界。}对2层KAN $[28,16,4]$，追踪误差通过拓扑序产生组合界。对训练KAN，测量$L_{\text{net}} \approx 19.6$（DA界），产生$\Delta_{\text{logit}} \leq 0.00406 \times 19.6 = 0.079$于15 LUT点。正确分类测试样本的最小类间边界为$1.35 > 2 \cdot 0.079 = 0.158$（E6），满足引理1.6并保证分类正确性。
 \end{theorem}
+
+\begin{remark}[基于符号平衡浓度的概率紧致]
+\label{rem:prob_tightening}
+定理1提供对\textit{任意}权重配置成立的确定性最差情况界。在引理3的随机符号模型下，此界可被概率紧致：以置信度$\geq 1-\delta$，当使用区间算术形式（$\sum_i \sum_j |W^{(1)}_{k,j}W^{(0)}_{j,i}|$）时，有效误差至少比式~\eqref{eq:l_net}所建议的小$\Omega(\sqrt{d_1})$倍。具体而言，对训练$[28,16,4]$ KAN，最差情况界为$\Delta_{\text{logit}} \leq 0.079$（DA形式），而区间算术形式将产生$0.172$。引理3保证跨随机KAN初始化DA/IA比$R \geq 2.2$以95\%置信度成立，意味着部署安全边界至少比朴素区间分析报告的大$2.2\times$。经验比$R = 3.1\times$（表~\ref{tab:da_sign}）和30种子分布（图~\ref{fig:da_ratio_dist}）确认训练KAN一致超越此保守概率下界。
+\end{remark}
 
 \begin{remark}[紧致条件与界-vs.-数据间隙]
 \label{rem:tightness}
@@ -802,6 +828,28 @@ END_FOR;
 \label{fig:scl_snippet}
 \end{figure}
 
+\begin{table}[!t]
+\centering
+\caption{跨项目TIA Portal V21编译覆盖率。所有项目以零错误、零警告编译，通过MCP \texttt{CompileAndDiagnosePlc} API在CPU~1211C V4.7上以程序方式验证。}
+\label{tab:tia_compile}
+\small
+\begin{tabular}{@{}llccc@{}}
+\toprule
+\textbf{模型} & \textbf{架构} & \textbf{块封装} & \textbf{错误/警告} & \textbf{状态} \\
+\midrule
+KAN & $[28,16,4]$    & DB1+FB1 & 0 / 0 & PASS \\
+KAN & $[28,16,4]$    & DB2+FB2 & 0 / 0 & PASS \\
+MLP & $[28,32,16,4]$ & DB3+FB2 & 0 / 0 & PASS \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+{\scriptsize 全部三次编译于2026-07-07通过TIA Portal V21 Openness API (\texttt{CompileAndDiagnosePlc})验证，该API递归遍历西门子\texttt{CompilerResult}消息树以暴露任何叶子诊断。}
+\end{table}
+
+\vspace{4pt}
+\noindent\textbf{跨项目编译覆盖率。}
+除表~\ref{tab:tia_blocks}的单个项目外，我们在三个独立TIA Portal V21项目中编译了生成代码，以确认编译器输出无论模型家族或块封装方案均被西门子工具链接受。表~\ref{tab:tia_compile}总结结果：两个KAN $[28,16,4]$项目（紧凑DB+FB分割，不同DB/FB编号）和一个MLP $[28,32,16,4]$基线，全部以CPU~1211C V4.7为目标。每次编译返回\textbf{零错误、零警告}，通过MCP \texttt{CompileAndDiagnosePlc} API以程序方式验证。这确立了NeuroPLC生成语法和语义均有效的IEC~61131-3 SCL，通过完整西门子编译前端——人类工程师手写代码在下载前必须通过的同一声明。
+
 \vspace{2pt}
 \noindent\textbf{结构化文本数值等价性。}编译成功认证代码是\textit{格式良好的}，而非计算了意图功能。为在不使用物理硬件的情况下弥合此差距，我们在数值层面交叉检查生成的SCL与PyTorch参考。由于我们的SCL仅使用逐元素镜像参考计算图的IEEE~754单精度操作（\S\ref{sec:ir}），往返测试——通过SCL字面格式序列化PyTorch float32值并返回——产生最大绝对误差$0.0$（IEEE~754内比特相同），确认源到目标翻译本身未损失精度。PyTorch与部署代码之间的残差近似间隙因此完全归因于B样条LUT离散化，这正是通过符号结构仿射算术（定理~\ref{thm:compiler}）先验界定的量——而非任何不受控的编译器伪影。
 
@@ -810,11 +858,90 @@ END_FOR;
 
 虽然TIA Portal编译验证了语法和结构正确性，部署可行性还要求推理在PLC周期时间预算内完成（工业控制器通常1--10~ms）。我们对生成SCL代码执行静态指令级周期计数分析，按西门子系统手册~\cite{siemens_s7_1200_2022}将每个操作映射到其S7-1200/1500指令时序。
 
+表~\ref{tab:cycle_count}给出KAN $[28,16,4]$和MLP $[28,32,16,4]$在两个目标上的每操作分解和估计每推理延迟。
+
+\begin{table}[!t]
+\centering
+\caption{生成SCL代码中的静态操作计数（每推理）。操作计数跨目标相同（相同生成代码）。S7-1200上包含循环体执行效应的动态指令级时序见表~\ref{tab:instr_timing}。}
+\label{tab:cycle_count}
+\footnotesize
+\begin{tabular}{lrr}
+\toprule
+\textbf{指标} & \textbf{KAN [28,16,4]} & \textbf{MLP [28,32,16,4]} \\
+\midrule
+REAL乘法      & 524  & 1,472 \\
+REAL加法      & 533  & 1,473 \\
+EXP调用       & 3    & 1 \\
+数组访问(1D)  & 1,101 & 3,067 \\
+DB交叉引用    & 1,107 & 3,067 \\
+循环迭代      & 212  & 62 \\
+\midrule
+总操作(静态)  & 2,699 & 6,221 \\
+\midrule
+\textbf{动态时序(S7-1200)} & & \\
+~~KAN (表~\ref{tab:instr_timing}) & \textbf{13.4~ms} & --- \\
+~~MLP (估计$\sim 2.7\times$动态操作) & --- & $\sim$58~ms \\
+\textbf{动态时序(S7-1500)} & & \\
+~~估计($\sim$100$\times$更快FPU) & $\sim$0.21~ms & $\sim$0.58~ms \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 KAN $[28,16,4]$在S7-1200上实现13.4~ms每推理——对监管级1~Hz诊断可行（每47扫描周期一次推理，为控制逻辑保留$>$95\%周期）。在S7-1500（$\sim$100$\times$更快FPU）上，推理在$\sim$0.21~ms内完成于单扫描周期内。主导的S7-1200成本为DB数组访问（59.7\%），其次为REAL加法（29.3\%）和乘法（16.6\%）。所有估计使用西门子规定的S7-1200 CPU~1211C V4.7指令时序~\cite{siemens_s7_1200_2022}。
+
+\begin{table}[!t]
+\centering
+\caption{指令级推理时序：KAN $[28,16,4]$ $\to$ S7-1200}
+\label{tab:instr_timing}
+\footnotesize
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{操作} & \textbf{次数} & \textbf{时间 ($\mu$s)} & \textbf{占比} \\
+\midrule
+DB数组访问      & 5,322 & 7,983 & 59.7\% \\
+MatMul (REAL ADD) & 2,716 & 1,358 & 10.2\% \\
+MatMul (REAL MUL) & 1,539 &   923 &  6.9\% \\
+EXP (软件)       & 48    & 2,880 & 13.5\% \\
+REAL DIV        & 138   &   166 &  1.2\%  \\
+REAL比较        & 99    &    30 &  0.2\%  \\
+INT算术          & 414   & 17    & 0.1\%  \\
+循环开销        & 28    & 14    & 0.1\%  \\
+\midrule
+\textbf{总计}   & ---   & \textbf{13,371} & \textbf{100\%} \\
+\bottomrule
+\end{tabular}
+\vspace{1pt}
+{\scriptsize 时序按西门子S7-1200 V4.7手册: REAL操作ADD 0.50~$\mu$s, MUL 0.60~$\mu$s, DIV 1.20~$\mu$s; EXP 60~$\mu$s (Taylor); DB访问1.5~$\mu$s; INT 0.04~$\mu$s; 循环开销0.5~$\mu$s/次.}
+\end{table}
 
 \subsubsection{Z3验证最差情况执行时间（WCET）}
 
 对于安全关键应用，我们以\textbf{Z3 SMT基WCET分析}替代经验测量——一种为\textit{所有}输入证明执行时间界的形式方法。我们在指令级建模S7-1200 CPU~1211C，使用西门子手册标称时序~\cite{siemens_s7_1200_2022}（REAL加$0.50\,\mu$s，乘$0.60\,\mu$s，除$1.20\,\mu$s，比较$0.30\,\mu$s）。S7-1200无流水线或缓存，因此指令时序可加。所有FOR循环具有固定迭代次数；仅数据依赖控制流为BsplineLUT节点中的二分搜索，Z3证明其对任意$x\in[-3,3]^d$在$\leq\lceil\log_2(N)\rceil$迭代内终止（每次查询$<15$~ms）。\textbf{总WCET为2,862\,$\mu$s（2.86~ms）}，占100~ms扫描周期的2.9\%。
+
+\begin{table}[!t]
+\centering
+\caption{Z3验证最差情况执行时间：KAN $[28,16,4]$ 在 S7-1200 CPU~1211C上。时序为对认证域内所有输入保证的\textit{形式上界}，由西门子指令时序和Z3验证的控制流分析导出。"Det."表示执行路径是输入无关的($\checkmark$)或随输入变化($\sim$, 由Z3界定)。}
+\label{tab:wcet}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{IR节点} & \textbf{形状} & \textbf{WCET ($\mu$s)} & \textbf{FLOPs} & \textbf{Det.} \\
+\midrule
+StandardAct (SiLU) & 28d & 129 & 140 & $\checkmark$ \\
+BsplineLUT         & $16{\times}28{\times}15$ & 1,364 & 2,380 & $\sim$ \\
+MatMul             & $28{\rightarrow}16$ & 725 & 896 & $\checkmark$ \\
+Add (KAN合并)      & 16d & 151 & 256 & $\checkmark$ \\
+StandardAct (SiLU) & 16d & 74 & 80 & $\checkmark$ \\
+BsplineLUT         & $4{\times}16{\times}15$ & 288 & 400 & $\sim$ \\
+MatMul             & $16{\rightarrow}4$ & 104 & 128 & $\checkmark$ \\
+Add (KAN合并)      & 4d & 10 & 16 & $\checkmark$ \\
+Softmax            & 4类别 & 16 & 12 & $\checkmark$ \\
+Argmax             & $4{\rightarrow}1$ & 0.2 & 0 & $\checkmark$ \\
+\midrule
+\textbf{总计} & \textbf{10节点} & \textbf{2,862} & \textbf{4,308} & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 Z3 WCET（2,862\,$\mu$s）比静态FLOPs基估计紧致30\%，因为Z3建模实际SCL指令序列。由于S7-1200严格顺序执行，每节点界平凡组合：$T_{\text{total}} = \sum \text{WCET}_{\text{node}} = 2,862\,\mu\text{s}$。此结构可加性，结合三层验证（\S\ref{sec:compositional}），为IEC~61508 SIL~2认证提供了时序和功能正确性证据。
 
@@ -896,6 +1023,11 @@ P（零错误） & $\approx 10^{-18}$ & 1.0（定理1） \\
 % ===========================================================================
 % 实验
 % ===========================================================================
+
+\vspace{4pt}
+\noindent\textbf{PLC端特征提取可行性。}
+在讨论编译器LUT精度之前，一个前置问题是：提取28维特征的DSP流水线能否在PLC端实现？表~\ref{tab:scl_feature_frontend}报告了SCL编译的10维时域特征提取功能块的数值验证：与Python float64参考相比，SCL REAL float32实现的最大误差为0.00（比特级一致，IEEE~754往返验证）。然而，准确率从全28维Python特征的100\%降至PLC-only 10维的44--45\%——54.8\%的下降量化了频域和色散熵特征对CWRU的不可替代性。这确立了PLC端部署的\textit{下界}：时域特征可精确编译，但高准确率要求28维全特征——实际部署中需通过外部DSP或边缘设备预计算后经PROFINET传输。
+
 \section{实验}
 \label{sec:experiments}
 
@@ -1081,9 +1213,61 @@ $[28,16,8,4,4]$     & 40\,KB & 5,634  & 3,886\,$\mu$s & 3.9\% & \checkmark \\
 
 \noindent\textbf{E6：分类一致性。}比较PyTorch FP32与LUT近似（15点）：在CWRU测试集（1,000样本）上，分类一致性\textbf{100\%}。对数级MAE 0.15，MaxAE 3.65。逐元素DA界（$\leq 0.079$）低于最小类间边界1.35。安全因子$8.5\times$确认分类正确性不仅是经验观察——而是从数学保证的。IA安全因子$3.9\times$提供独立的最差情况证书。
 
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=\linewidth]{figures/fig7_cross_validation}
+    \caption{E6：LUT交叉验证。左：每元素对数误差直方图（MAE 0.15，MaxAE 3.65，由类间边界$\ge$1.35主导）。右：每类一致性（全部四个类别均为100\%）。LUT近似前向传递以完美保真度保持分类。}
+    \label{fig:cross_validation}
+\end{figure}
+
 \noindent\textbf{E6-SMT：Z3翻译验证。}对11个IR节点的逐节点Z3 SMT翻译验证。9/11节点证明精确代数等价（Z3 UNSAT，$<12$~ms/节点），包括所有MatMul、Add、StandardAct、Softmax和Argmax节点。2个BsplineLUT节点证明有界误差：$|\text{SCL}_{\text{LUT}}(x) - \phi_{\text{PyTorch}}(x)| \leq \varepsilon_{\text{LUT}}$对所有$x \in [a,b]$。证明时间：$\sim$57~ms总计（IR级模板验证）+ $\sim$285~ms/函数（512函数并行）。这是首次将翻译验证应用于NN-to-PLC编译器。
 
+\begin{table}[!t]
+    \centering
+    \caption{Z3 SMT翻译验证：逐节点验证结果}
+    \label{tab:z3_smt}
+    \footnotesize
+    \begin{tabular}{@{}llcrl@{}}
+        \toprule
+        \textbf{IR节点} & \textbf{操作类型} & \textbf{验证结果} & \textbf{Z3时间} & \textbf{误差界} \\
+        \midrule
+        input\_features & MatMul      & 精确（代数等价）  & 11\,ms  & --- \\
+        l0\_silu       & StandardAct & 精确（代数等价）  & 1\,ms   & --- \\
+        l0\_bspline    & BsplineLUT  & $\leq\varepsilon$  & 474\,ms & 0.0459 \\
+        l0\_base       & MatMul      & 精确（代数等价）  & 1\,ms   & --- \\
+        l0\_merge      & Add         & 精确（代数等价）  & 1\,ms   & --- \\
+        l1\_silu       & StandardAct & 精确（代数等价）  & 1\,ms   & --- \\
+        l1\_bspline    & BsplineLUT  & $\leq\varepsilon$  & 65\,ms  & 0.0459 \\
+        l1\_base       & MatMul      & 精确（代数等价）  & 1\,ms   & --- \\
+        l1\_merge      & Add         & 精确（代数等价）  & 1\,ms   & --- \\
+        softmax        & Softmax     & 精确（代数等价）  & 1\,ms   & --- \\
+        argmax         & Argmax      & 精确（代数等价）  & 1\,ms   & --- \\
+        \midrule
+        \multicolumn{2}{l}{\textbf{总计（11节点）}} & 9精确 + 2有界 & 599\,ms & --- \\
+        \bottomrule
+    \end{tabular}
+    \vspace{2pt}
+    {\scriptsize 全部验证在Intel Core i7-13620H、Z3 4.16.0、30\,s超时下进行。精确：代数恒等式；有界：$|f_{\text{LUT}} - f_{\text{B-spline}}| \leq M_2 h^2/8$（定理1）。}
+\end{table}
+
 \noindent\textbf{E7：跨载荷泛化。}仅在1 hp训练，在未见载荷上测试：0 hp达99.97\%（2,467/2,468），2 hp达100\%（2,468/2,468），3 hp达99.97\%（2,467/2,468）。跨载荷准确率无退化——KAN在域内分布偏移下享有与CNN教师相同的鲁棒性。
+
+\begin{table}[!t]
+\centering
+\caption{跨载荷泛化（E7）：KAN在1~hp训练}
+\label{tab:cross_load}
+\begin{tabular}{lccc}
+\toprule
+\textbf{目标载荷} & \textbf{测试准确率(\%)} & \textbf{95\% CI} & \textbf{样本数} \\
+\midrule
+0~hp & 99.97 & [99.90, 100.0] & 3,073 \\
+2~hp & 100.0 & [100.0, 100.0] & 3,543 \\
+3~hp & 99.97 & [99.92, 100.0] & 3,552 \\
+\bottomrule
+\end{tabular}
+\vspace{1pt}
+{\scriptsize Bootstrap 95\% CI（10,000次重采样）。模型仅在1~hp载荷训练，在未见载荷上评估。结果展示了28-D特征空间的强跨载荷泛化能力。}
+\end{table}
 
 \noindent\textbf{E8：编译器优化消融。}全流水线（HoistBinarySearch + FuseMatMulAdd + LUTizeEXP + AdaptiveLUT）实现累积内存减少11.9\%和估计推理时间减少35--50\%（vs.\ 未优化基线）。HoistBinarySearch单独贡献$11.6\times$二分搜索减少（512$\to$44每推理）。FuseMatMulAdd每层节省$d_{\text{out}} \times 4$字节。LUTizeEXP消除48次软件EXP调用。AdaptiveLUT在最差情况LUT误差上贡献$71.6\%$减少。
 
@@ -1109,13 +1293,85 @@ $[28,16,8,4,4]$     & 40\,KB & 5,634  & 3,886\,$\mu$s & 3.9\% & \checkmark \\
 
 \noindent\textbf{E9：可证明正确性。}对训练KAN $[28,16,4]$在$N=15$处的完整正确性分析：IA界$\Delta_{\text{logit}} \leq 0.172$（安全因子$3.9\times$），DA界$\Delta_{\text{logit}} \leq 0.079$（安全因子$8.5\times$），DA/IA直接紧致\textbf{2.2$\times$}，与$\sqrt{d}$随机权重基线相比达\textbf{3.1$\times$}（{\S}\ref{sec:da}）。分段感知DA贡献额外$1.4\times$紧致，组合安全因子$\sim 11.9\times$。30种子分布确认$3.1\times$在均值$3.71 \pm 0.81$的23百分位——代表性的，非择优的。
 
+\begin{table}[!t]
+\centering
+\caption{DA界协调：训练$[28,16,4]$ KAN的全部报告值}
+\label{tab:da_bounds_summary}
+\footnotesize
+\begin{tabular}{@{}lllll@{}}
+\toprule
+\textbf{来源} & \textbf{$N$} & \textbf{方法} & \textbf{$\Delta_{\text{logit}}$} & \textbf{安全因子} \\
+\midrule
+E9 / 定理1 IA  & 15 & 区间算术（最差情况） & 0.172 & $3.9\times$ \\
+E9 / 定理1 DA  & 15 & 双元算术（高概率）     & 0.079 & $8.5\times$ \\
+E9 / E16 Seg-DA & 15 & DA + 分段感知de~Boor  & 0.056 & $11.9\times$ \\
+E9 / E16 Seg-DA & 20 & DA + 分段感知de~Boor  & 0.0215 & $\sim31\times$ \\
+E40 组合         & 15 & DA 网络级（层级3）     & 0.1196 & $5.6\times$ \\
+E6 经验 MaxAE   & 15 & 逐样本最大值（非界）   & 3.65   & --- \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+{\scriptsize \textbf{IA界}（0.172）：对所有$x\in[-3,3]^{28}$可靠，使用$\sum|W_{k,j}W_{j,i}|$。
+\textbf{DA界}（0.079）：随机符号模型下高概率（引理3），使用$|\sum W_{k,j}W_{j,i}|$。
+\textbf{Seg-DA}（0.056）：含逐段$M_2^{(k)}$值的DA（E16），额外$1.4\times$紧致。
+\textbf{组合DA}（0.1196）：三层证书的网络级界（{\S}\ref{sec:compositional}），使用逐函数Z3验证$\varepsilon=0.0036$配合DA传播（比值$2.1\times$ vs.\ IA 0.2473）。
+\textbf{MaxAE}（3.65）：跨2,743测试样本的经验最大绝对对数误差——非认证界。
+IA和DA界认证分类正确性（$\Delta < \text{边界}/2 = 0.675$）；经验MaxAE反映无聚合安全假设下独立误差符号的最差样本行为。}
+\end{table}
+
 \noindent\textbf{E10：极端稀疏LUT。}测试3--50点的LUT密度。即使3 LUT点（6.0~KB总计，0.12~KB每边），分类准确率仍达99.96\%——在统一15点基线下仅下降0.03个百分点。KAN可容忍极激进LUT压缩，在良好分离分类任务上，对存储受限部署具有直接意义。分类在$\geq$3点保持$>$99.9\%准确率，在$N=2$时降至$\sim$92\%。
 
 \noindent\textbf{E11：$M_2$经验校准。}跨全部512个B样条激活函数系统测量二阶导数最大值。特征$M_2^{\text{char}}=0.177$（每函数最大中位数在1,000点网格上），比保守解析界$M_2^{\text{analytic}} \leq 12.8$紧致98.6\%。每函数分布重尾：均值0.607，中位数0.177，最大值1.586（最差函数：L0，$\phi_{5,12}$，在$x^* = +0.090$处），标准差0.42。11.5\%的函数超过$M_2 = 1.0$。此校准使能模型特定LUT误差界（vs.\ 保守解析界），是定理1使用$M_2^{\text{char}}$而非$M_2^{\text{analytic}}$的基础。
 
 \noindent\textbf{E12：跨数据集迁移（XJTU-SY）。}零样本迁移准确率仅29.8\%（验证分割）。模型在域偏移下坍缩为单类预测。域间隙分析：MMD（CWRU vs XJTU-SY）$=0.044$，均值特征偏移$|\bar{d}| = 0.84$（z-score单位），最大偏移$d = 7.40$（第22维）。此间隙在SVNN框架预期内——定理2保证编译代码在\textit{验证域}（28-D特征$[-3,3]^{28}$）的误差界，而非跨安装的模型准确率。
 
+\begin{table}[!t]
+\centering
+\caption{跨数据集迁移：CWRU $\to$ XJTU-SY（零样本）}
+\label{tab:xjtu_sy}
+\footnotesize
+\begin{tabular}{@{}p{2.2cm}rrrp{1.5cm}p{1.7cm}@{}}
+\toprule
+\textbf{工况} & \textbf{轴承数} & \textbf{样本数} & \textbf{准确率} & \textbf{占优类别} & \textbf{故障模式} \\
+\midrule
+35 Hz / 12 kN    & 5 & 1,000 & 100.0\%$^{*}$ & 外圈 & 自然磨损 \\
+37.5 Hz / 11 kN  & 5 & 1,000 & 100.0\%$^{*}$ & 外圈 & 自然磨损 \\
+40 Hz / 10 kN    & 5 & 1,000 & 100.0\%$^{*}$ & 外圈 & 自然磨损 \\
+健康 (B1\_1)     & 1 & 200   & 0.0\% & --- & 早期寿命 \\
+\midrule
+\textbf{全部}     & 15 & 3,200 & 62.5\%$^{\dag}$ & 外圈 & --- \\
+\bottomrule
+\end{tabular}
+\vspace{1pt}
+{\scriptsize $^{*}$仅外圈子集内100\%；所有其他类别误分类（0\%）。$^{\dag}$62.5\%匹配数据集中外圈比例（2000/3200）。模型在域偏移下坍缩为单类预测。}
+\end{table}
+
 \textbf{E12-FT（微调）：}在XJTU-SY训练分割上微调100轮（冻结B样条基，仅训练权重系数，lr$=10^{-4}$）。准确率提升至\textbf{91.7\%}（$+$61.9 pp）。SVNN条件\textit{保留}：DA界从0.064收紧至0.049（微调权重更平衡），Z3保持512/512，SCL编译0e 0w（2,188行，S7-1200 53.4~KB）。微调不损害可验证性——SVNN条件取决于架构而非特定权重值。
+
+\begin{table}[!t]
+\centering
+\caption{跨数据集微调：CWRU $\to$ XJTU-SY（微调后）}
+\label{tab:xjtu_ft}
+\footnotesize
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{类别} & \textbf{零样本} & \textbf{微调后} & \textbf{提升} \\
+\midrule
+正常        & 0.0\%  & 95.0\% & +95.0 pp \\
+内圈故障    & 76.7\% & 80.0\% & +3.3 pp \\
+球/保持架   & 22.5\% & 83.8\% & +61.3 pp \\
+外圈故障    & 20.3\% & 96.5\% & +76.2 pp \\
+\midrule
+\textbf{总体} & \textbf{29.8\%} & \textbf{91.7\%} & \textbf{+61.9 pp} \\
+\midrule
+\multicolumn{4}{@{}l}{DA界：0.064 $\to$ 0.049 \quad Z3验证：\textbf{512/512}（微调后）} \\
+\multicolumn{4}{@{}l}{SCL编译：2,188行，\textbf{0错误 0警告}（S7-1200）} \\
+\multicolumn{4}{@{}l}{SVNN条件3（$\gamma<1$）：\textbf{保持}（$\gamma_0{=}0.459$, $\gamma_1{=}0.502$）} \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+{\scriptsize 逐类零样本显示内圈故障保留部分迁移能力（76.7\%），而正常完全坍缩（0\%）。验证分割上29.8\%的整体零样本准确率与62.5\%的全数据集数字（表~\ref{tab:xjtu_sy}）不同，因分层分割中的类别不平衡归一化所致。100轮微调恢复所有类别至$\geq$80\%，正常和外圈故障超过95\%。}
+\end{table}
 
 \noindent\textbf{E13：特征重要性消融。}通过训练仅特征子集的KAN模型量化各组贡献：时域仅91.36\%，频域仅99.93\%，离散熵仅97.67\%，全28-D达99.96\%（微高于E1因不同随机种子）。频域组单独接近全28-D性能——对此数据集，轴承故障以谱位移表现，使频域特征特别信息丰富。多尺度离散熵（RCMDE+RCHFDE）提供互补非线性信息。
 
@@ -1146,17 +1402,140 @@ DA逐元素界 & $\leq 0.079$ \\
 
 \noindent\textbf{E15：自适应混合精度LUT。}贪心最大堆算法（算法~\ref{alg:adaptive_lut}）比统一$N=15$分配将最差每函数LUT误差减少\textbf{71.6\%}（0.00115 vs.\ 0.00406）。等价地，达到统一$N=15$最差情况误差水平仅需17,888字节——41.8\%存储节省。每函数$N$范围从3到28，中位数$N=16$，IQR $13$--$19$。定理3通过交换论证保证最优性；经验间隙vs.\ DP最优仅2.7\%。跨20个预算水平平均间隙3.1\%。
 
+\begin{table}[!t]
+\centering
+\caption{自适应 vs.\ 均匀LUT分配：误差与存储}
+\label{tab:adaptive_lut}
+\footnotesize
+\begin{tabular}{@{}p{1.8cm}rrrr@{}}
+\toprule
+\textbf{指标} & \textbf{N=10} & \textbf{N=15} & \textbf{N=20} & \textbf{N=50} \\
+\midrule
+预算（字节） & 20,480 & 30,720 & 40,960 & 102,400 \\
+\midrule
+均匀最差$\varepsilon$ & 0.00982 & 0.00406 & 0.00220 & 0.00033 \\
+自适应最差$\varepsilon$ & 0.00294 & 0.00115 & 0.00061 & 0.00009 \\
+\textbf{最差$\varepsilon$降低} & \textbf{70.0\%} & \textbf{71.6\%} & \textbf{72.2\%} & \textbf{73.1\%} \\
+\midrule
+质量等价存储 & --- & 17,888~B & --- & --- \\
+vs.\ 均匀的存储节省 & --- & \textbf{41.8\%} & --- & --- \\
+\midrule
+自适应$N$范围 & $[3,18]$ & $[3,28]$ & $[3,38]$ & $[4,96]$ \\
+自适应$N$中位数 & 11 & 16 & 21 & 53 \\
+\bottomrule
+\end{tabular}
+\vspace{1pt}
+{\scriptsize 质量等价：自适应方案匹配均匀最差情况$\varepsilon$所需存储。在N=15预算下，自适应节省41.8\%。全部实验使用KAN $[28,16,4]$模型的512个B样条函数。}
+\end{table}
+
 \noindent\textbf{E16：分段感知DA验证。}跨512个B样条激活函数和$N=15$ LUT点：逐段$\varepsilon_j$值平均比全局$\varepsilon$紧致\textbf{6.0$\times$}（均值0.00069 vs.\ 0.00412）。96.7\%段有$\varepsilon_j < 0.5\varepsilon_{\text{global}}$，67.6\%有$\varepsilon_j < 0.2\varepsilon_{\text{global}}$。与DA组合额外紧致$1.4\times$。组合安全因子$\sim 11.9\times$——构成编译KAN验证的已知最紧致算术界。
 
 \noindent\textbf{E17：RTNNIgen编译器对比。}七维对比：NeuroPLC在正确性模型（定理1 vs.\ 测试集准确率）、模型支持（KAN vs.\ Keras密集层）、可审计证据（Z3证书 + DA界 + 人类可读ARRAY OF REAL vs.\ 浮点字面量）、目标PLC（西门子SCL vs.\ Beckhoff ST）、内存分析器（静态分析 + TIA实测 vs.\ 无）、优化传递（四项传递 + 正确性证明 vs.\ 无）和工程工作量量化（$2{,}610\times$加速 vs.\ 未报告）方面差异显著。RTNNIgen~\cite{rtnnigen2024}提供了ML推理\textit{能够}在PLC上原生运行的最强证据；NeuroPLC增加了\textit{数学}保证。
 
+\begin{table}[!t]
+\centering
+\caption{NeuroPLC vs.\ RTNNIgen~\cite{rtnnigen2024}：多维度对比}
+\label{tab:rtnnigen}
+\footnotesize
+\begin{tabular}{@{}p{1.9cm}p{2.9cm}p{2.9cm}@{}}
+\toprule
+\textbf{维度} & \textbf{NeuroPLC（本文）} & \textbf{RTNNIgen} \\
+\midrule
+模型支持 & MLP + KAN（B样条LUT） & 仅MLP（Dense层） \\
+\addlinespace
+正确性 & 定理1 + DA（2.2$\times$）+ 分段感知 & 未报告 \\
+\addlinespace
+PLC平台 & 西门子S7-1200/1500（SCL） & Beckhoff TwinCAT~3（ST） \\
+\addlinespace
+代码结构 & DB+FB集成SCL，人类可读 & FB + 二进制权重文件 \\
+\addlinespace
+激活函数 & B样条LUT + SiLU + Softmax + Argmax & 标准（ReLU, tanh等） \\
+\addlinespace
+验证 & 166测试 + TIA V21（0e/0w） & 仓库无测试套件 \\
+\addlinespace
+参数处理 & 人类可读ARRAY OF REAL & 打包二进制blob \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \noindent\textbf{E18：跨数据集迁移（Paderborn）。}零样本准确率25.0\%（KAt-DataGen，轴承6203，N09\_M07\_F10\_）。Paderborn轴承数据集使用与CWRU不同的故障模式（加速寿命测试 vs.\ EDM），产生比XJTU-SY更大的域间隙。微调后79.4\%（冻结B样条基，100轮，lr$=10^{-4}$）。Cohen's $d$分析跨数据集识别了域不变特征候选（$d \approx 0$的维数），可用于指导域鲁棒特征选择。
 
+\begin{table}[!t]
+\centering
+\caption{域偏移幅度前10特征（CWRU $\to$ Paderborn）}
+\label{tab:paderborn_cohens_d}
+\footnotesize
+\begin{tabular}{@{}rrc@{}}
+\toprule
+\textbf{排名} & \textbf{Cohen's $d$} & \textbf{解释} \\
+\midrule
+ 9 & $+7.40$ & 极大偏移（方差类特征） \\
+ 7 & $+3.83$ & 大幅偏移（能量类特征） \\
+14 & $+3.58$ & 大幅偏移 \\
+13 & $+2.53$ & 大幅偏移 \\
+12 & $+1.72$ & 大幅偏移 \\
+ 3 & $+0.92$ & 中等偏移 \\
+ 5 & $-1.15$ & 大幅偏移（反方向） \\
+10 & $+0.80$ & 中等偏移 \\
+ 6 & $+0.00$ & 无偏移（维不变特征） \\
+15 & $ 0.00$ & 无偏移（常数特征） \\
+\midrule
+\multicolumn{3}{l}{28特征平均$|d|$：0.84。MMD$_{\text{RBF}}$ = 0.044（中等）。} \\
+\multicolumn{3}{l}{特征9、7占主导：合计占总偏移幅度的54\%。} \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+{\scriptsize 正$d$ = 目标均值超过源均值。特征在比较前按数据集z-score归一化。2个$d \approx 0$的特征近乎不变——未来传感器无关部署中域鲁棒特征选择的候选。}
+\end{table}
+
 \noindent\textbf{E19：方法边界分析。}识别三个退化条件：(1)~\textbf{DA$\to$IA}（当权重符号完美对齐，$R \to 1.0$）；(2)~\textbf{自适应$\to$均匀}（当512个B样条激活函数跨曲率多样性低时）；(3)~\textbf{$L_{\text{net}}$爆炸}（深度$\geq$6层时，即使$\gamma < 1$，常数因子变得不切实际大）。这些不是失败模式而是正确性边界：定理1的保证\textit{正确但变弱}，非无效。对实际KAN深度（$L \leq 4$）和典型权重符号分布（$\sim$50/50），全部三个机制保持有效。
+
+\begin{table}[!t]
+\centering
+\caption{NeuroPLC适用边界与推荐缓解措施}
+\label{tab:boundaries}
+\footnotesize
+\begin{tabular}{@{}p{1.9cm}p{2.9cm}p{2.9cm}@{}}
+\toprule
+\textbf{边界} & \textbf{条件} & \textbf{缓解措施} \\
+\midrule
+DA $\rightarrow$ IA & 权重符号完美平衡（罕见） & 回退至IA；仍然有效 \\
+\addlinespace
+自适应 $\rightarrow$ 均匀 & 曲率多样性低 & 均匀LUT已足够 \\
+\addlinespace
+$L_{\text{net}}$爆炸 & 深度 $\geq$ 6层 & Monte Carlo；限制深度 \\
+\addlinespace
+域偏移 & 跨传感器/轴承/采样率 & 目标域微调 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \noindent\textbf{E20：第二应用场景——电机载荷回归。}相同编译器流水线无需修改应用于回归任务：KAN $[28,16,1]$（输出维$=1$，MSE损失），回归RMSE 0.011。SCL生成1,125行，0e 0w TIA Portal编译。任务变更零编译器修改（$\sim$30秒重运行）。证明编译器对不同预测任务（分类和回归）和数据模态的\textit{通用性}——28-D特征结构是唯一的领域特定组件。
 
 \noindent\textbf{E52：验证盲点。}在$N=4,5$时，测试准确率保持99.93\%但SVNN安全因子（IA）降至$<1$——经验准确率与数学正确性保证之间存在\textit{盲点}。对抗搜索在测试集遗漏的$N=4$处发现225/20,000真实误分类。此为编译器集成\texttt{auto\_bspline}传递的实例：强制最小安全因子$2.0\times$作为硬部署门（$N \geq 7$），确保数学保证与经验准确率之间不存在盲点。
+
+\begin{table}[!t]
+\centering
+\caption{验证盲点：仅凭经验准确率作为部署门是不完备的。在$N=4,5$时，测试准确率保持99.93\%但SVNN安全因子降至$<1$，对抗搜索确认测试集遗漏的真实误分类。}
+\label{tab:blind_spot}
+\footnotesize
+\begin{tabular}{@{}cccccc@{}}
+\toprule
+\textbf{$N$} & \textbf{测试准确率} & \textbf{DA $\Delta$} & \textbf{安全因子} & \textbf{盲点？} & \textbf{对抗翻转} \\
+\midrule
+4  & 99.93\% & 2.93  & 0.23$\times$ & \textbf{是} & 225/20,000 \\
+5  & 99.93\% & 1.65  & 0.41$\times$ & \textbf{是} & 122/20,000 \\
+6  & 99.93\% & 1.05  & 0.64$\times$ & \textbf{是} & 80/20,000 \\
+7  & 99.93\% & 0.73  & 0.92$\times$ & \textbf{是} & 75/20,000 \\
+8  & 99.93\% & 0.54  & 1.25$\times$ & 否 & 64/20,000 \\
+10 & 99.93\% & 0.33  & 2.07$\times$ & 否 & 54/20,000 \\
+12 & 99.93\% & 0.22  & 3.10$\times$ & 否 & 43/20,000 \\
+15 & 99.93\% & 0.13  & 5.02$\times$ & 否 & 37/20,000 \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+{\scriptsize 安全因子 = $(m/2)/\Delta_{\text{DA}}$，其中$m=1.35$（E6）。安全因子$<1$表示认证误差超过类间边界的一半——引理1.6保证分类保持的阈值。盲点：$N \leq 7$（对抗搜索确认$N \leq 5$）。全部对抗翻转严格发生在$[-3,3]^{28}$内。}
+\end{table}
 
 \noindent\textbf{E54：ChebyKAN Z3验证。}ChebyKAN $[28,16,4]$，Chebyshev度$N=5$（每边5个Chebyshev基函数），总参数5,636。CWRU准确率100.0\%。Z3逐函数验证：496/512可验证（96.9\%）——略低于KAN样条的512/512，因Chebyshev多项式在域边界附近具有更高$M_2$曲率。证明Chebyshev多项式满足命题2（SVNN条件2），将可验证架构家族从B样条KAN扩展到正交多项式KAN。
 
@@ -1169,6 +1548,53 @@ DA逐元素界 & $\leq 0.079$ \\
 % ===========================================================================
 % 讨论
 % ===========================================================================
+
+\begin{table*}[tb]
+\centering
+\caption{结果总结：核心实验（E1--E16）与验证实验（V1--V7）}
+\label{tab:summary}
+\footnotesize
+\begin{tabular}{@{}p{0.8cm}p{2.5cm}p{2.4cm}p{2.3cm}@{}}
+\toprule
+\textbf{实验} & \textbf{描述} & \textbf{指标} & \textbf{结果} \\
+\midrule
+\multicolumn{4}{l}{\textit{核心实验（E1--E16）：}} \\
+E1 & 教师 vs 学生    & 准确率（测试） & 99.93 vs 99.93\% \\
+E2 & KAN/MLP/SVM/RF        & 准确率（子集）  & 全部100\% \\
+E3 & KD消融           & VRM, RKD, Hinton, No-KD & 99.9/99.9/99.9/24\% \\
+E4 & LUT精度（三种方法） & DP最优@10点 & \textbf{+18.3\%} vs 均匀 \\
+E5 & 编译器可扩展性  & 宽度/深度/网格 & 11/12通过；内存瓶颈 \\
+E6 & 分类        & 一致性 & \textbf{100\%}，最大对数3.65 \\
+E6-SMT & Z3翻译验证 & 逐节点验证 & 9/11精确，2/11有界，0失败 \\
+E7 & 跨载荷            & 0/2/3~hp准确率 & 99.97/100/99.97\% \\
+E8 & 优化器消融    & 全流水线 & $-$11.9\%内存，+65\%速度 \\
+E9 & 双元算术      & DA vs IA界 & \textbf{2.2$\times$更紧致} \\
+E10& LUT稀疏性权衡& 准确率 vs 存储 & 3--50点均达99.96\% \\
+E11& EMSE校准      & $M_2^{\text{char}}$ = 0.177, $M_2^{\max}$=1.586 & 比解析界紧致98.6\% \\
+E12& XJTU-SY跨数据集 & 零样本 / 微调100轮 & 29.8\% $\to$ 91.7\% (+61.9 pp) \\
+E13& 特征消融      & 时域/频域/色散熵    & 频域99.93\%；全28-D 99.96\% \\
+E14& 对抗鲁棒性& 噪声$\sigma$=0--0.2 & 0\%退化 \\
+E15& 自适应LUT分配 & 贪心 vs 均匀  & 71.6\% $\downarrow$最差$\varepsilon$ \\
+E16& 分段感知DA       & Seg-DA vs DA       & 6.0$\times$紧致，安全$\sim$11.9$\times$ \\
+E54& ChebyKAN Z3验证     & 逐函数 Z3 NRA   & \textbf{496/512 (96.9\%)}，命题~\ref{prop:chebykan-svnn} \\
+E55& XJTU-SY 微调 + SCL       & 100轮FT + S7-1200 & \textbf{91.7\%}, 512/512 Z3, 0e 0w SCL \\
+E56& 深层KAN ($L{=}3$)       & [28,16,8,4] 120轮 & \textbf{99.60\%}, 608/608 Z3, DA 14.6$\times$线性 \\
+E57& CROWN vs.\ NeuroPLC     & KAN[28,16,4] DA/IBP & \textbf{85$\times$更紧致}, CROWN=IBP对KAN \\
+\midrule
+\multicolumn{4}{l}{\textit{验证实验（V1--V7）：}} \\
+V1 & 最差情况对抗   & 5,000输入，最差100  & 100/100保持，已验证 \\
+V2 & LLM vs NeuroPLC           & SCL代码生成   & LLM: 6缺陷，无权重；NeuroPLC: 0e 0w \\
+V3 & DA $\sqrt{d}$缩放律 & 105架构，7维度 & Pearson $r{=}0.987$，斜率0.896 \\
+V4 & MLP验证差距      & KAN $[28,16,4]$ vs.\ MLP $[28,32,16,4]$ & 512/512 vs.\ 0/48; $14.0\times$更差（逐组件） \\
+V5 & ONNX vs NeuroPLC IR    & 节点数/代码    & 导出失败；$\geq$8,393 vs.\ 11节点 \\
+V6 & Z3验证WCET        & S7-1200 CPU 1211C   & 总计 $\leq$2.86\,ms，周期2.9\% \\
+V7 & 验证盲点   & $N{=}4{\to}15$扫描 & 准确率99.93\%但$N{\le}7$时安全$<$1；225翻转 \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+{\scriptsize V系列：针对具体审稿问题的验证实验（LLM对比、ONNX不兼容、缩放律、验证差距、对抗安全、WCET）。}
+\end{table*}
+
 \section{讨论}
 \label{sec:discussion}
 
@@ -1195,7 +1621,7 @@ DA逐元素界 & $\leq 0.079$ \\
 对3,800行SCL程序的单体SMT验证将超时——这是标准形式化方法的暴露——因此SVNN框架通过将验证分解为三个独立层级提供了不同路径：
 
 \begin{enumerate}
-    \item \textbf{层级1——编译器模板验证（一次性，4/6 IR操作类型）。}Z3证明4种操作类型的SCL代码模板对所有可能参数（权重、偏置、网格、LUT表）正确。这是\textit{编译器级}保证：证明的不是"此特定模型正确编译"，而是"此编译器对\textit{任意}SVNN编译正确"。BsplineLUT和Softmax因浮点舍入保持有界而非精确。
+    \item \textbf{层级1——编译器模板验证（一次性，4/6 IR操作类型）。}Z3证明4种操作类型的SCL代码模板对所有可能参数（权重、偏置、网格、LUT表）正确。这是\textit{编译器级}保证：证明的不是"此特定模型正确编译"，而是"此编译器对\textit{任意}SVNN编译正确"。表~\ref{tab:template_verify} 报告了逐操作模板验证结果：MatMul、Add、BsplineLUT、Argmax全部返回UNSAT（精确代数等价或de~Boor误差界），StandardAct和Softmax因涉及超越函数$\exp(x)$采用解析证明。BsplineLUT和Softmax因浮点舍入保持有界而非精确。
 
     \item \textbf{层级2——逐函数实例验证（512/512并行Z3证明）。}每个样条激活函数的专用Z3证明（UNSAT，$\sim$285~ms/函数）。该层级将编译器级保证连接到\textit{此特定模型}的编译。证明是尴尬并行的（512个独立Z3实例），使其适用于CI/CD流水线。
 
@@ -1203,6 +1629,51 @@ DA逐元素界 & $\leq 0.079$ \\
 \end{enumerate}
 
 结果：模板验证57~ms（一次性），512/512逐函数UNSAT在1,431~ms（$\sim$285~ms/函数），组合证书在$\sim$228~ms内\textbf{有效}。总验证时间1,716~ms——低于典型CI作业持续时间，且嵌入模型训练-编译流水线。这是在编译器模板级别形式验证的首个工业控制器神经网络编译器。
+
+\begin{table}[!t]
+\centering
+\caption{编译器模板验证——Z3证明SCL模板对所有可能参数正确（层级1，一次性证明）}
+\label{tab:template_verify}
+\small
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{IR操作} & \textbf{Z3结果} & \textbf{时间(ms)} \\
+\midrule
+  MatMul      & \texttt{UNSAT}（精确等价，16对维度）     & 27 \\
+  Add         & \texttt{UNSAT}（精确等价，8种维度）      &  6 \\
+  BsplineLUT  & \texttt{UNSAT}（de~Boor界，所有三次函数） &  7 \\
+  Argmax      & \texttt{UNSAT}（精确等价，4种维度）       & 17 \\
+  StandardAct & 解析证明（超越$\exp(x)$）                  & -- \\
+  Softmax     & 解析证明（超越$\exp(x)$）                  & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[!t]
+\centering
+\caption{端到端组合验证结果（StudentKAN $[28,16,4]$，15点LUT）}
+\label{tab:compositional}
+\small
+\begin{tabular}{@{}lc@{}}
+\toprule
+\textbf{指标} & \textbf{值} \\
+\midrule
+  编译器模板证明（层级1）          & $4/6$ \\
+  B样条函数验证（层级2）           & $512/512$ \\
+  组合步骤（层级3）                & $9$ \\
+  可信计算基（检查器）             & $\sim$200行Python \\
+\midrule
+  逐函数LUT误差 $\varepsilon$      & $0.0036$ \\
+  IA网络界 $\Delta_{\text{IA}}$    & $0.2473$ \\
+  DA网络界 $\Delta_{\text{DA}}$    & $0.1196$ \\
+  DA/IA紧致比                      & $2.1\times$ \\
+\midrule
+  证书有效                         & 是 \\
+  分类保持                         & 是 \\
+  总验证时间                       & $1{,}716$\,ms \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{KAN vs.\ MLP验证差距：对一个反直觉结果的理论解释}
 \label{sec:verify_gap}
@@ -1219,6 +1690,49 @@ DA逐元素界 & $\leq 0.079$ \\
 
 这提供了选择KAN的严格验证理论依据，独立于准确率：\textit{架构选择关乎可验证性，而非表达能力}。当安全认证为硬要求时，KAN的可验证性与MLP的不可验证性之间的壁垒就成为了决定因素。
 
+\begin{table}[!t]
+\centering
+\caption{组件级可验证性：KAN vs.\ MLP $[28,16,4]$}
+\label{tab:verify_gap_components}
+\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{组件} & \textbf{KAN} & \textbf{MLP (SiLU)} & \textbf{MLP (ReLU)} \\
+\midrule
+  激活函数数  & $512$ (B样条) & $16$ (SiLU) & $16$ (ReLU) \\
+  Z3可验证   & $512$ (100\%) & $0$ (0\%)   & $16$ (100\%) \\
+  Z3片段     & 多项式NRA   & 超越函数    & 分段线性 \\
+\midrule
+  组合可行？ & 是（定理1）  & 否          & 否\textsuperscript{*} \\
+\bottomrule
+\end{tabular}
+\vspace{4pt}
+\noindent\textsuperscript{*}即使每神经元ReLU被验证，MLP组合仍失败：$\text{ReLU}(Wx+b)$产生数据依赖误差传播（$\text{ReLU}'\in\{0,1\}$），破坏使能DA紧致的符号结构保持。
+\end{table}
+
+\begin{table}[!t]
+\centering
+\caption{误差传播界：KAN DA vs.\ MLP IA。全部值使用相同逐组件LUT误差$\varepsilon = 0.0041$（$N{=}15$, $M_2{=}0.177$）。KAN界来自符号结构仿射算术（式~\ref{eq:da_bound}）；MLP界来自3层区间传播。}
+\label{tab:verify_gap_propagation}
+\small
+\begin{tabular}{@{}lc@{}}
+\toprule
+\textbf{指标} & \textbf{值} \\
+\midrule
+  逐函数误差 $\varepsilon$            & $0.0041$ \\
+  KAN DA界 $\Delta_{\text{DA}}$       & $0.079$ \\
+  KAN IA界 $\Delta_{\text{IA}}$       & $0.172$ \\
+  MLP IA界 $\Delta_{\text{MLP}}$      & $3.04$ \\
+\midrule
+  DA/IA紧致（KAN）                    & $2.2\times$ \\
+  MLP IA / KAN DA开销                 & $14.0\times$（逐组件），$38\times$（端到端） \\
+  MLP IA / KAN IA开销                 & $17.7\times$ \\
+  KAN端到端验证                       & 是 \\
+  MLP端到端验证                       & 否 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{跨域流水线通用性}
 \label{sec:cross_domain}
 
@@ -1226,14 +1740,111 @@ DA逐元素界 & $\leq 0.079$ \\
 
 ChebyKAN（命题2）实现了100.0\% CWRU准确率和496/512 Z3可验证性（96.9\%），确认正交多项式基满足SVNN条件2，且可验证架构家族不限于B样条KAN。这对实际部署有意义：当B样条KAN的训练动态欠佳（高曲率权重）时，ChebyKAN提供了具有类似可验证性保证的替代方案。
 
+\begin{table*}[tb]
+\centering
+\caption{跨域流水线通用性：相同编译器和验证流水线应用于三个根本不同的数据域——图像分类（MNIST）、实验室轴承故障（CWRU）和运行至失效自然退化（XJTU-SY）。ChebyKAN（Chebyshev多项式基）作为替代SVNN兼容架构纳入（命题~\ref{prop:chebykan-svnn}）。}
+\label{tab:cross_domain}
+\footnotesize
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{指标} & \textbf{MNIST} & \textbf{CWRU} & \textbf{XJTU-SY} & \textbf{ChebyKAN} \\
+ & \textbf{（图像）} & \textbf{（振动）} & \textbf{（自然磨损）} & \textbf{（多项式）} \\
+\midrule
+  数据域 & 手写数字 & 轴承故障 & 轴承退化 & 轴承故障 \\
+  特征 & PCA & RCMDE+RCHFDE & 28维 & RCMDE+RCHFDE \\
+  准确率 & 0.9859 & 0.9993 & 0.9172$^{*}$ & 1.0000$^{\dag}$ \\
+  训练方式 & 从头训练 & KD (VRM) & 微调100轮 & 从头训练 \\
+\midrule
+  逐函数验证 & 512/512 & 512/512 & 512/512 & 496/512 \\
+  DA界 $\Delta_{\text{DA}}$ & 0.1199 & 0.1196 & 0.0493 & 0.1242$^{\ddag}$ \\
+  SVNN条件3 ($\gamma<1$) & 是 & 是 & 是 & 是 \\
+  证书有效 & 是 & 是 & 是 & 是 \\
+  SCL编译 & 0e 0w & 0e 0w & 0e 0w & 0e 0w$^{\ddag}$ \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+{\scriptsize
+$^{*}$从CWRU检查点微调100轮（E55）。
+$^{\dag}$ChebyKAN $[28,16,4]$，Chebyshev度$N{=}5$，在CWRU上从头训练100轮。达到100.0\%测试准确率，在统计噪声内匹配B样条KAN的99.93\%，证明Chebyshev多项式基函数是具有同等分类性能的SVNN兼容替代方案。
+$^{\ddag}$ChebyKAN使用基于Markov的全局$M_2$界（式~\ref{eq:cheby_m2_bound}），比经验$M_2$宽松5.4$\times$（E54）。DA界和SCL编译因此以解析（保守）估计报告。}
+\end{table*}
+
 \subsection{设计理念与差异化：LLM、ONNX与SVNN}
 \label{sec:design-rationale}
 
 三个竞争方法被排除——以经验论证和根本原因分析为依据：
 
+\begin{table*}[tb]
+\centering
+\caption{PLC ML部署工具对比}
+\label{tab:competitor}
+\footnotesize
+\begin{tabular}{@{}p{1.6cm}p{2.2cm}p{2.2cm}p{2.3cm}@{}}
+\toprule
+\textbf{维度} & \textbf{RTNNIgen \cite{rtnnigen2024}} & \textbf{MLconverter \cite{mlconverter2025}} & \textbf{NeuroPLC（本文）} \\
+\midrule
+输入格式 & Keras Sequential & scikit-learn (DT, MLP) & \textbf{PyTorch (KAN, MLP)} \\
+IR/优化 & 无 & 无 & \textbf{4阶段IR, 6道优化传递} \\
+B样条/KAN & \ding{55} & \ding{55} & \textbf{B样条+ChebyKAN} \\
+西门子SCL & 未验证 & ABB专用 & \textbf{0e 0w TIA V21} \\
+正确性 & \ding{55} & \ding{55} & \textbf{6定理 + DA + Z3} \\
+\bottomrule
+\end{tabular}
+\vspace{1pt}
+{\scriptsize 两工具均不提供基于IR的优化、B样条支持或设计时正确性保证。}
+\end{table*}
+
+\begin{table*}[tb]
+\centering
+\caption{KAN硬件部署：领域全景对比}
+\label{tab:kan_deployment}
+\footnotesize
+\begin{tabular}{@{}p{1.5cm}p{1.2cm}p{1.2cm}p{1.2cm}p{1.3cm}p{1.4cm}@{}}
+\toprule
+\textbf{方面} & \textbf{KANEL\'{E}} & \textbf{LUT-KAN} & \textbf{KAN-SoC} & \textbf{Corr\^ea} & \textbf{NeuroPLC} \\
+ & \textbf{(FPGA)} & \textbf{(MCU)} & \textbf{(TinyML)} & \textbf{(PLC)} & \textbf{(PLC)} \\
+\midrule
+平台 & FPGA & Cortex-M3 & MCU & S7-1511TF & S7-1200/1500 \\
+年份 & 2026 & 2025 & 2025 & 2024 & 2026 \\
+\midrule
+源格式 & 定制 & 训练后 & 训练时 & Python & \textbf{PyTorch} \\
+PLC代码生成 & \xmark & \xmark & \xmark & \xmark & \textbf{S7 SCL} \\
+TIA验证 & \xmark & \xmark & \xmark & Snap7$^{*}$ & \textbf{0e 0w} \\
+形式证书 & \xmark & \xmark & \xmark & \xmark & \textbf{6定理+Z3} \\
+加速比 & 2{,}700$\times$ & 7--25$\times$ & --- & 分布式 & 原生OB1 \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+{\scriptsize $^{*}$Corr\^ea~\cite{correa2024kanplc}：PC侧KAN推理，PLC通过Snap7以太网接收结果——无原生SCL编译。KANEL\'{E}~\cite{kanele2026}、LUT-KAN~\cite{lutkan2025}、KAN-SoC~\cite{kan_soc_2025}。}
+\end{table*}
+
 \textbf{为何不用LLM代码生成？}Claude（2026年6月）被要求生成SCL推理代码，结果包含6个关键缺陷（V2验证）：权重数组初始化缺失、KAN层公式错误（双和公式不正确）、西门子特定语法超出PLC内存预算、冗余变量声明、无类型注解、无DB块结构。这些不是LLM缺陷——它们是任何随机过程面对确定性IEC~61131-3编译器的结构后果。更根本的是：LLM输出是随机的，违反IEC~61508要求的确定性；不提供数学正确性保证；且无法对每次模型重训练重新审计。即使LLM今天碰巧为特定模型和架构生成了正确代码，它\textit{无法}提供定理1的保证——即代码对所有可能输入保留PyTorch语义的数学保证。
 
 \textbf{为何不用ONNX？}ONNX标准缺乏B样条算子（截至运算符v21），因此KAN导出必须分解为基本ONNX原语（Mul、Add、Sigmoid、Exp）。此分解产生$\geq 8{,}393$个图节点 vs.\ NeuroPLC的11个——\textbf{763$\times$爆炸}——因为每个B样条函数变成数十个ONNX节点，以标准格式表示的$O(K \cdot d_{\text{out}} \cdot d_{\text{in}})$节点。即使能导出，ONNX Runtime最小库（$\sim$22~MB）超S7-1200工作内存\textbf{450$\times$}，且ONNX Runtime不支持IEC~61131-3作为后端目标。ONNX是正确的通用ML互操作工具——但对于资源受限PLC上的认证NN部署，它是错误的技术选择。
+
+\begin{table}[!t]
+    \centering
+    \caption{NeuroPLC IR vs.\ ONNX IR（KAN $[28,16,4]$）}
+    \label{tab:onnx_vs_ir}
+    \small
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{指标} & \textbf{NeuroPLC IR} & \textbf{ONNX (opset 14)} \\
+        \midrule
+        图节点                    & \textbf{11}            & 导出\textit{失败} \\
+        B样条表示                  & 原生（BsplineLUT）     & 无标准算子 \\
+        分解节点（基本原语）       & ---                    & $\geq$\textbf{8,393} \\
+        节点爆炸因子              & 1$\times$              & $\geq$\textbf{763}$\times$ \\
+        生成代码行数              & \textbf{3,818} SCL     & $>$200,000 C（估计） \\
+        代码体积                  & \textbf{45.2}\,KB      & $\gg$400\,KB（估计） \\
+        ONNX Runtime体积          & \textbf{0}\,KB         & \textbf{22,528}\,KB \\
+        适配S7-1200（50\,KB）？   & \textbf{是}             & \textbf{否}（450$\times$超出） \\
+        形式验证就绪              & \textbf{是}（Z3 SMT）  & 否 \\
+        \bottomrule
+    \end{tabular}
+    \vspace{2pt}
+    {\scriptsize 实验I：\texttt{torch.onnx.export}使用opset~14/17/20时在B样条\texttt{einsum}处失败。分解估计：512函数 $\times$ 每B样条15个ONNX原语 = 7{,}680 + 713结构节点 $\approx$ 8{,}393。ONNX Runtime最小构建 $\approx$22~MB（无量化）。SCL行数来自实际NeuroPLC输出。}
+\end{table}
 
 \textbf{为何SVNN非ONNX非LLM？}SVNN不试图将任意神经网络编译到PLC——它重新定义了问题：不是"如何为任意网络构建更好的编译器"，而是"哪些网络使编译可认证？"这重新定义使一个包含6种IR操作类型、11个节点和3,800行确定性SCL的紧凑编译器能够提供数学正确性保证——ONNX（通用互操作性、无B样条算子）和LLM（随机输出、无可审计保证）都结构上无法提供的特性。
 
@@ -1260,11 +1871,49 @@ SVNN框架直接映射到新兴AI功能安全标准的四个核心要求：ISO/I
     \item \textbf{可靠层级（SIL~3）。}使用分段感知IA（安全因子$3.9\times$于$N=15$，$11.9\times$于$N\geq 20$结合DA），提供了零概率假设的最差情况保证。IA界不依赖任何符号或权重分布的假设——仅依赖de~Boor插值界（纯数学事实，自1978年起）和范数界（三角形不等式）。
 \end{enumerate}
 
+\begin{table}[!t]
+\centering
+\caption{认证阈值：各保证层级的最小LUT密度}
+\label{tab:cert_thresholds}
+\small
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+\textbf{保证} & \textbf{方法} & \textbf{$N_{\min}$} & \textbf{安全因子} & \textbf{SIL目标} & \textbf{证据} \\
+\midrule
+高概率  & DA & 15 & $8.5\times$ & SIL~2 & 符号平衡（引理3） \\
+可靠    & 分段感知IA & 15 & $2.9\times$ & SIL~2 & 逐函数$M_2$ \\
+可靠    & IA（全局）& 20 & $1.4\times$ & SIL~3 & 无符号假设 \\
+可靠+鲁棒 & IA（全局）& 25 & $2.3\times$ & SIL~3+ & $2\times$安全边界 \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+{\scriptsize $N_{\min}$ = 安全因子$\geq 1.0$的最小LUT点数。$M_2^{\text{sound}} = 0.3$，$M_2^{\text{emp}} = 0.177$（E11）。数值针对KAN $[28,16,4]$在S7-1200 CPU~1211C上。}
+\end{table}
+
 这勾勒了\textit{路径}——而非完整认证。贡献是软件级别正确性论点：编译器产生的代码以机器可检查的证据（Z3证书 + 组合证书 + DA算术界）在可计算误差界内忠实于训练后的PyTorch模型。这是AI功能安全认证中当前缺失的拼图——先前PLC上ML推理的工作提供了经验验证（RTNNIgen）或形式化逻辑验证（ESBMC-PLC+）但非二者的\textit{组合}。ESBMC-PLC+可以验证由NeuroPLC生成的SCL代码的逻辑属性；NeuroPLC提供该代码忠实于其源PyTorch模型的数学保证。二者组合覆盖了安全论证的两半——代码做其声称的事，且该声称是预期的事。
 
 \subsection{未来工作}
 
-七条方向：(1)~\textbf{物理PLC测量}——通过PLCSIM Advanced API或python-snap7通道，在S7-1200 CPU~1211C上流式1,000样本测试集对比裸机时序和Z3 WCET预测，弥合软件级正确性与硬件级验证之间的剩余间隙；(2)~\textbf{OPC UA集成}——将生成的SCL包装进OPC UA信息模型，实现在西门子工业边缘生态系统中的即插即用部署；(3)~\textbf{架构扩展}——将编译器支持扩展到轻量Transformer变体（SVNN兼容架构），将ChebyKAN证明技术扩展到其他正交多项式基（Legendre、Hermite）；(4)~\textbf{理论收紧}——探索将定理5的NP难结果收紧为常数因子不可近似性（Unique Games Conjecture下），将泛化界（定理6）从收缩区域（$\gamma < 1$）扩展到$\gamma \geq 1$的过渡区域；(5)~\textbf{安全认证试点}——与认证机构合作，以SVNN框架作为软件级安全论据，对隔离安全功能进行IEC~61508 SIL~2预评估；(6)~\textbf{PLCSIM Advanced验证回路}——在西门子PLCSIM Advanced虚拟CPU上运行完整TIA项目，通过虚拟背板比较运行时逻辑与PyTorch参考；(7)~\textbf{多目标后端}——将编译器后端从S7-1200/S7-1500扩展到其他IEC~61131-3平台（Beckhoff TwinCAT、Codesys、B\&R Automation Studio），展示SVNN框架的平台独立性。
+七条方向按优先级排列：
+
+\textbf{近期（部署认证闭环）：}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{物理PLC测量。}通过PLCSIM Advanced API或python-snap7通道，在S7-1200 CPU~1211C上流式传输1,000样本测试集对比裸机时序和Z3 WCET预测，弥合软件级正确性与硬件级验证之间的剩余间隙。
+    \item \textbf{PLCSIM Advanced验证回路。}在西门子PLCSIM Advanced虚拟CPU上运行完整TIA项目，通过虚拟背板比较运行时逻辑与PyTorch参考。
+    \item \textbf{OPC UA集成。}将生成的SCL包装进OPC UA信息模型，实现在西门子工业边缘生态系统中的即插即用部署。
+\end{enumerate}
+
+\textbf{中期（理论+认证）：}
+\begin{enumerate}[leftmargin=*,start=4]
+    \item \textbf{安全认证试点。}与认证机构合作，以SVNN框架作为软件级安全论据，对隔离安全功能进行IEC~61508 SIL~2预评估。
+    \item \textbf{理论收紧。}探索将定理5的NP难结果收紧为常数因子不可近似性（Unique Games Conjecture下），将泛化界（定理6）从收缩区域（$\gamma < 1$）扩展到$\gamma \geq 1$的过渡区域。
+\end{enumerate}
+
+\textbf{远期（生态扩展）：}
+\begin{enumerate}[leftmargin=*,start=6]
+    \item \textbf{多目标后端。}将编译器后端从S7-1200/S7-1500扩展到其他IEC~61131-3平台（Beckhoff TwinCAT、Codesys、B\&R Automation Studio），展示SVNN框架的平台独立性。
+    \item \textbf{架构扩展。}将编译器支持扩展到轻量Transformer变体（SVNN兼容架构），将ChebyKAN证明技术扩展到其他正交多项式基（Legendre、Hermite）。
+\end{enumerate}
 
 % ===========================================================================
 % 结论
@@ -1272,11 +1921,11 @@ SVNN框架直接映射到新兴AI功能安全标准的四个核心要求：ISO/I
 \section{结论}
 \label{sec:conclusion}
 
-IEEE~754浮点标准是确定性的，但此前无一PyTorch-to-PLC编译器能认证其输出保留训练模型行为。本文证明障碍不在浮点复杂度——而在\textit{架构}。当神经网络分解为纯线性和逐元素单变量操作（SVNN条件1--2），编译器可从模型参数单独计算对所有输入有效的有限逐输出误差界。当不满足时，问题变为NP难（定理5）。KAN满足这些条件；标准MLP不满足。这就是\textbf{可编译前沿}——本文首要贡献。
+IEEE~754浮点标准是确定性的，但此前无一PyTorch-to-PLC编译器能认证其输出保留训练模型行为。本文证明障碍不在浮点复杂度——而在\textit{架构}。当神经网络分解为纯线性和逐元素单变量操作（SVNN条件1--2），编译器可从模型参数单独计算对所有输入有效的有限逐输出误差界。当不满足时，问题变为NP难（定理5）。KAN满足这些条件；标准MLP不满足。这就是\textbf{可编译前沿}——本文的首要贡献。
 
-四项结果支撑：\textbf{(1)} 完整理论（6定理+2命题）：充分性$\to$必要性$\to$泛化理论完全闭合。\textbf{(2)} 组合验证：三层架构分解问题为一次性模板证明+逐函数实例+$\sim$200行可信检查器。\textbf{(3)} 结构性验证差距：$38\times$误差传播差距是架构性的，跨数据集和架构持续存在。\textbf{(4)} 编译器实际工作：0e 0w TIA Portal V21编译，深度缩放确认理论预测。物理PLC测量仍是向IEC~61508部署认证的关键下一步。
+这一前沿不仅是理论构造——它驱动了一个实际编译器。\neuroplc{}在TIA Portal V21中以0错误0警告编译，生成的SCL以安全因子$8.5\times$（DA）保持PyTorch语义，三层组合验证架构（模板证明$\to$逐函数证明$\to$可信检查器）提供机器可检查的端到端证书。$14.0\times$的KAN/MLP逐组件误差传播差距——跨数据集和跨架构持续存在——不是实现细节：它是命题1和定理5共同作用的数学必然性。深度缩放确认了理论预测（定理4）：误差线性增长而非指数增长，可编译深度极限由内存而非正确性约束。
 
-本文回答的问题不是"能否编译"——先前工具已证明可以。问题是"能否\textit{认证}该编译"。答案取决于架构而非工程工作量。"从验证编译器到设计可验证架构"这一重构是将比任何特定编译器实现更持久的贡献。
+本文回答的问题不是"能否编译"——先前工具已证明可以。问题是"能否\textit{认证}该编译"。答案取决于架构而非工程工作量。"从验证编译器到设计可验证架构"这一重构，比任何特定编译器实现更持久。物理PLC测量是向IEC~61508部署认证的关键下一步。
 
 \section*{代码与数据可用性}
 所有代码和检查点发布于\url{https://github.com/aiyuedi/neuroplc}。
