@@ -17,6 +17,7 @@ build/
 *.synctex.gz
 *.fdb_latexmk
 *.fls
+paper/NUL
 
 # Data (large, not in repo)
 data/raw/
@@ -38,6 +39,18 @@ tia_project/_archive/
 
 # Downloaded tools (never integrated)
 tools/
+
+# Root artifacts (generated during dev)
+kan
+kan.ir.json
+kan.report.json
+fix_positioning.py
+run_all.sh
+texput.log
+*.pt
+
+# Python test cache
+.pytest_cache/
 
 # One-off bootstrap (stale)
 neuroplc-*.zip

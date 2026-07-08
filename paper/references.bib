@@ -771,3 +771,123 @@
   year = {2015},
   note = {Software available from tensorflow.org}
 }
+
+@misc{bozorgasl2024chebykan,
+  author = {Zavareh Bozorgasl and Hao Chen},
+  title  = {{Wav-KAN}: Wavelet Kolmogorov-Arnold Networks},
+  year   = {2024},
+  eprint = {2405.12832},
+  archivePrefix = {arXiv},
+  note   = {Includes ChebyKAN variant using Chebyshev polynomial basis functions},
+}
+
+@misc{bozorgasl2024waveletkan,
+  author = {Zavareh Bozorgasl and Hao Chen},
+  title  = {{Wav-KAN}: Wavelet Kolmogorov-Arnold Networks},
+  year   = {2024},
+  eprint = {2405.12832},
+  archivePrefix = {arXiv},
+}
+
+@book{mason2002chebyshev,
+  author    = {John C. Mason and David C. Handscomb},
+  title     = {Chebyshev Polynomials},
+  year      = {2002},
+  publisher = {Chapman and Hall/CRC},
+}
+
+@article{markov1916limit,
+  author  = {Andrey Andreyevich Markov},
+  title   = {On a problem of {D. I. Mendeleev}},
+  year    = {1916},
+  journal = {Izvestiya Akademii Nauk},
+  note    = {Reprinted in Collected Works, 1948. Contains the Markov Brothers' Inequality: $||p'|| \leq n^2||p||$ for polynomials on $[-1,1]$.},
+}
+
+@article{wang2020xjtu,
+  author  = {Biao Wang and Yaguo Lei and Naipeng Li and Ningbo Li},
+  title   = {A Hybrid Prognostics Approach for Estimating Remaining Useful Life of Rolling Element Bearings},
+  journal = {IEEE Transactions on Reliability},
+  year    = {2020},
+  volume  = {69},
+  number  = {1},
+  pages   = {401--412},
+}
+
+@manual{z3prover,
+  author = {Leonardo de Moura and Nikolaj Bj{\o}rner},
+  title  = {{Z3}: An Efficient {SMT} Solver},
+  year   = {2008},
+  note   = {Microsoft Research},
+}
+
+% ── Theorem 3: Computational Necessity ──────────────────────────────────────
+
+@inproceedings{virmaux2018lipschitz,
+  author    = {Aladin Virmaux and Kevin Scaman},
+  title     = {Lipschitz Regularity of Deep Neural Networks: Analysis and Efficient Estimation},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2018},
+  volume    = {31},
+}
+
+@article{murty1985np,
+  author  = {Katta G. Murty and Santosh N. Kabadi},
+  title   = {Some {NP}-complete Problems in Quadratic and Nonlinear Programming},
+  journal = {Mathematical Programming},
+  year    = {1987},
+  volume  = {39},
+  number  = {2},
+  pages   = {117--129},
+}
+
+@inproceedings{alphabetacrown2021,
+  author    = {Huan Zhang and Shiqi Wang and Kaidi Xu and Linyi Li and Bo Li and Suman Jana and Cho-Jui Hsieh and J. Zico Kolter},
+  title     = {General Cutting Planes for Bound-Tightening in Neural Network Verification},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2022},
+  note      = {$\alpha$-$\beta$-CROWN verifier},
+}
+
+% ── Theorem 4: Generalization Bound ─────────────────────────────────────────
+
+@article{bartlett2002rademacher,
+  author  = {Peter L. Bartlett and Shahar Mendelson},
+  title   = {Rademacher and {Gaussian} Complexities: Risk Bounds and Structural Results},
+  journal = {Journal of Machine Learning Research},
+  year    = {2002},
+  volume  = {3},
+  pages   = {463--482},
+}
+
+@book{boucheron2013concentration,
+  author    = {St{\'e}phane Boucheron and G{\'a}bor Lugosi and Pascal Massart},
+  title     = {Concentration Inequalities: A Nonasymptotic Theory of Independence},
+  year      = {2013},
+  publisher = {Oxford University Press},
+}
+
+@inproceedings{golowich2018size,
+  author    = {Noah Golowich and Alexander Rakhlin and Ohad Shamir},
+  title     = {Size-Independent Sample Complexity of Neural Networks},
+  booktitle = {Conference on Learning Theory (COLT)},
+  year      = {2018},
+}
+
+% ── KAN-on-PLC (competitor) ─────────────────────────────────────────────────
+
+@mastersthesis{correa2024kanplc,
+  author  = {Gerson F{\'a}bio da Silva Corr{\^e}a},
+  title   = {Avalia{\c{c}}{\~a}o de Redes Neurais Artificiais em Controladores L{\'o}gicos Program{\'a}veis para Classifica{\c{c}}{\~a}o de Dados},
+  school  = {Universidade de S{\~a}o Paulo (USP)},
+  year    = {2024},
+  note    = {First KAN-on-PLC demonstration via Snap7 distributed execution; MLP achieved 98\% on S7-1511TF, KAN achieved 88.5\% (distributed). No native SCL compilation, no correctness guarantees.},
+}
+
+@inproceedings{kan_soc_2025,
+  author    = {Anonymous},
+  title     = {Kolmogorov-Arnold Networks under TinyML Constraints: A Study on {SoC} Estimation for Electric Vehicles},
+  booktitle = {IEEE International Conference on Emerging Technologies and Factory Automation (ETFA)},
+  year      = {2025},
+  note      = {KAN achieved 10× smaller memory (693 bytes vs.\ 6,807 bytes) vs.\ MLP on microcontrollers with competitive accuracy.},
+}

@@ -1,0 +1,64 @@
+{
+  "experiment": "E54",
+  "description": "ChebyKAN Z3 Verification \u2014 Proposition 2 Validation",
+  "config": {
+    "arch": [
+      28,
+      16,
+      4
+    ],
+    "degree": 5,
+    "lut_points": 15,
+    "x_range": [
+      -3.0,
+      3.0
+    ],
+    "seed": 42
+  },
+  "results": {
+    "total_activations": 512,
+    "verified_count": 496,
+    "verification_rate": 0.96875,
+    "per_layer": [
+      {
+        "idx": 0,
+        "total": 448,
+        "verified": 435,
+        "rate": 0.9709821428571429
+      },
+      {
+        "idx": 1,
+        "total": 64,
+        "verified": 61,
+        "rate": 0.953125
+      }
+    ],
+    "mean_m2_markov": 48.68473815917969,
+    "mean_epsilon": 0.12419575452804565,
+    "total_time_s": 5.155461549758911
+  },
+  "m2_analysis": {
+    "layers": [
+      {
+        "layer_idx": 0,
+        "mean_analytical": 45.62447738647461,
+        "mean_empirical": 8.466780680587679,
+        "max_analytical": 71.38531494140625,
+        "max_empirical": 16.910556116583013,
+        "conservatism_ratio": 5.388645236853939
+      },
+      {
+        "layer_idx": 1,
+        "mean_analytical": 70.10653686523438,
+        "mean_empirical": 12.931354610669755,
+        "max_analytical": 103.76469421386719,
+        "max_empirical": 23.908555753234932,
+        "conservatism_ratio": 5.421437968056867
+      }
+    ]
+  },
+  "svnn_condition1": true,
+  "svnn_condition2": true,
+  "frontier": "Interior",
+  "timestamp": "2026-07-08T14:57:01.298484"
+}

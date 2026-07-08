@@ -1,0 +1,302 @@
+% ===========================================================================
+% 神经网络的结构可验证性（中文版）
+% ===========================================================================
+\section{神经网络的结构可验证性}
+\label{sec:svnn}
+
+我们现在形式化编译器设计过程中浮现的核心观察：神经网络编译器能否提供设计时正确性保证，根本上取决于被编译的\textit{架构}。本节定义了保持正确性编译可实现的架构类，证明了KAN属于此类，并展示了标准MLP不在此类。
+
+\vspace{4pt}
+\begin{remark}[可编译前沿]
+\label{rem:compilable_frontier}
+SVNN条件定义了\textbf{可编译前沿}——将部署行为可在设计时认证的神经架构与需要运行时测试的架构分隔的原则性边界。满足条件1--2的架构位于\textit{内部}（可认证侧）；违反任一条件的架构位于\textit{外部}（仅经验侧）。命题1确立了采用SiLU、Sigmoid或Tanh激活的标准MLP位于外部。这一前沿不是实现假象；它反映了哪些函数类允许闭式、编译器可计算的误差传播这一基本性质。
+\end{remark}
+
+\subsection{PLC部署网络的验证挑战}
+\label{sec:svnn-challenge}
+
+工业PLC管理安全关键设备。在此类控制器上部署神经网络需要超越经验测试集准确率的正确性保证。现有ML$\to$PLC工具（RTNNIgen~\cite{rtnnigen2024}、MLconverter~\cite{mlconverter2025}、ICSML~\cite{icsml2023}）不提供数学保证证明生成的PLC代码保留了训练模型的行为。
+
+我们识别三个递增强度的部署验证级别：
+\begin{enumerate}
+    \item \textbf{Level 1——运行时测试（最弱）：}在测试集上评估部署模型并报告准确率。不提供对未见输入的保证。
+    \item \textbf{Level 2——设计时误差界（SVNN）：}在\textit{编译时}且不执行于硬件，计算可证明的逐输出误差界$\varepsilon_i$。这是\neuroplc{}提供的保证（定理1）。
+    \item \textbf{Level 3——机械化形式验证（最强）：}机器检查的证明（Coq/Isabelle/Lean），证明编译器保留到IEEE~754比特级的语义。TorchLean~\cite{torchlean2025}已实现此级别但对完整编译器流水线不可行。
+\end{enumerate}
+
+Level~2——设计时误差界——是工业部署的合适级别。问题是：\textit{哪些架构允许这样的界，为什么？}
+
+\subsection{定义：结构可验证神经网络（SVNN）}
+\label{sec:svnn-definition}
+
+\begin{definition}[结构可验证神经网络]
+\label{def:svnn}
+神经网络架构$\mathcal{A}$关于编译器$C$是\textbf{结构可验证的}（SVNN），如果对任意实例$M \in \mathcal{A}$，编译器能在设计时且不执行$M$于目标硬件的情况下，计算出逐输出误差界$\varepsilon_i(M, X)$使得：
+\begin{equation}
+\sup_{x \in X} \|M(x)_i - C(M)(x)_i\|_\infty \leq \varepsilon_i(M, X)
+\quad \forall i \in \{1, \dots, d_{\text{out}}\}
+\label{eq:svnn_def}
+\end{equation}
+其中$X \subset \mathbb{R}^{d_{\text{in}}}$是验证输入域，$C(M)$表示编译器生成的代码在IEC~61131-3 REAL（$\equiv$ IEEE~754 binary32）上执行的结果。
+\end{definition}
+
+该定义捕捉了核心要求：编译器必须在模型运行于PLC\textit{之前}提供\textit{先验}保证。
+
+\subsection{SVNN的充分条件}
+\label{sec:svnn-conditions}
+
+\vspace{4pt}
+\noindent\textbf{定理2（SVNN充分条件）。}
+\label{thm:svnn_conditions}
+设$\mathcal{A}$为前馈神经网络架构。若$\mathcal{A}$满足下述条件1和2，则$\mathcal{A}$是结构可验证的——对任意有限深度的实例，编译器能从模型参数单独计算出有限逐输出误差界。若$\mathcal{A}$额外满足收缩性精炼（条件3），该界允许闭式、\textit{与深度无关的}几何级数形式$O(M_{\max} \cdot h^2 \cdot d_{\max} / (1-\gamma))$。
+
+标准MLP层$\mathbf{h} = \sigma(W\mathbf{x} + \mathbf{b})$将仿射变换和逐点激活耦合，违反条件1。KAN层在IR级自然分解为独立的MatMul、BsplineLUT、StandardAct和Add节点。
+
+\begin{enumerate}
+    \item \textbf{操作类型封闭性（条件1）。}架构可分解为有向无环图，其中每个节点要么是线性变换，要么是逐元素单变量函数。该分解由编译器的IR提供（\S\ref{sec:ir}）。
+
+    \item \textbf{单变量曲率界（条件2）。}每个逐元素单变量函数$f$在验证输入域上是$C^2$连续的，且其二阶导数满足$\sup_x |f''(x)| \leq M_f < \infty$。$M_f$必须仅从函数参数可计算。这使得de~Boor LUT误差界$\varepsilon_f = M_f h^2/8$成立。
+
+    \item \textbf{收缩组合（条件3，精炼）。}每逐元素层的Lipschitz常数$L_f^{(\ell)} = \sup_x |f'(x)|$与后续线性层的行和范数之积满足$L_f^{(\ell)} \cdot \|W^{(\ell+1)}\|_{1,\infty} \leq \gamma < 1$。条件3将逐深度证书升级为与深度无关的证书；对SVNN成员资格\textit{不是}必需的。
+\end{enumerate}
+
+\vspace{4pt}
+\noindent\textit{证明。}证明分四步进行。
+
+\textbf{步骤1（线性层精确性）。}设$y = Wx + b$为线性变换，输入携带误差$\delta_x$。编译输出为$\tilde{y} = W\tilde{x} + b = Wx + b + W\delta_x$。因此$\|\tilde{y} - y\|_\infty = \|W\delta_x\|_\infty \leq \|W\|_{1,\infty} \cdot \|\delta_x\|_\infty$。线性层\textit{不引入新误差源}。
+
+\textbf{步骤2（逐元素有界性）。}由B样条近似误差的de~Boor--Cox递推~\cite{deBoor1978}，对任意$C^2$函数：
+\begin{equation}
+\|f - \tilde{f}\|_\infty \leq \frac{M_f \cdot h^2}{8}
+\label{eq:de_boor_general}
+\end{equation}
+若输入携带误差$\delta_x$，由中值定理：
+\begin{equation}
+|f(x + \delta_x) - \tilde{f}(x + \delta_x)| \leq L_f \cdot |\delta_x| + \varepsilon_f
+\label{eq:element_error}
+\end{equation}
+
+\textbf{步骤3（有限深度组合）。}通过对层指标的结构归纳：
+\begin{equation}
+\Delta^{(\ell)} \leq L_f^{(\ell)} \cdot \|W^{(\ell)}\|_{1,\infty} \cdot \Delta^{(\ell-1)} + \varepsilon_f^{(\ell)} \cdot d_{\ell-1}
+\label{eq:layer_recurrence}
+\end{equation}
+展开跨$L$层的递推：
+\begin{equation}
+\Delta^{(L)} \leq \sum_{\ell=1}^{L} \varepsilon_f^{(\ell)} \cdot d_{\ell-1} \cdot \prod_{j=\ell+1}^{L} \bigl(L_f^{(j)} \cdot \|W^{(j)}\|_{1,\infty}\bigr)
+\label{eq:total_bound}
+\end{equation}
+
+条件1的关键作用：它保证归纳遇到的每个节点都是已知类型，具有闭式误差规则。条件1和2下，每一项有限且可计算，产生可计算的设计时界$\Delta^{(L)} < \infty$。
+
+\textbf{步骤3b（深度均匀精炼——条件3）。}当$\gamma < 1$时：
+\begin{equation}
+\Delta^{(L)} \leq \frac{\max_\ell(\varepsilon_f^{(\ell)} \cdot d_{\ell-1})}{1 - \gamma} = O\!\left(\frac{M_{\max} \cdot h^2 \cdot d_{\max}}{1-\gamma}\right)
+\label{eq:convergent_bound}
+\end{equation}
+
+\textbf{步骤4（紧致性）。}在实践中三个因素显著紧致化界：(1)分段感知$M_2$（$6.0\times$），(2)符号结构仿射算术（$3.1\times$），(3)自适应LUT（$71.6\%$）。组合安全因子约为$11.9\times$。
+
+\vspace{4pt}
+\begin{remark}[SVNN条件的近似必要性]
+\label{rem:near_necessity}
+定理5（\S\ref{sec:svnn-necessity}）提供了形式答案：违反条件1使紧致界计算成为NP难问题。Richardson定理~\cite{richardson1969decidability}施加基本障碍：涉及$e^x$的表达式相等性不可判定。KAN的B样条激活是分段多项式，完全避开此障碍。
+\end{remark}
+
+\noindent\textbf{注记2（与定理1的关系）。}定理1（\S\ref{sec:method}）是SVNN框架对特定架构和编译器的\textit{具体实例化}。定理2提供了\textit{一般原则}：任何满足条件1--2的有限深度架构允许保持正确性的编译器。
+
+\noindent\textbf{注记3（算术界 vs.\ MILP验证）。}SVNN算术界（$O(L \cdot M_{\max} \cdot h^2 \cdot d_{\max})$，定理2）与Schwartz等~\cite{schwartz2026optimal}的PWA抽象+MILP方法在验证代价-精度谱上互补。算术界（Level~2）在编译时可计算，MILP（Level~3）提供精确认证。
+
+\subsection{KAN满足SVNN条件}
+\label{sec:svnn-kan}
+
+\begin{proposition}[KAN是结构可验证的]
+\label{prop:kan-svnn}
+每个KAN架构满足定理2的SVNN充分条件，因此是SVNN架构。训练后的KAN学生额外满足收缩性精炼（条件3）。
+\end{proposition}
+
+\vspace{4pt}
+\noindent\textit{证明。}
+
+\textit{条件1（操作类型封闭性）。}KAN层自然分解为：
+\begin{equation}
+\text{KANLayer}(x)_j = \underbrace{b(x_j)}_{\text{Base path}} + \sum_{i=1}^{d_{\text{in}}} \underbrace{\phi_{j,i}(x_i)}_{\text{Spline path}}
+\label{eq:kan_decomposition}
+\end{equation}
+每KAN层仅由逐元素单变量函数和线性组合构成——满足条件1。
+
+\textit{条件2（单变量有界性）。}三次B样条是$C^2$连续分段多项式。界$M_2 = \max_x |\phi''(x)|$可从B样条控制点和节点向量直接计算：
+\begin{equation}
+\phi''(x) = \sum_{c=0}^{G+k-2} w_c \cdot B''_{c,3}(x)
+\label{eq:bspline_second_deriv}
+\end{equation}
+解析上界仅依赖B样条次数和节点间距：
+\begin{equation}
+\max_x |B'_{c,4}(x)| \leq \frac{3}{h}, \quad \max_x |B''_{c,4}(x)| \leq \frac{6}{h^2}
+\label{eq:bspline_basis_bounds}
+\end{equation}
+\begin{equation}
+L_B^{\text{analytic}} \leq \frac{3}{h} \cdot \max_c |\Delta w_c|, \quad M_2^{\text{analytic}} \leq \frac{6}{h^2} \cdot \max_c |\Delta^2 w_c|
+\label{eq:bspline_diff_bounds}
+\end{equation}
+
+对KAN学生$[28,16,4]$，$G=8$，$h=0.75$：解析界$M_2^{\text{analytic}} \leq 12.8$；经验值$M_2 = 0.177$（E11），紧致$98.6\%$。解析界作为\textbf{架构保证}，经验测量提供\textbf{模型特定精炼}。
+
+\textit{条件3（收缩组合）。}对训练后的KAN：$L_B = 0.65$，$\|W^{(1)}\|_{1,\infty} \leq 0.28$，乘积$0.182 \ll 1$。Tankman~\cite{tankman2026lipschitz}证明对标准KAN操作集$P(\text{KAN}) \leq 1$是结构性质。$\square$
+
+\subsection{标准MLP不接受紧致SVNN误差界}
+\label{sec:svnn-mlp}
+
+\vspace{4pt}
+\noindent\textbf{命题1（标准MLP不接受SVNN紧致界结构）。}
+使用ReLU、SiLU、Sigmoid或Tanh激活的标准MLP不接受SVNN条件2的编译器可计算、架构无关的紧致LUT误差界。
+
+\vspace{4pt}
+\noindent\textit{证明。}
+\textit{(a) SiLU/GELU：}SiLU包含超越函数$e^{-x}$，Z3的NRA理论不可判定。经验上MLP $[28,16,4]$含SiLU实现0/16 Z3可验证组件（E41）。\textit{(b) ReLU：}ReLU在$x=0$处违反$C^2$连续性（$f''$为Dirac delta），de~Boor界不适用。\textit{(c) Sigmoid/Tanh：}满足条件2但违反条件1——标准MLP层将仿射变换和逐点激活耦合在单一操作中。
+
+MLP可达到的最优误差界为：
+\begin{equation}
+\Delta_{\text{MLP}}^{(L)} \leq O\bigl(L \cdot L_{\text{act}}^L \cdot \|\mathbf{W}\|_{\text{prod}}\bigr)
+\label{eq:mlp_bound}
+\end{equation}
+超过3--4层即空洞。对比之下，KAN界$O(L \cdot M_{\max} \cdot h^2 \cdot d_{\max})$与权重幅度无关且随LUT分辨率以三次方减小。$\square$
+
+\vspace{4pt}
+\noindent\textbf{架构分类学。}表~\ref{tab:svnn_taxonomy}将主要神经架构族映射到SVNN条件，揭示了鲜明分界：分解为纯线性$+$逐元素操作且使用$C^2$参数可计算激活的架构位于\textit{内部}。无论激活选择如何，\textit{无一}MLP变体跨越可编译前沿。
+
+\begin{table}[t]
+\centering
+\caption{SVNN可编译前沿下的架构分类学。内部架构允许编译器计算设计时正确性证书；外部架构需要运行时测试。}
+\label{tab:svnn_taxonomy}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}p{1.7cm}p{0.95cm}p{0.95cm}p{1.1cm}p{1.15cm}p{1.25cm}@{}}
+\toprule
+\textbf{架构} & \textbf{条件1} & \textbf{条件2} & \textbf{收缩性} & \textbf{前沿} & \textbf{Z3验证} \\
+\midrule
+KAN (B-spline) & \cmark & \cmark & \cmark$^{*}$ & 内部$^{\dag}$ & 512/512 \\
+KAN (Chebyshev) & \cmark & \cmark & \cmark & 内部 & 完整$^{\ddag}$ \\
+KAN (Wavelet) & \cmark & \cmark & $\sim$ & 内部 & 完整$^{\ddag}$ \\
+\midrule
+MLP + ReLU & \xmark & \xmark$^{\S}$ & N/A & 外部 & 0/16 \\
+MLP + SiLU/GELU & \xmark & \xmark$^{\P}$ & N/A & 外部 & 0/16$^{\sharp}$ \\
+MLP + Sigmoid & \xmark & \cmark & N/A & 外部 & -- \\
+MLP + Tanh & \xmark & \cmark & N/A & 外部 & -- \\
+\midrule
+Transformer & \xmark & \xmark & N/A & 外部 & N/A \\
+CNN (Conv2d) & \xmark & \xmark & N/A & 外部 & N/A \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+\parbox{\linewidth}{\scriptsize
+\cmark{} = 满足；\xmark{} = 违反；$\sim$ = 取决于小波基选择。\\
+$^{*}$收缩性在训练KAN学生$[28,16,4]$上验证（VRM-KD蒸馏）；Tankman~\cite{tankman2026lipschitz}证明$P(\text{KAN})\leq 1$为结构性质。\\
+$^{\dag}$B样条KAN是本分类学中唯一在物理硬件上（TIA Portal V21, S7-1200）同时满足并经验验证所有三个条件的架构。\\
+$^{\ddag}$ChebyKAN：命题~\ref{prop:chebykan-svnn}形式验证；Z3可验证率496/512, 96.9\% (E54)。\\
+$^{\S}$ReLU为分段线性($C^0$)；$f''$在$x=0$处为Dirac delta，de~Boor界不适用。\\
+$^{\P}$SiLU包含$e^{-x}$，在Z3 NRA理论中超越不可判定。\\
+$^{\sharp}$经验确认：MLP $[28,16,4]$含SiLU，0/16组件Z3可验证(E41)。}
+\end{table}
+
+\subsection{ChebyKAN满足SVNN条件}
+\label{sec:svnn-chebykan}
+
+\begin{proposition}[ChebyKAN是结构可验证的]
+\label{prop:chebykan-svnn}
+使用切比雪夫多项式基函数的KAN架构（ChebyKAN）~\cite{bozorgasl2024chebykan}，定义为
+\begin{equation}
+\phi_{j,i}(x) = \sum_{n=0}^{N} c_{j,i,n} \cdot T_n(\tanh(x))
+\label{eq:chebykan_def}
+\end{equation}
+满足定理2的SVNN条件1--2。ChebyKAN通过多项式NRA享有Z3可验证性，无需B样条基所需的分段枚举。
+\end{proposition}
+
+\vspace{4pt}
+\noindent\textit{证明。}
+
+\textit{条件1：}ChebyKAN层分解为三个纯操作：(1)~$\tanh(x_i)$（逐元素），(2)~$T_n(u_i)$（逐元素，Chebyshev多项式），(3)~线性组合$\sum c_{j,i,n} \cdot v_{i,n}$。无非线性-线性耦合。
+
+\textit{条件2：}通过Markov不等式~\cite{markov1916limit}，对$[-1,1]$上任意$N$次多项式$p$：
+\begin{equation}
+\max_{y\in[-1,1]} |p''(y)| \leq \frac{N^2(N^2-1)}{3} \cdot \max|p(y)|
+\label{eq:markov_second}
+\end{equation}
+对$g(y) = \sum_n c_n T_n(y)$，有$\max|g(y)| \leq \sum_n |c_n|$。因此：
+\begin{equation}
+M_2^{\text{Cheby}}(g) \leq \frac{N^2(N^2-1)}{3} \cdot \sum_{n=0}^{N} |c_n|
+\label{eq:cheby_m2_bound}
+\end{equation}
+通过链式法则组合$\tanh$和$g$，最终$a~priori$曲率界为：
+\begin{equation}
+M_2(f) \leq \frac{N^2(N^2+5)}{3} \cdot \sum_{n=0}^{N} |c_n|
+\label{eq:cheby_final_m2}
+\end{equation}
+
+\textit{Z3可验证性：}Chebyshev多项式可直接表达为$y$的显式多项式（如$T_2(y)=2y^2-1$，$T_3(y)=4y^3-3y$），属于Z3的NRA理论。经验验证：ChebyKAN$[28,16,4]$，$N=5$，实现496/512 Z3可验证组件（96.9\%，E54）。Markov基解析$M_2$界比经验$M_2$松$5.4\times$（均值8.5 vs.\ 45.6）——解释3.1\%不可验证组件。
+
+\textbf{与MLP+Tanh的对比。}表~\ref{tab:svnn_taxonomy}显示MLP+Tanh位于\textit{外部}（违反条件1）尽管使用了与ChebyKAN相同的$\tanh$激活。这隔离了SVNN条件的结构性：决定SVNN成员资格的不是激活函数本身，而是架构如何\textit{分解}该激活相对于线性变换。
+
+\vspace{2pt}
+\noindent\textbf{与B样条KAN的比较。}两种基代表紧致性-复杂度谱上的互补点：B样条通过分段感知精炼实现更紧致的界（$6.0\times$），但需$O(G)$分段枚举；Chebyshev通过Markov不等式实现单一全局界，$O(1)$计算，无需分段枚举。两种方法都从参数单独产生\textit{可计算}的界，满足条件2。$\square$
+
+\vspace{4pt}
+\noindent\textbf{注记4（Wavelet-KAN和Fourier-KAN）。}命题~\ref{prop:chebykan-svnn}的证明技术自然扩展到其他正交多项式和紧支撑分段多项式小波基。表~\ref{tab:svnn_taxonomy}中Wavelet-KAN标记为``$\sim$''（取决于小波选择），反映SVNN条件是\textit{基特定的}。
+
+\subsection{条件1的计算必要性}
+\label{sec:svnn-necessity}
+
+\vspace{4pt}
+\noindent\textbf{定理5（条件1的计算必要性）。}
+\label{thm:necessity}
+设$\mathcal{A}$为违反条件1的前馈架构——即某层将线性变换和非线性激活耦合在单一融合操作$\mathbf{h}=\sigma(W\mathbf{x}+\mathbf{b})$中。则计算紧致逐输出编译器误差界$\varepsilon^{*}(M, X) = \sup_{x \in X} \|M(x) - C(M)(x)\|_\infty$在神经元数上\textbf{NP难}。相比之下，任何满足条件1的架构允许在$O(L \cdot d_{\max}^2)$时间内通过定理2的结构归纳计算$\varepsilon^{*}$的界。
+
+\vspace{4pt}
+\noindent\textit{证明。}步骤1（归约）：对违反条件1的架构，紧致界等于$\sup_x \|\sigma(Wx+b) - \tilde{\sigma}(Wx+b)\|_\infty$——关于输入\textit{和}线性预激活的联合优化，等价于神经元可达性问题。步骤2（NP难度）：Katz等~\cite{katz2017reluplex}证明神经网络验证的决策版本对ReLU网络是NP完全的。由于紧致误差界计算需要在每层求解神经元可达性，$\varepsilon^{*}$不可在多项式时间内计算（除非P=NP）。对比条件1满足架构：结构归纳产生$O(L \cdot d_{\max}^2)$时间的显式上界。$\square$
+
+\vspace{4pt}
+\begin{remark}[分离结果解释]
+\label{rem:separation}
+定理5建立了SVNN与非SVNN架构之间的\textbf{计算复杂度分离}：前者允许$O(\text{poly}(L,d))$编译器计算误差界，后者对紧致界需NP难计算。为非SVNN架构提供误差界的工具（CROWN、$\alpha$-$\beta$-CROWN~\cite{alphabetacrown2021}、Marabou~\cite{katz2019marabou}）仅通过接受过近似或指数最差代价实现。
+\end{remark}
+
+\subsection{SVNN兼容架构的泛化界}
+\label{sec:svnn-generalization}
+
+\vspace{4pt}
+\noindent\textbf{定理6（SVNN的泛化界）。}
+\label{thm:generalization}
+设$M$为满足SVNN条件1--3的KAN架构，收缩常数$\gamma<1$，深度$L$，输入域$X\subset[-B,B]^{d_{\text{in}}}$。设$\hat{M}$为$n$个i.i.d.训练样本上$\rho$-Lipschitz损失下的经验风险最小化器。则以至少$1-\delta$的概率：
+\begin{equation}
+L(\hat{M}) - \hat{L}(\hat{M}) \leq \frac{4\rho\,\gamma^L B}{\sqrt{n}} + 3\sqrt{\frac{\log(2/\delta)}{2n}}
+\label{eq:svnn_gen_bound}
+\end{equation}
+关键项$\gamma^L B / \sqrt{n}$随网络深度$L$\textbf{指数衰减}——更深的SVNN网络泛化严格更优。
+
+\vspace{4pt}
+\noindent\textit{证明。}使用Rademacher复杂度框架~\cite{bartlett2002rademacher}三步进行。步骤1：由条件3，全局Lipschitz常数为$L_{\text{global}}(M) \leq \prod_\ell (L_f^{(\ell)} \cdot \|W^{(\ell+1)}\|_{1,\infty}) \leq \gamma^L$。步骤2：由Lipschitz收缩不等式~\cite{bartlett2002rademacher}，$\mathfrak{R}_n(\mathcal{F}_M) \leq \gamma^L \cdot B/\sqrt{n}$。步骤3：应用标准泛化界~\cite{boucheron2013concentration}得到式~\ref{eq:svnn_gen_bound}。$\square$
+
+\vspace{4pt}
+\noindent\textbf{推论1（深度改善泛化）。}在条件3下，添加一层\textit{严格减小}泛化差距。这与标准MLP理论预测相反（添加层通常\textit{增加}差距）。
+
+\textbf{对训练KAN学生的定量实例化。}对$[28,16,4]$，$\gamma=0.182$，$L(\hat{M})-\hat{L}(\hat{M}) \leq 0.0136$。与标准MLP对比：$L_{\text{global}}^{\text{MLP}} \approx 3.8$，Rademacher复杂度项约0.217——比KAN的0.0019大一个数量级（$114\times$差异）。
+
+\vspace{4pt}
+\begin{remark}[SVNN六大定理]
+\label{rem:six_theorems}
+六个定理和两个命题构成SVNN框架的完整理论架构：
+\begin{itemize}
+    \item \textbf{定理1}（\S\ref{sec:method}）：\textit{实例化}——NeuroPLC以可证明误差界编译特定KAN。
+    \item \textbf{定理2}（\S\ref{sec:svnn-conditions}）：\textit{充分性}——条件1--2保证任意SVNN架构的设计时正确性。
+    \item \textbf{定理3}（\S\ref{sec:method}）：\textit{DA极小极大最优性}。
+    \item \textbf{定理4}（\S\ref{sec:method}）：\textit{$L$层深度均匀界}。
+    \item \textbf{定理5}（\S\ref{sec:svnn-necessity}）：\textit{计算必要性}——违反条件1为NP难。
+    \item \textbf{定理6}（\S\ref{sec:svnn-generalization}）：\textit{学习理论推论}——条件3产生深度改善泛化界。
+\end{itemize}
+\textbf{命题：}命题1（标准MLP\textit{不}满足）、命题2（ChebyKAN\textit{满足}）。
+\end{remark}
+
+\subsection{对编译器设计的启示}
+\label{sec:svnn-implications}
+
+SVNN框架对面向安全关键嵌入式平台的神经网络编译器设计有五点启示：（1）选择可验证架构而非试图验证任意架构输出；（2）设计IR以反映架构分解；（3）利用架构属性获取更紧致界；（4）将正确性保证与实现分离；（5）桥接设计时和机械化验证。这些启示将\neuroplc{}定位为更广泛编译器设计范式——\textit{结构可验证编译}——的首个实例。

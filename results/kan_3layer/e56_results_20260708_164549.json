@@ -1,0 +1,30 @@
+{
+  "experiment": "E56",
+  "description": "Deep KAN Validation (L=3) \u2014 Theorem 2 depth-scaling evidence",
+  "arch_2l": [
+    28,
+    16,
+    4
+  ],
+  "arch_3l": [
+    28,
+    16,
+    8,
+    4
+  ],
+  "acc_2l": 0.9730222384250821,
+  "acc_3l": 0.995989792198323,
+  "z3_3l_verified": 608,
+  "z3_3l_total": 608,
+  "z3_3l_rate": 1.0,
+  "da_2l": 0.06432219594717026,
+  "da_3l": 0.9374809557342529,
+  "ia_2l": 0.13200508058071136,
+  "ia_3l": 1.0313502465550615,
+  "tightening_3l": 1.1001292775566713,
+  "condition3": true,
+  "gamma_0": 0.4035034477710724,
+  "gamma_1": 0.31842654943466187,
+  "depth_ratio_2l_vs_3l": 14.57476601862651,
+  "timestamp": "2026-07-08T16:45:49.441687"
+}

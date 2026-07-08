@@ -1,0 +1,21 @@
+{
+  "graph_name": "kan",
+  "target_plc_kb": 75,
+  "memory": {
+    "weights_kb": 5.7,
+    "lut_kb": 36.0,
+    "code_kb": 4.9,
+    "variables_kb": 0.8,
+    "array_blocks": 10,
+    "total_kb": 47.3
+  },
+  "flops": {
+    "matmul": 2784,
+    "bspline_lut": 5472,
+    "activation": 208,
+    "softmax": 12,
+    "total_per_inference": 8476
+  },
+  "budget_utilization_pct": 63.1,
+  "fits_budget": true
+}

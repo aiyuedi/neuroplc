@@ -1,8 +1,8 @@
 # NeuroPLC: PyTorch→IEC 61131-3 SCL Compiler for Siemens PLCs
 
-> **An IR-Based Compiler from PyTorch to IEC 61131-3 SCL for Siemens PLCs with Bearing Fault Diagnosis**
+> **An IR-Based Compiler from PyTorch to IEC 61131-3 SCL for Siemens PLCs with Structural Verifiability Proofs**
 
-Started: 2026-07-03 | Status: **Final — 35 pages, 0e/0w, polished, submission-ready**
+Started: 2026-07-03 | Status: **Final — 47 pages, 0e/0w, submission-ready**
 
 Author: 刘甫悦 (板板) + Claude
 
@@ -12,22 +12,26 @@ Author: 刘甫悦 (板板) + Claude
 
 | Dimension | State |
 |-----------|-------|
-| Paper | ~4,438 lines, 35 pages, **0 errors, 0 warnings** |
-| Experiments | E1–E53 + 7 validation experiments (V1–V7) |
-| Algorithms | DA + Segment-Aware Bounds + Adaptive LUT (3 contributions) |
-| TIA Portal compile | ✅ MCP-verified 4 targets × 0e 0w, DB+FB 90.4% (45.2/50 KB) |
+| Paper | ~4,700+ lines, **47 pages**, 0 citations undefined |
+| Theory | **6 Theorems + 2 Propositions + 2 Lemmas** (SVNN: sufficiency→necessity→generalization) |
+| Experiments | E1–E57 + V1–V7 = **64 experiments** |
+| Architectures | B-spline KAN (2L + **3L**) + **ChebyKAN** (dual SVNN-compliant) |
+| Datasets | CWRU (99.93%) + **XJTU-SY** (91.7% FT, 512/512 Z3) + MNIST (98.6%) |
+| TIA Portal compile | ✅ MCP-verified: **4 targets × 0e 0w** + XJTU-SY SCL 0e 0w + **3L KAN 0e 0w** |
 | PLCSIM Advanced | ✅ Python ctypes bridge: RegisterInstance+PowerOn (SREC_OK), <100ms |
-| SCL generation | KAN + MLP, S7-1200 + S7-1500, 12 output variants + feature extraction FB |
-| Model | KAN [28,16,4], 512 B-spline fn, VRM-KD distilled, 99.93% CWRU |
-| Verification | Z3 3-tier: 512/512 functions, certificate VALID, ~200-line TCB |
+| SCL generation | KAN + MLP, S7-1200 + S7-1500, DB+FB variants + **3L KAN (2,612 lines)** |
+| Z3 Verification | B-spline: **512/512 (2L) + 608/608 (3L)** | ChebyKAN: **496/512 (96.9%)** | MLP: 0/48 |
+| CROWN comparison | NeuroPLC DA **85× tighter** than CROWN-IBP (E57) |
 | Safety | 5,000 adversarial inputs → 100/100 worst-case preserved |
 | DA scaling | 105 architectures, Pearson r=0.9872, √d law confirmed |
+| Generalization bound | $\Delta L \leq O(\gamma^L/\sqrt{n})$ (Theorem 6), $\gamma=0.182$ measured |
+| Depth scaling | 2L→3L: 99.93%→99.60% acc, DA grows 15.3× (linear, not exponential) |
 
 ---
 
 ## One-Paragraph Summary
 
-NeuroPLC is the **first compiler** that translates PyTorch neural networks (KAN/MLP) to IEC 61131-3 Structured Control Language (SCL) for Siemens S7 PLCs with **machine-checkable end-to-end correctness guarantees**. It introduces an Intermediate Representation (IR) graph that decouples model semantics from PLC dialect, enabling 6 substantive optimization passes (plus 2 structural) before code generation. The SVNN framework formalizes the architectural conditions under which a compiler CAN provide such guarantees (Theorem 2): KAN satisfies them; standard MLPs provably do not (Proposition 1, validated by 512/512 vs 0/48 Z3-verifiable components). Three novel algorithms guarantee correctness: (1) **Doubleton Arithmetic**—3.1× tighter than interval arithmetic, with √d scaling law confirmed across 105 random architectures (Pearson r=0.987); (2) **Segment-Aware de Boor Bounds**—6.0× per-segment tightening; (3) **Adaptive Mixed-Precision LUT Allocation**—71.6% worst-ε reduction. The compiler is validated on bearing fault diagnosis: KAN [28,16,4] (6,148 params) distilled via VRM-KD (7.9× compression from 48K-param CNN teacher), deploys on S7-1200 CPU 1211C at 45.2 KB work memory (90.4% of 50 KB budget, TIA V21 MCP-measured), with 0 errors, 0 warnings.
+NeuroPLC is the **first compiler** that translates PyTorch neural networks (KAN/MLP) to IEC 61131-3 SCL for Siemens S7 PLCs with **machine-checkable end-to-end correctness guarantees**. The **SVNN framework** (6 theorems + 2 propositions) provides a complete theory: sufficiency (Theorem 2 — which architectures admit design-time certification), computational necessity (Theorem 5 — violating the decomposition condition is NP-hard), and a learning-theoretic consequence (Theorem 6 — contractive SVNN architectures enjoy depth-improving generalization $\Delta L \leq O(\gamma^L/\sqrt{n})$). B-spline KANs satisfy all conditions (512/512 Z3-verifiable); **ChebyKAN**—a new SVNN-compliant variant using Chebyshev polynomials—is proven to also satisfy Conditions 1–2 (Proposition 2, 496/512 Z3-verifiable via polynomial NRA). Standard MLPs provably do not admit the SVNN guarantee (Proposition 1, 0/48 Z3-verifiable). Three algorithms enforce correctness: (1) **Doubleton Arithmetic**—3.1× tighter than IA, √d scaling confirmed (Pearson r=0.987); (2) **Segment-Aware Bounds**—6.0× per-segment tightening; (3) **Adaptive LUT**—71.6% worst-ε reduction. Validated on CWRU (99.93%), XJTU-SY run-to-failure (91.7% fine-tuned, 512/512 Z3 preserved post-FT), and MNIST (98.6%). All SCL compiles to **0 errors, 0 warnings** in TIA Portal V21.
 
 ---
 
@@ -116,7 +120,7 @@ Affine arithmetic preserving weight-matrix sign structure. Random-walk model exp
 D:/neuroplc-paper/
 ├── README.md                          ← you are here
 ├── paper/
-│   ├── main.tex                       (~4,005 lines, 35 pages)
+│   ├── main.tex                       (~4,700 lines, 47 pages)
 │   ├── section_svnn.tex                (SVNN framework)
 │   ├── references.bib
 │   ├── figures/                        (9 PDF figures)
@@ -256,6 +260,6 @@ pdflatex main && bibtex main && pdflatex main && pdflatex main
 
 ---
 
-*Last updated: 2026-07-07 CST*
+*Last updated: 2026-07-08*
 *Author: 刘甫悦 (板板) + Claude*
-*Paper: 0 errors, 0 warnings, 35 pages, 4438 lines + 780 lines (section_svnn.tex), polished & submission-ready*
+*Paper: 0 errors, 0 warnings, 47 pages, submission-ready*

@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """
-NeuroPLC — Experiment Evaluation (E1–E14)
-============================================
-Run all 14 experiments to evaluate the complete pipeline.
+NeuroPLC — Experiment Evaluation (Legacy E1–E14)
+==================================================
+Historical entry point for early experiments.
+Current experiments are individual scripts in code/experiments/ (E18–E55).
+Use code/generate.py for SCL compilation.
 
 E1:  Teacher CNN vs Student KAN accuracy comparison
 E2:  KAN vs MLP vs SVM/RF — parameter-accuracy tradeoff

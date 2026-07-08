@@ -1,6 +1,7 @@
 # NeuroPLC — Reviewer FAQ & Defense Document
 
-> Prepared: 2026-07-07 | Pre-submission defense for IEEE TII / TIE / MSSP
+> Updated: 2026-07-08 | Pre-submission defense for IEEE TII / TIE / MSSP
+> 12 questions covering: physical PLC, ONNX, LLMs, CWRU generalization (XJTU-SY + ChebyKAN), SVNN novelty (6 theorems), factory scaling, hardware soundness, feature extraction, FPGA comparison, reproducibility, ChebyKAN rationale, generalization bound rigor
 
 ---
 
@@ -62,32 +63,50 @@ Experiment E44 provides structural evidence:
 ## Q4: "CWRU is an old dataset with known limitations. Does your method generalize?"
 
 **Our Answer:**
-We are transparent about CWRU's limitations (Section Limitations, with explicit references to Smith 2015 and Hendriks 2022). We provide three counterarguments:
+We are transparent about CWRU's limitations (Section Limitations, with explicit references to Smith 2015 and Hendriks 2022). We provide **four** counterarguments:
 
 1. **The compiler is data-agnostic**: The SVNN framework (Theorem 2) depends on KAN architecture, not data provenance. Experiment E42 (MNIST) proves identical verification guarantees (512/512 functions, certificate valid) on image classification — a completely different domain.
 
-2. **Cross-dataset with fine-tuning**: E12 shows CWRU→XJTU-SY improves from 37.3% (zero-shot) to 79.4% (fine-tuned), with SVNN conditions **preserved** after fine-tuning (DA bound: 0.080→0.073).
+2. **Cross-dataset with fine-tuning (E55)**: CWRU→XJTU-SY improves from 29.8% (zero-shot, on stratified validation split) to **91.7%** (100-epoch fine-tuning, +61.9 pp), with SVNN conditions **preserved** after fine-tuning (DA bound: 0.064→0.049, tightened; Z3: 512/512 preserved; SCL: 2,188 lines, 0e 0w). XJTU-SY (Wang et al. 2020, IEEE Trans. Reliability) uses naturally degraded bearings in run-to-failure tests — addressing the "artificial EDM faults" critique.
 
-3. **Method boundary analysis**: E19 quantitatively characterizes when our methods degrade (balanced weight signs, uniform B-spline curvature, depth > 5 layers) — transforming limitations into methodological contributions.
+3. **Cross-architecture verification (E54)**: ChebyKAN (Chebyshev polynomial basis, Proposition 2) achieves 100.0% CWRU accuracy with 496/512 Z3-verifiable components via polynomial NRA — confirming the compiler generality is data- AND architecture-independent.
+
+4. **Method boundary analysis**: E19 quantitatively characterizes when our methods degrade (balanced weight signs, uniform B-spline curvature, depth > 5 layers) — transforming limitations into methodological contributions.
 
 ---
 
 ## Q5: "Is the SVNN framework really novel? This looks like standard compiler verification."
 
 **Our Answer:**
-The novelty is in **reframing the question**. Prior work asks: "Can we verify an arbitrary neural network compiler?" (answer: no, due to floating-point undecidability). SVNN asks: "Which architectures are inherently verifiable, and what are the sufficient conditions?"
+The novelty is in **reframing the question** and providing a **complete theory** where prior work offers only empirical observations. Prior work asks: "Can we verify an arbitrary neural network compiler?" (answer: no, due to floating-point undecidability). SVNN asks: "Which architectures are inherently verifiable, and what are the precise conditions?"
 
-Three concrete distinctions from prior work:
+The framework now comprises **6 theorems + 2 propositions** forming a complete theoretical closure:
+
+| Theorem | Role | Key Result |
+|---------|------|------------|
+| **T1** | Instantiation | NeuroPLC compiles KAN with computable error bound |
+| **T2** | Sufficiency | Conditions 1--2 → SVNN (any architecture) |
+| **T3** | DA optimality | Minimax optimal LUT allocation under fixed budget |
+| **T4** | L-layer guarantee | Depth-uniform bound: O(L·M·h²·d) |
+| **T5** | Necessity | Violating Cond.~1 → NP-hard (cannot relax) |
+| **T6** | Generalization | Cond.~3 → ΔL ≤ O(γ^L/√n), deeper = better |
+| **P1** | Negative | MLPs do NOT satisfy SVNN (0/48 Z3) |
+| **P2** | Positive | ChebyKAN DOES satisfy SVNN (496/512 Z3) |
+
+**Concrete distinctions from prior work:**
 
 | Aspect | Prior Compiler Verification | SVNN (Our Work) |
 |--------|---------------------------|-----------------|
 | Verification target | The compiler implementation | The architecture being compiled |
+| Theoretical completeness | Empirical only | 6 theorems (sufficiency→necessity→generalization) |
 | Error bound type | Empirical (test set) | A priori (design-time, Theorem 2) |
 | Architecture scope | Any (or specific to one) | Class characterized by 3 conditions |
 | MLP support | Yes (empirical only) | No — Proposition 1 proves MLPs CANNOT admit tight bounds |
-| KAN support | No prior work | Yes — Proposition proves KAN satisfies all 3 conditions |
+| KAN support | No prior work | Yes — B-spline KAN + ChebyKAN (2 architectures) |
+| Necessity proof | None | Yes — Theorem 5 (NP-hard via MLP verification) |
+| Generalization theory | None | Yes — Theorem 6 (Rademacher, γ^L exponential decay) |
 
-The SVNN framework is validated by an **empirical negative result** (MLPs fail Z3 verification: 0/16 vs. KAN's 512/512, E41) that would be inexplicable under the prior "verify anything" paradigm.
+The SVNN framework is validated by an **empirical negative result** (MLPs fail Z3 verification: 0/48 vs. KAN's 512/512, E41) that would be inexplicable under the prior "verify anything" paradigm.
 
 ---
 
@@ -156,13 +175,40 @@ NeuroPLC's LUT compilation paradigm is architecturally similar to KANELE's FPGA 
 ## Q10: "Where is the code, and can I reproduce your results?"
 
 **Our Answer:**
-1. **GitHub repository**: Full source code, trained checkpoints, evaluation scripts, and SCL output at [URL to be disclosed upon acceptance].
+1. **GitHub repository**: Full source code, trained checkpoints (B-spline KAN, ChebyKAN, MLP), evaluation scripts, and SCL output at [URL to be disclosed upon acceptance].
 
-2. **Verification Certificate Bundle** (`results/verification_certificate/`): Self-contained package with Tier 1-3 proofs, 512/512 function verification results, composition certificate, and a ~200-line trusted checker. Independent verification requires only `torch`, `numpy`, and `z3-solver`.
+2. **Expanded verification**: E54 (ChebyKAN Z3: 496/512, 96.9%) and E55 (XJTU-SY fine-tuning: 91.7%, 512/512 Z3 preserved, SCL 2,188 lines 0e 0w) are fully scripted. All 64 experiments (E1--E57 + V1--V7) have corresponding scripts or are documented.
 
-3. **Reproducibility**: The 6,148-parameter KAN checkpoint is included. All experiments (E1-E47) are scripted. Compilation to SCL is deterministic (verified by `test_compiler_reproducibility`). TIA Portal V21 validation requires a Siemens license; PLCSIM Advanced validation is an accessible alternative.
+3. **Verification Certificate Bundle** (`results/verification_certificate/`): Self-contained package with Tier 1-3 proofs, 512/512 function verification results, composition certificate, and a ~200-line trusted checker. Independent verification requires only `torch`, `numpy`, and `z3-solver`.
 
-4. **Data**: CWRU and XJTU-SY are publicly available. Preprocessing scripts are included. Preprocessed features are provided for convenience.
+4. **Reproducibility**: Model checkpoints are included for B-spline KAN, ChebyKAN, MLP, and fine-tuned XJTU-SY variant. Compilation to SCL is deterministic (verified by `test_compiler_reproducibility`). TIA Portal V21 validation requires a Siemens license; PLCSIM Advanced validation is an accessible alternative.
+
+5. **Data**: CWRU, XJTU-SY, and MNIST are publicly available. Preprocessing scripts are included. Preprocessed features (CWRU 28-D + XJTU-SY 28-D) are provided for convenience.
+
+---
+
+## Q11: "Why include ChebyKAN? Isn't B-spline KAN sufficient?"
+
+**Our Answer:**
+ChebyKAN serves a specific theoretical purpose: it proves the SVNN framework is **not tied to B-spline's local support property**. Proposition~2 demonstrates that globally-supported Chebyshev polynomial basis functions also satisfy Conditions~1--2, with 496/512 Z3-verifiable components via polynomial NRA (no segment enumeration required). If the SVNN conditions were specific to B-splines, a reviewer could argue the framework is "one architecture's special case." ChebyKAN preemptively refutes this.
+
+The practical trade-off is instructive:
+- **B-spline KAN**: 512/512 Z3, segment-aware $M_2^{(k)}$ (6.0× tighter per segment), but requires $O(G)$ segment enumeration
+- **ChebyKAN**: 496/512 Z3, single global Markov bound per function, no segment enumeration, 100.0% CWRU accuracy
+
+Both achieve accuracy parity on the benchmark task. This architectural diversity matters for deployment engineers choosing between tighter bounds (B-spline) and simpler proofs (ChebyKAN).
+
+## Q12: "Is the generalization bound (Theorem~6) rigorous enough for a theory contribution?"
+
+**Our Answer:**
+Theorem~6 ({\S}\ref{sec:svnn-generalization}) is positioned as a **learning-theoretic consequence** of the SVNN framework, not a standalone theory paper claim. Its contribution is the **connection**: Condition~3 (contractivity, $\gamma<1$) ---already established as the depth-uniform refinement of the compilation guarantee---has a parallel consequence in PAC-learning theory via Rademacher complexity.
+
+The proof is standard (Bartlett & Mendelson 2002 + Boucheron et al. 2013), but the result is non-trivial because:
+1. It establishes that **deeper SVNN networks generalize strictly better** ($\gamma^L$ decay), the opposite of standard MLP theory
+2. It quantifies the trained KAN's generalization gap at $\leq 0.0136$, consistent with the measured 0.0% gap
+3. It provides a concrete contrast with MLP: $L_{\text{global}}^{\text{MLP}} \approx 3.8$ vs. $L_{\text{global}}^{\text{KAN}} = 0.182$, a **114× difference** in Rademacher complexity
+
+For industrial deployment, this bound closes a practical loop: it proves that the **same architectural property** (contractivity) that enables compilation correctness also yields learning-theoretic generalization---a two-for-one guarantee that strengthens the case for choosing SVNN architectures in safety-critical settings.
 
 ---
 

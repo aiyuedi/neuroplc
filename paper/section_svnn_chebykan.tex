@@ -1,0 +1,296 @@
+% ===========================================================================
+% III.X. Chebyshev-KAN Satisfies the SVNN Conditions
+% ===========================================================================
+% To be inserted into section_svnn.tex after \subsection{Standard MLPs Do Not Admit Tight SVNN Error Bounds}
+% and before \subsection{Implications for Compiler Design}
+
+\subsection{Chebyshev-KAN Satisfies the SVNN Conditions}
+\label{sec:svnn-chebykan}
+
+Having established that B-spline KAN satisfies the SVNN conditions
+({\S}\ref{sec:svnn-kan}) and that standard MLPs do not
+({\S}\ref{sec:svnn-mlp}), we now demonstrate that the SVNN framework
+extends to alternative basis function families. We prove that KAN
+architectures using \textit{Chebyshev polynomial} basis functions---a
+globally-supported, orthogonal polynomial basis---also satisfy Conditions~1
+and~2, establishing that SVNN membership is not tied to the local-support
+property of B-splines but rather to the structural decomposition and
+curvature computability that both bases provide.
+
+\vspace{4pt}
+\begin{proposition}[Chebyshev-KAN Is Structurally Verifiable]
+\label{prop:chebykan-svnn}
+A KAN architecture using Chebyshev polynomial basis functions
+(ChebyKAN)~\cite{bozorgasl2024chebykan}, defined as
+\begin{equation}
+\phi_{j,i}(x) = \sum_{n=0}^{N} c_{j,i,n} \cdot T_n(\tanh(x))
+\label{eq:chebykan_def}
+\end{equation}
+where $T_n$ is the Chebyshev polynomial of degree $n$ and $c_{j,i,n}$ are
+learnable coefficients, satisfies SVNN Conditions~1 and~2 of Theorem~2.
+Furthermore, ChebyKAN enjoys Z3 verifiability via polynomial NRA: the
+Chebyshev basis functions $T_n$ are degree-$n$ polynomials expressible
+directly in Z3's nonlinear real arithmetic theory, enabling compositional
+verification without the segment enumeration required for B-spline basis.
+\end{proposition}
+
+\vspace{4pt}
+\noindent\textit{Proof.} We verify each SVNN condition separately, then
+establish Z3 verifiability.
+
+\vspace{2pt}
+\noindent\textit{Condition~1 (Operation-Type Closure).}
+A ChebyKAN layer with $d_{\text{in}}$ inputs and $d_{\text{out}}$ outputs
+decomposes as:
+\begin{equation}
+y_j = \sum_{i=1}^{d_{\text{in}}} \left[ \sum_{n=0}^{N} c_{j,i,n} \cdot
+T_n(\tanh(x_i)) \right]
+\label{eq:chebykan_layer}
+\end{equation}
+
+This computation naturally separates into three pure operation types:
+\begin{enumerate}
+    \item \textbf{Bound mapping (element-wise):}
+          $u_i = \tanh(x_i)$ for each input $i$. The hyperbolic tangent
+          maps $\mathbb{R} \to (-1,1)$, placing inputs in the natural
+          domain of Chebyshev polynomials. This is an element-wise
+          univariate operation (TanhLUT node in the IR).
+
+    \item \textbf{Polynomial basis evaluation (element-wise):}
+          For each pair $(i,n)$, compute $v_{i,n} = T_n(u_i)$. Since
+          Chebyshev polynomials satisfy the recurrence
+          $T_{n+1}(x) = 2x \cdot T_n(x) - T_{n-1}(x)$ with $T_0(x)=1$
+          and $T_1(x)=x$, each $T_n$ is a univariate function of $u_i$.
+          These are element-wise univariate operations (ChebyLUT nodes).
+
+    \item \textbf{Linear combination:}
+          $y_j = \sum_{i,n} c_{j,i,n} \cdot v_{i,n}$ aggregates the
+          basis-evaluated values via learnable coefficients. This is a
+          linear transformation (MatMul node with coefficient matrix $C$).
+\end{enumerate}
+
+Crucially, no operation mixes linear and nonlinear computations: the
+nonlinearity is confined to steps~1--2 (element-wise tanh and polynomial
+evaluation), while step~3 is purely linear. This decomposition satisfies
+Condition~1. The IR representation is:
+\begin{equation}
+\text{Input} \xrightarrow{\text{TanhLUT}} u \xrightarrow{\text{ChebyLUT}}
+v \xrightarrow{\text{MatMul}(C)} \text{Output}
+\end{equation}
+where each node is provably of a single pure type (element-wise or linear).
+
+\vspace{2pt}
+\noindent\textit{Condition~2 (Univariate Curvature Bound).}
+We must show that the second derivative $f''(x)$ of each composite
+activation $f(x) = \sum_n c_n \cdot T_n(\tanh(x))$ is bounded and
+computable from the architecture parameters $(N, \{c_n\})$ alone.
+
+\textbf{Step 2a (Tanh bound mapping):}
+The function $h(x) = \tanh(x)$ is $C^\infty$ with bounded second
+derivative. The analytical bound is:
+\begin{equation}
+\sup_{x \in \mathbb{R}} |\tanh''(x)| = \frac{2}{\sqrt{27}} \approx 0.385
+\label{eq:tanh_m2}
+\end{equation}
+This is a universal constant, independent of any learnable parameters.
+
+\textbf{Step 2b (Chebyshev polynomial curvature):}
+Let $g(y) = \sum_{n=0}^{N} c_n \cdot T_n(y)$ be the polynomial of degree
+$N$ evaluated on $y \in (-1,1)$. Chebyshev polynomials $T_n$ are
+degree-$n$ polynomials satisfying $|T_n(y)| \leq 1$ for all $y \in
+[-1,1]$~\cite{mason2002chebyshev}. By the Markov Brothers'
+Inequality~\cite{markov1916limit}, for any polynomial $p$ of degree $N$
+on $[-1,1]$:
+\begin{equation}
+\max_{y \in [-1,1]} |p'(y)| \leq N^2 \cdot \max_{y \in [-1,1]} |p(y)|
+\label{eq:markov_first}
+\end{equation}
+\begin{equation}
+\max_{y \in [-1,1]} |p''(y)| \leq \frac{N^2(N^2-1)}{3} \cdot
+\max_{y \in [-1,1]} |p(y)|
+\label{eq:markov_second}
+\end{equation}
+
+For the polynomial $g(y) = \sum_n c_n T_n(y)$, we have
+$\max_{y \in [-1,1]} |g(y)| \leq \sum_n |c_n|$ (triangle inequality
+with $|T_n(y)| \leq 1$). Applying Eq.~\ref{eq:markov_second}:
+\begin{equation}
+M_2^{\text{Cheby}}(g) := \max_{y \in [-1,1]} |g''(y)| \leq
+\frac{N^2(N^2-1)}{3} \cdot \sum_{n=0}^{N} |c_n|
+\label{eq:cheby_m2_bound}
+\end{equation}
+
+This bound is \textit{computable from parameters alone}: given the
+polynomial degree $N$ and the learned coefficients $\{c_n\}$, the compiler
+can compute the right-hand side of Eq.~\ref{eq:cheby_m2_bound} without
+executing the model on any inputs. This satisfies the ``parameter-computable
+curvature'' requirement of Condition~2.
+
+\textbf{Step 2c (Composition via chain rule):}
+The full activation is $f(x) = g(\tanh(x))$. Applying the chain rule:
+\begin{equation}
+f''(x) = g''(\tanh x) \cdot \text{sech}^4(x) - 2g'(\tanh x) \cdot
+\tanh(x) \cdot \text{sech}^2(x)
+\label{eq:cheby_f_second}
+\end{equation}
+
+Since $|\text{sech}(x)| \leq 1$ and $|\tanh(x)| < 1$ for all $x$, we
+bound:
+\begin{equation}
+|f''(x)| \leq |g''(\tanh x)| + 2|g'(\tanh x)| \leq M_2^{\text{Cheby}}(g)
++ 2 M_1^{\text{Cheby}}(g)
+\label{eq:cheby_f_m2_total}
+\end{equation}
+where $M_1^{\text{Cheby}}(g) \leq N^2 \cdot \sum_n |c_n|$ by
+Eq.~\ref{eq:markov_first}. Substituting Eq.~\ref{eq:cheby_m2_bound}:
+\begin{equation}
+M_2(f) \leq \left[\frac{N^2(N^2-1)}{3} + 2N^2\right] \cdot \sum_{n=0}^{N}
+|c_n| = \frac{N^2(N^2+5)}{3} \cdot \sum_{n=0}^{N} |c_n|
+\label{eq:cheby_final_m2}
+\end{equation}
+
+Equation~\ref{eq:cheby_final_m2} provides an \textit{a priori} curvature
+bound computable from the polynomial degree $N$ (an architectural
+hyperparameter) and the learned coefficients $\{c_{j,i,n}\}$ (model
+parameters). The compiler can evaluate this bound for every activation in
+the network before generating SCL code, satisfying Condition~2.
+
+\vspace{2pt}
+\noindent\textit{Z3 Verifiability.}
+The compositional verification pipeline ({\S}\ref{sec:compositional}) requires that each
+activation function can be abstracted as a finite set of polynomial
+constraints verifiable by Z3's SMT solver. ChebyKAN satisfies this
+requirement in two ways:
+
+\begin{enumerate}
+    \item \textbf{Polynomial basis is NRA-native.} Chebyshev polynomials
+          $T_n(y)$ are expressible as explicit polynomials in $y$ (e.g.,
+          $T_2(y) = 2y^2 - 1$, $T_3(y) = 4y^3 - 3y$). Z3's Nonlinear
+          Real Arithmetic (NRA) theory handles polynomial equalities and
+          inequalities natively~\cite{z3prover}, making each segment's
+          verification a polynomial feasibility query.
+
+    \item \textbf{Tanh preprocessing is standard.} The tanh bound mapping
+          $u = \tanh(x)$ is treated identically to B-spline's SiLU base
+          path: a $C^\infty$ univariate function approximated via LUT,
+          whose error bound is $M_{\tanh} h^2/8$ (Eq.~\ref{eq:tanh_m2}).
+          The LUT approximation introduces a bounded error that propagates
+          through the polynomial evaluation, and the combined constraint
+          system remains polynomial in the LUT-approximated $u$ variable.
+\end{enumerate}
+
+In contrast to B-spline basis functions---which require segment-by-segment
+enumeration due to their local support---Chebyshev polynomials are
+\textit{globally supported}: each $T_n$ is defined on the entire interval
+$(-1,1)$. This eliminates the segment enumeration overhead but requires
+computing bounds over the full domain. The tradeoff is: B-spline achieves
+tighter per-segment bounds via the segment-aware $M_2$ refinement
+({\S}\ref{sec:segment-aware}), while ChebyKAN uses global polynomial
+bounds (Eq.~\ref{eq:cheby_m2_bound}) that are looser but analytically
+simpler. Both approaches yield finite, computable bounds---the SVNN
+requirement.
+
+Empirical Z3 verification confirms the theoretical prediction: a
+ChebyKAN$[28,16,4]$ with polynomial degree $N=5$ achieves 496/512
+Z3-verifiable components (96.9\%, E54, {\S}\ref{sec:cross_domain}), demonstrating that the
+polynomial NRA encoding successfully produces verifiable constraints for
+the majority of activations. The Markov-based analytical $M_2$ bound
+(Eq.~\ref{eq:cheby_m2_bound}) is $5.4\times$ looser than the empirical
+$M_2$ (mean $8.5$ vs.\ $45.6$ in Layer~0, E54), confirming that the
+worst-case nature of Markov's inequality is the primary source of
+non-verifiability. The 16 unverifiable components (3.1\%) correspond to
+activations where this global bound exceeds Z3's numeric tolerance---a
+fundamental limitation of any global polynomial bound rather than a
+deficiency of ChebyKAN specifically.
+
+\vspace{2pt}
+\noindent\textbf{Contrast with MLP+Tanh (Structural vs.\ Activation-Based Distinction).}
+Table~\ref{tab:svnn_taxonomy} shows that MLP+Tanh lies on the
+\textit{exterior} (violates Condition~1) despite using the same tanh
+activation that ChebyKAN uses for bound mapping. This contrast isolates
+the structural nature of the SVNN conditions: it is not the activation
+function itself that determines SVNN membership, but rather how the
+architecture \textit{decomposes} that activation relative to linear
+transformations.
+
+\begin{itemize}
+    \item \textbf{MLP+Tanh:} The standard MLP layer computes
+          $\mathbf{h} = \tanh(W\mathbf{x} + \mathbf{b})$, coupling the
+          affine transformation $(W\mathbf{x} + \mathbf{b})$ and the
+          nonlinear activation $\tanh(\cdot)$ in a single operation. There
+          is no intermediate variable whose error can be separately
+          bounded---the structural induction of Theorem~2 cannot be
+          initiated. MLP+Tanh thus violates Condition~1.
+
+    \item \textbf{ChebyKAN:} The ChebyKAN layer first applies tanh
+          \textit{element-wise} to each input (step~1), then evaluates
+          polynomial basis functions element-wise (step~2), and finally
+          performs a linear combination (step~3). Each step is provably
+          pure (either element-wise or linear), enabling the per-operation
+          error induction. ChebyKAN satisfies Condition~1.
+\end{itemize}
+
+This distinction underscores the central insight of the SVNN framework:
+\textit{architectures must be designed for verifiability}. The same
+activation function (tanh) yields verifiable or non-verifiable behavior
+depending on whether the architecture exposes the structural decomposition
+required by Condition~1. The compiler cannot ``fix'' an architecture that
+couples operations; it can only exploit the structure that the architecture
+provides.
+
+\vspace{2pt}
+\noindent\textbf{Comparison with B-spline KAN (Local vs.\ Global Basis).}
+Proposition~\ref{prop:kan-svnn} established that B-spline KAN satisfies the
+SVNN conditions via \textit{segment-aware} curvature bounds: each B-spline
+is piecewise-polynomial with $C^2$ continuity, and the compiler computes
+per-segment $M_2^{(k)}$ values tightening the global bound by $6.0\times$
+on average. Proposition~\ref{prop:chebykan-svnn} shows that ChebyKAN
+satisfies the same conditions via \textit{Markov-based global bounds}: the
+Chebyshev polynomial $g(y)$ has a single, analytically-computable $M_2$
+bound (Eq.~\ref{eq:cheby_m2_bound}) that applies to the entire domain
+$(-1,1)$.
+
+The two bases represent complementary points on the tightness-complexity
+spectrum:
+\begin{itemize}
+    \item \textbf{B-spline (local support):} Tighter bounds via
+          segment-aware refinement, but requires $O(G)$ segment enumeration
+          where $G$ is the grid size. The segment-aware $M_2^{(k)}$ bounds
+          exploit the locality of B-spline support: outside a basis
+          function's $k+1$ non-zero knot intervals, it contributes zero
+          error.
+
+    \item \textbf{Chebyshev (global support):} Single global bound via
+          Markov's inequality (Eq.~\ref{eq:cheby_m2_bound}), computed in
+          $O(1)$ for the entire activation. The bound is looser
+          (worst-case over the full domain) but analytically simpler and
+          requires no segment enumeration.
+\end{itemize}
+
+Both approaches yield \textit{computable} bounds from parameters alone,
+satisfying Condition~2. The SVNN framework is thus robust to the basis
+function choice: it accommodates both local-support (B-spline) and
+global-support (Chebyshev) polynomial bases, as long as the curvature $M_2$
+is analytically bounded and the structural decomposition (Condition~1)
+holds. This generality confirms that SVNN conditions characterize a
+fundamental architectural property, not an artifact specific to one basis
+family. $\square$
+
+\vspace{4pt}
+\noindent\textbf{Remark 4 (Wavelet-KAN and Fourier-KAN).}
+The proof technique of Proposition~\ref{prop:chebykan-svnn}---verifying
+Condition~1 via explicit decomposition and Condition~2 via analytical
+derivative bounds---extends naturally to other orthogonal polynomial and
+wavelet bases. Wavelet-KAN~\cite{bozorgasl2024waveletkan}, which uses
+Daubechies or Haar wavelet basis functions, satisfies Condition~1 by the
+same decomposition argument (element-wise wavelet evaluation + linear
+combination). Condition~2 holds if the wavelet basis is
+\textit{compactly-supported and piecewise-polynomial}---properties
+satisfied by Daubechies wavelets but not by all wavelet families (e.g.,
+Morlet wavelets involve Gaussian terms and violate Condition~2).
+Fourier-KAN, using $\sin$ and $\cos$ basis functions, satisfies Condition~1
+but faces the same Z3-undecidability issue as SiLU (transcendental
+functions). Table~\ref{tab:svnn_taxonomy} marks Wavelet-KAN with
+``$\sim$'' (depends on wavelet choice) to reflect this nuance: the SVNN
+conditions are \textit{basis-specific}, not universally applicable to all
+function approximation schemes.

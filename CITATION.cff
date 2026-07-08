@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use NeuroPLC in your research, please cite the paper."
+title: "NeuroPLC: An IR-Based Compiler from PyTorch to IEC 61131-3 SCL for Siemens PLCs with Structural Verifiability"
+authors:
+  - given-names: "Fuyue"
+    family-names: "Liu"
+    alias: "板板"
+    affiliation: "Guilin University of Electronic Technology"
+    orcid: ""
+repository-code: "https://github.com/aiyuedi/neuroplc"
+url: "https://github.com/aiyuedi/neuroplc"
+abstract: "First compiler translating PyTorch KAN/MLP models to IEC 61131-3 SCL for Siemens S7 PLCs with machine-checkable end-to-end correctness guarantees via Z3 SMT, Doubleton Arithmetic, and compositional certification."
+keywords:
+  - "Kolmogorov-Arnold Networks"
+  - "IEC 61131-3"
+  - "Neural Network Compiler"
+  - "Structural Verifiability"
+  - "SMT Verification"
+  - "PLC"
+license: MIT
+date-released: "2026-07-08"

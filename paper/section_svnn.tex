@@ -110,6 +110,7 @@ error bounds while others do not.
 
 \vspace{4pt}
 \noindent\textbf{Theorem 2 (SVNN Sufficient Conditions).}
+\label{thm:svnn_conditions}
 Let $\mathcal{A}$ be a feedforward neural network architecture. If $\mathcal{A}$
 satisfies Conditions~1 and~2 below, then $\mathcal{A}$ is structurally
 verifiable---for any instance $M \in \mathcal{A}$ of finite depth $L$, a
@@ -144,7 +145,7 @@ induction, and KAN belongs to it; standard MLPs do not.
     mix these operation types. This decomposition is provided by the
     compiler's IR ({\S}\ref{sec:ir}); it guarantees that the per-node
     error induction in the proof below never encounters a coupled
-    linear+nolinear operation.
+    linear+nonlinear operation.
 
     \item \textbf{Univariate Curvature Bound (Condition~2).} Every element-wise
     univariate function $f: \mathbb{R} \to \mathbb{R}$ is $C^2$-continuous
@@ -223,7 +224,8 @@ We now compose the analysis across $L$ layers by structural induction on
 the layer index $\ell$. Let $\Delta^{(\ell)}$ denote the maximum per-output
 error after layer $\ell$, with $\Delta^{(0)} = 0$ (input is exact).
 
-For a linear layer $\ell$ followed by an element-wise layer:
+For a KAN layer (element-wise B-spline activation followed by a linear
+combination via weight matrix):
 \begin{equation}
 \Delta^{(\ell)} \leq L_f^{(\ell)} \cdot \|W^{(\ell)}\|_{1,\infty}
 \cdot \Delta^{(\ell-1)} + \varepsilon_f^{(\ell)} \cdot d_{\ell-1}
@@ -273,16 +275,18 @@ Eq.~\ref{eq:total_bound} decay geometrically, and the finite sum is majorized
 by the convergent series
 \begin{equation}
 \Delta^{(L)} \leq \frac{\max_\ell(\varepsilon_f^{(\ell)} \cdot
-d_{\ell-1})}{1 - \gamma} = O(L \cdot M_{\max} \cdot h^2 \cdot d_{\max})
+d_{\ell-1})}{1 - \gamma}
+= O\!\left(\frac{M_{\max} \cdot h^2 \cdot d_{\max}}{1-\gamma}\right)
 \label{eq:convergent_bound}
 \end{equation}
 where $M_{\max} = \max_f M_f$ and $d_{\max} = \max_\ell d_{\ell-1}$
 is the maximum number of element-wise activation functions per layer.
 The bound follows by substituting $\varepsilon_f^{(\ell)} =
 M_f^{(\ell)} h^2 / 8$ (Eq.~\ref{eq:de_boor_general}) into the
-geometric series, yielding a factor of $M_{\max} h^2$ per layer
-multiplied by the $d_{\ell-1}$ parallel activations. This form is
-\emph{depth-uniform}: it grows only linearly in $L$ and admits deployment on
+geometric series, yielding a per-layer factor of $M_{\max} h^2 d_{\max}$
+multiplied by the geometric decay $1/(1-\gamma)$. This form is
+\emph{depth-independent}: when $\gamma < 1$, the bound converges to a
+constant as $L \to \infty$, admitting deployment on
 arbitrarily deep networks. When Condition~3 does not hold ($\gamma \geq 1$),
 Eq.~\ref{eq:total_bound} still evaluates to a finite number for the fixed
 deployment depth, but the worst-case majorant grows as
@@ -320,8 +324,13 @@ $11.9\times$ above the minimum required for classification correctness
 \label{rem:near_necessity}
 While Theorem~2 establishes sufficiency, the question of necessity is
 equally important: are these conditions arbitrarily chosen, or do they
-characterize a genuine structural boundary? We argue the latter through
-three observations.
+characterize a genuine structural boundary? Theorem~5
+({\S}\ref{sec:svnn-necessity}) provides the formal answer:
+violating Condition~1 makes tight bound computation NP-hard,
+establishing that the SVNN conditions are not an arbitrary restriction
+but the precise boundary at which polynomial-time compiler-computed
+correctness becomes achievable. We briefly summarize the three
+observations that motivate the formal proof.
 
 \vspace{2pt}
 \noindent\textit{(a) Condition~1 is structurally necessary for polynomial-time
@@ -442,7 +451,7 @@ CNN (Conv2d) & \xmark & \xmark & N/A & Exterior & N/A \\
 \cmark{} = condition satisfied; \xmark{} = condition violated; $\sim$ = depends on wavelet basis choice.\\
 $^{*}$Contractivity verified for the trained KAN student $[28,16,4]$ under VRM-KD distillation; Tankman~\cite{tankman2026lipschitz} proves $P(\text{KAN}) \leq 1$ as a structural property for standard operation sets on $[0,1]$-bounded inputs.\\
 $^{\dag}$The B-spline KAN is the only architecture in this taxonomy for which all three conditions are simultaneously satisfied \textit{and} empirically validated on physical hardware (TIA Portal V21, S7-1200).\\
-$^{\ddag}$Polynomial and wavelet activations are piecewise-polynomial and closable under Z3's polynomial theory; full verifiability follows by the same structural induction as B-spline KAN (Theorem~2, Step~3).\\
+$^{\ddag}$ChebyKAN: formally verified in Proposition~\ref{prop:chebykan-svnn} ({\S}\ref{sec:svnn-chebykan}); Z3 verifiability rate 496/512, 96.9\% (E54). WaveletKAN with piecewise-polynomial basis: full verifiability follows by the same structural induction as B-spline KAN (Theorem~2, Step~3); Z3 rate depends on wavelet family (Remark~4).\\
 $^{\S}$ReLU is piecewise-linear ($C^0$); $f''$ is a Dirac delta at $x=0$, so the de~Boor $M_2 h^2/8$ bound does not apply. MILP-based verification (e.g., Reluplex) is possible but requires exponential case-splitting.\\
 $^{\P}$SiLU contains $\sigma(x)=1/(1+e^{-x})$; $e^{-x}$ is transcendental and undecidable in Z3's NRA theory. On compact domain $[-3,3]$, $\sup|\text{SiLU}''| \approx 0.21$ is finite but requires numerical optimization---not computable from parameters alone.\\
 $^{\sharp}$Confirmed empirically: MLP $[28,16,4]$ with SiLU, 0/16 components Z3-verifiable (E41).}
@@ -654,7 +663,7 @@ is formally satisfiable. However, SiLU contains $\sigma(x) = 1/(1+e^{-x})$,
 which uses the transcendental function $e^{-x}$. Z3's Nonlinear Real
 Arithmetic (NRA) theory is \emph{undecidable} for transcendental functions,
 so per-function Z3 verification---the mechanism behind the compositional
-certificate of {\S}IV-F---yields no proof for any SiLU segment. Empirically:
+certificate of {\S}\ref{sec:compositional}---yields no proof for any SiLU segment. Empirically:
 MLP $[28,16,4]$ with SiLU activations achieves 0/16 Z3-verifiable
 components (E41), confirming that SiLU-based MLPs are incompatible with the
 compositional verification pipeline regardless of bound tightness.
@@ -711,6 +720,16 @@ are exact in DA) and decreases cubically with LUT resolution $h$.
 This architectural distinction---not implementation quality---is why
 \neuroplc provides guarantees for KAN that it cannot provide for MLP.
 $\square$
+
+% ============================================================================
+% ChebyKAN Verification (Proposition 2)
+% ============================================================================
+\input{section_svnn_chebykan}
+
+% ============================================================================
+% Theorem 3 (Computational Necessity) + Theorem 4 (Generalization Bound)
+% ============================================================================
+\input{section_svnn_theorems}
 
 \subsection{Implications for Compiler Design}
 \label{sec:svnn-implications}
