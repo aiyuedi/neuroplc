@@ -1,0 +1,35 @@
+\begin{table}[t]
+\centering
+\caption{SVNN Framework $\rightarrow$ IEC~61508-3 Compliance Mapping. Each SVNN condition (Theorem~2) is mapped to the relevant IEC~61508-3 software safety requirement (Annex~A). Compliance levels: $\checkmark$ = satisfied, $\sim$ = partially satisfied, -- = planned/not yet demonstrated.}
+\label{tab:iec61508_mapping}
+\small
+\begin{tabular}{p{3.2cm}p{2.8cm}ccp{2.8cm}}
+\toprule
+\textbf{SVNN Condition} & \textbf{IEC~61508-3 Req.} & \textbf{SIL2} & \textbf{SIL3} & \textbf{Key Evidence} \\
+\midrule
+  Condition 1\\ Operation-Type Closure & R1\\(Structured Design & Modularity) & $\checkmark$ & $\checkmark$ & Proposition~1 (IR minimality) \\
+  Condition 2\\ Univariate Boundedness & R2\\(Deterministic Behavior)\\+ R6\\(Resource Bounding) & $\checkmark$ & $\checkmark$ & Theorem~1 (DA bound) \\
+  Condition 3\\ Layer-Wise Composability & R3\\(Semi-Formal Methods)\\+ R4\\(Formal Verification)\\+ R5\\(Static Analysis) & $\checkmark$ & $\sim$ & Theorem~4 (L-layer bound via martingale + Azuma-Hoeffding) \\
+  Compiler Correctness (Translation Validation) & R4\\(Formal Proof)\\+ R5\\(Static Analysis) & $\checkmark$ & $\sim$ & Z3 translation validation report (9 exact + 2 bounded = 11/11 nodes PASS) \\
+  Architecture-Independent Guarantees & R8\\(Traceability)\\+ R9\\(Third-Party Qualification) & $\checkmark$ & $\checkmark$ & Cross-dataset FT experiment (CWRU → XJTU-SY: 37.3%% → 79.4%% with unchanged guarantees) \\
+  Online Monitoring & Runtime Assurance & R7\\(Fault Detection & Diagnostic Coverage) & $\sim$ & $\sim$ & Two-Tier classification margin analysis \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Comparison of PLC Neural Inference Solutions. NeuroPLC is the only approach that combines formal verification with deployment on resource-constrained micro-PLCs (S7-1200).}
+\label{tab:competitor_comparison}
+\small
+\begin{tabular}{p{2.4cm}p{2.4cm}p{1.8cm}p{2.0cm}p{2.8cm}}
+\toprule
+\textbf{Solution} & \textbf{Hardware} & \textbf{Formal Verif.} & \textbf{Memory} & \textbf{Key Limitation} \\
+\midrule
+  NeuroPLC (this work) & S7-1200/1500 & Z3 SMT (Two-Tier) & 45.2 KB work / 258 KB load & No physical PLC validation; ESBMC not integrated \\
+  SIMATIC S7-1500 TM NPU & S7-1500 + TM NPU & None (black-box testing only) & NPU external (not on CPU) & Requires external NPU module; no formal verification; limited to Siemens-curated architectures \\
+  Beckhoff TF3850 TwinCAT ML & TwinCAT 3 (x86 IPC) & None & Depends on IPC (typically GB-scale) & Requires IPC hardware (not micro-PLC); no formal verification; Windows dependency \\
+  B&R Hypervisor + Ubuntu Docker & Automation PC 910 & None for AI component & IPC-scale (GB) & Requires high-end IPC; no real-time AI guarantee; hypervisor cert covers PLC side only \\
+\bottomrule
+\end{tabular}
+\end{table}

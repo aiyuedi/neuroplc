@@ -1,0 +1,24 @@
+\begin{table}[t]
+\centering
+\caption{Why ONNX Cannot Deploy KAN to PLCs: Export Failure + IR Node Explosion Analysis.}
+\label{tab:onnx_failure}
+\small
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Metric} & \textbf{ONNX} & \textbf{NeuroPLC} \\
+\midrule
+KAN export & FAILS & N/A (custom compiler) \\
+Export error & Not attempted & --- \\
+IR / graph nodes & $\geq$8,393 (decomposed) & \textbf{11} (6-op IR) \\
+Node explosion factor & $\geq$763.0$\times$ & \textbf{1$\times$} \\
+Generated code lines (est.) & >$200,000$ C & \textbf{3,818} SCL \\
+Runtime library size & 22528 KB & \textbf{0} KB (no runtime) \\
+Fits S7-1200 (75 KB)? & \textbf{No} (300$\times$ over) & \textbf{Yes} (40.3 KB, 53.7\%) \\
+Fits S7-1500 (1.5 MB)? & No & \textbf{Yes} (110.8 KB, 7.4\%) \\
+B-spline operator? & \textbf{No} (no standard op) & \textbf{Yes} (BsplineLUT) \\
+Verification-ready? & No & \textbf{Yes} (Z3 Theorem~1) \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+{\scriptsize ONNX opset versions 14, 17, 20 all failed with B-spline \texttt{einsum} not traceable. Node decomposition analysis assumes hypothetical successful export with B-spline expansion into Gather+Mul+ReduceSum primitives. ONNX Runtime minimal build size $\approx$22\,MB (no quantization, no hardware-specific optimizations).}
+\end{table}

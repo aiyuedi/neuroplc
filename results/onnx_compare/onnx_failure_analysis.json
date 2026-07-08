@@ -1,0 +1,48 @@
+{
+  "timestamp": "2026-07-07T17:08:26",
+  "export_attempt": {
+    "success": null,
+    "error_type": "Not attempted",
+    "error_message": "Use --try-export to run",
+    "opset_versions_tried": []
+  },
+  "decomposition_analysis": {
+    "kan_architecture": [
+      28,
+      16,
+      4
+    ],
+    "neuroplc_ir_nodes": 11,
+    "onnx_decomposed_nodes": 8393,
+    "explosion_factor": 763.0,
+    "breakdown": {
+      "layer0": {
+        "silu_activations": 112,
+        "bspline_evaluations": 6720,
+        "matmul_ops": 448,
+        "add_merge_ops": 16,
+        "subtotal": 7296
+      },
+      "layer1": {
+        "silu_activations": 64,
+        "bspline_evaluations": 960,
+        "matmul_ops": 64,
+        "add_merge_ops": 4,
+        "subtotal": 1092
+      },
+      "output": {
+        "softmax_argmax": 5
+      },
+      "total": 8393
+    },
+    "memory_analysis": {
+      "onnx_runtime_size_kb": 22528.0,
+      "s7_1200_work_memory_kb": 75.0,
+      "s7_1500_work_memory_kb": 1500.0,
+      "onnx_vs_s7_1200_ratio": 300,
+      "onnx_exceeds_s7_1200": true,
+      "onnx_exceeds_s7_1500": true
+    },
+    "key_insight": "ONNX has no standard B-spline operator. Decomposing KAN's 512 B-spline activation functions into primitives explodes the IR from 11 to 8393 nodes (763\u00d7 explosion). Even if export succeeded, the ONNX Runtime library alone (22.0 MB) exceeds S7-1200 memory (0 MB) by 300\u00d7. This is WHY domain-specific compilation (NeuroPLC's approach) is necessary for industrial PLC deployment."
+  }
+}

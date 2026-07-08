@@ -1,0 +1,27 @@
+{
+  "experiment": "E42",
+  "name": "Cross-Domain Generality: MNIST vs CWRU",
+  "timestamp": "2026-07-07T13:56:25.919069",
+  "domains": {
+    "mnist": {
+      "domain": "Image classification (MNIST digits 0-3)",
+      "features": "PCA(784\u219228) + z-score norm",
+      "accuracy": 0.9859,
+      "per_function_verified": "512/512",
+      "da_bound": 0.1199,
+      "ia_bound": 0.5752,
+      "da_ia_tightening": 4.8,
+      "certificate_valid": true
+    },
+    "cwru": {
+      "domain": "Bearing fault diagnosis (CWRU vibration)",
+      "features": "RCMDE + RCHFDE (28-D)",
+      "accuracy": 0.9875,
+      "per_function_verified": "512/512",
+      "da_bound": 0.1196,
+      "ia_bound": 0.2473,
+      "da_ia_tightening": 2.1,
+      "certificate_valid": true
+    }
+  }
+}

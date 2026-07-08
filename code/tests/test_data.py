@@ -153,14 +153,14 @@ class TestDownloadVerify:
 
     def test_manifest_consistency(self):
         """Manifest in download script matches EXPECTED_FILES."""
-        import download_verify_cwru as dv
+        import data_pipeline.download_verify_cwru as dv
         script_manifest = dv.CWRU_MANIFEST
         assert script_manifest == EXPECTED_FILES, \
             "download_verify_cwru.py manifest differs from test manifest"
 
     def test_subdir_names(self):
         """Subdirectory naming is correct."""
-        import download_verify_cwru as dv
+        import data_pipeline.download_verify_cwru as dv
         assert dv._subdir_name("Normal", None) == "Normal"
         assert dv._subdir_name("IR", 0.007) == "IR007"
         assert dv._subdir_name("Ball", 0.021) == "Ball021"
@@ -168,7 +168,7 @@ class TestDownloadVerify:
 
     def test_file_map_52_entries(self):
         """_build_file_map should return 52 entries."""
-        import download_verify_cwru as dv
+        import data_pipeline.download_verify_cwru as dv
         fmap = dv._build_file_map()
         assert len(fmap) == 52
         assert 97 in fmap and 3012 in fmap
@@ -181,7 +181,7 @@ class TestDownloadVerify:
 @pytest.mark.requires_data
 def test_verify_existing_data(data_raw, capsys):
     """Run --verify and check exit behavior."""
-    import download_verify_cwru as dv
+    import data_pipeline.download_verify_cwru as dv
     result = dv.verify_dataset(data_raw, verbose=False)
     assert "total_expected" in result
     assert result["total_expected"] == 52

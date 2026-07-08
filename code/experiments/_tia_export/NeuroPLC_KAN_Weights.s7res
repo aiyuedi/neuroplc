@@ -1,0 +1,17 @@
+﻿MultiLingualTexts:
+  - id: MLC_5BJ
+    zh-CN: LUT grid (15 pts)
+  - id: MLC_4SH
+    zh-CN: LUT table (16x28x15)
+  - id: MLC_3eX
+    zh-CN: W(16x28)
+  - id: MLC_4Gg
+    zh-CN: bias(16)
+  - id: MLC_hB
+    zh-CN: LUT grid (15 pts)
+  - id: MLC_i4
+    zh-CN: LUT table (4x16x15)
+  - id: MLC_3vY
+    zh-CN: W(4x16)
+  - id: MLC_43d
+    zh-CN: bias(4)

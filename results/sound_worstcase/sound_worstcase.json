@@ -1,0 +1,96 @@
+{
+  "experiment": "E53",
+  "title": "Sound In-Domain Worst-Case Compilation Error",
+  "arch": [
+    28,
+    16,
+    4
+  ],
+  "domain": [
+    -3.0,
+    3.0
+  ],
+  "true_margin": 1.35,
+  "cert_threshold": 0.675,
+  "note": "Uses the compiler's real uniform B-spline LUT (lerp) and searches strictly inside the validated domain. Supersedes E21, whose stand-in LUT had 0.131 zero-input error and searched out of domain.",
+  "sweep": [
+    {
+      "n_lut": 15,
+      "zero_input_err": 0.09461984648266997,
+      "empirical_worst_indomain": 16.835199060518086,
+      "ia_sound_worst_bound": 0.8767907619476318,
+      "da_highprob_bound": 0.10669733583927155,
+      "M2_max": 1.5962910061931055,
+      "M2_mean": 0.6106668354840876,
+      "eps_max": 0.03664953840749476,
+      "sound_certifies": false,
+      "highprob_certifies": true,
+      "empirical_certifies": false
+    },
+    {
+      "n_lut": 20,
+      "zero_input_err": 0.0531025247816741,
+      "empirical_worst_indomain": 17.067105665369333,
+      "ia_sound_worst_bound": 0.4760414958000183,
+      "da_highprob_bound": 0.057929858565330505,
+      "M2_max": 1.5962910061931055,
+      "M2_mean": 0.6106668354840876,
+      "eps_max": 0.01989836434312735,
+      "sound_certifies": true,
+      "highprob_certifies": true,
+      "empirical_certifies": false
+    },
+    {
+      "n_lut": 25,
+      "zero_input_err": 0.09465526947275027,
+      "empirical_worst_indomain": 17.058382037720946,
+      "ia_sound_worst_bound": 0.2983524203300476,
+      "da_highprob_bound": 0.03630673140287399,
+      "M2_max": 1.5962910061931055,
+      "M2_mean": 0.6106668354840876,
+      "eps_max": 0.012471023485883637,
+      "sound_certifies": true,
+      "highprob_certifies": true,
+      "empirical_certifies": false
+    },
+    {
+      "n_lut": 30,
+      "zero_input_err": 0.07650218032191214,
+      "empirical_worst_indomain": 17.098245253468978,
+      "ia_sound_worst_bound": 0.20434123277664185,
+      "da_highprob_bound": 0.024866443127393723,
+      "M2_max": 1.5962910061931055,
+      "M2_mean": 0.6106668354840876,
+      "eps_max": 0.008541390639558827,
+      "sound_certifies": true,
+      "highprob_certifies": true,
+      "empirical_certifies": false
+    },
+    {
+      "n_lut": 40,
+      "zero_input_err": 0.08458450678489138,
+      "empirical_worst_indomain": 17.10762953968758,
+      "ia_sound_worst_bound": 0.1129855364561081,
+      "da_highprob_bound": 0.01374929491430521,
+      "M2_max": 1.5962910061931055,
+      "M2_mean": 0.6106668354840876,
+      "eps_max": 0.00472275445619262,
+      "sound_certifies": true,
+      "highprob_certifies": true,
+      "empirical_certifies": false
+    },
+    {
+      "n_lut": 50,
+      "zero_input_err": 0.08823569936795916,
+      "empirical_worst_indomain": 17.123433272217234,
+      "ia_sound_worst_bound": 0.07157475501298904,
+      "da_highprob_bound": 0.008709986694157124,
+      "M2_max": 1.5962910061931055,
+      "M2_mean": 0.6106668354840876,
+      "eps_max": 0.002991799053673042,
+      "sound_certifies": true,
+      "highprob_certifies": true,
+      "empirical_certifies": false
+    }
+  ]
+}

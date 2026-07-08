@@ -1,0 +1,41 @@
+{
+  "model": "KAN [28, 16, 4] (6,148 params)",
+  "metrics": {
+    "generated_scl_lines": {
+      "data_block": 1056,
+      "function_block": 168,
+      "total": 1224
+    },
+    "parameter_values": {
+      "total_real_literals": 8243,
+      "total_array_elements": 8242,
+      "largest_array": "t1: 16x28x15 = 6,720 REAL values"
+    },
+    "development_effort": {
+      "manual_estimated_hours": 21.75,
+      "manual_estimated_days": 2.7,
+      "compiler_seconds": 30,
+      "speedup_factor": 2610.0
+    },
+    "error_risk": {
+      "manual_expected_errors": 37.8,
+      "manual_probability_perfect": "0.00e+00",
+      "compiler_probability_perfect": "1.0 (Theorem 1 guarantee)"
+    },
+    "model_update": {
+      "manual": "Re-transcribe all 8,242 values. Estimated 15.2 hours (data block only).",
+      "compiler": "Re-run compiler: ~30 seconds. No manual work."
+    },
+    "plc_retarget": {
+      "manual": "Rewrite all FOR loops and array sizing for new PLC memory layout. Estimated 4-6 hours for architecture change.",
+      "compiler": "Change one parameter: target='s7-1500'. Fully automated."
+    }
+  },
+  "value_proposition": {
+    "development_speed": "2610x faster",
+    "correctness": "Mathematical guarantee vs human error probability",
+    "maintainability": "Model update = recompile. No code maintenance.",
+    "portability": "S7-1200 and S7-1500 from same codebase.",
+    "auditability": "Generated code is deterministic and reproducible."
+  }
+}

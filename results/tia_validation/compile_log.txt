@@ -1,0 +1,42 @@
+TIA Portal V21 Compilation Test — 2026-07-05T21:40:00+08:00
+
+SCL Files:
+  - kan_s7-1200_db.scl  (1,056 lines, DATA_BLOCK "NeuroPLC_Weights")
+  - kan_s7-1200_db_fb.scl (168 lines, FUNCTION_BLOCK "NeuroPLC_Inference")
+
+PLC: S7-1200 CPU 1211C V4.7 (6ES7 211-1BE40-0XB0)
+Backend: neuroplc.backend_s7_db.S71200DBBackend (lut_pts=15)
+
+Architecture: DB+FB Split
+  - DATA_BLOCK "NeuroPLC_Weights": parameter arrays with start values
+    in BEGIN...END_DATA_BLOCK (stored as data, not compiled code)
+  - FUNCTION_BLOCK "NeuroPLC_Inference": inference logic only,
+    referencing DB arrays as "NeuroPLC_Weights".array[index]
+  - No init_done first-scan block needed (DB start values = initial data)
+  - No per-element init assignments in FB code
+
+Result: ✅✅✅ COMPILATION SUCCEEDED — 0 errors, 0 warnings ✅✅✅
+
+Block tree:
+  - NeuroPLC_Weights [DB2, DB] — global data block
+  - NeuroPLC_Inference [FB2, SCL] — function block (inference only)
+
+Key fixes applied (this session):
+  1. Removed CODESYS-style # prefix from all SCL references
+  2. Replaced WHILE binary search with FOR linear scan
+     (avoids INT/DINT/REAL type mismatch in Siemens SCL)
+  3. Changed base variable from REAL to INT (array index type fix)
+  4. Changed S7_Optimized_Access := 'FALSE'
+  5. Moved all parameters from FB VAR to global DB
+     (avoids 64KB block size limit on S7-1200)
+  6. DB start values via BEGIN...END_DATA_BLOCK syntax
+     (data, not compiled code)
+
+Previous state: 12 type errors (INT/REAL mismatches)
+Current state:  0 errors, 0 warnings
+
+Architecture validated: DB+FB split
+  - FB code size: ~168 lines inference code (vs 1,223 lines with
+    per-element init — a 7.3x reduction)
+  - Parameter data: ~32KB in DB load memory
+  - No block size limit issues (FB well under 64KB threshold)

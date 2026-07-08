@@ -1,0 +1,36 @@
+{
+  "eps_lut_15pt": 0.00406,
+  "L_net_da": 19.029294967651367,
+  "L_net_ia": 42.233219146728516,
+  "delta_logit_da": 0.07725894451141357,
+  "delta_logit_ia": 0.1714668720960617,
+  "tightening_ratio": 2.21937894821167,
+  "da_safety_factor": 17.473705291748047,
+  "ia_safety_factor": 7.873240947723389,
+  "margin": 1.35,
+  "w0_sign_stats": {
+    "positive": 229,
+    "negative": 219,
+    "zero": 0,
+    "total": 448
+  },
+  "w1_sign_stats": {
+    "positive": 33,
+    "negative": 31,
+    "zero": 0,
+    "total": 64
+  },
+  "per_path_tightening": {
+    "mean": 36.64522931511913,
+    "median": 2.3848055601119995,
+    "max": 2186.3759765625,
+    "min_active": 1.0116691589355469,
+    "count": 112
+  },
+  "random_walk_cancellation_model": {
+    "d0": 28,
+    "d1": 16,
+    "expected_R_sqrt_d": 5.291502622129181,
+    "description": "For zero-mean random signs, R ~ sqrt(d0) ~ 5.3. Trained weights have structured signs \u2192 R measured at 3.1x"
+  }
+}

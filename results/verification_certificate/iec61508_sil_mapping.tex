@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\caption{NeuroPLC Evidence Mapping to IEC~61508 Safety Integrity Levels. SVNN framework provides design-time (SIL~2) and mechanized (SIL~3) verification evidence.}
+\label{tab:sil_mapping}
+\small
+\begin{tabular}{@{}p{1.0cm}p{2.8cm}p{3.5cm}p{1.5cm}@{}}
+\toprule
+\textbf{SIL} & \textbf{Requirement} & \textbf{NeuroPLC Evidence} & \textbf{Status} \\
+\midrule
+  SIL 1 & Basic functional testing, documented design & E6: 1000-sample Python vs SCL cross-validation (10... & \checkmark \\
+  SIL 2 & Design-time error bounds, semi-formal verification & Theorem 1: Per-output error bound ε ≤ 0.079 (DA, N... & \checkmark \\
+  SIL 3 & Formal verification of safety-critical components & Tier 1: Z3 template proofs (4/6 op types, 57 ms to... & \checkmark \\
+  SIL 4 & Full formal verification, redundant architecture, independen & Pathway: SVNN Level 2 bounds provide pre-certifica... & $\circ$ \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+{\scriptsize SIL~1--2 evidence is complete within NeuroPLC's scope. SIL~3 evidence is partially complete (compiler-level Z3 proofs); full certification requires external process audit + hardware reliability analysis. SIL~4 requires redundant architecture and independent assessment (future work).}
+\end{table}

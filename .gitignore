@@ -1,3 +1,4 @@
+# Python
 __pycache__/
 *.pyc
 *.pyo
@@ -5,13 +6,10 @@ __pycache__/
 *.egg-info/
 dist/
 build/
-results/mlflow.db
-data/raw/12k_DE/
-data/processed/
-data/splits/
-data/tmp_extract/
-*.log
+
+# LaTeX
 *.aux
+*.log
 *.out
 *.toc
 *.bbl
@@ -19,8 +17,30 @@ data/tmp_extract/
 *.synctex.gz
 *.fdb_latexmk
 *.fls
+
+# Data (large, not in repo)
+data/raw/
+data/processed/
+data/splits/
+data/tmp_extract/
+data/mnist/
+xjtu-sy-data/
+
+# Results (generated)
+results/mlflow.db
+results/plcsim/
+
+# TIA Portal (archive old versions)
+tia_project/_archive/
+
+# Claude Code
+.claude/
+
+# Downloaded tools (never integrated)
+tools/
+
+# One-off bootstrap (stale)
 neuroplc-*.zip
-neuroplc-gpu-bootstrap.zip
 notebook_cell_payload.txt
 run_gpu_cell.py
 GPU_RUN_THIS_CELL.py

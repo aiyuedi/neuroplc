@@ -1,0 +1,51 @@
+\subsection{Pipeline Generality Across Domains}
+\label{sec:cross_domain}
+
+\noindent\textbf{Is the pipeline bearing-specific?}
+To demonstrate that \neuroplc's compiler and verification
+pipeline is domain-agnostic---depending only on the KAN
+architecture, not on data provenance---we apply the
+identical pipeline to a fundamentally different task:
+MNIST handwritten digit classification (digits 0--3).
+Raw $28\times28$ pixel images are reduced to 28-D
+features via PCA, then z-score normalized and clipped
+to $[-3,3]$---matching the preprocessing contract of the
+CWRU bearing pipeline. The same KAN $[28,16,4]$
+architecture is trained, compiled, and verified with
+\textbf{zero modification} to the compiler or verification
+toolchain.
+
+\begin{table}[ht]
+\centering
+\caption{Cross-Domain Pipeline Generality: Identical compiler
+and verification pipeline applied to image classification
+(MNIST) and vibration-based fault diagnosis (CWRU).}
+\label{tab:cross_domain}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Metric} & \textbf{MNIST (Image)} & \textbf{CWRU (Vibration)} \\
+\midrule
+  Domain & Handwritten digits & Bearing faults \\
+  Features & PCA(784$\to$28) & RCMDE $+$ RCHFDE \\
+  Test accuracy & $0.9859$ & $0.9875$ \\
+\midrule
+  Per-function verified & $512/512$ & $512/512$ \\
+  DA bound $\Delta_{\text{DA}}$ & $0.1199$ & $0.1196$ \\
+  DA/IA tightening & $4.8\times$ & $2.1\times$ \\
+  Certificate valid & Yes & Yes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Key Insight.} The compiler and verification
+pipeline require only that the model be a KAN---the
+data domain is irrelevant. The B-spline functions are
+verified against their LUT approximations using the same
+$M_2 h^2/8$ bound regardless of whether the input features
+represent pixel intensities or vibration amplitudes.
+The DA composition rules depend only on the weight matrix
+structure, not on data semantics. This domain independence
+is a direct consequence of the SVNN framework
+({\S}\ref{sec:svnn}): the three sufficient conditions are
+architectural properties of KAN, not properties of the
+training data or task.

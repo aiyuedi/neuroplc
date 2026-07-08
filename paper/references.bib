@@ -4,6 +4,16 @@
 % 导入后 Better BibTeX 会自动导出到 D:\dev-tools\research\literature\refs.bib
 % ===========================================================================
 
+% ── 0. Numerical Analysis ──
+@book{atkinson1989numerical,
+  title     = {{An Introduction to Numerical Analysis}},
+  author    = {Atkinson, Kendall E.},
+  year      = {1989},
+  edition   = {2nd},
+  publisher = {John Wiley \& Sons},
+  isbn      = {978-0-471-50023-0},
+}
+
 % ── 1. KAN 原始论文 ──
 @article{liu2024kan,
   title = {{KAN: Kolmogorov-Arnold Networks}},
@@ -26,14 +36,7 @@
 }
 
 % ── 3. KAN + 航空发动机轴承 (HKAC) ──
-@inproceedings{hkac2025,
-  title = {{Aero-engine Inter-shaft Bearing Fault Diagnosis via Hybrid Kolmogorov-Arnold Classifier}},
-  author = {Li, Hongkun and others},
-  booktitle = {IEEE International Conference on Prognostics and Health Management (PHM)},
-  year = {2025}
-}
 
-% ── 4. 1D-CNN + KAN 混合 ──
 @article{cnn1dkan2025,
   title = {{Rolling Bearing Fault Diagnosis Based on 1D Convolutional Neural Network and Kolmogorov-Arnold Network for Industrial Internet}},
   author = {Wang, Y. and others},
@@ -102,22 +105,7 @@
 }
 
 % ── 11. RCMREDE 2D 离散熵 ──
-@article{ding2025rcmrede2d,
-  title = {{Two-dimensional Refined Composite Multi-scale Revised Ensemble Dispersion Entropy}},
-  author = {Ding, S. and others},
-  journal = {Engineering Applications of Artificial Intelligence (EAAI)},
-  year = {2025}
-}
 
-% ── 12. Agents4PLC (LLM 生成 ST 代码, 非ML→PLC, 区分引用) ──
-@article{liu2024agents4plc,
-  title = {{Agents4PLC: Automating Closed-loop PLC Code Generation and Verification}},
-  author = {Liu, Z. and others},
-  journal = {arXiv preprint arXiv:2405.12345},
-  year = {2024}
-}
-
-% ── 13. LLM4PLC ──
 @inproceedings{fakih2024llm4plc,
   title = {{LLM4PLC: Harnessing Large Language Models for Verifiable Programming of PLCs in Industrial Control Systems}},
   author = {Fakih, M. and others},
@@ -224,13 +212,13 @@
   title = {{SIMATIC S7-1200 Programmable Controller System Manual}},
   author = {{Siemens AG}},
   number = {A5E02486680-AP},
-  edition = {V4.6},
+  edition = {4.6},
   year = {2022},
   note = {CPU 1211C AC/DC/Relay: 75 kB work memory}
 }
 
 % ── 22. ONNX Runtime 引用 ──
-@article{onnxruntime,
+@misc{onnxruntime,
   title = {{ONNX Runtime}},
   author = {{Microsoft}},
   howpublished = {\url{https://github.com/microsoft/onnxruntime}},
@@ -262,14 +250,7 @@
 }
 
 % ── 25. PDR-KAN (KAN 硬件加速器, ISCAS 2025) ──
-@inproceedings{pdrkan2025,
-  title = {{PDR-KAN: Pipeline-Driven Reconfigurable Accelerator for Kolmogorov-Arnold Networks with Cross-Mode Sparsity Support}},
-  author = {Liu, H. and others},
-  booktitle = {IEEE International Symposium on Circuits and Systems (ISCAS)},
-  year = {2025}
-}
 
-% ── 26. JLU Siemens PLC AI 论文 (LLM → IEC 61131-3, ICSE 2025) ──
 @inproceedings{haag2025llm4iec,
   title = {{Training LLMs for Generating IEC 61131-3 Structured Text with Online Feedback}},
   author = {Haag, Aaron and Fuchs, Bertram and Kacan, Altay and Lohse, Oliver},
@@ -300,6 +281,7 @@
 % ── 29. NeuralCasting: ONNX → 嵌入式 C (IOTSMS 2024) ──
 @inproceedings{neuralcasting2024,
   title = {{NeuralCasting: A Front-End Compilation Infrastructure for Neural Networks}},
+  author = {Cerioli, Alessandro and Miccini, Riccardo and Laroche, Cl\'{e}ment and Piechowiak, Tobias and Pezzarossa, Luca and Spars{\o}, Jens and Schoeberl, Martin},
   booktitle = {International Conference on Internet of Things: Systems, Management and Security (IOTSMS)},
   pages = {161--168},
   year = {2024},
@@ -318,16 +300,7 @@
 }
 
 % ── 31. SMOTE / 不平衡数据 ──
-@article{chawla2002smote,
-  title = {{SMOTE: Synthetic Minority Over-sampling Technique}},
-  author = {Chawla, Nitesh V. and Bowyer, Kevin W. and Hall, Lawrence O. and Kegelmeyer, W. Philip},
-  journal = {Journal of Artificial Intelligence Research},
-  volume = {16},
-  pages = {321--357},
-  year = {2002}
-}
 
-% ── 32. t-SNE 可视化 ──
 @article{maaten2008tsne,
   title = {{Visualizing Data using t-SNE}},
   author = {van der Maaten, Laurens and Hinton, Geoffrey},
@@ -335,4 +308,466 @@
   volume = {9},
   pages = {2579--2605},
   year = {2008}
+}
+
+% ===========================================================================
+% 第三轮补充: 2026-07-04 深度研究 (33 → 44 篇)
+% ===========================================================================
+
+% ── 33. RTNNIgen (最接近竞争工具, Keras→ST) ──
+@inproceedings{rtnnigen2024,
+  title = {{RTNNIgen --- An Open-Source PLC Library and Python Generator Converting Keras Models to Realtime Capable Structured Text}},
+  author = {Hinze, Christoph and Zhou, Zexu and Xu, Haijia and Lechler, Armin and Verl, Alexander},
+  booktitle = {IECON 2024 --- 50th Annual Conference of the IEEE Industrial Electronics Society},
+  year = {2024},
+  doi = {10.1109/IECON55916.2024.10905775}
+}
+
+% ── 34. MLconverter (sklearn→ST, ABB 800xA) ──
+@article{mlconverter2025,
+  title = {{A Conversion Tool for Translating Python-Based Machine Learning Models to Structured Text Codes}},
+  author = {Campos, N. and Pereira, A. and Duarte, D. and Perez, F. and Pessin, G. and Pinto, M.},
+  journal = {SoftwareX},
+  volume = {29},
+  pages = {102005},
+  year = {2025}
+}
+
+% ── 35. ICSML (IEC 61131-3 ML library) ──
+@inproceedings{icsml2023,
+  title = {{ICSML: Industrial Control Systems ML Framework for Native Inference Using IEC 61131-3 Code}},
+  author = {Doumanidis, Constantine and Rajput, Prashant Hari Narayan and Maniatakos, Michail},
+  booktitle = {ACM Workshop on Cyber-Physical Systems Security \& Privacy (CPSS)},
+  year = {2023}
+}
+
+% ── 36. KANELÉ (B-spline LUT FPGA, ISFPGA 2026 Best Paper) ──
+@inproceedings{kanele2026,
+  title = {{KANEL\'{E}: Kolmogorov-Arnold Networks for Efficient LUT-Based Evaluation}},
+  author = {Hoang, L. and Gupta, A. and Harris, D. M.},
+  booktitle = {ACM/SIGDA International Symposium on Field-Programmable Gate Arrays (ISFPGA)},
+  year = {2026},
+  note = {Best Paper Award}
+}
+
+% ── 37. LUT-KAN (整数LUT MCU部署) ──
+@article{lutkan2025,
+  title = {{LUT-KAN: Efficient B-Spline Activation via Precomputed Lookup Tables for Embedded Inference}},
+  author = {Kuznetsov, A.},
+  journal = {Neurocomputing},
+  year = {2026}
+}
+
+% ── 38. KAN or MLP Fair Comparison (KAN参数爆炸事实) ──
+@article{yu2024kanfair,
+  title = {{KAN or MLP: A Fairer Comparison}},
+  author = {Yu, Runpeng and others},
+  journal = {arXiv preprint arXiv:2407.11075},
+  year = {2024}
+}
+
+% ── 39. Smith & Randall 2015 (CWRU缺陷) ──
+@article{smith2015rolling,
+  title = {{Rolling Element Bearing Diagnostics Using the Case Western Reserve University Data: A Benchmark Study}},
+  author = {Smith, Wade A. and Randall, Robert B.},
+  journal = {Mechanical Systems and Signal Processing},
+  volume = {64--65},
+  pages = {100--131},
+  year = {2015},
+  doi = {10.1016/j.ymssp.2015.04.021}
+}
+
+% ── 40. Hendriks et al. 2022 (CWRU泄漏防御) ──
+@article{hendriks2022towards,
+  title = {{Towards Better Benchmarking Using the CWRU Bearing Fault Dataset}},
+  author = {Hendriks, J. and Dumond, P. and Knox, D. A.},
+  journal = {Mechanical Systems and Signal Processing},
+  volume = {169},
+  pages = {108732},
+  year = {2022},
+  doi = {10.1016/j.ymssp.2021.108732}
+}
+
+% ── 41. Glow compiler (自定义编译器哲学) ──
+@article{roth2018glow,
+  title = {{Glow: Graph Lowering Compiler Techniques for Neural Networks}},
+  author = {Roth, Nadav and others},
+  journal = {arXiv preprint arXiv:1805.00907},
+  year = {2018}
+}
+
+% ── 42. BYOC (专用硬件需要专用codegen) ──
+@inproceedings{chen2021byoc,
+  title = {{Bring Your Own Codegen to Deep Learning Compiler}},
+  author = {Chen, Zhi and others},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year = {2021}
+}
+
+% ── 43. Li et al. 2005 (曲率驱动B-spline采样前身, CAD) ──
+@article{li2005adaptive,
+  title = {{Adaptive Knot Placement in B-spline Curve Approximation}},
+  author = {Li, Weishi and Xu, Shuhong and Zhao, Gang and Goh, Li Ping},
+  journal = {Computer-Aided Design},
+  volume = {37},
+  number = {8},
+  pages = {791--797},
+  year = {2005},
+  doi = {10.1016/j.cad.2004.09.006}
+}
+
+% ── 44. de Boor (B-spline数值分析经典) ──
+@book{deBoor1978,
+  title = {{A Practical Guide to Splines}},
+  author = {de Boor, Carl},
+  publisher = {Springer-Verlag},
+  year = {1978},
+  edition = {1st}
+}
+
+% ── 45. SHARe-KAN (KAN向量量化压缩, 2025) ──
+
+@book{piegl1997nurbs,
+  title = {{The NURBS Book}},
+  author = {Piegl, Les and Tiller, Wayne},
+  publisher = {Springer},
+  edition = {2nd},
+  year = {1997},
+  doi = {10.1007/978-3-642-59223-2}
+}
+
+% ── 49. PolyKAN (KAN可证明压缩, 2025) ──
+@article{polykan2025,
+  title = {{PolyKAN: Provable and Optimal Compression of Kolmogorov-Arnold Networks}},
+  author = {Zhang, Di},
+  journal = {arXiv preprint arXiv:2510.04205},
+  year = {2025}
+}
+
+% ── 50. LUT-KAN (IEEE Access 2024) ──
+@article{lutkan2024,
+  title = {{Look-Up Table Optimization for Kolmogorov-Arnold Networks on Microcontrollers}},
+  author = {Kuznetsov, Oleksandr},
+  journal = {IEEE Access},
+  volume = {12},
+  pages = {170140--170158},
+  year = {2024},
+  doi = {10.1109/ACCESS.2024.3496501}
+}
+
+% ── 51. Affine Arithmetic Decision Diagrams (FDL 2025) ──
+@inproceedings{heermann2025aadd,
+  title = {{Reachability Analysis of Deep Neural Networks Using Affine Arithmetic Decision Diagrams}},
+  author = {Heermann, Hagen and Grabowsky, Pascal and Zivkovic, Carna and Grimm, Christoph},
+  booktitle = {Forum on Specification \& Design Languages (FDL)},
+  year = {2025}
+}
+
+% ── 52. ICML 2025 — Soundness Warning (Floating-Point) ──
+@inproceedings{szasz2025soundness,
+  title = {{No Soundness in the Real World: On the Challenges of the Verification of Deployed Neural Networks}},
+  author = {Sz\'{a}sz, J\'{a}nos and B\'{a}nhelyi, Bal\'{a}zs and Csendes, Tibor},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year = {2025},
+  note = {Spotlight Paper}
+}
+
+% ── 53. PLC+ML Predictive Maintenance (Sensors 2025) ──
+@article{mennilli2025plc,
+  title = {{Integrating Machine Learning for Predictive Maintenance on Resource-Constrained PLCs: A Feasibility Study}},
+  author = {Mennilli, Riccardo and Mazza, Andrea and others},
+  journal = {Sensors},
+  volume = {25},
+  number = {2},
+  pages = {537},
+  year = {2025}
+}
+
+% ── 54. Doubleton Arithmetic for NN Verification ──
+@article{krukowski2024doubleton,
+  title = {{Make Interval Bound Propagation Great Again}},
+  author = {Krukowski, Patryk and Wilczak, Daniel and Tabor, Jacek and Bielawska, Anna and Spurek, Przemys{\l}aw},
+  journal = {arXiv preprint arXiv:2410.03373},
+  year = {2024}
+}
+
+% ── 55. XJTU-SY bearing dataset ──
+@article{xjtusy2020,
+  title = {{A Hybrid Prognostics Approach for Estimating Remaining Useful Life of Rolling Element Bearings}},
+  author = {Wang, Biao and Lei, Yaguo and Li, Naipeng and Li, Ningbo},
+  journal = {IEEE Transactions on Reliability},
+  volume = {69},
+  number = {1},
+  pages = {401--412},
+  year = {2020},
+  doi = {10.1109/TR.2018.2882682}
+}
+
+% ── 57. GloroKAN — Lipschitz-constrained KAN verification (Sep 2025) ──
+@inproceedings{glorokan2025,
+  title = {{Training and Verifying Robust Kolmogorov-Arnold Networks}},
+  author = {Schumacher, Max-Lion and Heiderich, Bj{\"o}rn and Huber, Marco F.},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year = {2025},
+  note = {OpenReview: N9hl7CShRA}
+}
+
+% ── 58. STARK — LLM-based ST code generation (ISEC 2026) ──
+@inproceedings{stark2026,
+  title = {{STARK: A Comprehensive Framework for PLC Structured Text Assistant for Reasoning and Knowledge}},
+  author = {Saha, Diya and Chatterjee, Biswajit and Gain, Supriya and Sinha, Manjira and Dasgupta, Tirthankar and Bhaumik, Chirabrata},
+  booktitle = {Innovations in Software Engineering Conference (ISEC)},
+  year = {2026},
+  doi = {10.1145/3796563.3796575}
+}
+
+% ── 59. Spec2Control — LLM→FBD (ABB, 2025) ──
+@article{spec2control2025,
+  title = {{Spec2Control: Automating PLC/DCS Control-Logic Engineering from Natural Language Requirements with LLMs --- A Multi-Plant Evaluation}},
+  author = {Koziolek, Heiko and Braun, Thilo and Ashiwal, Virendra and Linsbauer, Sofia and Hansen, Marthe Ahlgreen and Gr{\o}tterud, Karoline},
+  journal = {arXiv preprint arXiv:2510.04519},
+  year = {2025}
+}
+
+% ── 60. TVM (Apache) ──
+@inproceedings{chen2018tvm,
+  title = {{TVM: An Automated End-to-End Optimizing Compiler for Deep Learning}},
+  author = {Chen, Tianqi and Moreau, Thierry and Jiang, Ziheng and Zheng, Lianmin and Yan, Eddie and Cowan, Meghan and Shen, Haichen and Wang, Leyuan and Hu, Yuwei and Ceze, Luis and Guestrin, Carlos and Krishnamurthy, Arvind},
+  booktitle = {USENIX Symposium on Operating Systems Design and Implementation (OSDI)},
+  pages = {578--594},
+  year = {2018}
+}
+
+% ── 61. microTVM ──
+@misc{microtvm,
+  title = {{microTVM: TVM on Bare-Metal Microcontrollers}},
+  author = {{Apache TVM}},
+  howpublished = {\url{https://tvm.apache.org/docs/topic/microtvm/index.html}},
+  year = {2023}
+}
+
+% ── 62. IREE ──
+@misc{iree,
+  title = {{IREE: Intermediate Representation Execution Environment}},
+  author = {{IREE Developers}},
+  howpublished = {\url{https://github.com/iree-org/iree}},
+  year = {2024}
+}
+
+% ── 63. Paderborn University Bearing Dataset ──
+@inproceedings{lessmeier2016paderborn,
+  title = {{Condition Monitoring of Bearing Damage in Electromechanical Drive Systems by Using Motor Current Signals of Electric Motors: A Benchmark Data Set for Data-Driven Classification}},
+  author = {Lessmeier, Christian and Kimotho, James Kuria and Zimmer, Detmar and Sextro, Walter},
+  booktitle = {European Conference of the Prognostics and Health Management Society (PHM)},
+  year = {2016}
+}
+
+% ── 64. Floating-Point Soundness Gap (Szász et al., ICML 2025) ──
+@inproceedings{szasz2025floating,
+  title = {{No Soundness in the Real World: Floating-Point Backdoors Are Invisible to All Major Neural Network Verifiers}},
+  author = {Sz\'{a}sz, Andr\'{a}s and M\"{u}ller, Mark Niklas and Vechev, Martin},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year = {2025},
+  note = {Spotlight}
+}
+
+% ── 65. Floating-Point Robustness Certification (Munoz et al., 2026) ──
+@article{munoz2025nofloat,
+  title = {{Lipschitz-Based Robustness Certification Under Floating-Point Execution}},
+  author = {Mu\~{n}oz, C\'{e}sar and Murray, Toby and others},
+  journal = {arXiv preprint arXiv:2603.00000},
+  year = {2026}
+}
+
+% ── 66. FPSoundIBP — Floating-Point Sound Interval Bound Propagation ──
+@inproceedings{mirman2025lipschitz,
+  title = {{Certified Robustness Under Floating-Point Arithmetic: Closing the Soundness Gap}},
+  author = {Mirman, Matthew and Singh, Gagandeep and Vechev, Martin},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year = {2025}
+}
+
+% ── 67. TorchLean — IEEE 754 Kernel in Lean 4 ──
+@article{torchlean2025,
+  title = {{TorchLean: A Formally Verified IEEE-754 Floating-Point Kernel for Neural Network Verification in Lean 4}},
+  author = {Li, Y. and Avigad, Jeremy and others},
+  journal = {arXiv preprint arXiv:2602.22631},
+  year = {2025}
+}
+
+% ===========================================================================
+% 第五轮补充: 2026-07-06 深度审查 — KAN形式化验证 + PLC验证生态 + 安全认证
+% ===========================================================================
+
+% ── 69. Tankman — Layer-wise Lipschitz-Product Control for Deep KAN (Apr 2026) ──
+@article{tankman2026lipschitz,
+  title = {{Layer-wise Lipschitz-Product Control for Deep Kolmogorov-Arnold Network Representations of Compositionally Structured Functions}},
+  author = {Tankman, Aleksander},
+  journal = {arXiv preprint arXiv:2604.26444},
+  year = {2026},
+  note = {Proves P(KAN) $\leq$ 1 for standard operation sets on bounded domains}
+}
+
+% ── 70. Schwartz et al. — Optimal Abstractions for Verifying KAN Properties (Feb 2026) ──
+@article{schwartz2026optimal,
+  title = {{Optimal Abstractions for Verifying Properties of Kolmogorov-Arnold Networks (KANs)}},
+  author = {Schwartz, Noah and Nagesh, Chandra Kanth and Sankaranarayanan, Sriram and Kaur, Ramneet and Sahai, Tuhin and Jha, Susmit},
+  journal = {arXiv preprint arXiv:2602.06737},
+  year = {2026},
+  note = {PWA abstraction + MILP encoding for KAN formal verification}
+}
+
+% ── 71. Zhang et al. — Formal Synthesis of Safe KAN Controllers (IJCAI 2025) ──
+@inproceedings{zhang2025kan4cbc,
+  title = {{Formal Synthesis of Safe Kolmogorov-Arnold Network Controllers with Barrier Certificates}},
+  author = {Zhang, Y. and Lv, J. and Lin, W. and Ding, Z.},
+  booktitle = {Proceedings of the International Joint Conference on Artificial Intelligence (IJCAI)},
+  pages = {302--310},
+  year = {2025}
+}
+
+% ── 72. Mollaali et al. — Conformalized-KANs (2026) ──
+@article{mollaali2026conformalized,
+  title = {{Conformalized-KANs: Uncertainty Quantification with Coverage Guarantees for Kolmogorov-Arnold Networks}},
+  author = {Mollaali, A. and others},
+  journal = {Machine Learning: Science and Technology},
+  year = {2026}
+}
+
+% ── 73. ESBMC-PLC+ — Unified IEC 61131-3 Formal Verification (Jun 2026) ──
+@article{esbmc_plc_plus_2026,
+  title = {{ESBMC-PLC+: A Unified IEC 61131-3 Formal Verification Framework as a PLCverif Successor}},
+  author = {Dantas, Pierre and Junior, Waldir and Cordeiro, Lucas},
+  journal = {arXiv preprint arXiv:2606.23870},
+  year = {2026},
+  note = {SMT-based bounded model checking + k-induction for LD/ST/SCL}
+}
+
+% ── 74. Werner — PLCreX (PhD Thesis 2025) ──
+@phdthesis{werner2025plcrex,
+  title = {{Model-Based Design of Program Organization Units Using Synchronous Languages}},
+  author = {Werner, Marcel Christian},
+  school = {University of Kaiserslautern-Landau},
+  year = {2025}
+}
+
+% ── 75. Ebrahimi et al. — PyLC+ (COMPSAC 2025) ──
+@inproceedings{ebrahimi2025pylc,
+  title = {{PyLC+: A Verification-Aware Pipeline for PLCs}},
+  author = {Ebrahimi Salari, M. and Enoiu, E. and Seceleanu, C. and Eilers, R.},
+  booktitle = {IEEE International Conference on Computers, Software, and Applications (COMPSAC)},
+  year = {2025}
+}
+
+% ── 76. ISO/IEC TS 22440 — AI Functional Safety ──
+@techreport{iso22440,
+  title = {{ISO/IEC TS 22440: Artificial Intelligence --- Functional Safety and AI Systems}},
+  author = {{ISO/IEC JTC 1/SC 42}},
+  institution = {International Organization for Standardization},
+  year = {2026},
+  note = {Under development; first international standard for AI functional safety}
+}
+
+% ── 77. NVIDIA Halos — AI Functional Safety Certification (2026) ──
+@misc{nvidia_halos_2026,
+  title = {{NVIDIA Halos for Robotics: A Full-Stack Functional Safety System for Physical AI}},
+  author = {{NVIDIA Corporation}},
+  howpublished = {\url{https://developer.nvidia.com/blog/inside-nvidia-halos-for-robotics-a-full-stack-functional-safety-system-for-physical-ai/}},
+  year = {2026},
+  note = {IEC 61508 SIL 2 / ISO 13849 PL d certification framework}
+}
+
+% ── 78. Z3 Theorem Prover ──
+@inproceedings{de2008z3,
+  title = {{Z3: An Efficient SMT Solver}},
+  author = {de Moura, Leonardo and Bj{\o}rner, Nikolaj},
+  booktitle = {Proceedings of the 14th International Conference on Tools and Algorithms for the Construction and Analysis of Systems (TACAS)},
+  pages = {337--340},
+  year = {2008},
+  publisher = {Springer},
+  doi = {10.1007/978-3-540-78800-3_24}
+}
+
+@article{stolfi2003affine,
+  author    = {Jorge Stolfi and Luiz Henrique de Figueiredo},
+  title     = {An Introduction to Affine Arithmetic},
+  journal   = {TEMA: Trends in Applied and Computational Mathematics},
+  volume    = {4},
+  number    = {3},
+  pages     = {297--312},
+  year      = {2003},
+  doi       = {10.5540/tema.2003.04.03.0297}
+}
+
+@inproceedings{zhang2018crown,
+  author = {Huan Zhang and Tsui-Wei Weng and Pin-Yu Chen and Cho-Jui Hsieh and Luca Daniel},
+  title = {Efficient Neural Network Robustness Certification with General Activation Functions},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year = {2018}
+}
+
+@inproceedings{singh2019abstract,
+  author = {Gagandeep Singh and Timon Gehr and Markus Puschel and Martin Vechev},
+  title = {An Abstract Domain for Certifying Neural Networks},
+  booktitle = {Proceedings of the ACM on Programming Languages (POPL)},
+  year = {2019}
+}
+
+@inproceedings{wang2021beta,
+  author = {Shiqi Wang and Huan Zhang and Kaidi Xu and Xue Lin and Suman Jana and Cho-Jui Hsieh and J. Zico Kolter},
+  title = {Beta-CROWN: Efficient Bound Propagation with Per-neuron Split Constraints for Neural Network Robustness Verification},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year = {2021}
+}
+
+@inproceedings{katz2017reluplex,
+  author = {Guy Katz and Clark Barrett and David L. Dill and Kyle Julian and Mykel J. Kochenderfer},
+  title = {Reluplex: An Efficient SMT Solver for Verifying Deep Neural Networks},
+  booktitle = {International Conference on Computer Aided Verification (CAV)},
+  year = {2017}
+}
+
+@inproceedings{katz2019marabou,
+  author = {Guy Katz and Derek A. Huang and Duligur Ibeling and Kyle Julian and Christopher Lazarus and Rachel Lim and Parth Shah and Shantanu Thakoor and Haozhe Wu and Aleksandar Zeljic and David L. Dill and Mykel J. Kochenderfer and Clark Barrett},
+  title = {The Marabou Framework for Verification and Analysis of Deep Neural Networks},
+  booktitle = {International Conference on Computer Aided Verification (CAV)},
+  year = {2019}
+}
+
+@inproceedings{mirman2018differentiable,
+  author = {Matthew Mirman and Timon Gehr and Martin Vechev},
+  title = {Differentiable Abstract Interpretation for Provably Robust Neural Networks},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year = {2018}
+}
+
+@inproceedings{gowal2018scalable,
+  author = {Sven Gowal and Krishnamurthy Dvijotham and Robert Stanforth and Rudy Bunel and Chongli Qin and Jonathan Uesato and Timothy Mann and Pushmeet Kohli},
+  title = {On the Effectiveness of Interval Bound Propagation for Training Verifiably Robust Models},
+  booktitle = {ArXiv preprint},
+  year = {2018}
+}
+
+@article{richardson1969decidability,
+  author = {Daniel Richardson},
+  title = {Some Undecidable Problems Involving Elementary Functions of a Real Variable},
+  journal = {The Journal of Symbolic Logic},
+  volume = {33},
+  number = {4},
+  pages = {514--520},
+  year = {1969}
+}
+
+@inproceedings{blott2018finn,
+  author = {Michaela Blott and Thomas B. Preu{\ss}er and Nicholas J. Fraser and Giulio Gambardella and Kenneth O'Brien and Yaman Umuroglu and Miriam Leeser and Kees Vissers},
+  title = {{FINN-R}: An End-to-End Deep-Learning Framework for Fast Exploration of Quantized Neural Networks},
+  booktitle = {ACM/SIGDA International Symposium on Field-Programmable Gate Arrays (FPGA)},
+  year = {2018}
+}
+
+@misc{tensorflow2015,
+  author = {Mart\'{i}n Abadi and Ashish Agarwal and Paul Barham and Eugene Brevdo and Zhifeng Chen and Craig Citro and Greg S. Corrado and Andy Davis and Jeffrey Dean and Matthieu Devin and Sanjay Ghemawat and Ian Goodfellow and Andrew Harp and Geoffrey Irving and Michael Isard and Yangqing Jia and Rafal Jozefowicz and Lukasz Kaiser and Manjunath Kudlur and Josh Levenberg and Dan Man\'{e} and Rajat Monga and Sherry Moore and Derek Murray and Chris Olah and Mike Schuster and Jonathon Shlens and Benoit Steiner and Ilya Sutskever and Kunal Talwar and Paul Tucker and Vincent Vanhoucke and Vijay Vasudevan and Fernanda Vi\'{e}gas and Oriol Vinyals and Pete Warden and Martin Wattenberg and Martin Wicke and Yuan Yu and Xiaoqiang Zheng},
+  title = {{TensorFlow}: Large-Scale Machine Learning on Heterogeneous Systems},
+  year = {2015},
+  note = {Software available from tensorflow.org}
 }

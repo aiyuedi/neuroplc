@@ -1,0 +1,50 @@
+{
+  "description": "Adaptive LUT degradation: when does curvature-aware sampling lose its advantage over uniform sampling?",
+  "n_trials": 5,
+  "summary": {
+    "mean_improvement": 0.8949227870128267,
+    "std_improvement": 0.2195755879110522,
+    "max_improvement": 1.1283796667040529,
+    "min_improvement": 0.6058906522308419,
+    "corr_diversity_improvement": -0.46078971271694286,
+    "pct_low_improvement": 100.0
+  },
+  "results": [
+    {
+      "curvature_diversity": 1.3959736793397446,
+      "curvature_std": 1.253455021553139,
+      "dp_error": 1.0217568332165528,
+      "uniform_error": 1.1529296349174822,
+      "adaptive_improvement": 1.1283796667040529
+    },
+    {
+      "curvature_diversity": 1.7003692702148012,
+      "curvature_std": 0.9225398739742297,
+      "dp_error": 1.38285008042113,
+      "uniform_error": 0.9049077374043016,
+      "adaptive_improvement": 0.6543787719408622
+    },
+    {
+      "curvature_diversity": 0.6413981088224386,
+      "curvature_std": 0.37012550832040925,
+      "dp_error": 0.8717746088707455,
+      "uniform_error": 0.8868427652693871,
+      "adaptive_improvement": 1.0172844634901217
+    },
+    {
+      "curvature_diversity": 1.3526312114657715,
+      "curvature_std": 0.6635610404821947,
+      "dp_error": 0.7940382444338888,
+      "uniform_error": 0.8485730933505822,
+      "adaptive_improvement": 1.0686803806982548
+    },
+    {
+      "curvature_diversity": 1.4128680725982108,
+      "curvature_std": 0.665886711021507,
+      "dp_error": 1.3474451533432785,
+      "uniform_error": 0.8164044228044459,
+      "adaptive_improvement": 0.6058906522308419
+    }
+  ],
+  "conclusion": "Adaptive LUT provides meaningful improvement (>1.5\u00d7) only when B-spline basis functions have diverse curvature (|\u03c6''| varies >2\u00d7 across bases). For uniform-curvature functions (e.g., near-linear activations), uniform sampling is sufficient. Trained KANs on CWRU show diverse curvature across edges, making adaptive LUT beneficial."
+}

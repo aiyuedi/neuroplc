@@ -136,7 +136,7 @@ class NeuroPLCCompiler:
             target_points=self.lut_points, x_range=self.x_range,
             verbose=self.verbose)
 
-        self.sampling_error = compare_sampling_error(self.ir_graph)
+        self.sampling_error = compare_sampling_error(self.ir_graph, n_test_points=100)
 
         if self.verbose:
             n_opt = self.optimizer_stats.get("adaptive_bspline", 0)

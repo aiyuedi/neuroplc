@@ -1,0 +1,14 @@
+{
+  "timestamp": "2026-07-07T17:17:41.695799",
+  "templates_proved": 4,
+  "total_templates": 6,
+  "note": "Using cached results. Run with --full to re-prove via Z3.",
+  "cached_results": {
+    "MatMul": "PROVED (all dimension pairs UNSAT)",
+    "Add": "PROVED (all dimensions UNSAT)",
+    "BsplineLUT": "PROVED_BOUNDED (Z3 UNSAT on cubic poly bound)",
+    "Argmax": "PROVED (all dimensions UNSAT)",
+    "StandardAct": "ASSUMED (analytic proof; transcendental exp)",
+    "Softmax": "ASSUMED (analytic proof; transcendental exp)"
+  }
+}

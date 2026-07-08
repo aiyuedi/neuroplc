@@ -1,0 +1,154 @@
+{
+  "model": {
+    "architecture": [
+      28,
+      16,
+      4
+    ]
+  },
+  "variants": [
+    {
+      "variant": "Full IR (6 ops)",
+      "description": "Reference: all 6 IR operations",
+      "op_set": [
+        "Add",
+        "Argmax",
+        "BsplineLUT",
+        "MatMul",
+        "Softmax",
+        "StandardAct"
+      ],
+      "num_op_types": 6,
+      "total_nodes": 11,
+      "op_counts": {
+        "MatMul": 3,
+        "StandardAct": 2,
+        "BsplineLUT": 2,
+        "Add": 2,
+        "Softmax": 1,
+        "Argmax": 1
+      },
+      "memory": {
+        "arrays_bytes": 0,
+        "lut_bytes": 30720,
+        "weights_bytes": 5376,
+        "total_bytes": 36096,
+        "total_kb": 35.2
+      },
+      "operations": 7028,
+      "est_scl_lines": 2132
+    },
+    {
+      "variant": "No-BsplineLUT",
+      "description": "Remove BsplineLUT: expand each spline function into MatMul+Act",
+      "op_set": [
+        "MatMul",
+        "StandardAct",
+        "Add",
+        "Softmax",
+        "Argmax"
+      ],
+      "num_op_types": 5,
+      "total_nodes": 521,
+      "op_counts": {
+        "MatMul": 3,
+        "StandardAct": 2,
+        "BsplineLUT": 2,
+        "Add": 2,
+        "Softmax": 1,
+        "Argmax": 1
+      },
+      "memory": {
+        "arrays_bytes": 30720,
+        "lut_bytes": 0,
+        "weights_bytes": 5376,
+        "expansion_lut_bytes": 30720,
+        "total_bytes": 66816,
+        "total_kb": 65.2
+      },
+      "operations": 12148,
+      "est_scl_lines": 4692,
+      "expansion": {
+        "bspline_functions_expanded": 512,
+        "extra_memory_bytes": 30720,
+        "extra_operations": 5120,
+        "node_blowup": "512/2 = 256x"
+      }
+    },
+    {
+      "variant": "No-Add",
+      "description": "Remove Add: base+spline merge requires extended weight matrices",
+      "op_set": [
+        "MatMul",
+        "BsplineLUT",
+        "StandardAct",
+        "Softmax",
+        "Argmax"
+      ],
+      "num_op_types": 5,
+      "total_nodes": 15,
+      "op_counts": {
+        "MatMul": 3,
+        "StandardAct": 2,
+        "BsplineLUT": 2,
+        "Add": 2,
+        "Softmax": 1,
+        "Argmax": 1
+      },
+      "memory": {
+        "arrays_bytes": 0,
+        "lut_bytes": 30720,
+        "weights_bytes": 5376,
+        "total_bytes": 36224,
+        "total_kb": 35.4
+      },
+      "operations": 7124,
+      "est_scl_lines": 2172,
+      "expansion": {
+        "extra_matmul_nodes": 4,
+        "extra_memory_bytes": 128
+      }
+    },
+    {
+      "variant": "No-StandardAct",
+      "description": "Remove StandardAct: SiLU inlined at each MatMul site, duplicating LUTs",
+      "op_set": [
+        "MatMul",
+        "BsplineLUT",
+        "Add",
+        "Softmax",
+        "Argmax"
+      ],
+      "num_op_types": 5,
+      "total_nodes": 9,
+      "op_counts": {
+        "MatMul": 3,
+        "StandardAct": 2,
+        "BsplineLUT": 2,
+        "Add": 2,
+        "Softmax": 1,
+        "Argmax": 1
+      },
+      "memory": {
+        "arrays_bytes": 0,
+        "lut_bytes": 30720,
+        "weights_bytes": 5376,
+        "total_bytes": 36608,
+        "total_kb": 35.8
+      },
+      "operations": 7868,
+      "est_scl_lines": 2156,
+      "expansion": {
+        "inlined_activations": 2,
+        "extra_operations": 840,
+        "duplicated_lut_bytes": 512
+      }
+    }
+  ],
+  "full_ir_baseline": {
+    "total_nodes": 11,
+    "total_memory_kb": 35.2,
+    "total_operations": 7028,
+    "est_scl_lines": 2132
+  }
+}

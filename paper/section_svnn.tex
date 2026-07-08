@@ -1,0 +1,780 @@
+% ===========================================================================
+% III. STRUCTURAL VERIFIABILITY OF NEURAL NETWORKS
+% ===========================================================================
+\section{Structural Verifiability of Neural Networks}
+\label{sec:svnn}
+
+We now formalize a central observation that emerged from the compiler design
+process: whether a neural network compiler can provide design-time correctness
+guarantees is not solely a property of the compiler---it is fundamentally
+determined by the \textit{architecture} being compiled. This section defines
+the class of architectures for which correctness-preserving compilation is
+achievable, proves that KAN belongs to this class, and demonstrates that
+standard MLPs do not.
+
+\vspace{4pt}
+\begin{remark}[The Compilable Frontier]
+\label{rem:compilable_frontier}
+The SVNN conditions define a \textbf{compilable frontier}---a principled
+boundary separating neural architectures whose deployed behavior can be
+certified at design time from those that require runtime testing. Architectures
+satisfying Conditions~1--2 lie on the \textit{interior} (certifiable side):
+their decomposition into pure linear and element-wise operations enables the
+structural induction that Theorem~2's proof relies on. Architectures violating
+any condition lie on the \textit{exterior} (empirical-only side): they can
+still be compiled and deployed, but their correctness guarantees are limited
+to test-set validation. Proposition~1 (below) establishes that standard MLPs
+with SiLU, Sigmoid, or Tanh activations---the dominant architectures in
+industrial ML---lie on the exterior. This frontier is not an implementation
+artifact; it reflects a fundamental property of which function classes admit
+closed-form, compiler-computable error propagation.
+\end{remark}
+
+
+\subsection{The Verification Challenge for PLC-Deployed Networks}
+\label{sec:svnn-challenge}
+
+Industrial PLCs govern safety-critical machinery: conveyor sorting systems,
+motor drives, and process control loops where incorrect outputs can cause
+equipment damage or production line stoppage. Deploying neural networks on
+such controllers therefore demands correctness guarantees that go beyond
+empirical test-set accuracy.
+
+Existing ML$\to$PLC tools (RTNNIgen~\cite{rtnnigen2024}, MLconverter%
+~\cite{mlconverter2025}, ICSML~\cite{icsml2023}) provide \textit{no}
+mathematical guarantee that the generated PLC code preserves the trained
+model's behavior. Their correctness model is purely empirical: train, convert,
+and test on a held-out set. For industrial deployment---where inputs may
+drift, sensors may degrade, and the PLC's REAL arithmetic differs from
+PyTorch's float32---this is insufficient.
+
+We identify three levels of deployment verification, in increasing order
+of strength:
+
+\begin{enumerate}
+    \item \textbf{Level 1---Runtime Testing (Weakest):} Evaluate the deployed
+          model on a test set and report accuracy. This is the status quo
+          (RTNNIgen, MLconverter). It provides no guarantee on unseen inputs
+          and cannot detect systematic floating-point discrepancies.
+    \item \textbf{Level 2---Design-Time Error Bounds (SVNN):} Compute, at
+          \textit{compile time} and without executing on hardware, a provable
+          per-output error bound $\varepsilon_i$ such that for all valid
+          inputs $x$, the deployed model's output differs from the trained
+          model's output by at most $\varepsilon_i$. This is the guarantee
+          that \neuroplc provides (Theorem~1).
+    \item \textbf{Level 3---Mechanized Formal Verification (Strongest):}
+          A machine-checked proof (e.g., in Coq, Isabelle, or Lean) that the
+          compiler preserves semantics down to the IEEE~754 bit-level. This
+          has been achieved for select neural network kernels in TorchLean%
+          \cite{torchlean2025} but is currently intractable for full
+          compiler pipelines.
+\end{enumerate}
+
+Level~2---design-time error bounds---is the appropriate level for
+industrial deployment. The question is: \textit{which architectures admit
+such bounds, and why?}
+
+\subsection{Definition: Structurally Verifiable Neural Network (SVNN)}
+\label{sec:svnn-definition}
+
+\begin{definition}[Structurally Verifiable Neural Network]
+\label{def:svnn}
+A neural network architecture $\mathcal{A}$ is \textbf{structurally
+verifiable} (SVNN) with respect to a compiler $C$ if for any instance
+$M \in \mathcal{A}$, the compiler can compute, at design time and without
+executing $M$ on target hardware, a per-output error bound
+$\varepsilon_i(M, X)$ such that:
+\begin{equation}
+\sup_{x \in X} \|M(x)_i - C(M)(x)_i\|_\infty \leq \varepsilon_i(M, X)
+\quad \forall i \in \{1, \dots, d_{\text{out}}\}
+\label{eq:svnn_def}
+\end{equation}
+where $X \subset \mathbb{R}^{d_{\text{in}}}$ is the validated input domain
+and $C(M)$ denotes the compiler's generated code executing on the target
+platform's arithmetic (here, IEC~61131-3 REAL $\equiv$ IEEE~754 binary32).
+\end{definition}
+
+This definition captures the essential requirement: the compiler must
+provide an \textit{a priori} guarantee---before the model ever runs on the
+PLC---that the deployed code will not silently diverge from the trained
+model. The error bound $\varepsilon_i$ may depend on the model's parameters,
+the compiler's approximation choices (e.g., LUT resolution), and the input
+domain, but it must be computable from these quantities alone.
+
+\subsection{Sufficient Conditions for SVNN}
+\label{sec:svnn-conditions}
+
+We now establish the architectural conditions that enable SVNN compilation.
+The conditions formalize why some architectures admit tight, composable
+error bounds while others do not.
+
+\vspace{4pt}
+\noindent\textbf{Theorem 2 (SVNN Sufficient Conditions).}
+Let $\mathcal{A}$ be a feedforward neural network architecture. If $\mathcal{A}$
+satisfies Conditions~1 and~2 below, then $\mathcal{A}$ is structurally
+verifiable---for any instance $M \in \mathcal{A}$ of finite depth $L$, a
+compiler adhering to the SVNN compilation discipline can compute, from the
+model parameters alone, a finite per-output error bound. If $\mathcal{A}$
+additionally satisfies the contractivity refinement (Condition~3), this bound
+admits the closed, \textit{depth-independent} geometric-series form
+$O(M_{\max} \cdot h^2 \cdot d_{\max} / (1-\gamma))$, where $M_{\max}$ is the
+maximum second-derivative bound, $h$ is the LUT grid spacing, $d_{\max}$ the
+maximum activation count per layer, and $\gamma < 1$ the contractivity
+constant; absent Condition~3, the bound remains finite for every fixed $L$
+but may grow with depth.
+
+The conditions are designed to \textit{discriminate}: a standard MLP layer
+$\mathbf{h} = \sigma(W\mathbf{x} + \mathbf{b})$ composes an affine transform
+and a pointwise activation in one coupled operation, violating Condition~1.
+This prevents per-operation error induction (the proof's structural induction
+requires each node to be either purely linear or purely element-wise).
+MLPs with SiLU or GELU additionally violate the Z3-verifiability of
+Condition~2 (the transcendental $\exp$ is undecidable in Z3's NRA theory);
+MLPs with ReLU lack a $C^2$ curvature parameter. KAN layers, in contrast,
+decompose naturally at the IR level into separate MatMul, BsplineLUT,
+StandardAct, and Add nodes---each satisfies one of the two pure types.
+Conditions~1--2 thus characterize exactly the class that admits the
+induction, and KAN belongs to it; standard MLPs do not.
+
+\begin{enumerate}
+    \item \textbf{Operation-Type Closure (Condition~1).} The architecture
+    can be decomposed into a directed acyclic graph where every node is
+    either (a) a linear transformation (matrix multiplication, vector
+    addition) or (b) an element-wise univariate function. No node may
+    mix these operation types. This decomposition is provided by the
+    compiler's IR ({\S}\ref{sec:ir}); it guarantees that the per-node
+    error induction in the proof below never encounters a coupled
+    linear+nolinear operation.
+
+    \item \textbf{Univariate Curvature Bound (Condition~2).} Every element-wise
+    univariate function $f: \mathbb{R} \to \mathbb{R}$ is $C^2$-continuous
+    on the validated input domain $X$, and its second derivative satisfies
+    $\sup_{x \in X} |f''(x)| \leq M_f < \infty$. The bound $M_f$ must be
+    computable from the function's parameters alone. This enables the
+    de~Boor LUT error bound $\varepsilon_f = M_f h^2/8$---a
+    \textit{compiler-controllable} error: by increasing the LUT resolution
+    (reducing $h$), the per-function error decreases quadratically.
+    Condition~2 thus provides the compiler with a tunable guarantee knob
+    that MLPs with ReLU (no $C^2$) or SiLU/GELU (transcendental,
+    Z3-undecidable) lack.
+\end{enumerate}
+
+\noindent Conditions~1 and~2 are the \textit{sufficient conditions} for
+structural verifiability. The following refinement governs how the bound
+scales, not whether it exists:
+
+\begin{enumerate}\setcounter{enumi}{2}
+    \item \textbf{Contractive Composition (Condition~3, refinement).} The
+    product of each element-wise layer's Lipschitz constant
+    $L_f^{(\ell)} = \sup_x |f'(x)|$ with the subsequent linear layer's
+    row-sum norm satisfies $L_f^{(\ell)} \cdot \|W^{(\ell+1)}\|_{1,\infty}
+    \leq \gamma < 1$. When this holds, the bound converges to a
+    depth-independent constant $O(1/(1-\gamma))$; when it does not, the
+    bound remains finite for the specific deployment depth but grows as
+    $O(\gamma^L)$. Condition~3 upgrades a per-depth certificate to a
+    depth-independent one; it is \textit{not} required for SVNN membership.
+\end{enumerate}
+
+\vspace{4pt}
+\noindent\textit{Proof.} The proof proceeds in four steps.
+
+\vspace{2pt}
+\noindent\textbf{Step 1 (Linear Layer Exactness).}
+Let $y = Wx + b$ be a linear transformation with input $x$ that carries
+error $\delta_x$ (i.e., the compiled input is $\tilde{x} = x + \delta_x$).
+The compiled output is $\tilde{y} = W\tilde{x} + b = Wx + b + W\delta_x$.
+Hence $\|\tilde{y} - y\|_\infty = \|W\delta_x\|_\infty \leq
+\|W\|_{1,\infty} \cdot \|\delta_x\|_\infty$. A linear layer
+introduces \textit{no new error sources}---it only amplifies or attenuates
+existing error. Under sign-structural affine arithmetic ({\S}\ref{sec:da}), the
+amplification factor exploits weight-matrix sign structure, yielding
+$\|W\delta_x\|_\infty \leq \|W^+\delta_x^+ + W^-\delta_x^-\|_\infty$,
+which is strictly tighter than the interval-arithmetic bound
+$\|W\|_{1,\infty} \cdot \|\delta_x\|_\infty$ when $W$ contains both
+positive and negative entries.
+
+\vspace{2pt}
+\noindent\textbf{Step 2 (Element-Wise Boundedness).}
+Consider an element-wise univariate function $f$ applied to input $x$.
+The compiled version uses a piecewise-linear LUT approximation
+$\tilde{f}$ on a grid with spacing $h$. By the de~Boor--Cox recurrence
+for B-spline approximation error~\cite{deBoor1978}, for any $C^2$
+function:
+\begin{equation}
+\|f - \tilde{f}\|_\infty \leq \frac{M_f \cdot h^2}{8}
+\label{eq:de_boor_general}
+\end{equation}
+where $M_f = \sup_x |f''(x)|$. Condition~2 guarantees that $M_f$ is
+finite and computable. The LUT thus introduces fresh error at most
+$\varepsilon_f = M_f h^2 / 8$ per function evaluation.
+
+If the input carries error $\delta_x$, the mean value theorem gives:
+\begin{equation}
+|f(x + \delta_x) - \tilde{f}(x + \delta_x)| \leq
+|f(x + \delta_x) - f(x)| + |f(x) - \tilde{f}(x + \delta_x)|
+\leq L_f \cdot |\delta_x| + \varepsilon_f
+\label{eq:element_error}
+\end{equation}
+where $L_f = \sup_x |f'(x)|$ is the Lipschitz constant of $f$.
+
+\vspace{2pt}
+\noindent\textbf{Step 3 (Finite-Depth Composition---Conditions 1 and 2 suffice).}
+We now compose the analysis across $L$ layers by structural induction on
+the layer index $\ell$. Let $\Delta^{(\ell)}$ denote the maximum per-output
+error after layer $\ell$, with $\Delta^{(0)} = 0$ (input is exact).
+
+For a linear layer $\ell$ followed by an element-wise layer:
+\begin{equation}
+\Delta^{(\ell)} \leq L_f^{(\ell)} \cdot \|W^{(\ell)}\|_{1,\infty}
+\cdot \Delta^{(\ell-1)} + \varepsilon_f^{(\ell)} \cdot d_{\ell-1}
+\label{eq:layer_recurrence}
+\end{equation}
+
+The first term captures error amplification from the previous layer; the
+second term captures fresh approximation error from $d_{\ell-1}$ parallel
+element-wise function evaluations (one per input dimension).
+
+Unrolling the recurrence across $L$ layers yields the total bound:
+\begin{equation}
+\Delta^{(L)} \leq \sum_{\ell=1}^{L} \varepsilon_f^{(\ell)} \cdot
+d_{\ell-1} \cdot \prod_{j=\ell+1}^{L}
+\bigl(L_f^{(j)} \cdot \|W^{(j)}\|_{1,\infty}\bigr)
+\label{eq:total_bound}
+\end{equation}
+
+The critical role of Condition~1 is now apparent: it guarantees that every
+node encountered by the induction is of a known type with a closed-form error
+rule (Step~1 for linear nodes, Step~2 for element-wise nodes). The recurrence
+Eq.~\ref{eq:layer_recurrence} applies \emph{only} because each node is
+provably pure. In a standard MLP layer $\mathbf{h} = \sigma(W\mathbf{x} +
+\mathbf{b})$, the affine transform and pointwise activation are coupled in a
+single operation---there is no intermediate variable whose error can be
+separately bounded, so the structural induction cannot be initiated. This is
+why Sigmoid/Tanh MLPs, despite having bounded $M_2$ (they satisfy
+Condition~2), are not SVNN: they fail Condition~1.
+
+Under Conditions~1 and~2, every term in Eq.~\ref{eq:total_bound} is finite
+and computable: $\varepsilon_f^{(\ell)} = M_f^{(\ell)} h^2/8$ from
+Condition~2, $L_f^{(j)}$ finite on the compact domain $X$, and
+$\|W^{(j)}\|_{1,\infty}$ finite by construction. Eq.~\ref{eq:total_bound}
+is therefore a finite sum of finite terms, directly yielding a computable
+design-time bound $\Delta^{(L)} < \infty$ for any fixed depth $L$---the
+existence guarantee of Definition~\ref{def:svnn}. The bound is
+\emph{compiler-controllable}: increasing the LUT resolution (reducing $h$)
+monotonically decreases $\varepsilon_f$ and hence $\Delta^{(L)}$, giving the
+compiler a tunable knob to meet any target safety requirement.
+
+\vspace{2pt}
+\noindent\textbf{Step 3b (Depth-Uniform Refinement---Condition 3).}
+Condition~3 does not change \textit{whether} a bound exists; it controls
+\textit{how the bound scales with depth}. When
+$L_f^{(j)} \cdot \|W^{(j)}\|_{1,\infty} \leq \gamma < 1$, the product terms in
+Eq.~\ref{eq:total_bound} decay geometrically, and the finite sum is majorized
+by the convergent series
+\begin{equation}
+\Delta^{(L)} \leq \frac{\max_\ell(\varepsilon_f^{(\ell)} \cdot
+d_{\ell-1})}{1 - \gamma} = O(L \cdot M_{\max} \cdot h^2 \cdot d_{\max})
+\label{eq:convergent_bound}
+\end{equation}
+where $M_{\max} = \max_f M_f$ and $d_{\max} = \max_\ell d_{\ell-1}$
+is the maximum number of element-wise activation functions per layer.
+The bound follows by substituting $\varepsilon_f^{(\ell)} =
+M_f^{(\ell)} h^2 / 8$ (Eq.~\ref{eq:de_boor_general}) into the
+geometric series, yielding a factor of $M_{\max} h^2$ per layer
+multiplied by the $d_{\ell-1}$ parallel activations. This form is
+\emph{depth-uniform}: it grows only linearly in $L$ and admits deployment on
+arbitrarily deep networks. When Condition~3 does not hold ($\gamma \geq 1$),
+Eq.~\ref{eq:total_bound} still evaluates to a finite number for the fixed
+deployment depth, but the worst-case majorant grows as
+$O(M_{\max} \cdot h^2 \cdot \gamma^L)$---still computable, only looser with
+depth. Thus Condition~3 upgrades a per-depth guarantee into a depth-uniform
+one; it is a refinement, not a membership requirement.
+
+\vspace{2pt}
+\noindent\textbf{Step 4 (Tightness and Practical Considerations).}
+The $O(L \cdot M_{\max} \cdot h^2 \cdot d_{\max})$ bound is a \textit{worst-case}
+guarantee. In practice, three factors make the bound substantially
+tighter for the KAN architecture specifically:
+\begin{enumerate}
+    \item \textbf{Segment-Aware $M_2$ ({\S}\ref{sec:segment-aware}):}
+          Rather than using the global $\sup |f''|$, we compute
+          per-segment $M_2^{(k)}$ bounds, tightening the LUT error
+          estimate by $6.0\times$ on average for KAN B-splines.
+    \item \textbf{sign-structural affine arithmetic ({\S}\ref{sec:da}):}
+          Linear layers propagate error via DA rather than IA,
+          exploiting weight-matrix sign structure for an additional
+          $3.1\times$ tightening.
+    \item \textbf{Adaptive LUT Allocation ({\S}\ref{sec:adaptive-lut}):}
+          Non-uniform knot placement allocates more LUT points to
+          high-curvature regions, reducing the effective $h$ for
+          the dominant error sources by up to $71.6\%$.
+\end{enumerate}
+Together, these refinements transform the asymptotic $O(L \cdot M_{\max}
+\cdot h^2 \cdot d_{\max})$ bound into a practically useful guarantee. For the trained
+$[28,16,4]$ KAN, the combined segment-aware DA safety factor is approximately
+$11.9\times$ above the minimum required for classification correctness
+({\S}\ref{sec:method}, Table~\ref{tab:da_bounds_summary}).
+
+\vspace{4pt}
+\begin{remark}[Near-Necessity of the SVNN Conditions]
+\label{rem:near_necessity}
+While Theorem~2 establishes sufficiency, the question of necessity is
+equally important: are these conditions arbitrarily chosen, or do they
+characterize a genuine structural boundary? We argue the latter through
+three observations.
+
+\vspace{2pt}
+\noindent\textit{(a) Condition~1 is structurally necessary for polynomial-time
+bound computation.}
+Any architecture that couples linear transforms with nonlinear activations
+in a single operation---the standard MLP layer $\mathbf{h} = \sigma(W\mathbf{x}
++ \mathbf{b})$---eliminates the intermediate representation whose error the
+structural induction bounds. Without this decomposition, error propagation
+must model the coupled operation as a single black-box function, requiring
+general-purpose LP/SMT solvers (CROWN, Marabou, Reluplex) whose cost grows
+with network size. Condition~1 thus separates architectures admitting $O(L
+\cdot d_{\max}^2)$ compiler-computed bounds from those requiring
+exponential-time SMT case-splitting.
+
+\vspace{2pt}
+\noindent\textit{(b) Condition~2 separates $C^2$-bounded from transcendental.}
+The de~Boor LUT error bound ($\varepsilon = M_2 h^2/8$) requires $C^2$
+continuity. Activations without $C^2$ (ReLU: $f''$ undefined at 0) or with
+unbounded curvature (SiLU: $\sup |\text{SiLU}''| = \infty$ on $\mathbb{R}$)
+cannot use this bound. The $C^2$ requirement is nearly tight: it excludes
+exactly the activations whose LUT error cannot be bounded by a finite,
+parameter-computable constant. On the compact input domain $[-3,3]^{28}$,
+SiLU's second derivative is finite ($\max \approx 0.21$)---but the key
+distinction is \textit{computability}: $M_2^{\text{B-spline}}$ is computable
+from the learned coefficients alone, whereas $\sup_{x\in[-3,3]}
+|\text{SiLU}''(x)|$ requires numerical optimization over a transcendental
+function---a different computational model.
+
+\vspace{2pt}
+\noindent\textit{(c) Richardson's Theorem~\cite{richardson1969decidability}
+imposes a fundamental barrier.}
+The equality of expressions involving $e^x$ is undecidable by
+Richardson's theorem. Since SiLU contains $e^{-x}$, determining whether
+$\text{SiLU}_{\text{LUT}}(x) = \text{SiLU}_{\text{FP32}}(x)$ for a given LUT
+resolution is, in general, undecidable. KAN's B-spline activations are
+piecewise-polynomial and avoid this barrier entirely. The SVNN conditions
+are therefore not an arbitrary restriction---they characterize the precise
+boundary at which compiler-computed correctness becomes \textit{decidable}.
+\end{remark}
+
+\vspace{4pt}
+\noindent\textbf{Remark 2 (Relationship to Theorem~1).}
+Theorem~1 ({\S}\ref{sec:method}) is the \textit{concrete instantiation}
+of the SVNN framework for a specific architecture (2-layer KAN) and
+compiler (NeuroPLC). Theorem~2 provides the \textit{general principle}:
+any finite-depth architecture satisfying Conditions~1--2 admits a
+correctness-preserving compiler, with Condition~3 sharpening the resulting
+bound to a depth-uniform form. Theorem~1 proves that KAN satisfies the
+conditions; Theorem~2 shows \textit{why} this is possible and characterizes
+the broader class of architectures for which similar guarantees can be obtained.
+
+\vspace{4pt}
+\noindent\textbf{Remark 3 (Arithmetic Bounds vs.\ MILP-Based Verification).}
+The SVNN arithmetic bound ($O(L \cdot M_{\max} \cdot h^2 \cdot d_{\max})$, Theorem~2)
+and the PWA abstraction + MILP approach of Schwartz
+et~al.~\cite{schwartz2026optimal} represent two complementary points on
+the verification cost-precision spectrum. \textit{Arithmetic bounds}
+(Level~2) are computable in closed form at compile time, require no
+external solver, and provide a sound over-approximation for all inputs
+in the validated domain---but they are inherently conservative (the
+$\sim$11.9$\times$ safety factor for our trained KAN reflects this
+conservatism). \textit{MILP-based verification} (Level~3) can provide
+exact certification within the PWA abstraction error (typically
+$<$0.1\% of the function range per unit), but requires solving an
+MILP whose size grows with the number of PWA pieces---tractable for
+KANs (each univariate function is abstracted independently) but
+exponential for MLPs (multivariate activations require piecewise
+decomposition of $\mathbb{R}^d$). The two approaches are synergistic:
+arithmetic bounds serve as a fast, no-solver-required pre-certificate;
+if the bound is within safety margins, no further verification is
+needed. If tighter guarantees are required (e.g., for SIL~3+
+certification), the SVNN decomposition enables targeted MILP
+verification of safety-critical outputs. This two-tier architecture is
+discussed further in {\S}\ref{sec:compositional}.
+
+
+
+\vspace{4pt}
+\noindent\textbf{Architecture Taxonomy Under the Compilable Frontier.}
+Table~\ref{tab:svnn_taxonomy} maps major neural architecture families to the
+SVNN conditions, providing a concrete instantiation of the compilable frontier
+(Remark~\ref{rem:compilable_frontier}). The taxonomy reveals a stark divide:
+architectures that decompose into pure linear $+$ element-wise operations
+(Condition~1) and use $C^2$ parameter-computable activations (Condition~2)
+occupy the \textit{interior}---their deployed behavior is certifiable at design
+time. All architectures violating either condition lie on the
+\textit{exterior}---they can be compiled and deployed, but correctness
+guarantees are limited to test-set validation. The Contractivity column
+(Condition~3) further distinguishes architectures whose error bounds are
+depth-\textit{uniform} ($\gamma < 1$, $O(L)$ growth) from those whose bounds
+are merely depth-\textit{finite} (computable but potentially growing with $L$).
+
+\begin{table}[t]
+\centering
+\caption{Architecture Taxonomy Under the SVNN Compilable Frontier. Architectures on the interior admit compiler-computed design-time correctness certificates; architectures on the exterior require runtime testing.}
+\label{tab:svnn_taxonomy}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}p{1.7cm}p{0.95cm}p{0.95cm}p{1.1cm}p{1.15cm}p{1.25cm}@{}}
+\toprule
+\textbf{Architecture} & \textbf{Cond.~1} & \textbf{Cond.~2} & \textbf{Contract.} & \textbf{Frontier} & \textbf{Z3-Verif.} \\
+\midrule
+KAN (B-spline) & \cmark & \cmark & \cmark$^{*}$ & Interior$^{\dag}$ & 512/512 \\
+KAN (Chebyshev) & \cmark & \cmark & \cmark & Interior & Full$^{\ddag}$ \\
+KAN (Wavelet) & \cmark & \cmark & $\sim$ & Interior & Full$^{\ddag}$ \\
+\midrule
+MLP + ReLU & \xmark & \xmark$^{\S}$ & N/A & Exterior & 0/16 \\
+MLP + SiLU/GELU & \xmark & \xmark$^{\P}$ & N/A & Exterior & 0/16$^{\sharp}$ \\
+MLP + Sigmoid & \xmark & \cmark & N/A & Exterior & -- \\
+MLP + Tanh & \xmark & \cmark & N/A & Exterior & -- \\
+\midrule
+Transformer & \xmark & \xmark & N/A & Exterior & N/A \\
+CNN (Conv2d) & \xmark & \xmark & N/A & Exterior & N/A \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+\parbox{\linewidth}{\scriptsize
+\cmark{} = condition satisfied; \xmark{} = condition violated; $\sim$ = depends on wavelet basis choice.\\
+$^{*}$Contractivity verified for the trained KAN student $[28,16,4]$ under VRM-KD distillation; Tankman~\cite{tankman2026lipschitz} proves $P(\text{KAN}) \leq 1$ as a structural property for standard operation sets on $[0,1]$-bounded inputs.\\
+$^{\dag}$The B-spline KAN is the only architecture in this taxonomy for which all three conditions are simultaneously satisfied \textit{and} empirically validated on physical hardware (TIA Portal V21, S7-1200).\\
+$^{\ddag}$Polynomial and wavelet activations are piecewise-polynomial and closable under Z3's polynomial theory; full verifiability follows by the same structural induction as B-spline KAN (Theorem~2, Step~3).\\
+$^{\S}$ReLU is piecewise-linear ($C^0$); $f''$ is a Dirac delta at $x=0$, so the de~Boor $M_2 h^2/8$ bound does not apply. MILP-based verification (e.g., Reluplex) is possible but requires exponential case-splitting.\\
+$^{\P}$SiLU contains $\sigma(x)=1/(1+e^{-x})$; $e^{-x}$ is transcendental and undecidable in Z3's NRA theory. On compact domain $[-3,3]$, $\sup|\text{SiLU}''| \approx 0.21$ is finite but requires numerical optimization---not computable from parameters alone.\\
+$^{\sharp}$Confirmed empirically: MLP $[28,16,4]$ with SiLU, 0/16 components Z3-verifiable (E41).}
+\end{table}
+
+The taxonomy clarifies a structural fact with direct engineering consequences:
+\textit{no} MLP variant---regardless of activation choice---crosses the
+compilable frontier. ReLU MLPs violate Condition~2 (no $C^2$ curvature
+parameter); SiLU/GELU MLPs violate Condition~2 (transcendental, Z3-undecidable)
+\textit{and} Condition~1 (coupled linear+nonlinear); Sigmoid/Tanh MLPs satisfy
+Condition~2 but violate Condition~1. The SVNN conditions together form a
+\textbf{conjunction}---failure of either is sufficient to place an architecture
+on the exterior. This is why the compiler's ability to provide guarantees is an
+architectural question, not a compiler engineering question (Remark~%
+\ref{rem:compilable_frontier}).
+
+\subsection{KAN Satisfies the SVNN Conditions}
+\label{sec:svnn-kan}
+
+\begin{proposition}[KAN Is Structurally Verifiable]
+\label{prop:kan-svnn}
+Every Kolmogorov-Arnold Network (KAN) architecture, as defined by
+Liu et~al.~\cite{liu2024kan}, satisfies the SVNN sufficient conditions
+(Conditions~1 and~2) of Theorem~2 and is therefore an SVNN architecture.
+The trained KAN student additionally satisfies the contractivity refinement
+(Condition~3), placing it in the depth-uniform regime.
+\end{proposition}
+
+\vspace{4pt}
+\noindent\textit{Proof.} We verify Conditions~1 and~2, which establish SVNN
+membership, and then confirm the Condition~3 refinement:
+
+\vspace{2pt}
+\noindent\textit{Condition~1 (Operation-Type Closure).}
+A KAN layer with $d_{\text{in}}$ inputs and $d_{\text{out}}$ outputs
+decomposes naturally as:
+\begin{equation}
+\text{KANLayer}(x)_j = \underbrace{b(x_j)}_{\text{Base path}}
++ \sum_{i=1}^{d_{\text{in}}}
+\underbrace{\phi_{j,i}(x_i)}_{\text{Spline path}}
+\label{eq:kan_decomposition}
+\end{equation}
+where $b(\cdot)$ is a SiLU activation (element-wise univariate) and each
+$\phi_{j,i}(\cdot)$ is a cubic B-spline (element-wise univariate).
+The summation $\sum_{i=1}^{d_{\text{in}}} \phi_{j,i}(x_i)$ is a linear
+combination, equivalent to a MatMul with an identity-projected weight
+structure. The final addition $b(x_j) + \sum_i \phi_{j,i}(x_i)$ is
+element-wise linear. Thus every KAN layer consists solely of
+element-wise univariate functions and linear combinations---satisfying
+Condition~1.
+
+This decomposition is exactly the basis of NeuroPLC's IR design: each
+KAN layer maps to a MatMul node, $d_{\text{in}} \times d_{\text{out}}$
+BsplineLUT nodes, and $d_{\text{out}}$ Add nodes ({\S}\ref{sec:ir}).
+The 6-op IR type system is not an arbitrary design choice---it is the
+minimal closure required by the SVNN decomposition of KAN.
+
+\vspace{2pt}
+\noindent\textit{Condition~2 (Univariate Boundedness).}
+Cubic B-splines ($k=3$) are $C^2$-continuous piecewise polynomial
+functions. On the bounded input domain $X = [-3, 3]$ used by the KAN
+student, the second derivative $\phi''(x)$ of each B-spline activation
+is bounded. The bound $M_2 = \max_x |\phi''(x)|$ is computable directly
+from the B-spline control points $\{w_c\}$ and knot vector $\{t_c\}$
+via the derivative recurrence:
+\begin{equation}
+\phi''(x) = \sum_{c=0}^{G+k-2} w_c \cdot B''_{c,3}(x)
+\label{eq:bspline_second_deriv}
+\end{equation}
+where $B''_{c,3}$ is computed from the B-spline basis derivative
+recurrence~\cite{deBoor1978}. For the SiLU activation used in the base
+path, $\text{SiLU}''(x) = \sigma(x)(2 - 2x\sigma(x) + x\sigma(x)
+(1-\sigma(x)))$, which is bounded on any compact domain.
+
+\vspace{4pt}
+\noindent\textbf{Analytical $M_2$ and $L_B$ Upper Bounds.}
+While $M_2 = \max_x |\phi''(x)|$ can be computed numerically from the B-spline
+control points (as done in E11, yielding the model-specific value 0.177), we
+further establish \textit{analytical} upper bounds that depend only on the
+B-spline degree and knot spacing---providing a true a priori guarantee that
+requires no forward pass or empirical measurement.
+
+\textit{B-spline derivative bounds on uniform knots.}
+For a cubic B-spline ($k=3$, order 4) defined on uniform knots with spacing $h$,
+the basis function derivatives satisfy the following analytical bounds
+(derived from the Cox-de~Boor recurrence~\cite{deBoor1978}):
+
+\begin{equation}
+\max_x |B'_{c,4}(x)| \leq \frac{3}{h},
+\qquad
+\max_x |B''_{c,4}(x)| \leq \frac{6}{h^2}
+\label{eq:bspline_basis_bounds}
+\end{equation}
+
+For a B-spline curve $\phi(x) = \sum_c w_c B_{c,4}(x)$, at any $x$ at most 4
+basis functions are non-zero (local support property). Consequently:
+
+\begin{equation}
+\max_x |\phi'(x)| \leq \frac{12 \cdot W_{\max}}{h},
+\qquad
+\max_x |\phi''(x)| \leq \frac{24 \cdot W_{\max}}{h^2}
+\label{eq:bspline_curve_bounds}
+\end{equation}
+
+where $W_{\max} = \max_c |w_c|$ is the maximum absolute control-point value.
+A tighter bound using control-point differences~\cite{deBoor1978} yields:
+
+\begin{equation}
+L_B^{\text{analytic}} \leq \frac{3}{h} \cdot \max_c |\Delta w_c|,
+\qquad
+M_2^{\text{analytic}} \leq \frac{6}{h^2} \cdot \max_c |\Delta^2 w_c|
+\label{eq:bspline_diff_bounds}
+\end{equation}
+
+where $\Delta w_c = w_{c+1} - w_c$ and $\Delta^2 w_c = w_{c+1} - 2w_c + w_{c-1}$
+are the first and second forward differences of the control-point sequence.
+
+\textit{Application to KAN.}
+For the KAN student $[28,16,4]$ with grid size $G=8$ on input domain $[-3,3]$,
+the knot spacing is $h = 6/G = 0.75$. With control points typically bounded by
+$W_{\max} \approx 0.3$ (enforceable via weight clipping during training),
+Eq.~\ref{eq:bspline_curve_bounds} yields the a priori bounds
+$L_B^{\text{analytic}} \leq 12 \times 0.3 / 0.75 = 4.8$ and
+$M_2^{\text{analytic}} \leq 24 \times 0.3 / 0.5625 = 12.8$. The tighter
+difference-based bounds (Eq.~\ref{eq:bspline_diff_bounds}) reduce these
+to $L_B^{\text{analytic}} \leq 4 \times \max|\Delta w|$ and
+$M_2^{\text{analytic}} \leq 10.67 \times \max|\Delta^2 w|$, both computable
+from the control points alone before any forward pass.
+
+\textit{Relationship to empirical values.}
+The empirically measured values ($L_B = 0.65$, $M_2 = 0.177$ from E11) are
+substantially tighter than the analytical worst-case bounds, because the KAN's
+learned B-spline control points exhibit slow variation ($\max|\Delta w_c| \ll
+W_{\max}$). The analytical bounds serve as the \textbf{architectural guarantee}
+(proving that the architecture admits finite $M_2$ and $L_B$ a priori), while
+the empirical measurements provide \textbf{model-specific refinement}
+(tightening the bound post-training). Both are computed from the model
+parameters alone---neither requires hardware execution. This two-tier approach
+satisfies SVNN Condition~2: $M_f$ is analytically bounded by the architecture
+and computable from parameters, with the analytical bound providing the
+design-time certificate and the empirical refinement providing the deployment-time
+tightening.
+
+\vspace{2pt}
+\noindent\textit{Condition~3 (Contractive Composition, refinement).}
+Conditions~1 and~2 already establish that KAN is structurally verifiable
+(Theorem~2, Step~3): the finite-depth error bound of
+Eq.~\ref{eq:total_bound} exists and is computable from the control points
+alone. We now show that the trained KAN \emph{additionally} satisfies the
+contractivity refinement, which upgrades this guarantee to the depth-uniform
+$O(L)$ form of Eq.~\ref{eq:convergent_bound}.
+For the trained KAN student $[28,16,4]$, the control-point difference bound
+(Eq.~\ref{eq:bspline_diff_bounds}) yields $L_B^{\text{analytic}} \leq 1.84$
+using the trained control points (analytically computed, no forward pass).
+The tighter empirical measurement gives $L_B = 0.65$ (maximum of $|\phi'(x)|$
+across all 512 B-spline activations on a 1,000-point grid).
+The weight matrix row-sum norms are
+$\|W^{(0)}\|_{1,\infty} \leq 0.32$ and $\|W^{(1)}\|_{1,\infty} \leq 0.28$.
+Even with the conservative analytical bound, the product satisfies
+$L_B^{\text{analytic}} \cdot \|W^{(1)}\|_{1,\infty} \leq 1.84 \times 0.28
+= 0.515 < 1$; with the empirical refinement, $L_B \cdot
+\|W^{(1)}\|_{1,\infty} = 0.65 \times 0.28 = 0.182 \ll 1$.
+Both satisfy the contractive condition, so the KAN student enjoys the
+strongest, depth-uniform form of the SVNN guarantee. We emphasize, however,
+that a KAN with larger weights violating $\gamma < 1$ would \emph{still} be
+structurally verifiable by Conditions~1--2---it would simply fall back to the
+finite depth-dependent bound. Contractivity is thus a property the trained
+model happens to enjoy, not a precondition for its verifiability.
+
+Beyond this empirical observation, Tankman~\cite{tankman2026lipschitz}
+has recently provided a \textit{formal} characterization: for standard
+KAN operation sets $\{+, -, \times, \sin, \cos\}$ on $[0,1]$-bounded
+inputs, the layer-wise Lipschitz product satisfies
+$P(\text{KAN}) \leq 1$, independent of input dimension $n$ and
+network depth. This result establishes that the contractivity required
+by Condition~3 is not merely an artifact of our specific trained model
+or distillation procedure---it is a \textit{structural property} of
+KAN architectures under standard operations. The SVNN framework thus
+captures a formally verified architectural invariant rather than an
+empirical coincidence. $\square$
+
+\subsection{Standard MLPs Do Not Admit Tight SVNN Error Bounds}
+\label{sec:svnn-mlp}
+
+Having established that KAN architectures satisfy the SVNN conditions,
+we now show that the most widely deployed alternative---the Multi-Layer
+Perceptron (MLP) with standard activations---does not. This result
+clarifies \textit{why} prior ML$\to$PLC tools provide no correctness
+guarantees: the architecture itself precludes them.
+
+\vspace{4pt}
+\noindent\textbf{Proposition 1 (Standard MLPs Do Not Admit the SVNN Tight-Bound Structure).}
+Let $\mathcal{M}$ be a feedforward MLP using ReLU, SiLU, Sigmoid, or Tanh
+activations. Then $\mathcal{M}$ does not admit the compiler-computable
+architecture-independent tight LUT error bound of Condition~2, for the
+following reasons. This does \emph{not} mean MLPs are unverifiable in
+general (tools such as Reluplex and $\alpha$-$\beta$-CROWN verify ReLU
+networks)---it means the \emph{KAN-style} de~Boor curvature bound, which
+is computable from parameters alone without knowing the input distribution,
+does not apply to MLP activations.
+
+\vspace{4pt}
+\noindent\textit{Proof.} We analyze each activation function:
+
+\vspace{2pt}
+\noindent\textit{(a) SiLU / GELU (modern MLP standard): $f(x) = x \cdot \sigma(x)$.}
+$\text{SiLU}''(x)$ is bounded and the function is $C^\infty$, so Condition~2
+is formally satisfiable. However, SiLU contains $\sigma(x) = 1/(1+e^{-x})$,
+which uses the transcendental function $e^{-x}$. Z3's Nonlinear Real
+Arithmetic (NRA) theory is \emph{undecidable} for transcendental functions,
+so per-function Z3 verification---the mechanism behind the compositional
+certificate of {\S}IV-F---yields no proof for any SiLU segment. Empirically:
+MLP $[28,16,4]$ with SiLU activations achieves 0/16 Z3-verifiable
+components (E41), confirming that SiLU-based MLPs are incompatible with the
+compositional verification pipeline regardless of bound tightness.
+
+\vspace{2pt}
+\noindent\textit{(b) ReLU: $f(x) = \max(0, x)$.}
+ReLU is piecewise-linear with kink at $x = 0$. A LUT whose knots include
+$x = 0$ would reproduce ReLU exactly ($\varepsilon = 0$), so the
+\emph{existence} of a valid bound is not the issue. The issue is that the
+de~Boor curvature bound (Eq.~\ref{eq:de_boor_general}, $\varepsilon \leq
+M_2 h^2/8$) requires $C^2$ continuity, which ReLU violates at $x=0$
+($f''$ is a Dirac delta). Without the curvature characterization, the
+compiler cannot compute an a priori LUT error from the architecture and
+parameters alone: the error depends on where inputs fall relative to the
+kink, which is input-distribution-dependent. Existing tools that verify
+ReLU networks (Reluplex, $\alpha$-$\beta$-CROWN) instead enumerate
+activation patterns via case-splitting, at exponential cost in the number
+of ReLU units---not by a single closed-form parameter-computable bound.
+
+\vspace{2pt}
+\noindent\textit{(c) Sigmoid / Tanh.}
+Both are $C^\infty$ with bounded $M_2$ ($\sup_x|\sigma''| \approx 0.096$,
+$\sup_x|\tanh''| = 2/\sqrt{27} \approx 0.385$), so Condition~2 is
+satisfiable. The bottleneck is the \emph{mixing} within each MLP layer:
+each neuron combines linear and nonlinear operations in the same layer, while
+SVNN Condition~1 requires layers to be \emph{either} purely linear
+\emph{or} purely element-wise. Standard MLP layers violate Condition~1
+(affine transform + pointwise activation in one step), breaking the clean
+compositional error accounting that makes per-function Z3 verification
+tractable.
+
+\vspace{2pt}
+\noindent\textbf{Consequence for MLP compilation.}
+The fundamental issue is not that MLPs cannot be compiled---they can,
+and \neuroplc does compile MLPs ({\S}\ref{sec:method}). The issue is
+that the compiler cannot provide a \textit{tight, architecture-aware
+error bound} for MLPs. Without a per-function $M_2$ bound (Condition~2
+violation for ReLU) or with only coarse global Lipschitz bounds
+(Sigmoid/Tanh), the best achievable MLP error bound is:
+\begin{equation}
+\Delta_{\text{MLP}}^{(L)} \leq O\bigl(L \cdot L_{\text{act}}^L \cdot
+\|\mathbf{W}\|_{\text{prod}}\bigr)
+\label{eq:mlp_bound}
+\end{equation}
+where $L_{\text{act}} = \max(1, L_{\text{ReLU}}, L_\sigma, L_{\tanh})$.
+For $L_{\text{ReLU}} = 1$, the bound grows as $O(L \cdot
+\|\mathbf{W}\|_{\text{prod}})$, which can easily exceed 1.0 for
+networks deeper than 3--4 layers with typical weight magnitudes.
+This makes the guarantee vacuous for all but the shallowest MLPs.
+
+In contrast, the KAN error bound grows as $O(L \cdot M_{\max} \cdot
+h^2 \cdot d_{\max})$, which is independent of weight magnitudes (the linear layers
+are exact in DA) and decreases cubically with LUT resolution $h$.
+This architectural distinction---not implementation quality---is why
+\neuroplc provides guarantees for KAN that it cannot provide for MLP.
+$\square$
+
+\subsection{Implications for Compiler Design}
+\label{sec:svnn-implications}
+
+The SVNN framework has five concrete implications for how neural network
+compilers targeting safety-critical embedded platforms should be designed:
+
+\begin{enumerate}
+    \item \textbf{Choose verifiable architectures.} Rather than attempting
+          to verify the output of an arbitrary architecture---an approach
+          that the floating-point verification community has shown to be
+          fundamentally limited~\cite{szasz2025floating,munoz2025nofloat,
+          mirman2025lipschitz}---compiler designers should target
+          architectures that are \textit{structurally amenable} to
+          verification. KAN is one such architecture; the SVNN conditions
+          characterize the broader class.
+
+    \item \textbf{Design the IR to reflect the architecture's
+          decomposition.} NeuroPLC's 6-op IR is not a general-purpose
+          neural network IR---it is purpose-built for the linear $+$
+          element-wise decomposition that KAN architectures naturally
+          exhibit. Each IR operation type corresponds to a proof obligation
+          in the correctness theorem ({\S}\ref{sec:method}, Theorem~1).
+
+    \item \textbf{Exploit architectural properties for tighter bounds.}
+          The three refinements identified in Theorem~2 Step~4
+          (Segment-Aware $M_2$, sign-structural affine arithmetic, Adaptive LUT
+          Allocation) are possible \textit{because} KAN's architecture
+          exposes the necessary structure: per-function second derivatives,
+          per-layer weight-matrix sign patterns, and per-function curvature
+          profiles. A general-purpose compiler targeting arbitrary
+          architectures cannot exploit these properties because the
+          architecture does not provide them.
+
+    \item \textbf{Separate the correctness guarantee from the
+          implementation.} Theorem~2 provides a \textit{design principle};
+          Theorem~1 provides an \textit{instantiation} for a specific
+          compiler and architecture. Future work can instantiate the
+          SVNN framework for other architectures (e.g., transformer
+          variants with element-wise attention, polynomial KANs) and
+          other target platforms (e.g., FPGA via KANEL\'{E}~\cite{kanele2026},
+          ARM Cortex-M via LUT-KAN~\cite{lutkan2024}), reusing the same
+          proof structure with architecture-specific refinements.
+
+    \item \textbf{Bridge design-time and mechanized verification.}
+          The SVNN framework's arithmetic bounds (Level~2,
+          {\S}\ref{sec:svnn-challenge}) are complementary to SMT/MILP-based
+          formal verification (Level~3). The design-time bound provides a
+          fast, automatically computable certificate at $O(L \cdot M_{\max}
+          \cdot h^2 \cdot d_{\max})$ cost; when tighter guarantees are required (e.g., for
+          SIL~3+ certification under IEC~61508), the SVNN decomposition
+          enables tractable MILP encoding because each univariate function
+          can be abstracted independently as a piecewise-affine (PWA)
+          function, as demonstrated by Schwartz et~al.~\cite{schwartz2026optimal}.
+          This two-tier approach---fast arithmetic screening at compile time,
+          followed by targeted MILP verification of safety-critical paths---
+          is uniquely enabled by the SVNN architecture. Standard MLPs do not
+          admit this decomposition: their multivariate ReLU activations
+          require exponentially many PWA pieces to abstract, making MILP-based
+          verification intractable beyond trivial depths~\cite{schwartz2026optimal}.
+\end{enumerate}
+
+These implications position \neuroplc not merely as a tool for compiling
+KANs to PLCs, but as the first instance of a broader compiler design
+paradigm: \textit{structurally verifiable compilation}, where the compiler's
+ability to provide correctness guarantees is achieved by targeting
+architectures that are designed to be verifiable.

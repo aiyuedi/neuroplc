@@ -1,0 +1,67 @@
+{
+  "framework": "NeuroPLC v1.0 \u2014 SVNN-based structurally verifiable compilation",
+  "standard": "IEC 61508:2010 (Functional Safety of E/E/PE Systems)",
+  "ai_guidance": "ISO/IEC TS 22440 (AI in Functional Safety, under development)",
+  "generated_at": "2026-07-07T17:17:41.690344",
+  "sil_levels": [
+    {
+      "sil": "SIL 1",
+      "requirements": "Basic functional testing, documented design",
+      "neuroplc_evidence": [
+        "E6: 1000-sample Python vs SCL cross-validation (100% agreement)",
+        "E10: LUT density sweep 3-50 pts, all preserve \u226599.96% accuracy",
+        "E14: Adversarial robustness \u03c3=0-0.2, 0% degradation",
+        "42\u00d7 unit tests + 166\u00d7 integration tests"
+      ],
+      "evidence_type": "Empirical testing",
+      "status": "COMPLETE"
+    },
+    {
+      "sil": "SIL 2",
+      "requirements": "Design-time error bounds, semi-formal verification",
+      "neuroplc_evidence": [
+        "Theorem 1: Per-output error bound \u03b5 \u2264 0.079 (DA, N=15)",
+        "Theorem 2: SVNN O(L\u00b7M_max\u00b7h\u00b2\u00b7d_max) bound, all KANs",
+        "Lemma 3: Probabilistic DA tightening R \u2265 2.2 (95% confidence)",
+        "Proposition 2: Adversarial lower bound validated via E21",
+        "E9: Interval Arithmetic safety factor 51.9\u00d7 (conservative)",
+        "E11: Doubleton Arithmetic safety factor 159\u00d7 (tightened)",
+        "E16: Segment-Aware DA composed safety factor ~223\u00d7",
+        "E19: Method boundary analysis (DA/IA degradation conditions)"
+      ],
+      "evidence_type": "Design-time arithmetic bounds",
+      "status": "COMPLETE"
+    },
+    {
+      "sil": "SIL 3",
+      "requirements": "Formal verification of safety-critical components",
+      "neuroplc_evidence": [
+        "Tier 1: Z3 template proofs (4/6 op types, 57 ms total)",
+        "Tier 2: Per-function Z3 verification (512/512 functions UNSAT)",
+        "Tier 3: Composition certificate (~200-line trusted checker)",
+        "E6-SMT: Z3 translation validation (9/11 exact, 2/11 bounded)",
+        "E25: Z3-verified WCET \u2264 2.86 ms (S7-1200)",
+        "E37: Two-Tier verification chain (DA + Z3, 512/512)",
+        "E40: Compositional verification (9-step certificate)",
+        "E41: MLP verification gap analysis (0/16 vs 512/512)"
+      ],
+      "evidence_type": "Machine-checkable Z3 proofs",
+      "status": "COMPLETE (compiler level); PARTIAL (IEC 61508 process audit needed)"
+    },
+    {
+      "sil": "SIL 4",
+      "requirements": "Full formal verification, redundant architecture, independent assessment",
+      "neuroplc_evidence": [
+        "Pathway: SVNN Level 2 bounds provide pre-certificate",
+        "Pathway: MILP-based PWA verification (Schwartz et al. 2026)",
+        "Pathway: Coq/Isabelle mechanization of Theorem 1",
+        "Future: Hardware-in-the-loop with safety PLC (S7-1200F)",
+        "Required: Independent safety assessment body audit",
+        "Required: Dual-channel architecture for fault tolerance"
+      ],
+      "evidence_type": "Future work + external certification",
+      "status": "FUTURE_WORK (SIL 3 evidence provides foundation)"
+    }
+  ],
+  "assessor_notes": "NeuroPLC provides design-time (Level 2) and mechanized (Level 3) verification evidence that directly supports SIL 2 and partially supports SIL 3 certification under IEC 61508-3:2010. The SVNN framework's a priori error bounds (Theorem 2) align with T\u00dcV Rheinland's assessment criteria for AI-enabled safety functions: (1) deterministic behavior via \u03b5_i(M,X), (2) algorithm transparency via per-function M_2 computable from B-spline control points, (3) quantified performance boundaries via segment-aware de Boor and adaptive LUT analysis. Full SIL 3+ certification requires additional evidence: hardware reliability analysis, process audit, environmental testing \u2014 outside this compiler's scope."
+}

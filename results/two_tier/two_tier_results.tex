@@ -1,0 +1,51 @@
+\noindent\textbf{Two-Tier Verification Chain (Z3 SMT).}
+We demonstrate the Two-Tier verification architecture
+({\S}\ref{sec:two_tier}) on a micro KAN 
+$28\to16\to4$ with $512$ B-spline 
+functions and $15$-point LUT sampling.
+
+\textbf{Tier 1---Doubleton Arithmetic (Design-Time):} 
+Each B-spline $\to$ LUT approximation satisfies 
+$|\text{LUT}(x) - \text{Bspline}(x)| 
+\leq M_2 h^2/8 = 0.0321$ 
+(Theorem~1). Composing these per-function bounds through 
+the weight matrices via Doubleton Arithmetic yields 
+a network-level error bound of 
+$\Delta_{\text{DA}} \leq 0.5030$, 
+$2.1\times$ tighter than 
+the interval-arithmetic bound 
+($\Delta_{\text{IA}} \leq 1.0323$).
+
+\textbf{Tier 2---Z3 SMT Per-Function Verification 
+(Deploy-Time):} 
+For each of the $512$ B-spline 
+functions, we encode both the true B-spline 
+(Cox--de Boor recurrence over piecewise cubic polynomials) 
+and the LUT linear interpolation as Z3 SMT formulas, 
+then query whether any input $x\in[-3,3]$ violates 
+the per-function bound. 
+Z3 returns \texttt{UNSAT} for 
+$512/512$ 
+functions ($100\%)$, confirming that the Tier~1 
+per-function bound is sound for this model instance. 
+Average verification time is $285$\,ms 
+per function, demonstrating that the Two-Tier 
+verification chain is computationally feasible 
+for deployment-time safety certification.
+
+\begin{table}[ht]
+\centering
+\caption{Two-Tier Verification Chain Results}
+\label{tab:two_tier}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Metric} & \textbf{Tier 1 (DA)} & \textbf{Tier 2 (Z3)} \\
+\midrule
+Per-function bound & $0.0321$ (analytic) & $0.0321$ (SMT-proved) \\
+Verification scope & All KAN architectures & $512$ functions (this instance) \\
+Verification time & $0$\,ms (formula) & $146100$\,ms ($285\,ms/func) \\
+Network-level bound & $0.5030$ (compositional) & $0.5030$ (via Tier~1) \\
+Status & Theorem~1 (proven) & Z3 \texttt{UNSAT} ($512/512) \\
+\bottomrule
+\end{tabular}
+\end{table}

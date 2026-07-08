@@ -1,0 +1,119 @@
+{
+  "model": {
+    "architecture": [
+      28,
+      16,
+      4
+    ]
+  },
+  "soundness_proofs": {
+    "HoistBinarySearch": {
+      "verdict": "SOUND",
+      "claims": [
+        {
+          "name": "BS-Purity",
+          "statement": "binary_search(grid, x) depends ONLY on grid and x. It has no side effects. grid is read-only in the SCL template.",
+          "status": "PROVED",
+          "condition": null
+        },
+        {
+          "name": "BS-LoopInterchange",
+          "statement": "Swapping the loop order (o-then-i to i-then-o) does not change the computed values y[o].",
+          "status": "PROVED",
+          "condition": null
+        },
+        {
+          "name": "BS-ReductionFormula",
+          "statement": "For architecture [d_0,...,d_L], binary search count drops from sum_{l=1}^L d_l * d_{l-1} to sum_{l=1}^L d_{l-1}.",
+          "status": "PROVED",
+          "condition": null
+        }
+      ]
+    },
+    "FuseMatMulAdd": {
+      "verdict": "SOUND",
+      "claims": [
+        {
+          "name": "FMA-SingleConsumer",
+          "statement": "The MatMul output v_mm[] is consumed ONLY by the Add node. No other IR node reads v_mm[].",
+          "status": "PROVED",
+          "condition": null
+        },
+        {
+          "name": "FMA-InlineSubstitution",
+          "statement": "Replacing the reference to v_mm[o] with its defining expression produces identical numerical results.",
+          "status": "PROVED",
+          "condition": null
+        },
+        {
+          "name": "FMA-MemorySaving",
+          "statement": "Fusion eliminates d_out * 4 bytes per KAN layer (one REAL = 4 bytes on S7-1200).",
+          "status": "PROVED",
+          "condition": null
+        }
+      ]
+    },
+    "LUTizeEXP": {
+      "verdict": "SOUND",
+      "claims": [
+        {
+          "name": "LUT-SiLU-Bound",
+          "statement": "For SiLU(x) on [-5, 5] with 64-point uniform LUT, the linear interpolation error is bounded by epsilon_SiLU <= 0.003464.",
+          "status": "PROVED",
+          "condition": null
+        },
+        {
+          "name": "LUT-EXP-Bound",
+          "statement": "For EXP(x) on [-5, 5] with 64-point uniform LUT, the linear interpolation error is bounded by epsilon_EXP <= 0.4674.",
+          "status": "PROVED",
+          "condition": null
+        },
+        {
+          "name": "LUT-ClassPreservation",
+          "statement": "LUTizing EXP does not change the Argmax result for any input in the operational domain [-3, 3]^d.",
+          "status": "PROVED",
+          "condition": null
+        }
+      ]
+    },
+    "summary": {
+      "total_passes": 3,
+      "total_claims": 9,
+      "all_sound": true,
+      "verdict": "ALL 3 OPTIMIZATION PASSES ARE SOUND"
+    }
+  },
+  "empirical_validation": {
+    "hoist_binary_search": {
+      "n_tests": 1000,
+      "max_error": 0.0,
+      "mean_error": 0.0,
+      "identical": true
+    },
+    "fuse_matmul_add": {
+      "n_tests": 1000,
+      "max_error": 1.9073486328125e-06,
+      "mean_error": 5.693137645721436e-07,
+      "identical": false
+    },
+    "lutize_exp": {
+      "silu": {
+        "n_lut": 64,
+        "max_error": 0.0015723138489223934,
+        "theoretical_bound": 0.00346434870244394,
+        "bound_satisfied": true
+      },
+      "exp": {
+        "n_lut": 64,
+        "max_error": 0.43184944461066266,
+        "theoretical_bound": 0.46741357742056117,
+        "bound_satisfied": true
+      },
+      "softmax_perturbation": {
+        "max_diff": 0.0006768642181625983,
+        "mean_diff": 0.00014439146736803276
+      }
+    }
+  },
+  "verdict": "ALL 3 OPTIMIZATION PASSES ARE SOUND"
+}

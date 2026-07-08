@@ -1,0 +1,25 @@
+﻿MultiLingualTexts:
+  - id: MLC_58s
+    zh-CN: 28-D feature vector
+  - id: MLC_3Dr
+    zh-CN: 0=Normal, 1=InnerRace, 2=Ball, 3=OuterRace
+  - id: MLC_3Mf
+    zh-CN: max softmax probability 鈹€鈹€ Inference temporaries 鈹€鈹€
+  - id: MLC_ua
+    zh-CN: silu output
+  - id: MLC_4sy
+    zh-CN: 'BsplineLUT output (1D: o*28+i)'
+  - id: MLC_52N
+    zh-CN: matmul output
+  - id: MLC_4UX
+    zh-CN: add merge
+  - id: MLC_4Mb
+    zh-CN: silu output
+  - id: MLC_4pz
+    zh-CN: 'BsplineLUT output (1D: o*16+i)'
+  - id: MLC_5A8
+    zh-CN: matmul output
+  - id: MLC_4GB
+    zh-CN: add merge
+  - id: MLC_36n
+    zh-CN: softmax output 鈹€鈹€ Temporary variables 鈹€鈹€

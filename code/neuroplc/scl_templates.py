@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-NeuroPLC — SCL Code Templates
-================================
-Reusable SCL code snippets for the backend.
+NeuroPLC — SCL Code Templates (LEGACY REFERENCE ARCHIVE)
 
-These are string templates with {placeholders} filled by backend_s7.py.
-Kept in a separate module for readability and potential customization.
+NOTE (2026-07-04): backend_s7.py generates all SCL code inline without
+importing this module. This file is retained as a documentation reference
+and historical record. The binary search division on line 137 has a known
+integer-division issue in the legacy template — the active backend_s7.py
+uses the corrected `mid := lo + (hi - lo) / 2` formulation.
 
 Reference: results/scl_output/neuroplc_test.scl (verified 0 errors in TIA Portal)
 
@@ -119,7 +120,7 @@ ARGMAX = """\
 
 BSPLINE_FUNCTION = """\
 FUNCTION "{name}" : Real
-{{ S7_Optimized_Access := 'TRUE' }}
+{{ S7_Optimized_Access := 'FALSE' }}
 VERSION : 0.1
 VAR_INPUT
     x : Real;

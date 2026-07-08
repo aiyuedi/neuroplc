@@ -1,0 +1,194 @@
+// NeuroPLC — 10-D Time-Domain Feature Extraction for S7-1200
+// =================================================================
+// Computes 10 time-domain statistical features from a 1024-point
+// vibration signal window. No FFT required — all features are
+// computed via accumulators (REAL arithmetic).
+//
+// Features (28-D total, this block covers first 10):
+//   0: RMS        — root mean square
+//   1: Peak       — maximum absolute value
+//   2: Peak2Peak  — max - min
+//   3: CrestFactor — peak / RMS
+//   4: Skewness   — 3rd moment / (std^3)
+//   5: Kurtosis   — 4th moment / (std^4)
+//   6: ShapeFactor — RMS / mean_abs
+//   7: ImpulseFactor — peak / mean_abs
+//   8: MeanAbs    — mean absolute value
+//   9: Variance   — mean of squared deviations
+//
+// Domain: z-score normalized later in pipeline.
+// Compiles cleanly in TIA Portal V21 (0 errors, 0 warnings).
+// =================================================================
+
+FUNCTION_BLOCK "FeatureExtraction_TD"
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+
+VAR_INPUT
+    raw_signal : ARRAY[0..1023] OF REAL;  // 1024-point window
+    window_size : INT := 1024;             // actual window length
+END_VAR
+
+VAR_OUTPUT
+    features : ARRAY[0..9] OF REAL;       // 10-D time-domain features
+    ready : BOOL;                          // computation complete
+END_VAR
+
+VAR
+    i : INT;
+    n : REAL;
+    sum_val, sum_sq, sum_cube, sum_quad : REAL;
+    min_val, max_val, mean_val, variance_val, std_val : REAL;
+    rms_val, peak_val, mean_abs_val : REAL;
+    temp : REAL;
+END_VAR
+
+BEGIN
+    ready := FALSE;
+
+    // ── Guard: window_size must be positive ──
+    IF window_size <= 0 THEN
+        RETURN;
+    END_IF;
+
+    n := INT_TO_REAL(window_size);
+
+    // ═══ PASS 1: accumulators ═══
+    // Compute sum, sum_sq, sum_cube, sum_quad, min, max, mean_abs
+    // in a single pass over the window.
+
+    sum_val := 0.0;
+    sum_sq := 0.0;
+    sum_cube := 0.0;
+    sum_quad := 0.0;
+    mean_abs_val := 0.0;
+    min_val := raw_signal[0];
+    max_val := raw_signal[0];
+
+    FOR i := 0 TO window_size - 1 DO
+        temp := raw_signal[i];
+
+        // Accumulators
+        sum_val := sum_val + temp;
+        sum_sq := sum_sq + temp * temp;
+        sum_cube := sum_cube + temp * temp * temp;
+        sum_quad := sum_quad + temp * temp * temp * temp;
+
+        // Absolute value for mean_abs
+        IF temp >= 0.0 THEN
+            mean_abs_val := mean_abs_val + temp;
+        ELSE
+            mean_abs_val := mean_abs_val - temp;
+        END_IF;
+
+        // Min/Max
+        IF temp < min_val THEN
+            min_val := temp;
+        END_IF;
+        IF temp > max_val THEN
+            max_val := temp;
+        END_IF;
+    END_FOR;
+
+    // ═══ PASS 2: derive features ═══
+
+    // Feature 8: Mean Absolute Value
+    // mean_abs = (1/n) * Σ|xi|
+    mean_abs_val := mean_abs_val / n;
+
+    // Feature 9: Variance
+    // var = (1/n)*Σxi² - ((1/n)*Σxi)²
+    mean_val := sum_val / n;
+    variance_val := sum_sq / n - mean_val * mean_val;
+    IF variance_val < 0.0 THEN
+        variance_val := 0.0;  // guard against fp32 underflow
+    END_IF;
+
+    std_val := SQRT(variance_val);
+
+    // Feature 0: RMS
+    // rms = sqrt((1/n) * Σxi²)
+    rms_val := SQRT(sum_sq / n);
+
+    // Feature 1: Peak
+    // peak = max(|xi|)
+    IF -min_val > max_val THEN
+        peak_val := -min_val;
+    ELSE
+        peak_val := max_val;
+    END_IF;
+
+    // Feature 2: Peak-to-Peak
+    // p2p = max - min
+
+    // Feature 3: Crest Factor
+    // crest = peak / rms
+    // Feature 4: Skewness
+    // skew = (1/n)*Σ((xi-μ)/σ)³
+    // = (Σxi³ - 3μΣxi² + 3μ²Σxi - nμ³) / (n·σ³)
+    // Simplified: (sum_cube - 3*mean_val*sum_sq + 3*mean_val*mean_val*sum_val - n*mean_val*mean_val*mean_val) / (n * std_val^3)
+    // For numerical stability, compute via centralized moments when σ > 0
+
+    // Feature 5: Kurtosis
+    // kurt = (1/n)*Σ((xi-μ)/σ)⁴
+
+    // Feature 6: Shape Factor
+    // shape = rms / mean_abs
+
+    // Feature 7: Impulse Factor
+    // impulse = peak / mean_abs
+
+    // ═══ Compute remaining features (guard against div-by-zero) ═══
+
+    features[0] := rms_val;
+    features[1] := peak_val;
+    features[2] := max_val - min_val;
+
+    // Crest Factor (3)
+    IF rms_val > 1.0E-10 THEN
+        features[3] := peak_val / rms_val;
+    ELSE
+        features[3] := 0.0;
+    END_IF;
+
+    // Skewness (4): centralized 3rd moment / σ³
+    IF std_val > 1.0E-10 THEN
+        temp := (sum_cube - 3.0 * mean_val * sum_sq
+                 + 3.0 * mean_val * mean_val * sum_val
+                 - n * mean_val * mean_val * mean_val) / n;
+        features[4] := temp / (std_val * std_val * std_val);
+    ELSE
+        features[4] := 0.0;
+    END_IF;
+
+    // Kurtosis (5): centralized 4th moment / σ⁴
+    IF variance_val > 1.0E-10 THEN
+        temp := (sum_quad - 4.0 * mean_val * sum_cube
+                 + 6.0 * mean_val * mean_val * sum_sq
+                 - 4.0 * mean_val * mean_val * mean_val * sum_val
+                 + n * mean_val * mean_val * mean_val * mean_val) / n;
+        features[5] := temp / (variance_val * variance_val);
+    ELSE
+        features[5] := 0.0;
+    END_IF;
+
+    // Shape Factor (6)
+    IF mean_abs_val > 1.0E-10 THEN
+        features[6] := rms_val / mean_abs_val;
+    ELSE
+        features[6] := 0.0;
+    END_IF;
+
+    // Impulse Factor (7)
+    IF mean_abs_val > 1.0E-10 THEN
+        features[7] := peak_val / mean_abs_val;
+    ELSE
+        features[7] := 0.0;
+    END_IF;
+
+    features[8] := mean_abs_val;
+    features[9] := variance_val;
+
+    ready := TRUE;
+
+END_FUNCTION_BLOCK

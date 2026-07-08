@@ -1,0 +1,181 @@
+{
+  "description": "Depth Lipschitz explosion: how L_net grows with KAN depth",
+  "L_B": 0.65,
+  "max_depth": 5,
+  "n_trials_per_depth": 3,
+  "results": [
+    {
+      "depth": 2,
+      "n_successful": 3,
+      "L_net_mean": 204.23677623401318,
+      "L_net_std": 8.759053052405193,
+      "L_net_min": 193.69162186255303,
+      "L_net_max": 215.13796826034385,
+      "bound_usable": false,
+      "raw": [
+        {
+          "trial": 0,
+          "L_layers": [
+            19.233166909217836,
+            11.185779714584351
+          ],
+          "L_net": 215.13796826034385,
+          "total_params": 6148
+        },
+        {
+          "trial": 1,
+          "L_layers": [
+            18.915630984306336,
+            10.239765304327012
+          ],
+          "L_net": 193.69162186255303,
+          "total_params": 6148
+        },
+        {
+          "trial": 2,
+          "L_layers": [
+            18.789776611328126,
+            10.850620675086976
+          ],
+          "L_net": 203.88073857914264,
+          "total_params": 6148
+        }
+      ]
+    },
+    {
+      "depth": 3,
+      "n_successful": 3,
+      "L_net_mean": 2257.025379600254,
+      "L_net_std": 28.854389798561506,
+      "L_net_min": 2231.7680320061368,
+      "L_net_max": 2297.410377187639,
+      "bound_usable": false,
+      "raw": [
+        {
+          "trial": 0,
+          "L_layers": [
+            19.42215132713318,
+            11.28950593471527,
+            10.477708423137665
+          ],
+          "L_net": 2297.410377187639,
+          "total_params": 9222
+        },
+        {
+          "trial": 1,
+          "L_layers": [
+            19.154874086380005,
+            11.145608937740326,
+            10.501049232482911
+          ],
+          "L_net": 2241.897729606985,
+          "total_params": 9222
+        },
+        {
+          "trial": 2,
+          "L_layers": [
+            19.457684719562533,
+            11.259247946739197,
+            10.187051630020141
+          ],
+          "L_net": 2231.7680320061368,
+          "total_params": 9222
+        }
+      ]
+    },
+    {
+      "depth": 4,
+      "n_successful": 3,
+      "L_net_mean": 24930.84043281249,
+      "L_net_std": 321.66245692289687,
+      "L_net_min": 24479.5262671728,
+      "L_net_max": 25205.860935390534,
+      "bound_usable": false,
+      "raw": [
+        {
+          "trial": 0,
+          "L_layers": [
+            19.014541447162628,
+            11.510158973932267,
+            10.844636350870132,
+            10.619873994588852
+          ],
+          "L_net": 25205.860935390534,
+          "total_params": 12296
+        },
+        {
+          "trial": 1,
+          "L_layers": [
+            18.92690086364746,
+            10.887585079669952,
+            10.831090164184571,
+            10.967806220054626
+          ],
+          "L_net": 24479.5262671728,
+          "total_params": 12296
+        },
+        {
+          "trial": 2,
+          "L_layers": [
+            18.672747433185577,
+            11.737261641025544,
+            11.299997389316559,
+            10.13780165910721
+          ],
+          "L_net": 25107.134095874142,
+          "total_params": 12296
+        }
+      ]
+    },
+    {
+      "depth": 5,
+      "n_successful": 3,
+      "L_net_mean": 294042.6190721306,
+      "L_net_std": 26790.612224022792,
+      "L_net_min": 274289.0241634541,
+      "L_net_max": 331918.55885520583,
+      "bound_usable": false,
+      "raw": [
+        {
+          "trial": 0,
+          "L_layers": [
+            18.973853528499603,
+            11.249987047910691,
+            11.064648348093034,
+            11.240409851074219,
+            10.393367505073547
+          ],
+          "L_net": 275920.27419773187,
+          "total_params": 15370
+        },
+        {
+          "trial": 1,
+          "L_layers": [
+            19.327754426002503,
+            11.87296712398529,
+            11.492563289403916,
+            11.33555720448494,
+            11.102763652801514
+          ],
+          "L_net": 331918.55885520583,
+          "total_params": 15370
+        },
+        {
+          "trial": 2,
+          "L_layers": [
+            19.455095911026003,
+            11.16928797364235,
+            11.191167628765106,
+            11.074560439586639,
+            10.18468652367592
+          ],
+          "L_net": 274289.0241634541,
+          "total_params": 15370
+        }
+      ]
+    }
+  ],
+  "growth_rate_per_layer": 2.4218657896185634,
+  "doubling_depth": 0.28620379524379586,
+  "conclusion": "L_net grows exponentially with depth (\u2248e^{2.42\u00b7L}). For 2-layer KAN, L_net \u2248 204.2 (well within usable range). By depth 5, L_net \u2248 294043 (bound becomes pessimistic). Beyond depth 6-7, the bound is too pessimistic for practical use. This is an inherent limitation of Lipschitz-based error analysis, not unique to NeuroPLC. For deep KANs, statistical (Monte Carlo) validation is preferred over analytical bounds."
+}

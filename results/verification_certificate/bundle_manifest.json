@@ -1,0 +1,54 @@
+{
+  "bundle_version": "1.0",
+  "generated_at": "2026-07-07T17:17:45.196786",
+  "model": {
+    "architecture": [
+      28,
+      16,
+      4
+    ],
+    "parameters": 6148,
+    "hash": "e32dce7c48411038"
+  },
+  "verification_results": {
+    "tier1_templates_proved": 4,
+    "tier1_total_templates": 6,
+    "tier2_functions_verified": 512,
+    "tier2_total_functions": 512,
+    "tier2_pass_rate": 100.0,
+    "tier3_certificate_valid": true,
+    "tier3_checker_warnings": 0,
+    "end_to_end_bound": 1.1127029657363892,
+    "classification_preserved": true
+  },
+  "files": [
+    {
+      "path": "tier1_template_proofs.json",
+      "size": 546
+    },
+    {
+      "path": "tier2_per_function_report.json",
+      "size": 159752
+    },
+    {
+      "path": "tier3_composition_certificate.json",
+      "size": 182120
+    },
+    {
+      "path": "tier3_checker_output.log",
+      "size": 440
+    },
+    {
+      "path": "iec61508_sil_mapping.json",
+      "size": 3938
+    },
+    {
+      "path": "iec61508_sil_mapping.tex",
+      "size": 1284
+    },
+    {
+      "path": "VERIFICATION_README.md",
+      "size": 2107
+    }
+  ]
+}

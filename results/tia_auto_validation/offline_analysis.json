@@ -1,0 +1,205 @@
+{
+  "timestamp": "2026-07-07T17:06:29",
+  "targets_analyzed": 12,
+  "targets_found": 12,
+  "results": [
+    {
+      "model": "KAN",
+      "arch": [
+        28,
+        16,
+        4
+      ],
+      "plc": "S7-1200",
+      "cpu": "1211C",
+      "scl_file": "kan_s7-1200_db_fb.scl",
+      "scl_format": "db_fb",
+      "status": "OK",
+      "scl_lines": 169,
+      "memory_kb": 40.3,
+      "ir_nodes": 11
+    },
+    {
+      "model": "KAN",
+      "arch": [
+        28,
+        16,
+        4
+      ],
+      "plc": "S7-1200",
+      "cpu": "1211C",
+      "scl_file": "kan_s7-1200_db.scl",
+      "scl_format": "db",
+      "status": "OK",
+      "scl_lines": 1057,
+      "memory_kb": 40.3,
+      "ir_nodes": 11
+    },
+    {
+      "model": "KAN",
+      "arch": [
+        28,
+        16,
+        4
+      ],
+      "plc": "S7-1200",
+      "cpu": "1211C",
+      "scl_file": "kan_s7-1200.scl",
+      "scl_format": "single",
+      "status": "OK",
+      "scl_lines": 2188,
+      "memory_kb": 40.3,
+      "ir_nodes": 11
+    },
+    {
+      "model": "KAN",
+      "arch": [
+        28,
+        16,
+        4
+      ],
+      "plc": "S7-1500",
+      "cpu": "1511",
+      "scl_file": "kan_s7-1500_db_fb.scl",
+      "scl_format": "db_fb",
+      "status": "OK",
+      "scl_lines": 169,
+      "memory_kb": 110.8,
+      "ir_nodes": 11
+    },
+    {
+      "model": "KAN",
+      "arch": [
+        28,
+        16,
+        4
+      ],
+      "plc": "S7-1500",
+      "cpu": "1511",
+      "scl_file": "kan_s7-1500_db.scl",
+      "scl_format": "db",
+      "status": "OK",
+      "scl_lines": 3307,
+      "memory_kb": 110.8,
+      "ir_nodes": 11
+    },
+    {
+      "model": "KAN",
+      "arch": [
+        28,
+        16,
+        4
+      ],
+      "plc": "S7-1500",
+      "cpu": "1511",
+      "scl_file": "kan_s7-1500.scl",
+      "scl_format": "single",
+      "status": "OK",
+      "scl_lines": 4378,
+      "memory_kb": 110.8,
+      "ir_nodes": 11
+    },
+    {
+      "model": "MLP",
+      "arch": [
+        28,
+        32,
+        16,
+        4
+      ],
+      "plc": "S7-1200",
+      "cpu": "1211C",
+      "scl_file": "mlp_s7-1200_db_fb.scl",
+      "scl_format": "db_fb",
+      "status": "OK",
+      "scl_lines": 144,
+      "memory_kb": 13.2,
+      "ir_nodes": 8
+    },
+    {
+      "model": "MLP",
+      "arch": [
+        28,
+        32,
+        16,
+        4
+      ],
+      "plc": "S7-1200",
+      "cpu": "1211C",
+      "scl_file": "mlp_s7-1200_db.scl",
+      "scl_format": "db",
+      "status": "OK",
+      "scl_lines": 213,
+      "memory_kb": 13.2,
+      "ir_nodes": 8
+    },
+    {
+      "model": "MLP",
+      "arch": [
+        28,
+        32,
+        16,
+        4
+      ],
+      "plc": "S7-1200",
+      "cpu": "1211C",
+      "scl_file": "mlp_s7-1200.scl",
+      "scl_format": "single",
+      "status": "OK",
+      "scl_lines": 551,
+      "memory_kb": 13.2,
+      "ir_nodes": 8
+    },
+    {
+      "model": "MLP",
+      "arch": [
+        28,
+        32,
+        16,
+        4
+      ],
+      "plc": "S7-1500",
+      "cpu": "1511",
+      "scl_file": "mlp_s7-1500_db_fb.scl",
+      "scl_format": "db_fb",
+      "status": "OK",
+      "scl_lines": 144,
+      "memory_kb": 13.2,
+      "ir_nodes": 8
+    },
+    {
+      "model": "MLP",
+      "arch": [
+        28,
+        32,
+        16,
+        4
+      ],
+      "plc": "S7-1500",
+      "cpu": "1511",
+      "scl_file": "mlp_s7-1500_db.scl",
+      "scl_format": "db",
+      "status": "OK",
+      "scl_lines": 213,
+      "memory_kb": 13.2,
+      "ir_nodes": 8
+    },
+    {
+      "model": "MLP",
+      "arch": [
+        28,
+        32,
+        16,
+        4
+      ],
+      "plc": "S7-1500",
+      "cpu": "1511",
+      "scl_file": "mlp_s7-1500.scl",
+      "scl_format": "single",
+      "status": "OK",
+      "scl_lines": 395,
+      "memory_kb": 13.2,
+      "ir_nodes": 8
+    }
+  ]
+}

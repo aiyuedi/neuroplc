@@ -1,0 +1,49 @@
+{
+  "templates_proved": 4,
+  "total_templates": 6,
+  "total_time_ms": 57.08289999893168,
+  "results": [
+    {
+      "op_type": "MatMul",
+      "status": "PROVED",
+      "z3_time_ms": 27.42700000089826,
+      "claim": "SCL MatMul = W\u00b7x + b for ALL W, b, x (exact, Real arithmetic)",
+      "details": "Z3 UNSAT on 16/16 dimension pairs (n,m <= 8)"
+    },
+    {
+      "op_type": "Add",
+      "status": "PROVED",
+      "z3_time_ms": 5.812000001242268,
+      "claim": "SCL Add = a + b for ALL a, b (exact, element-wise)",
+      "details": "Z3 UNSAT on 8/8 dimensions (d <= 16)"
+    },
+    {
+      "op_type": "BsplineLUT",
+      "status": "PROVED_BOUNDED",
+      "z3_time_ms": 6.600599999728729,
+      "claim": "|LUT_interp(x) - f(x)| <= M2*h^2/8 for ANY f with |f''|<=M2",
+      "details": "Z3 UNSAT: bound holds for all cubic polynomials with bounded 2nd derivative"
+    },
+    {
+      "op_type": "StandardAct",
+      "status": "ASSUMED",
+      "z3_time_ms": 0.0,
+      "claim": "SCL SiLU = PyTorch SiLU (identical analytic formula)",
+      "details": "Transcendental exp(x) \u2014 Z3 NRA incomplete; analytic identity suffices (same formula in SCL and PyTorch)"
+    },
+    {
+      "op_type": "Softmax",
+      "status": "ASSUMED",
+      "z3_time_ms": 0.0,
+      "claim": "SCL Softmax = PyTorch Softmax (identical analytic formula)",
+      "details": "Transcendental exp(x) \u2014 Z3 NRA cannot handle; analytic identity suffices (same formula in SCL and PyTorch). Key property: argmax(softmax(x)) = argmax(x) by monotonicity of exp."
+    },
+    {
+      "op_type": "Argmax",
+      "status": "PROVED",
+      "z3_time_ms": 16.509900000528432,
+      "claim": "SCL Argmax = argmax_i x_i for ALL x (exact)",
+      "details": "Z3 UNSAT on 4/4 dimensions (d <= 8)"
+    }
+  ]
+}

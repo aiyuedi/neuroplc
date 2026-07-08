@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\caption{NeuroPLC Multi-Target Compilation Matrix: All model--PLC combinations compile with 0 errors, 0 warnings in Siemens TIA Portal V21. DB+FB split format shown.}
+\label{tab:tia_multitarget}
+\small
+\begin{tabular}{@{}lcccrrrrr@{}}
+\toprule
+\textbf{Model} & \textbf{Architecture} & \textbf{PLC} & \textbf{Format} & \textbf{SCL Lines} & \textbf{Mem (KB)} & \textbf{Budget \%} & \textbf{Errors} & \textbf{Warnings} \\
+\midrule
+  KAN & [28,16,4] & S7-1200 1211C & DB+FB & 169 & 40.3 & --- & 0 & 0 \\
+  KAN & [28,16,4] & S7-1500 1511 & DB+FB & 169 & 110.8 & --- & 0 & 0 \\
+  MLP & [28,32,16,4] & S7-1200 1211C & DB+FB & 144 & 13.2 & --- & 0 & 0 \\
+  MLP & [28,32,16,4] & S7-1500 1511 & DB+FB & 144 & 13.2 & --- & 0 & 0 \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+{\scriptsize All variants compiled with 0 errors, 0 warnings. DB+FB split format ensures S7-1200 blocks stay under 64\,KB limit. Memory includes DATA\_BLOCK parameter storage (load memory).}
+\end{table}

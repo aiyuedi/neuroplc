@@ -1,0 +1,426 @@
+[
+  {
+    "target": "s7-1200",
+    "scl_fb_path": "D:\\neuroplc-paper\\results\\scl_output\\kan_s7-1200_db_fb.scl",
+    "scl_db_path": "D:\\neuroplc-paper\\results\\scl_output\\kan_s7-1200_db.scl",
+    "db_name": "NeuroPLC_Inference",
+    "db_file_size_kb": 192.6,
+    "fb_file_lines": 168,
+    "raw_counts": {
+      "db_access": 0,
+      "real_exp": 3,
+      "real_div": 5,
+      "real_mul": 524,
+      "real_add": 533,
+      "real_sub": 11,
+      "real_cmp": 4,
+      "real_assign": 72,
+      "array_1d": 1101,
+      "array_2d": 6,
+      "int_mul": 6,
+      "int_add": 218,
+      "branch": 4,
+      "for_init": 16,
+      "for_iter_total": 212,
+      "int_cmp": 212,
+      "for_overhead": 212
+    },
+    "arch_summary": {
+      "matmul_mul_add": 1057,
+      "activation_exp": 8,
+      "lut_interp": 1107,
+      "loop_iterations": 212,
+      "comparisons": 4
+    },
+    "timing": {
+      "breakdown": {
+        "array_1d": {
+          "count": 1101,
+          "us_per_op": 0.06,
+          "us_total": 66.06
+        },
+        "array_2d": {
+          "count": 6,
+          "us_per_op": 0.1,
+          "us_total": 0.6
+        },
+        "branch": {
+          "count": 4,
+          "us_per_op": 0.04,
+          "us_total": 0.16
+        },
+        "int_add": {
+          "count": 218,
+          "us_per_op": 0.02,
+          "us_total": 4.36
+        },
+        "int_cmp": {
+          "count": 212,
+          "us_per_op": 0.02,
+          "us_total": 4.24
+        },
+        "int_mul": {
+          "count": 6,
+          "us_per_op": 0.0,
+          "us_total": 0.0
+        },
+        "real_add": {
+          "count": 533,
+          "us_per_op": 0.1,
+          "us_total": 53.3
+        },
+        "real_assign": {
+          "count": 72,
+          "us_per_op": 0.04,
+          "us_total": 2.88
+        },
+        "real_cmp": {
+          "count": 4,
+          "us_per_op": 0.06,
+          "us_total": 0.24
+        },
+        "real_div": {
+          "count": 5,
+          "us_per_op": 0.3,
+          "us_total": 1.5
+        },
+        "real_exp": {
+          "count": 3,
+          "us_per_op": 1.5,
+          "us_total": 4.5
+        },
+        "real_mul": {
+          "count": 524,
+          "us_per_op": 0.15,
+          "us_total": 78.6
+        },
+        "real_sub": {
+          "count": 11,
+          "us_per_op": 0.1,
+          "us_total": 1.1
+        }
+      },
+      "total_us": 217.54
+    },
+    "derived": {
+      "total_operations": 2699,
+      "estimated_us_per_inference": 217.54,
+      "estimated_ms_per_inference": 0.2175,
+      "estimated_inferences_per_second": 4596.9,
+      "estimated_cycle_time_ms": 0.218
+    }
+  },
+  {
+    "target": "s7-1500",
+    "scl_fb_path": "D:\\neuroplc-paper\\results\\scl_output\\kan_s7-1500_db_fb.scl",
+    "scl_db_path": "D:\\neuroplc-paper\\results\\scl_output\\kan_s7-1500_db.scl",
+    "db_name": "NeuroPLC_Inference",
+    "db_file_size_kb": 629.9,
+    "fb_file_lines": 168,
+    "raw_counts": {
+      "db_access": 0,
+      "real_exp": 3,
+      "real_div": 5,
+      "real_mul": 524,
+      "real_add": 533,
+      "real_sub": 11,
+      "real_cmp": 4,
+      "real_assign": 72,
+      "array_1d": 1101,
+      "array_2d": 6,
+      "int_mul": 6,
+      "int_add": 288,
+      "branch": 4,
+      "for_init": 16,
+      "for_iter_total": 282,
+      "int_cmp": 282,
+      "for_overhead": 282
+    },
+    "arch_summary": {
+      "matmul_mul_add": 1057,
+      "activation_exp": 8,
+      "lut_interp": 1107,
+      "loop_iterations": 282,
+      "comparisons": 4
+    },
+    "timing": {
+      "breakdown": {
+        "array_1d": {
+          "count": 1101,
+          "us_per_op": 0.002,
+          "us_total": 2.202
+        },
+        "array_2d": {
+          "count": 6,
+          "us_per_op": 0.003,
+          "us_total": 0.018
+        },
+        "branch": {
+          "count": 4,
+          "us_per_op": 0.001,
+          "us_total": 0.004
+        },
+        "int_add": {
+          "count": 288,
+          "us_per_op": 0.001,
+          "us_total": 0.288
+        },
+        "int_cmp": {
+          "count": 282,
+          "us_per_op": 0.001,
+          "us_total": 0.282
+        },
+        "int_mul": {
+          "count": 6,
+          "us_per_op": 0.0,
+          "us_total": 0.0
+        },
+        "real_add": {
+          "count": 533,
+          "us_per_op": 0.002,
+          "us_total": 1.066
+        },
+        "real_assign": {
+          "count": 72,
+          "us_per_op": 0.001,
+          "us_total": 0.072
+        },
+        "real_cmp": {
+          "count": 4,
+          "us_per_op": 0.001,
+          "us_total": 0.004
+        },
+        "real_div": {
+          "count": 5,
+          "us_per_op": 0.006,
+          "us_total": 0.03
+        },
+        "real_exp": {
+          "count": 3,
+          "us_per_op": 0.03,
+          "us_total": 0.09
+        },
+        "real_mul": {
+          "count": 524,
+          "us_per_op": 0.003,
+          "us_total": 1.572
+        },
+        "real_sub": {
+          "count": 11,
+          "us_per_op": 0.002,
+          "us_total": 0.022
+        }
+      },
+      "total_us": 5.65
+    },
+    "derived": {
+      "total_operations": 2839,
+      "estimated_us_per_inference": 5.65,
+      "estimated_ms_per_inference": 0.0057,
+      "estimated_inferences_per_second": 176991.2,
+      "estimated_cycle_time_ms": 0.006
+    }
+  },
+  {
+    "target": "s7-1200",
+    "scl_fb_path": "D:\\neuroplc-paper\\results\\scl_output\\mlp_s7-1200_db_fb.scl",
+    "scl_db_path": "D:\\neuroplc-paper\\results\\scl_output\\mlp_s7-1200_db.scl",
+    "db_name": "NeuroPLC_Inference",
+    "db_file_size_kb": 34.9,
+    "fb_file_lines": 143,
+    "raw_counts": {
+      "db_access": 0,
+      "real_exp": 1,
+      "real_div": 1,
+      "real_mul": 1472,
+      "real_add": 1473,
+      "real_sub": 1,
+      "real_cmp": 4,
+      "real_assign": 74,
+      "array_1d": 3067,
+      "array_2d": 0,
+      "int_mul": 0,
+      "int_add": 62,
+      "branch": 4,
+      "for_init": 6,
+      "for_iter_total": 62,
+      "int_cmp": 62,
+      "for_overhead": 62
+    },
+    "arch_summary": {
+      "matmul_mul_add": 2945,
+      "activation_exp": 2,
+      "lut_interp": 3067,
+      "loop_iterations": 62,
+      "comparisons": 4
+    },
+    "timing": {
+      "breakdown": {
+        "array_1d": {
+          "count": 3067,
+          "us_per_op": 0.06,
+          "us_total": 184.02
+        },
+        "branch": {
+          "count": 4,
+          "us_per_op": 0.04,
+          "us_total": 0.16
+        },
+        "int_add": {
+          "count": 62,
+          "us_per_op": 0.02,
+          "us_total": 1.24
+        },
+        "int_cmp": {
+          "count": 62,
+          "us_per_op": 0.02,
+          "us_total": 1.24
+        },
+        "real_add": {
+          "count": 1473,
+          "us_per_op": 0.1,
+          "us_total": 147.3
+        },
+        "real_assign": {
+          "count": 74,
+          "us_per_op": 0.04,
+          "us_total": 2.96
+        },
+        "real_cmp": {
+          "count": 4,
+          "us_per_op": 0.06,
+          "us_total": 0.24
+        },
+        "real_div": {
+          "count": 1,
+          "us_per_op": 0.3,
+          "us_total": 0.3
+        },
+        "real_exp": {
+          "count": 1,
+          "us_per_op": 1.5,
+          "us_total": 1.5
+        },
+        "real_mul": {
+          "count": 1472,
+          "us_per_op": 0.15,
+          "us_total": 220.8
+        },
+        "real_sub": {
+          "count": 1,
+          "us_per_op": 0.1,
+          "us_total": 0.1
+        }
+      },
+      "total_us": 559.86
+    },
+    "derived": {
+      "total_operations": 6221,
+      "estimated_us_per_inference": 559.86,
+      "estimated_ms_per_inference": 0.5599,
+      "estimated_inferences_per_second": 1786.2,
+      "estimated_cycle_time_ms": 0.56
+    }
+  },
+  {
+    "target": "s7-1500",
+    "scl_fb_path": "D:\\neuroplc-paper\\results\\scl_output\\mlp_s7-1500_db_fb.scl",
+    "scl_db_path": "D:\\neuroplc-paper\\results\\scl_output\\mlp_s7-1500_db.scl",
+    "db_name": "NeuroPLC_Inference",
+    "db_file_size_kb": 34.9,
+    "fb_file_lines": 143,
+    "raw_counts": {
+      "db_access": 0,
+      "real_exp": 1,
+      "real_div": 1,
+      "real_mul": 1472,
+      "real_add": 1473,
+      "real_sub": 1,
+      "real_cmp": 4,
+      "real_assign": 74,
+      "array_1d": 3067,
+      "array_2d": 0,
+      "int_mul": 0,
+      "int_add": 62,
+      "branch": 4,
+      "for_init": 6,
+      "for_iter_total": 62,
+      "int_cmp": 62,
+      "for_overhead": 62
+    },
+    "arch_summary": {
+      "matmul_mul_add": 2945,
+      "activation_exp": 2,
+      "lut_interp": 3067,
+      "loop_iterations": 62,
+      "comparisons": 4
+    },
+    "timing": {
+      "breakdown": {
+        "array_1d": {
+          "count": 3067,
+          "us_per_op": 0.002,
+          "us_total": 6.134
+        },
+        "branch": {
+          "count": 4,
+          "us_per_op": 0.001,
+          "us_total": 0.004
+        },
+        "int_add": {
+          "count": 62,
+          "us_per_op": 0.001,
+          "us_total": 0.062
+        },
+        "int_cmp": {
+          "count": 62,
+          "us_per_op": 0.001,
+          "us_total": 0.062
+        },
+        "real_add": {
+          "count": 1473,
+          "us_per_op": 0.002,
+          "us_total": 2.946
+        },
+        "real_assign": {
+          "count": 74,
+          "us_per_op": 0.001,
+          "us_total": 0.074
+        },
+        "real_cmp": {
+          "count": 4,
+          "us_per_op": 0.001,
+          "us_total": 0.004
+        },
+        "real_div": {
+          "count": 1,
+          "us_per_op": 0.006,
+          "us_total": 0.006
+        },
+        "real_exp": {
+          "count": 1,
+          "us_per_op": 0.03,
+          "us_total": 0.03
+        },
+        "real_mul": {
+          "count": 1472,
+          "us_per_op": 0.003,
+          "us_total": 4.416
+        },
+        "real_sub": {
+          "count": 1,
+          "us_per_op": 0.002,
+          "us_total": 0.002
+        }
+      },
+      "total_us": 13.74
+    },
+    "derived": {
+      "total_operations": 6221,
+      "estimated_us_per_inference": 13.74,
+      "estimated_ms_per_inference": 0.0137,
+      "estimated_inferences_per_second": 72780.2,
+      "estimated_cycle_time_ms": 0.014
+    }
+  }
+]

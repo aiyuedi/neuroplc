@@ -1,0 +1,11 @@
+{
+  "eps": 0.0036,
+  "kan_da_bound": 0.00952201039604525,
+  "kan_ia_bound": 0.04087804662804645,
+  "mlp_ia_bound": 0.056976763658731354,
+  "kan_da_vs_ia": 4.293005880882489,
+  "mlp_vs_kan_da": 5.983690553666625,
+  "composition_possible": true,
+  "mlp_composition_possible": false,
+  "mlp_failure_reason": "MLP activations (SiLU/ReLU) compose NONLINEARLY through weight matrices. Per-neuron verification does not compose to end-to-end guarantee because: (1) ReLU'(x) is data-dependent (0 or 1), breaking sign-structure analysis, (2) error propagation through sequential ReLU+MatMul creates wrapping effect (6.0\u00d7 worse than KAN DA for 2 layers), (3) Theorem 1 requires operation-type closure (SVNN Condition 1) \u2014 MLP violates this because ReLU and MatMul alternate, mixing operation types."
+}

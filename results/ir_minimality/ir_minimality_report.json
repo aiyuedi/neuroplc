@@ -1,0 +1,18 @@
+{
+  "experiment": "E35",
+  "name": "IR Minimality Proof",
+  "theorem": "Proposition IR Minimality",
+  "claims": {
+    "necessity": "All 6 ops are irreplaceable for KAN compilation",
+    "sufficiency": "Any KAN forward pass is expressible as DAG of 6 ops",
+    "non_extensibility": "Adding more ops breaks SVNN Condition 1"
+  },
+  "quantitative": {
+    "ir_ops": 6,
+    "onnx_ops": "~170",
+    "mlir_tosa_ops": "~150",
+    "reduction_vs_onnx": "28x fewer",
+    "reduction_vs_mlir": "25x fewer"
+  },
+  "key_insight": "The 6-op IR is not an arbitrary design choice---it is the MAXIMAL VERIFIABLE SUBSET of neural network operations for KAN compilation: the largest set for which both Theorem 1 (compiler correctness) and Theorem 2 (SVNN error bound) hold simultaneously."
+}

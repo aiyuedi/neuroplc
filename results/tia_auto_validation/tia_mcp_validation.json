@@ -1,0 +1,73 @@
+{
+  "timestamp": "2026-07-07T17:36:16+08:00",
+  "tool": "TIA Portal V21 + MCP (184 tools)",
+  "results": [
+    {
+      "model": "KAN",
+      "arch": [
+        28,
+        16,
+        4
+      ],
+      "plc": "S7-1200 CPU 1211C V4.7",
+      "project": "NeuroPLC_FBOnly_Test",
+      "format": "DB+FB split",
+      "blocks": [
+        "NeuroPLC_Weights (DB2)",
+        "NeuroPLC_Inference (FB2)"
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "status": "PASS",
+      "verified_by": "MCP CompileAndDiagnosePlc"
+    },
+    {
+      "model": "KAN",
+      "arch": [
+        28,
+        16,
+        4
+      ],
+      "plc": "S7-1200 CPU 1211C V4.7",
+      "project": "NeuroPLC_S7_1200_DB",
+      "format": "DB+FB split",
+      "blocks": [
+        "NeuroPLC_KAN_Weights (DB1)",
+        "NeuroPLC_Inference (FB1)"
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "status": "PASS",
+      "verified_by": "MCP CompileAndDiagnosePlc"
+    },
+    {
+      "model": "MLP",
+      "arch": [
+        28,
+        32,
+        16,
+        4
+      ],
+      "plc": "S7-1200 CPU 1211C V4.7",
+      "project": "NeuroPLC_FBOnly_Test",
+      "format": "DB+FB split",
+      "blocks": [
+        "NeuroPLC_MLP_Weights (DB3)",
+        "NeuroPLC_Inference (FB2)"
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "status": "PASS",
+      "verified_by": "Existing project (+ prior TIA V21 session)"
+    }
+  ],
+  "summary": {
+    "total_compilations": 3,
+    "passed": 3,
+    "failed": 0,
+    "error_rate": "0/3",
+    "all_zero_errors": true,
+    "all_zero_warnings": true,
+    "full_coverage": "KAN (2 projects) + MLP (1 project) on S7-1200 CPU 1211C V4.7"
+  }
+}

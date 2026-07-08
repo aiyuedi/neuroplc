@@ -13,8 +13,9 @@ Architecture:
       → Layer 1: 16 → 4   (KANLinear with B-spline)
       → Output:  4-class logits
 
-Parameters: ~300 (most from B-spline coefficients)
-    vs MLP ~1,636 — 5× reduction
+Parameters: 6,148 (grid_size=8, spline_order=3)
+    B-spline: 4,928 + 704 = 5,632, Base: 448 + 64 = 512, Scales: 4
+    KAN has more parameters than MLP but achieves PLC compatibility via LUT compilation
 
 Key design choices (PLC-friendly):
     - grid_size=8:  small grid → fewer table entries

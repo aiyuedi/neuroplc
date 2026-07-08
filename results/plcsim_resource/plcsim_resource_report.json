@@ -1,0 +1,148 @@
+{
+  "meta": {
+    "experiment": "E29",
+    "name": "PLCSIM / TIA Portal Resource Analysis",
+    "timestamp": "2026-07-07T12:00:00+08:00",
+    "description": "Combines TIA Portal V21 real compilation data with Z3-verified WCET bounds for comprehensive resource analysis"
+  },
+  "tia_portal_data": {
+    "project": "NeuroPLC_S7_1200_DB.ap21",
+    "cpu": {
+      "model": "CPU 1211C AC/DC/Rly",
+      "order_number": "6ES7 211-1BE40-0XB0",
+      "firmware": "V4.7",
+      "work_memory_kb": 50,
+      "load_memory_kb": 1024,
+      "retentive_memory_kb": 10
+    },
+    "blocks": {
+      "DB1_NeuroPLC_KAN_Weights": {
+        "type": "GlobalDB",
+        "language": "DB",
+        "load_memory_bytes": 94474,
+        "work_memory_bytes": 32972,
+        "is_consistent": true,
+        "description": "KAN [28,16,4] weights (grids + LUT tables + W + bias)"
+      },
+      "FB1_NeuroPLC_Inference": {
+        "type": "FB",
+        "language": "SCL",
+        "load_memory_bytes": 169876,
+        "work_memory_bytes": 13360,
+        "is_consistent": true,
+        "description": "Inference FB: 6-op forward pass (11 IR nodes)"
+      },
+      "OB1_Main": {
+        "type": "OB",
+        "language": "LAD",
+        "load_memory_bytes": null,
+        "work_memory_bytes": null,
+        "is_consistent": true
+      }
+    },
+    "compilation": {
+      "errors": 0,
+      "warnings": 0,
+      "status": "Success",
+      "timestamp": "2026-07-07T03:53:25Z"
+    }
+  },
+  "memory_breakdown": {
+    "DB_load_kb": 92.3,
+    "DB_work_kb": 32.2,
+    "FB_load_kb": 165.9,
+    "FB_work_kb": 13.0,
+    "Total_work_kb": 45.2,
+    "Total_load_kb": 258.2,
+    "CPU_work_kb": 50,
+    "CPU_load_kb": 1024,
+    "Work_utilization_pct": 90.5,
+    "Load_utilization_pct": 25.2,
+    "Work_remaining_kb": 4.8
+  },
+  "wcet": {
+    "total_us": 3007.2,
+    "total_ms": 3.0071999999999997,
+    "total_ops": 20119,
+    "cycle_budget_pct": 3.0071999999999997,
+    "nodes": [
+      {
+        "op": "StandardAct",
+        "shape": "28→28",
+        "wcet_us": 89.4,
+        "ops": 140,
+        "deterministic": true
+      },
+      {
+        "op": "BsplineLUT",
+        "shape": "28→16×28",
+        "wcet_us": 1866.0,
+        "ops": 14644,
+        "deterministic": true
+      },
+      {
+        "op": "MatMul",
+        "shape": "28→16",
+        "wcet_us": 413.8,
+        "ops": 896,
+        "deterministic": true
+      },
+      {
+        "op": "Add",
+        "shape": "16→16",
+        "wcet_us": 8.0,
+        "ops": 16,
+        "deterministic": true
+      },
+      {
+        "op": "StandardAct",
+        "shape": "16→16",
+        "wcet_us": 59.8,
+        "ops": 80,
+        "deterministic": true
+      },
+      {
+        "op": "BsplineLUT",
+        "shape": "16→4×16",
+        "wcet_us": 493.2,
+        "ops": 4184,
+        "deterministic": true
+      },
+      {
+        "op": "MatMul",
+        "shape": "16→4",
+        "wcet_us": 44.8,
+        "ops": 128,
+        "deterministic": true
+      },
+      {
+        "op": "Add",
+        "shape": "4→4",
+        "wcet_us": 2.0,
+        "ops": 4,
+        "deterministic": true
+      },
+      {
+        "op": "Softmax",
+        "shape": "4→4",
+        "wcet_us": 24.6,
+        "ops": 24,
+        "deterministic": true
+      },
+      {
+        "op": "Argmax",
+        "shape": "4→1",
+        "wcet_us": 5.6,
+        "ops": 3,
+        "deterministic": true
+      }
+    ]
+  },
+  "key_findings": [
+    "Work memory: 90.5% utilization",
+    "Code compiled: 0 errors, 0 warnings on TIA Portal V21",
+    "WCET = 3.01 ms (Z3-verified)",
+    "Memory is binding constraint (90.4% work mem vs 3.0% cycle)",
+    "Paper upgrade: estimates → TIA Portal measured + Z3-verified"
+  ]
+}

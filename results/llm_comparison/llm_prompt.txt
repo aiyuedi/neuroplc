@@ -1,0 +1,23 @@
+Generate complete IEC 61131-3 SCL (Structured Control Language) code for Siemens S7-1200 that performs inference for a Kolmogorov-Arnold Network (KAN).
+
+Architecture: [28 input, 16 hidden, 4 output classes]
+
+Each KAN layer is:
+  y_j = scale_base * sum_i(W_base[j,i] * SiLU(x_i)) + scale_spline * sum_i(phi_{j,i}(x_i))
+
+where:
+  - SiLU(x) = x / (1 + EXP(-x))
+  - phi_{j,i}(x) is a cubic B-spline function with grid_size=8, evaluated via 15-point lookup table with linear interpolation
+  - W_base: (16,28) and (4,16) REAL matrices
+  - scale_base, scale_spline: REAL scalars per layer
+  - Output: Softmax over 4 classes, then Argmax
+
+Requirements:
+  1. Use DATA_BLOCK for all weight/bias/LUT parameter arrays
+  2. Use FUNCTION_BLOCK for inference logic
+  3. B-spline evaluation: binary search + linear interpolation
+  4. S7_Optimized_Access := 'FALSE'
+  5. All REAL arithmetic (IEEE 754 32-bit)
+  6. Must compile in Siemens TIA Portal V21 with 0 errors
+
+Generate complete, compilable SCL code. Include ALL parameter values as REAL array initializers (use placeholder values like 0.0 where exact weights are unknown).

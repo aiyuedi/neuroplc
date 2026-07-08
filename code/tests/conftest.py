@@ -79,7 +79,7 @@ def test_signal():
 @pytest.fixture(scope="session")
 def test_windows(test_signal):
     """Generate sliding windows from test signal."""
-    from preprocess import sliding_window
+    from data_pipeline.preprocess import sliding_window
     return sliding_window(test_signal, window_size=1024, stride=512)
 
 
@@ -109,7 +109,7 @@ def pytest_collection_modifyitems(config, items):
 
     if not has_data:
         skip_data = pytest.mark.skip(
-            reason="CWRU data not available. Run: python download_verify_cwru.py --source local --input <folder>"
+            reason="CWRU data not available. Run: python data_pipeline/download_verify_cwru.py --source local --input <folder>"
         )
         for item in items:
             if "requires_data" in item.keywords:

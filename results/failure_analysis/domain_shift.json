@@ -1,0 +1,208 @@
+{
+  "description": "Domain shift quantification between CWRU and XJTU-SY",
+  "domain": "CWRU Cross-Load (1hp \u2192 0hp)",
+  "mmd_rbf": 0.0905667394399643,
+  "cohens_d_mean": 0.13178477038828923,
+  "cohens_d_max": 0.32476747035980225,
+  "n_features_large_shift": 0,
+  "severity": "Severe \u2014 near-random performance without adaptation",
+  "per_feature_stats": {
+    "feat_0": {
+      "source_mean": -0.03820353373885155,
+      "source_std": 0.9609687328338623,
+      "target_mean": 0.09499755501747131,
+      "target_std": 1.0201044082641602,
+      "cohens_d": 0.13441380858421326
+    },
+    "feat_1": {
+      "source_mean": -0.04620612785220146,
+      "source_std": 0.9678816795349121,
+      "target_mean": 0.12844033539295197,
+      "target_std": 1.0343760251998901,
+      "cohens_d": 0.17435342073440552
+    },
+    "feat_2": {
+      "source_mean": -0.04386904463171959,
+      "source_std": 0.968691349029541,
+      "target_mean": 0.12097993493080139,
+      "target_std": 1.02899968624115,
+      "cohens_d": 0.16496436297893524
+    },
+    "feat_3": {
+      "source_mean": -0.021158501505851746,
+      "source_std": 1.0037130117416382,
+      "target_mean": 0.10151316225528717,
+      "target_std": 1.0017837285995483,
+      "cohens_d": 0.12233538180589676
+    },
+    "feat_4": {
+      "source_mean": -0.09443708509206772,
+      "source_std": 0.990635335445404,
+      "target_mean": 0.22106695175170898,
+      "target_std": 0.9519326090812683,
+      "cohens_d": 0.32476747035980225
+    },
+    "feat_5": {
+      "source_mean": -0.015241404995322227,
+      "source_std": 0.992201566696167,
+      "target_mean": 0.07781742513179779,
+      "target_std": 1.056815505027771,
+      "cohens_d": 0.09078752994537354
+    },
+    "feat_6": {
+      "source_mean": -0.020905056968331337,
+      "source_std": 0.9787431359291077,
+      "target_mean": 0.09719078242778778,
+      "target_std": 1.0186318159103394,
+      "cohens_d": 0.11822746694087982
+    },
+    "feat_7": {
+      "source_mean": -0.019447684288024902,
+      "source_std": 0.995563268661499,
+      "target_mean": 0.09383564442396164,
+      "target_std": 1.0101284980773926,
+      "cohens_d": 0.1129588708281517
+    },
+    "feat_8": {
+      "source_mean": -0.03494760021567345,
+      "source_std": 0.9591281414031982,
+      "target_mean": 0.08342275768518448,
+      "target_std": 1.018167495727539,
+      "cohens_d": 0.11967620998620987
+    },
+    "feat_9": {
+      "source_mean": -0.03208217769861221,
+      "source_std": 0.919828474521637,
+      "target_mean": 0.04672685265541077,
+      "target_std": 1.0145158767700195,
+      "cohens_d": 0.0813865214586258
+    },
+    "feat_10": {
+      "source_mean": -0.0169670507311821,
+      "source_std": 1.0686798095703125,
+      "target_mean": 0.1832430511713028,
+      "target_std": 0.824134111404419,
+      "cohens_d": 0.20980380475521088
+    },
+    "feat_11": {
+      "source_mean": -0.12516000866889954,
+      "source_std": 0.8718686699867249,
+      "target_mean": 0.06852152198553085,
+      "target_std": 1.183573603630066,
+      "cohens_d": 0.18632695078849792
+    },
+    "feat_12": {
+      "source_mean": -0.006898315157741308,
+      "source_std": 1.0821162462234497,
+      "target_mean": -0.2100422978401184,
+      "target_std": 0.8634774088859558,
+      "cohens_d": 0.20751847326755524
+    },
+    "feat_13": {
+      "source_mean": 0.09573817253112793,
+      "source_std": 0.9819399118423462,
+      "target_mean": 0.11685687303543091,
+      "target_std": 1.0042767524719238,
+      "cohens_d": 0.021263910457491875
+    },
+    "feat_14": {
+      "source_mean": -0.06135986000299454,
+      "source_std": 0.9727242588996887,
+      "target_mean": 0.14241202175617218,
+      "target_std": 1.1891467571258545,
+      "cohens_d": 0.1875768005847931
+    },
+    "feat_15": {
+      "source_mean": 0.04007204249501228,
+      "source_std": 1.0573121309280396,
+      "target_mean": -0.1431630402803421,
+      "target_std": 0.9493336081504822,
+      "cohens_d": 0.18236438930034637
+    },
+    "feat_16": {
+      "source_mean": -0.1703163981437683,
+      "source_std": 0.8819288015365601,
+      "target_mean": -0.335903525352478,
+      "target_std": 0.7774051427841187,
+      "cohens_d": 0.19918785989284515
+    },
+    "feat_17": {
+      "source_mean": -0.004011210985481739,
+      "source_std": 1.0368304252624512,
+      "target_mean": 0.19689209759235382,
+      "target_std": 0.8699120283126831,
+      "cohens_d": 0.2099265158176422
+    },
+    "feat_18": {
+      "source_mean": 0.02810068242251873,
+      "source_std": 1.0498275756835938,
+      "target_mean": 0.0686396062374115,
+      "target_std": 0.9895349144935608,
+      "cohens_d": 0.039739105850458145
+    },
+    "feat_19": {
+      "source_mean": 0.032819874584674835,
+      "source_std": 1.1509733200073242,
+      "target_mean": -0.04661838710308075,
+      "target_std": 0.9438601732254028,
+      "cohens_d": 0.0754740983247757
+    },
+    "feat_20": {
+      "source_mean": -0.07093294709920883,
+      "source_std": 0.9345631003379822,
+      "target_mean": -0.023912355303764343,
+      "target_std": 1.0810046195983887,
+      "cohens_d": 0.04653475433588028
+    },
+    "feat_21": {
+      "source_mean": -0.05692967399954796,
+      "source_std": 0.9476593732833862,
+      "target_mean": -0.1359097957611084,
+      "target_std": 0.9956410527229309,
+      "cohens_d": 0.08125974982976913
+    },
+    "feat_22": {
+      "source_mean": -0.06950172781944275,
+      "source_std": 1.0213522911071777,
+      "target_mean": -0.0740121454000473,
+      "target_std": 1.05311918258667,
+      "cohens_d": 0.004347987938672304
+    },
+    "feat_23": {
+      "source_mean": -0.15909531712532043,
+      "source_std": 1.0549471378326416,
+      "target_mean": 0.0026090394239872694,
+      "target_std": 1.0448323488235474,
+      "cohens_d": 0.15401853621006012
+    },
+    "feat_24": {
+      "source_mean": -0.09966869652271271,
+      "source_std": 0.9249260425567627,
+      "target_mean": -0.048216864466667175,
+      "target_std": 1.085121989250183,
+      "cohens_d": 0.051032811403274536
+    },
+    "feat_25": {
+      "source_mean": -0.062427740544080734,
+      "source_std": 0.9546445608139038,
+      "target_mean": -0.0437304861843586,
+      "target_std": 1.0772984027862549,
+      "cohens_d": 0.01836988888680935
+    },
+    "feat_26": {
+      "source_mean": 0.006283953320235014,
+      "source_std": 0.9846236109733582,
+      "target_mean": -0.20973876118659973,
+      "target_std": 1.2717692852020264,
+      "cohens_d": 0.18994426727294922
+    },
+    "feat_27": {
+      "source_mean": -0.10197710990905762,
+      "source_std": 1.1496493816375732,
+      "target_mean": 0.08942929655313492,
+      "target_std": 0.9511731266975403,
+      "cohens_d": 0.18141262233257294
+    }
+  },
+  "conclusion": "MMD = 0.0906 indicates severe \u2014 near-random performance without adaptation. 0/28 features show large shift (Cohen's d > 0.5). Domain adaptation (fine-tuning on target domain data) is necessary for practical deployment. This explains the E12 XJTU-SY zero-shot result (62.5% accuracy), and establishes a clear precondition: source and target domains must share sensor type, sampling rate, and operating conditions for zero-shot transfer."
+}

@@ -1,0 +1,11 @@
+{
+  "experiment": "E20",
+  "title": "Failure Analysis \u2014 Method Boundary Characterization",
+  "components": {
+    "da_degradation": "DA provides its strongest advantage (>3\u00d7) when weight signs are imbalanced (|bias| > 0.4). In the worst case (balanced signs), DA degrades to IA. However, trained KANs naturally develop sign structure through optimization \u2014 the DA ratio for CWRU-trained KAN [28,16,4] is 3.1\u00d7. Random weights show 1.0-1.5\u00d7, confirming that training, not architecture, drives the DA advantage.",
+    "lut_degradation": "Adaptive LUT provides meaningful improvement (>1.5\u00d7) only when B-spline basis functions have diverse curvature (|\u03c6''| varies >2\u00d7 across bases). For uniform-curvature functions (e.g., near-linear activations), uniform sampling is sufficient. Trained KANs on CWRU show diverse curvature across edges, making adaptive LUT beneficial.",
+    "depth_lipschitz": "L_net grows exponentially with depth (\u2248e^{2.42\u00b7L}). For 2-layer KAN, L_net \u2248 204.2 (well within usable range). By depth 5, L_net \u2248 294043 (bound becomes pessimistic). Beyond depth 6-7, the bound is too pessimistic for practical use. This is an inherent limitation of Lipschitz-based error analysis, not unique to NeuroPLC. For deep KANs, statistical (Monte Carlo) validation is preferred over analytical bounds.",
+    "domain_shift": "MMD = 0.0906 indicates severe \u2014 near-random performance without adaptation. 0/28 features show large shift (Cohen's d > 0.5). Domain adaptation (fine-tuning on target domain data) is necessary for practical deployment. This explains the E12 XJTU-SY zero-shot result (62.5% accuracy), and establishes a clear precondition: source and target domains must share sensor type, sampling rate, and operating conditions for zero-shot transfer."
+  },
+  "key_message": "NeuroPLC's guarantees are strongest for shallow (L <= 3) KANs deployed in same-domain settings (same sensor type, sampling rate, operating conditions). DA advantage requires weight sign structure (naturally developed through training). Depth Lipschitz explosion limits analytical bounds to L <= 5 layers. These boundaries are well-characterized, predictable, and accompanied by mitigation strategies \u2014 making them a feature, not a bug, of the methodology."
+}

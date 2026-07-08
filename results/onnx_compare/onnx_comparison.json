@@ -1,0 +1,34 @@
+{
+  "model": {
+    "architecture": [
+      28,
+      16,
+      4
+    ],
+    "total_params": 6148
+  },
+  "onnx": {
+    "export_successful": false,
+    "node_count": 15,
+    "estimated_with_decomposed": 2063
+  },
+  "neuroplc_ir": {
+    "node_count": 11,
+    "op_counts": {
+      "matmul": 3,
+      "standard_act": 2,
+      "bspline_lut": 2,
+      "add": 2,
+      "softmax": 1,
+      "argmax": 1
+    },
+    "total_bspline_functions": 512
+  },
+  "code_size": {
+    "scl_lines_actual": 3818,
+    "scl_lines_model": 3850,
+    "onnx_c_lines_estimate": 3000,
+    "onnx_c_lines_if_bspline_decomposed": 206300
+  },
+  "key_finding": "ONNX requires >2,000 nodes to represent B-spline computation; NeuroPLC IR uses 11 nodes with native BsplineLUT support."
+}

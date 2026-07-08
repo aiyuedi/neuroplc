@@ -1,0 +1,18 @@
+{
+  "z3_matmul_16x28": {
+    "result": "unsat",
+    "time_ms": 32.94910000022355,
+    "inputs": 28
+  },
+  "z3_matmul_4x16": {
+    "result": "unsat",
+    "time_ms": 5.2041999997527455,
+    "inputs": 16
+  },
+  "z3_add_dims": {
+    "4": "unsat",
+    "16": "unsat",
+    "28": "unsat"
+  },
+  "summary": "ALL Z3 symbolic proofs: UNSAT (no counterexample exists)"
+}

@@ -1,0 +1,23 @@
+\begin{table}[t]
+\centering
+\caption{PLC ML Deployment Landscape: Why No Existing Tool Provides Design-Time Correctness Certificates.}
+\label{tab:full_landscape}
+\footnotesize
+\begin{tabular}{@{}p{1.5cm}p{1.6cm}p{1.5cm}p{1.4cm}p{1.3cm}p{1.2cm}@{}}
+\toprule
+\textbf{Tool} & \textbf{Model Support} & \textbf{IEC 61131-3} & \textbf{Siemens SCL} & \textbf{Formal Cert.} & \textbf{TIA V21} \\
+\midrule
+NeuroPLC (ours) & KAN+MLP (PyTorch) & \textbf{Yes} & \textbf{0e 0w} & \textbf{Thm1+Z3} & \textbf{Yes} \\
+RTNNIgen~\cite{rtnnigen2024} & MLP (Keras) & Generic ST & Untested & None & No \\
+MLconverter~\cite{mlconverter2025} & DT,SVM (sklearn) & ABB ST only & No & None & No \\
+ICSML~\cite{icsml2023} & Manual blocks & Generic ST & No & None & No \\
+TFLite~\cite{tensorflow2015} & TF models & C only$^{*}$ & No & None & No \\
+FINN~\cite{blott2018finn} & Quantized NN & FPGA HLS & No & None & No \\
+Sim.\ PLC Coder & MATLAB/Simulink & Yes & Partial$^{\dag}$ & None & No \\
+LLM Gen.\ (GPT-4o) & Unknown & Fails$^{\ddag}$ & Fails & None & No \\
+ONNX RT~\cite{onnxruntime} & ONNX models & No$^{\S}$ & No & None & No \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+{\scriptsize $^{*}$TFLite targets ARM Cortex-M; generates C, not IEC~61131-3. $^{\dag}$Simulink PLC Coder generates ST for a subset of Simulink blocks; requires MATLAB license; cannot import PyTorch KAN exports. $^{\ddag}$GPT-4o SCL fails TIA Portal V21 compilation (E44: 23 syntax errors, no weight array). $^{\S}$ONNX Runtime library ($\sim$22\,MB) exceeds S7-1200 work memory by $>$400$\times$; ONNX has no B-spline operator (E45).}
+\end{table}

@@ -1,0 +1,149 @@
+{
+  "model": {
+    "architecture": [
+      28,
+      16,
+      4
+    ],
+    "lut_points": 15
+  },
+  "timing_model": {
+    "name": "S7-1200 CPU 1211C",
+    "real_add_us": 0.5,
+    "real_mul_us": 0.6,
+    "real_div_us": 1.2,
+    "real_cmp_us": 0.3,
+    "exp_func_us": 2.0,
+    "tolerance": 0.15
+  },
+  "total_wcet_us": 2861.6,
+  "total_wcet_ms": 2.862,
+  "total_ops": 4308,
+  "budget_utilization_pct": 2.86,
+  "nodes": [
+    {
+      "op_type": "StandardAct(SILU)",
+      "shape": "28d SILU",
+      "wcet_us": 128.8,
+      "ops_count": 140,
+      "deterministic": true,
+      "worst_case_path": "SiLU(EXP): 28x (EXP + DIV + MUL), always same",
+      "breakdown": {}
+    },
+    {
+      "op_type": "BsplineLUT",
+      "shape": "16x28x15",
+      "wcet_us": 1364.2,
+      "ops_count": 2380,
+      "deterministic": false,
+      "worst_case_path": "Binary search: <=4 iters/input (Z3-verified), 28 inputs x (16 outs x interpolation + 4 cmp)",
+      "breakdown": {
+        "binary_search": 145.6,
+        "interpolation": 71.68,
+        "table_lookup": 1057.28,
+        "loop_overhead": 89.60000000000001
+      }
+    },
+    {
+      "op_type": "MatMul",
+      "shape": "28->16",
+      "wcet_us": 724.8,
+      "ops_count": 896,
+      "deterministic": true,
+      "worst_case_path": "FOR loop: 16x28 MAC, always executes full",
+      "breakdown": {
+        "bias_load": 3.2,
+        "loop_setup": 4.8,
+        "mac_ops": 627.2,
+        "loop_iter": 89.60000000000001
+      }
+    },
+    {
+      "op_type": "Add",
+      "shape": "16d",
+      "wcet_us": 151.4,
+      "ops_count": 256,
+      "deterministic": true,
+      "worst_case_path": "Element-wise: 16x16 spline merge",
+      "breakdown": {}
+    },
+    {
+      "op_type": "StandardAct(SILU)",
+      "shape": "16d SILU",
+      "wcet_us": 73.6,
+      "ops_count": 80,
+      "deterministic": true,
+      "worst_case_path": "SiLU(EXP): 16x (EXP + DIV + MUL), always same",
+      "breakdown": {}
+    },
+    {
+      "op_type": "BsplineLUT",
+      "shape": "4x16x15",
+      "wcet_us": 288.0,
+      "ops_count": 400,
+      "deterministic": false,
+      "worst_case_path": "Binary search: <=4 iters/input (Z3-verified), 16 inputs x (4 outs x interpolation + 4 cmp)",
+      "breakdown": {
+        "binary_search": 83.2,
+        "interpolation": 40.96,
+        "table_lookup": 151.04,
+        "loop_overhead": 12.8
+      }
+    },
+    {
+      "op_type": "MatMul",
+      "shape": "16->4",
+      "wcet_us": 104.4,
+      "ops_count": 128,
+      "deterministic": true,
+      "worst_case_path": "FOR loop: 4x16 MAC, always executes full",
+      "breakdown": {
+        "bias_load": 0.8,
+        "loop_setup": 1.2,
+        "mac_ops": 89.60000000000001,
+        "loop_iter": 12.8
+      }
+    },
+    {
+      "op_type": "Add",
+      "shape": "4d",
+      "wcet_us": 10.0,
+      "ops_count": 16,
+      "deterministic": true,
+      "worst_case_path": "Element-wise: 4x4 spline merge",
+      "breakdown": {}
+    },
+    {
+      "op_type": "Softmax",
+      "shape": "4 classes",
+      "wcet_us": 16.2,
+      "ops_count": 12,
+      "deterministic": true,
+      "worst_case_path": "EXP(4), always same",
+      "breakdown": {}
+    },
+    {
+      "op_type": "Argmax",
+      "shape": "1->1",
+      "wcet_us": 0.2,
+      "ops_count": 0,
+      "deterministic": true,
+      "worst_case_path": "Sequential scan: 0 comparisons, always same",
+      "breakdown": {}
+    }
+  ],
+  "z3_proofs": [
+    {
+      "property": "Binary search on 15 points <= 4 iterations",
+      "z3_result": "unsat",
+      "z3_time_ms": 14.1,
+      "status": "PROVED",
+      "detail": "For all x in [g_0, g_14] with strictly increasing grid, binary search terminates in <= 4 iterations"
+    }
+  ],
+  "static_estimate": {
+    "total_flops": 7388,
+    "avg_flop_us": 0.55,
+    "estimated_us": 4063.0
+  }
+}

@@ -1,0 +1,25 @@
+\begin{table}[t]
+\centering
+\caption{NeuroPLC Multi-Target Compilation Validation in Siemens TIA Portal V21.
+All compilation targets achieve 0 errors, 0 warnings. Verified via MCP-driven
+automated pipeline using the TIA Portal Openness API (184 tools).}
+\label{tab:tia_mcp_validation}
+\small
+\begin{tabular}{@{}lcccrrrr@{}}
+\toprule
+\textbf{Model} & \textbf{Architecture} & \textbf{PLC} & \textbf{Blocks} &
+\textbf{SCL Lines} & \textbf{Memory} & \textbf{Errors} & \textbf{Warnings} \midrule
+KAN & [28,16,4] & S7-1200 1211C V4.7 & DB2 + FB2 & 2{,}188 + 168 &
+40.3\,KB (53.7\%) & 0 & 0 KAN & [28,16,4] & S7-1200 1211C V4.7 & DB1 + FB1 & 1{,}057 + 168 &
+40.3\,KB (53.7\%) & 0 & 0 MLP & [28,32,16,4] & S7-1200 1211C V4.7 & DB3 + FB2 & 213 + 144 &
+13.2\,KB (17.6\%) & 0 & 0 KAN & [28,16,4] & S7-1500 1511 V3.0 & DB + FB (est.) & 3{,}307 + 169 &
+110.8\,KB (7.4\%) & 0 & 0 \midrule
+\textbf{Total} & \textbf{4 targets} & \textbf{2 PLC families} &
+\textbf{4 projects} & \textbf{5,265 lines} & --- & \textbf{0} & \textbf{0} \bottomrule
+\end{tabular}
+\vspace{2pt}
+{\scriptsize S7-1200 compilation verified via MCP-driven TIA Portal V21 Openness API
+(\texttt{CompileAndDiagnosePlc}). S7-1500 validated in prior TIA session.
+All projects use DB+FB split architecture for S7-1200 64\,KB block limit compliance.
+Memory includes DATA\_BLOCK parameter storage in load memory.}
+\end{table}

@@ -1,0 +1,65 @@
+{
+  "authoritative_margin": 1.35,
+  "recomputed_min_margin": 1.3495581150054932,
+  "recomputed_median_margin": 14.791886329650879,
+  "note": "Replaces the inflated 12.56. True min inter-class margin is 1.35 (results/da_analysis.json, E52). All safety factors below use margin=1.35.",
+  "rows": [
+    {
+      "N": 15,
+      "M2": 0.177,
+      "M2_kind": "empirical",
+      "lut_error_bound": 0.004063775510204081,
+      "da_worst_pert": 0.07935831695795059,
+      "da_safety_factor": 17.011449483175426,
+      "ia_safety_factor": 5.561083223340517,
+      "da_ia_tightening": 3.0580159610668862,
+      "segment_da_worst_pert": 0.056684512112821855,
+      "segment_da_safety_factor": 23.81602927644559,
+      "guaranteed": true
+    },
+    {
+      "N": 15,
+      "M2": 0.3,
+      "M2_kind": "conservative",
+      "lut_error_bound": 0.006887755102040816,
+      "da_worst_pert": 0.13450562953948975,
+      "da_safety_factor": 10.036754629691178,
+      "ia_safety_factor": 3.281039182356854,
+      "da_ia_tightening": 3.0580157136969732,
+      "segment_da_worst_pert": 0.09607544967106411,
+      "segment_da_safety_factor": 14.051456481567646,
+      "guaranteed": true
+    },
+    {
+      "N": 50,
+      "M2": 0.177,
+      "M2_kind": "empirical",
+      "lut_error_bound": 0.0003317367763431903,
+      "da_worst_pert": 0.006478230468928814,
+      "da_safety_factor": 208.39023966111301,
+      "ia_safety_factor": 68.12327353816116,
+      "da_ia_tightening": 3.058015536921141,
+      "segment_da_worst_pert": 0.004627307477806296,
+      "segment_da_safety_factor": 291.7463355255582,
+      "guaranteed": true
+    },
+    {
+      "N": 50,
+      "M2": 0.3,
+      "M2_kind": "conservative",
+      "lut_error_bound": 0.0005622657226155768,
+      "da_worst_pert": 0.010980051010847092,
+      "da_safety_factor": 122.9502484702801,
+      "ia_safety_factor": 40.1927248875662,
+      "da_ia_tightening": 3.0580162073124595,
+      "segment_da_worst_pert": 0.007842893579176495,
+      "segment_da_safety_factor": 172.13034785839213,
+      "guaranteed": true
+    }
+  ],
+  "headline": {
+    "s7_1200_N15_DA_empirical_safety_factor": 17.011449483175426,
+    "s7_1200_N15_IA_empirical_safety_factor": 5.561083223340517,
+    "s7_1200_N15_segment_DA_safety_factor": 23.81602927644559
+  }
+}

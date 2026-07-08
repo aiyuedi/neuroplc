@@ -1,0 +1,56 @@
+{
+  "experiment": "E51",
+  "n_samples": 500,
+  "window_size": 1024,
+  "features": [
+    "RMS",
+    "Peak",
+    "Peak2Peak",
+    "CrestFactor",
+    "Skewness",
+    "Kurtosis",
+    "ShapeFactor",
+    "ImpulseFactor",
+    "MeanAbs",
+    "Variance"
+  ],
+  "python_feature_stats": {
+    "mean": [
+      0.538093626499176,
+      2.6078853607177734,
+      4.97211217880249,
+      4.587961196899414,
+      0.01246713474392891,
+      6.889511585235596,
+      1.4173319339752197,
+      6.828223705291748,
+      0.3714786171913147,
+      0.7290729284286499
+    ],
+    "std": [
+      0.6631300449371338,
+      2.910954236984253,
+      5.602961540222168,
+      1.723673701286316,
+      0.1630786508321762,
+      6.314661979675293,
+      0.22442245483398438,
+      3.767575263977051,
+      0.49252164363861084,
+      2.079166889190674
+    ]
+  },
+  "end_to_end": {
+    "fp32_accuracy_10d": 0.444,
+    "lut_accuracy_10d": 0.452,
+    "fp32_lut_agreement": 0.988,
+    "lut_accuracy_28d": 1.0,
+    "accuracy_drop_28d_to_10d": 0.548
+  },
+  "scl_equivalence": {
+    "max_fp_roundtrip_error": 0.0,
+    "verdict": "IDENTICAL within IEEE 754 roundtrip"
+  },
+  "scl_block": "FeatureExtraction_TD (FUNCTION_BLOCK)",
+  "plcsim_status": "NOT_RUN (PLCSIM not active)"
+}

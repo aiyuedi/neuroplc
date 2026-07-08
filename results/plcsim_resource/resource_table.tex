@@ -1,0 +1,42 @@
+\begin{table}[t]
+\centering
+\caption{Resource Analysis: NeuroPLC-compiled KAN \arch{} on S7-1200 CPU 1211C.
+Memory values measured from TIA Portal V21 compilation (block properties);
+WCET is a \emph{formal upper bound} verified by Z3 SMT solver.
+The compiled code occupies \textbf{45.2\,KB} of the 50\,KB work memory
+(\textbf{90.5\%} utilization), confirming that memory—not compute time—is the
+binding constraint for neural inference on low-end PLCs.}
+\label{tab:resource_analysis}
+\small
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Resource} & \textbf{Static Estimate} & \textbf{TIA Portal V21} & \textbf{Unit} \\
+\midrule
+\multicolumn{4}{l}{\textit{Memory (TIA Portal V21 compilation)}} \\
+\quad DB (weights) — Load  & 40.3 & 92.3 & KB \\
+\quad DB (weights) — Work  & 40.3 & 32.2 & KB \\
+\quad FB (inference) — Load & N/A & 165.9 & KB \\
+\quad FB (inference) — Work & 35.0 & 13.0 & KB \\
+\midrule
+\quad \textbf{Total Work Memory} & \textbf{75.0} & \textbf{45.2} & \textbf{KB} \\
+\quad \textbf{Total Load Memory} & \textbf{N/A} & \textbf{258.2} & \textbf{KB} \\
+\quad Work Mem. Utilization   & 150\% (est.) & \textbf{90.5}\% & of 50\,KB \\
+\midrule
+\multicolumn{4}{l}{\textit{Timing (Z3-verified WCET)}} \\
+\quad Total Inference WCET & 2.86 & 3.01 & ms \\
+\quad Cycle Budget Usage    & 2.86 & 3.01 & \% of 100\,ms \\
+\bottomrule
+\end{tabular}
+
+\vspace{4pt}
+\footnotesize
+TIA Portal data from project \texttt{NeuroPLC\_S7\_1200\_DB.ap21},
+compiled 2026-07-07 with 0 errors, 0 warnings.
+WCET bounds verified by Z3 SMT solver (per-instruction timing from
+Siemens S7-1200 System Manual, Appendix~A).
+The paper's original 75\,KB estimate over-counted work memory because
+it did not separate load memory (stored in flash, not counted against
+the work memory budget) from work memory (runtime RAM).
+The actual work memory usage is \textbf{45.2\,KB}, leaving 4.8\,KB
+for user logic.
+\end{table}

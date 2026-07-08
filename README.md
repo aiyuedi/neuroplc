@@ -1,83 +1,68 @@
-# NeuroPLC Paper Project
+# NeuroPLC: PyTorch→IEC 61131-3 SCL Compiler for Siemens PLCs
 
-> **NeuroPLC: An IR-Based Compiler for Deploying Feedforward Neural Networks on IEC 61131-3 Controllers with Application to Bearing Fault Diagnosis**
+> **An IR-Based Compiler from PyTorch to IEC 61131-3 SCL for Siemens PLCs with Bearing Fault Diagnosis**
 
-Started: 2026-07-03 | Status: **方案 C — 全面武器化 (2026-07-04 升级)**
+Started: 2026-07-03 | Status: **Final — 35 pages, 0e/0w, polished, submission-ready**
+
 Author: 刘甫悦 (板板) + Claude
 
 ---
 
-## 零、当前会话状态
+## Quick Status
 
-```
-项目: D:\neuroplc-paper\
-方案: 方案 C — IR-Based 通用编译器 + B-spline 自适应采样 + 多目标PLC
-      (2026-07-04 从 KAN工具 → 通用编译器架构 最终升级)
-
-✅ 已完成 (前置准备):
-  download_verify_cwru.py  GFW 兼容版 (本地导入 + 校验)
-  preprocess.py            28-D (20 统计 + 8 离散熵)
-  config.yaml              方案 C — IR 编译器参数 + 自适应采样
-  paper/main.tex            IEEEtran 骨架
-  paper/references.bib       14 核心引用占位
-  code/tests/               42 tests (38 pass, 4 skip)
-  neuroplc/utils/mlflow     MLflow sqlite 追踪器
-
-⏳ 待写 — Phase 1 (模型+训练):
-  models/teacher_cnn.py
-  models/student_kan.py
-  models/student_mlp.py
-  train_teacher.py
-  train_student_kd.py
-  evaluate.py
-  visualize.py
-
-⏳ 待写 — Phase 2 (编译器 — 核心创新):
-  neuroplc/ir.py             IR 图数据结构
-  neuroplc/frontend.py       PyTorch → IR
-  neuroplc/optimizer.py      B-spline 自适应采样 + 优化 passes
-  neuroplc/backend_s7.py     IR → SCL (S7-1200 + S7-1500)
-  neuroplc/analyzer.py       静态内存/FLOPs 分析
-  neuroplc/compiler.py       编排器 (重构)
-  neuroplc/scl_templates.py  SCL 模板 (重构)
-  neuroplc/validator.py      交叉验证 (适配)
-
-🔴 板板待做:
-  P0-1  下载 CWRU 全量数据 (123云盘: https://www.123pan.com/s/xBwHjv-WIzk.html 提取码 EXLF)
-  P0-2  导入 12 篇核心文献到 Zotero
-
-启动提示（粘贴到新会话）:
-  我在写论文 "NeuroPLC: IR-Based Compiler for Deploying Neural Networks on PLC"。
-  项目 D:\neuroplc-paper\，先读 README.md。
-  方案 C，已做完前置准备，下一步写 Phase 1 模型代码。
-```
+| Dimension | State |
+|-----------|-------|
+| Paper | ~4,438 lines, 35 pages, **0 errors, 0 warnings** |
+| Experiments | E1–E53 + 7 validation experiments (V1–V7) |
+| Algorithms | DA + Segment-Aware Bounds + Adaptive LUT (3 contributions) |
+| TIA Portal compile | ✅ MCP-verified 4 targets × 0e 0w, DB+FB 90.4% (45.2/50 KB) |
+| PLCSIM Advanced | ✅ Python ctypes bridge: RegisterInstance+PowerOn (SREC_OK), <100ms |
+| SCL generation | KAN + MLP, S7-1200 + S7-1500, 12 output variants + feature extraction FB |
+| Model | KAN [28,16,4], 512 B-spline fn, VRM-KD distilled, 99.93% CWRU |
+| Verification | Z3 3-tier: 512/512 functions, certificate VALID, ~200-line TCB |
+| Safety | 5,000 adversarial inputs → 100/100 worst-case preserved |
+| DA scaling | 105 architectures, Pearson r=0.9872, √d law confirmed |
 
 ---
 
-## 一、论文定位
+## One-Paragraph Summary
 
-### 目标
-**不发期刊，按期刊标准写，达到「研究生顶尖水平」的小论文。**
-
-### 标题
-*NeuroPLC: An IR-Based Compiler for Deploying Feedforward Neural Networks on IEC 61131-3 Controllers with Application to Bearing Fault Diagnosis*
-
-### 定位
-**系统论文为主 + 算法论文为辅。** 核心卖点不是你发明了 KAN——而是你设计了一个**通用的、有架构设计的编译器**，KAN 只是它支持的第一个（也是最佳的）案例。
-
-### 核心贡献 (5 项)
-
-| # | 贡献 | 类型 | 层次 |
-|---|------|:---:|:---:|
-| ① | 设计并实现了首个基于 IR 的 PyTorch→IEC 61131-3 通用编译器 | **系统创新** | ⭐⭐⭐⭐⭐ |
-| ② | B-spline 自适应采样算法：曲率感知的非均匀离散化 | **原创算法** | ⭐⭐⭐⭐ |
-| ③ | 多目标 PLC 代码生成 (S7-1200 紧凑模式 / S7-1500 性能模式) | 系统创新 | ⭐⭐⭐ |
-| ④ | KAN + VRM-KD + 28-D 多尺度离散熵：参数高效+可解的PLC诊断 | 算法支撑 | ⭐⭐⭐ |
-| ⑤ | TIA Portal MCP 全自动编译验证 + 静态内存分析 | 工程创新 | ⭐⭐⭐ |
+NeuroPLC is the **first compiler** that translates PyTorch neural networks (KAN/MLP) to IEC 61131-3 Structured Control Language (SCL) for Siemens S7 PLCs with **machine-checkable end-to-end correctness guarantees**. It introduces an Intermediate Representation (IR) graph that decouples model semantics from PLC dialect, enabling 6 substantive optimization passes (plus 2 structural) before code generation. The SVNN framework formalizes the architectural conditions under which a compiler CAN provide such guarantees (Theorem 2): KAN satisfies them; standard MLPs provably do not (Proposition 1, validated by 512/512 vs 0/48 Z3-verifiable components). Three novel algorithms guarantee correctness: (1) **Doubleton Arithmetic**—3.1× tighter than interval arithmetic, with √d scaling law confirmed across 105 random architectures (Pearson r=0.987); (2) **Segment-Aware de Boor Bounds**—6.0× per-segment tightening; (3) **Adaptive Mixed-Precision LUT Allocation**—71.6% worst-ε reduction. The compiler is validated on bearing fault diagnosis: KAN [28,16,4] (6,148 params) distilled via VRM-KD (7.9× compression from 48K-param CNN teacher), deploys on S7-1200 CPU 1211C at 45.2 KB work memory (90.4% of 50 KB budget, TIA V21 MCP-measured), with 0 errors, 0 warnings.
 
 ---
 
-## 二、编译器架构 (核心创新)
+## Algorithmic Contributions (3 novel algorithms)
+
+### 1. Segment-Aware Analytical Error Bounds
+Exploits the piecewise-linear structure of cubic B-spline second derivatives φ''(x). Computes per-LUT-segment M₂_j instead of a single global M₂.
+
+| N | Global ε | Mean Segment ε | Tightening | DA Safety (uniform→segment) |
+|---|----------|----------------|------------|------------------------------|
+| 10 | 0.00998 | 0.00179 | **5.6×** | 2.5× → 3.5× |
+| 15 | 0.00412 | 0.00069 | **6.0×** | 6.1× → 8.4× |
+| 20 | 0.00224 | 0.00036 | **6.2×** | 11.3× → 15.6× |
+| 50 | 0.00034 | 0.00005 | **6.7×** | 75.3× → 103.5× |
+
+96.7% of LUT segments have ε < 50% of the global bound. Combined with DA: **~11.9× safety factor** at N=15.
+
+### 2. Adaptive Mixed-Precision LUT Density Allocation
+Greedy max-heap algorithm: allocates more LUT points to high-curvature B-spline functions, fewer to flat ones.
+
+| Budget | Uniform Worst ε | Adaptive Worst ε | Reduction | N Range |
+|--------|-----------------|-------------------|-----------|---------|
+| N=10 | 0.00982 | 0.00294 | **70.0%** | [3, 18] |
+| N=15 | 0.00406 | 0.00115 | **71.6%** | [3, 28] |
+| N=20 | 0.00220 | 0.00061 | **72.2%** | [3, 38] |
+| N=50 | 0.00033 | 0.00009 | **73.1%** | [4, 96] |
+
+Quality parity: adaptive needs **41.8% less storage** (17,888 vs 30,720 bytes) for same worst-ε as uniform N=15.
+
+### 3. Doubleton Arithmetic (DA) with Sign-Structural Analysis
+Affine arithmetic preserving weight-matrix sign structure. Random-walk model explains 3.1× tightening over Interval Arithmetic. Forms the base error-propagation framework that both algorithms above compose with.
+
+---
+
+## Compiler Architecture
 
 ```
                         NEUROPLC COMPILER
@@ -92,227 +77,185 @@ Author: 刘甫悦 (板板) + Claude
 │       │ │MatMul │ │Adapt. │ │Memory │ │S7-1500│ │1e-4 ok│
 │KAN -┐ │ │Bspline│ │Bspline│ │FLOPs  │ │       │ │       │
 │MLP -┼─┘│ReLU   │ │DeadNod│ │Budget%│ │       │ │       │
-│CNN -┘  │Softmax│ │ConstFl│ │       │ │       │ │       │
 └───────┘ └───────┘ └───────┘ └───────┘ └───────┘ └───────┘
 ```
 
-**IR (中间表示) 是核心基础设施。** 它的价值：
-- 解耦 PyTorch 和 SCL → 加新模型只改 Frontend
-- 优化只作用于 IR → 所有后端受益
-- 可序列化/可测试/可调试
-- 论文里有架构图 → 证明你懂编译器设计
+**6 optimization passes**: adaptive B-spline LUT sampling, dead node elimination, constant folding, and 3 backend-specific transforms.
 
-### B-spline 自适应采样 (原创算法)
-
-```
-问题: 均匀采样，平坦区域浪费点，弯曲区域精度不够
-
-算法: Curvature-Aware Non-Uniform Discretization
-  1. 在 [-3, +3] 上高密度采样 (100pt), 计算曲率 κ(x)
-  2. 累积曲率 C(x) = ∫κ(t)dt
-  3. 在 C(x) 上均匀取 N_target 个点 → 曲率大的地方自动密集
-  4. 查表时仍用线性插值 (与均匀采样相同的推理逻辑)
-
-效果:
-  - 同存储 (20pt): 精度比均匀采样提升 15-30%
-  - 同精度: 存储减少 20-40%
-```
+**DB+FB split** for S7-1200 64KB work memory limit: parameters in DATA_BLOCK, inference logic in FUNCTION_BLOCK.
 
 ---
 
-## 三、技术路线
+## Technical Stack
 
-```
-CWRU 振动数据 (12kHz DE, 52 files)
-  │
-  ├─→ 滑窗 (1024pt, stride=512)
-  │     │
-  │     ├─→ 原始波形 → Teacher 1D-CNN (不变)
-  │     └─→ 28-D 特征 (10时域 + 10频域 + 8离散熵)
-  │
-  ├─→ Teacher: 1D-CNN(16→32→64) + 4-head SA + FC(128→64→4)
-  │     ~50K params, 99%+ CWRU
-  │
-  ├─→ VRM-KD 蒸馏: KL + VRM + Feature Align
-  │     └─→ Student KAN([28,16,4], grid=8, k=3)
-  │           ~300 params, target 96%+
-  │
-  ├─→ NeuroPLC Compiler (方案 C)
-  │     ├─ Frontend: PyTorch KAN/MLP → IR Graph
-  │     ├─ Optimizer: B-spline 自适应采样
-  │     ├─ Backend: IR → SCL (S7-1200 compact / S7-1500 perf)
-  │     └─ Analyzer: 内存预算报告
-  │
-  ├─→ TIA Portal 自动验证 (MCP 189 API)
-  │     └─ 0 errors, Python-SCL 逐元素一致
-  │
-  └─→ E5 新增: 同一编译器编译 KAN + MLP → 双目标PLC → 证明通用性
-```
+| Layer | Technology |
+|-------|-----------|
+| Model training | PyTorch, VRM-KD (ICCV 2025 Highlight) |
+| IR + compiler | Custom IR graph (6 op types), 6 substantive optimization passes |
+| Code generation | Siemens SCL (IEC 61131-3), S7-1200 + S7-1500 targets |
+| Verification | DA + Segment-Aware Bounds + IA (3 methods) |
+| Validation | TIA Portal V21 Openness API (184 MCP tools) |
+| Dataset | CWRU 12kHz DE, 4 classes × 4 fault diameters |
+| Features | 28-D: 10 time-domain + 10 frequency-domain + 8 dispersion entropy |
+
+| Parameter | Value |
+|-----------|-------|
+| CWRU | 12kHz DE, 4 fault types × 4 diameters × 4 loads |
+| Teacher | 1D-CNN(16→32→64) + 4-head SA, 48,708 params |
+| Student KAN | [28,16,4], grid=8, k=3, 6,148 params |
+| Distillation | VRM-KD: τ=4.0, α=0.3, λ_rel=0.5 → 99.93% CWRU |
+| S7-1200 | 15 LUT pts, 45.2 KB work memory / 50 KB budget (90.4%, TIA V21 measured) |
+| S7-1500 | 50 LUT pts, 110.8 KB / 1.5 MB budget (7.4%) |
+| PLCSIM Adv | Auto instance creation: InitializeApi → RegisterInstance → PowerOn (<100ms) |
 
 ---
 
-## 四、实验设计 (方案 C 升级版)
-
-| # | 实验 | 证明什么 | 升级点 |
-|---|------|---------|--------|
-| **E1** | Teacher vs Student 准确率 | 压缩损失可接受 | — |
-| **E2** | KAN vs MLP vs SVM/RF | KAN 在极低参数下的优势 | 都经同一编译器编译 |
-| **E3** | KD 消融: No-KD / Hinton / VRM | VRM-KD 优于传统 KD | — |
-| **E4** | B-spline 精度: 均匀 vs 自适应 @ 10/20/50pt | **自适应采样的优势** | 🔥 原创算法验证 |
-| **E5** | 编译器通用性: KAN+MLP → S7-1200+S7-1500 | **编译器不是 KAN-only** | 🔥 方案C新增 |
-| **E6** | Python vs SCL 交叉验证 (1000样本) | 代码生成正确性 | 含自适应采样精度 |
-| **E7** | 跨工况泛化: 1hp → 0/2/3hp | 域泛化 (诚实讨论) | — |
-
----
-
-## 五、项目文件结构
+## File Structure
 
 ```
 D:/neuroplc-paper/
-├── README.md                         ✅ v4 — 方案 C
-├── research-notes.md                 ✅
-├── GAP-REPORT.md                     ✅ 方案 C 更新
-├── MODELSCOPE.md                     ✅ GPU 训练指南 (36h 免费)
-├── pytest.ini                        ✅ 测试配置
-├── activate-neuroplc.sh              ✅ 环境激活脚本
-├── .gitignore                        ✅
+├── README.md                          ← you are here
 ├── paper/
-│   ├── main.tex                      ✅ IEEEtran 骨架
-│   ├── main.pdf                      ✅ pdflatex 编译通过
-│   └── references.bib                ✅ 32 篇文献 (Zotero 导入完成)
+│   ├── main.tex                       (~4,005 lines, 35 pages)
+│   ├── section_svnn.tex                (SVNN framework)
+│   ├── references.bib
+│   ├── figures/                        (9 PDF figures)
+│   └── fig_tikz/                       (TikZ source for overview + arch)
 ├── code/
-│   ├── config.yaml                   ✅ v3 — 方案 C 编译器参数
-│   ├── download_verify_cwru.py       ✅ GFW 兼容版
-│   ├── download_cwru.py              ✅ 原始版 (保留参考)
-│   ├── preprocess.py                 ✅ 28-D (20 统计 + 8 离散熵)
-│   ├── train_on_modelscope.py        ✅ ModelScope GPU 训练入口
-│   ├── models/                       ✅ Phase 1
-│   │   ├── __init__.py               ✅
-│   │   ├── teacher_cnn.py            ✅ 48,708 params
-│   │   ├── student_kan.py            ✅ 6,148 params + 自适应采样
-│   │   └── student_mlp.py            ✅ 1,524 params baseline
-│   ├── train_teacher.py              ✅ Phase 1
-│   ├── train_student_kd.py           ✅ VRM-KD: KL+CE+VRM+Feat
-│   ├── evaluate.py                   ✅ E1-E7 框架
-│   ├── visualize.py                  ✅ 7 张图表
-│   ├── tests/                        42 tests ✅
-│   │   ├── conftest.py               ✅
-│   │   ├── test_data.py              ✅
-│   │   └── test_preprocess.py        ✅
-│   └── neuroplc/
-│       ├── __init__.py               ✅
-│       ├── utils/
-│       │   ├── __init__.py           ✅
-│       │   └── mlflow_tracker.py     ✅
-│       ├── ir.py                     ⏳ Phase 2
-│       ├── frontend.py               ⏳ Phase 2
-│       ├── optimizer.py              ⏳ Phase 2
-│       ├── backend_s7.py             ⏳ Phase 2
-│       ├── analyzer.py               ⏳ Phase 2
-│       ├── compiler.py               ⏳ Phase 2
-│       ├── scl_templates.py          ⏳ Phase 2
-│       └── validator.py              ⏳ Phase 2
-├── data/raw/12k_DE/                  ✅ 48/52, 142MB
-├── results/{mlflow.db,scl_output/}   ✅
-└── tia_project/                      ⏳ Phase 5
+│   ├── models/
+│   │   ├── student_kan.py             KAN [28,16,4], B-spline basis
+│   │   ├── student_mlp.py             MLP baseline [28,32,16,4]
+│   │   └── teacher_cnn.py             Teacher CNN, 48K params
+│   ├── neuroplc/
+│   │   ├── ir.py                      IR graph (6 op types)
+│   │   ├── frontend.py                PyTorch → IR
+│   │   ├── optimizer.py               6 passes + adaptive B-spline
+│   │   ├── backend_s7.py              IR → SCL (single-file, S7-1200/1500)
+│   │   ├── backend_s7_db.py           IR → SCL (DB+FB split, TIA-compatible)
+│   │   ├── analyzer.py                Memory/FLOPs budget analysis
+│   │   ├── compiler.py                Orchestrator (Frontend→Optimizer→Backend)
+│   │   ├── affine_verify.py           Doubleton Arithmetic verification
+│   │   ├── interval_verify.py         Interval Arithmetic baseline
+│   │   ├── validator.py               Python vs SCL cross-validation
+│   │   └── scl_templates.py           SCL code templates
+│   ├── segment_bound.py               ★ Algorithm A: segment-aware bounds
+│   ├── adaptive_lut.py                ★ Algorithm B: adaptive LUT allocation
+│   ├── analyze_da_depth.py            DA sign-structural analysis
+│   ├── evaluate.py                    Experiments E1–E16
+│   ├── train_teacher.py / train_student_kd.py
+│   ├── preprocess.py                  28-D feature extraction
+│   ├── visualize.py                   7 figures + plots
+│   ├── regenerate_scl.py              Quick SCL regen with compiler
+│   ├── regenerate_db.py               DB+FB SCL regen (TIA-compatible)
+│   └── tests/                         42 tests (38 pass, 4 skip)
+├── results/
+│   ├── student/
+│   │   ├── kan_kd_vrmKD_best.pt       Active KAN checkpoint (VRM-KD)
+│   │   └── mlp_kd_vrmKD_best.pt       Active MLP checkpoint (VRM-KD)
+│   ├── teacher/teacher_best.pt
+│   ├── scl_output/                    12 SCL files (KAN+MLP × 2 targets × 3 formats)
+│   ├── adaptive_lut.json              Algorithm B results
+│   ├── da_analysis.json               DA sign-structural analysis results
+│   └── evaluation/evaluation_results.json
+├── data/                              CWRU + XJTU-SY datasets
+├── tia_project/                       TIA Portal V21 validation projects
+└── docs/                              Gap report + ModelScope guide
 ```
 
 ---
 
-## 六、关键参数
+## Reproducing Results
 
-| 参数 | 值 |
-|------|-----|
-| CWRU | 12kHz DE, 52 files, 4 fault × 4 diameter × 4 load |
-| 滑窗 | 1024pt, stride=512 (50% overlap) |
-| 特征 | **28-D** (10 time + 10 freq + 8 dispersion entropy) |
-| Teacher | 1D-CNN(16→32→64) + 4-head SA, ~50K params |
-| Student | KAN([28,16,4]), grid=8, k=3, ~300 params |
-| VRM-KD | τ=4.0, α=0.3, λ_rel=0.5 |
-| B-spline LUT | 自适应20点 (S7-1200) / 50点 (S7-1500) |
-| PLC | S7-1200 CPU 1211C V4.7 (75KB) + S7-1500 (1.5MB) |
-
----
-
-## 七、可行性审计
-
-| # | 环节 | 风险 | 证据 / 缓解 |
-|---|------|:---:|------|
-| ① | CWRU → 28-D | 🟢 | 成熟技术 |
-| ② | Teacher CNN 99%+ | 🟢 | CWRU 标准操作 |
-| ③ | VRM-KD 蒸馏 | 🟡 | ICCV 2025 Highlight, 实现简单 |
-| ④ | KAN Student 收敛 | 🟡 | MLP baseline 兜底 |
-| ⑤ | IR 编译器 | 🟡 | 只建模实际需要的操作, 不追求完备 |
-| ⑥ | B-spline 自适应采样 | 🟢 | 本质是曲率计算+重采样, 数学清晰 |
-| ⑦ | TIA Portal 编译 | ✅ | 已验证 0 errors |
-| ⑧ | Python vs SCL 一致 | 🟢 | IEEE 754, E6 验证 |
-| ⑨ | 跨工况泛化 | 🔴 | 已知挑战, 诚实讨论即可 |
-
----
-
-## 八、Phase 执行计划
-
-| Phase | 内容 | 文件数 | 状态 |
-|-------|------|:---:|:---:|
-| **0** | 前置准备 (工具链+测试+论文骨架+MLflow) | 8 | ✅ |
-| **1** | 模型+训练 (Teacher CNN, KAN, MLP, KD, eval, viz) | 8 | ✅ |
-| **2** | 编译器 (IR, Frontend, Optimizer, Backend, Analyzer) | 8 | ⏳ |
-| **3** | 测试 (IR/Frontend/Optimizer/Backend/Compiler) | 5 | ⏳ |
-| **4** | 实验运行 (7组) | — | ⏳ |
-| **5** | 论文正文填充 | — | ⏳ |
-| **6** | TIA Portal MCP 验证 | — | ⏳ |
-
-### 依赖关系
-
+### Algorithm A: Segment-Aware Bounds
+```bash
+cd code
+python segment_bound.py
+# → outputs per-N statistics + DA composition results
 ```
-P0 (前置准备) ── ✅ 完成
-  │
-  ├── 板板: P0-1 下载数据  🔴
-  │         P0-2 Zotero    🔴
-  │
-  └── Claude:
-        P1 (模型+训练) ──→ P2 (编译器) ──→ P5 (论文)
-              │                 │
-              ▼                 ▼
-           P4 (实验)  ←───────┘
-              │
-              ▼
-           P6 (TIA验证)
+
+### Algorithm B: Adaptive LUT Allocation
+```bash
+cd code
+python adaptive_lut.py
+# → outputs 4-budget comparison + quality parity + saves results/adaptive_lut.json
+```
+
+### SCL Generation
+```bash
+cd code
+python regenerate_scl.py   # single-file SCL (compiler pipeline)
+python regenerate_db.py    # DB+FB split SCL (TIA Portal compatible)
+```
+
+### Full Paper Compile
+```bash
+cd paper
+pdflatex main && bibtex main && pdflatex main && pdflatex main
+# → 0 errors, 0 warnings, 18 pages
+```
+
+### TIA Portal Validation
+```bash
+# Requires TIA Portal V21 + Openness + MCP server
+# Projects in tia_project/NeuroPLC_Verify/
+# Import SCL → Compile → Verify 0 errors
 ```
 
 ---
 
-## 九、Bug 修复 & 变更日志
+## Experiment Index (E1–E53, 7 Validation Experiments)
 
-| 日期 | 文件 | 内容 |
-|------|------|------|
-| 07-03 | preprocess.py:463 | 🔴 跨工况 val 分片公式错误, 已修复 |
-| 07-03 | download_cwru.py | 🟡 删除 3 处死代码 |
-| 07-03 | 工具链 | 🛠 onnx/sciplots 统一到系统 Python |
-| 07-04 | 方案 | 🔬 v1(MLP) → v2(KAN+VRM-KD+28-D) |
-| 07-04 | download_verify_cwru.py | 🆕 GFW 兼容版: 本地导入+校验+清单 |
-| 07-04 | preprocess.py | 🆕 离散熵模块 (RCMDE + RCHFDE, 20→28维) |
-| 07-04 | paper/main.tex | 🆕 IEEEtran 骨架 |
-| 07-04 | tests/ | 🆕 42 tests 全覆盖 |
-| 07-04 | neuroplc/utils/mlflow_tracker.py | 🆕 MLflow sqlite 追踪器 |
-| **07-04** | **方案** | **🔬🔬 v2(KAN工具) → v3(IR-Based通用编译器)** |
+| # | Experiment | Key Finding |
+|---|-----------|-------------|
+| E1–E16 | (core compiler experiments) | DA + Segment-Aware + Adaptive LUT |
+| E17 | RTNNIgen comparison | NeuroPLC: native B-spline, formal guarantees |
+| E18 | Paderborn cross-dataset | Domain shift quantified |
+| E21 | Theorem 1 tightness | Adversarial lower bound |
+| E25 | Z3-verified WCET | ≤2.86 ms, 2.9% of scan cycle |
+| E28 | Compiler scalability | Memory is binding constraint |
+| E29 | PLCSIM resource analysis | TIA-measured block sizes |
+| E37 | Two-Tier verification (DA+Z3) | 512/512 UNSAT |
+| E40 | Compositional verification | 9-step cert, ~200-line TCB |
+| E41 | MLP verification gap | 512/512 vs 0/48 |
+| E42 | MNIST cross-domain | Identical pipeline, 98.6% |
+| **E43** | **TIA auto multi-target validation** | **4 targets, MCP 0e 0w** |
+| **E48** | **KAN vs MLP verification gap** | **512/512 vs 0/48, Prop 1 validated** |
+| **E49** | **DA √d scaling law** | **105 archs, r=0.9872, p<10⁻⁵** |
+| **E50** | **Adversarial safety proof** | **5,000 inputs, 100/100 preserved** |
+| **E51** | **SCL feature extraction front-end** | **10-D FB, IEEE 754 equivalent** |
+| **E52** | **Verification blind spot** | **Test passes but SVNN SF<1; adversary finds flips** |
+| **E53** | **Sound in-domain worst-case** | **Real compiler LUT, strict domain, certifies at N≥15** |
+| **V1** | **Worst-case adversarial safety** | **5,000 inputs, 100/100 worst-case preserved** |
+| **V2** | **LLM vs NeuroPLC SCL generation** | **LLM: 6 defects, 0 weights; NeuroPLC: 0e 0w** |
+| **V3** | **DA √d scaling law** | **105 archs, Pearson r=0.987, p<10⁻⁵** |
+| **V4** | **KAN vs MLP verification gap** | **512/512 vs 0/48; 38× worse error propagation** |
+| **V5** | **ONNX vs NeuroPLC IR** | **Export fails; 763× node explosion; 450× memory overshoot** |
+| **V6** | **Z3-verified WCET** | **Total ≤2.86 ms, 2.9% of cycle** |
+| **V7** | **Verification blind spot** | **Accuracy 99.93% but SF<1 at N≤7; 225 adversarial flips** |
 
 ---
 
-## 十、给板板的备忘
+## Session History
 
-1. **环境**: 系统 Python 3.14.3 即可, 不需 CUDA。venv: `/d/dev-tools/research/venv/`
-2. **C 盘**: 所有数据放 D 盘
-3. **今天 (7/4)**: 考完高数后 —
-   - ① 123云盘下载 CWRU 全量 → 用 `download_verify_cwru.py --source local --input <dir>` 导入
-   - ② Zotero 导入 12 篇核心文献
-   - ③ 告诉我准备好了, 我立即开始写 Phase 1 模型代码
-4. **GPU**: 如果本机训练慢, 用 ModelScope 魔搭社区 36h 免费 GPU (账号 aiyuedi)
-5. **新会话**: 贴「当前会话状态」提示词即可无缝续接
-6. **风险**: 如果 KAN 训练效果不好 → 回退到 MLP → 编译器依然通用 → 论文仍然成立
-7. **测试**: `python -m pytest code/tests/ -v -s`
+| Session | Date | Key Achievement |
+|---------|------|----------------|
+| S1 | 07-03 | Theorem 1 proof + references fix |
+| S2 | 07-04 | DB+FB split → TIA Portal 0 errors |
+| S3 | 07-04 | DA sign analysis + paper restructure |
+| S4 | 07-05 | Algorithm A + B: segment-aware bounds + adaptive LUT |
+| S5 | 07-07 | ★ Final: 4 killer experiments, TIA MCP validation, SCL front-end, IEC 61508 SIL mapping, verification certificate bundle, PLCSIM API pipeline |
 
 ---
 
-*最后更新: 2026-07-04 15:30 CST*
-*作者: 刘甫悦 (板板) + Claude*
+## Environment
+
+- Python 3.14.3 (system), venv: `D:\dev-tools\research\venv\`
+- PyTorch 2.7.1+cpu, NumPy, SciPy, scikit-learn
+- TIA Portal V21 + Openness API (MCP 184 tools)
+- Windows 11, Git Bash
+
+---
+
+*Last updated: 2026-07-07 CST*
+*Author: 刘甫悦 (板板) + Claude*
+*Paper: 0 errors, 0 warnings, 35 pages, 4438 lines + 780 lines (section_svnn.tex), polished & submission-ready*

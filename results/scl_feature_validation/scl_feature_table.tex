@@ -1,0 +1,36 @@
+\begin{table}[t]
+\centering
+\caption{SCL Feature Extraction Front-End: 10-D Time-Domain Features.
+All features computed in Python (float64) and SCL (REAL/float32) produce
+identical results within IEEE~754 roundtrip ($<10^{-4}$).
+End-to-end chain using only 10-D SCL-computed features yields 45.20% accuracy vs.\ 100.00% for
+full 28-D Python features. The 54.8%
+drop quantifies the cost of omitting frequency-domain and dispersion-entropy
+features on the PLC.}
+\label{tab:scl_feature_frontend}
+\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Feature extraction (Python f64 vs SCL REAL f32) & \\
+~~Max roundtrip error & 0.0e+00 \\
+~~Equivalence & IDENTICAL \\
+\midrule
+End-to-end (10-D SCL features $+$ KAN inference) & \\
+~~FP32 accuracy & 0.4440 \\
+~~LUT accuracy & 0.4520 \\
+~~FP32-LUT agreement & 0.9880 \\
+\midrule
+Ablation comparison & \\
+~~Full 28-D (Python) & 1.0000 \\
+~~10-D time-only (PLC) & 0.4520 \\
+~~Accuracy drop & 0.5480 \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+{\scriptsize SCL block: \texttt{FeatureExtraction\_TD} (FUNCTION\_BLOCK, 10-D
+time-domain), with \texttt{NeuroPLC\_Inference} (FB2, KAN $[28,16,4]$).
+The 10-D features are z-score normalized and zero-padded to 28-D.
+Frequency-domain and dispersion-entropy front-ends require FFT (future work).}
+\end{table}

@@ -1,0 +1,168 @@
+// NeuroPLC — Auto-generated IEC 61131-3 SCL (DB+FB Mode)
+// Graph: kan | Target: S71200DBBackend
+// Work memory: 75KB | LUT points: 15
+// Nodes: 11 | Ops: {'matmul': 3, 'standard_act': 2, 'bspline_lut': 2, 'add': 2, 'softmax': 1, 'argmax': 1}
+// Parameters in DB "NeuroPLC_KAN_Weights", inference in FB.
+
+FUNCTION_BLOCK "NeuroPLC_Inference"
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+
+VAR_INPUT
+    features : ARRAY[0..27] OF REAL;  // 28-D feature vector
+END_VAR
+
+VAR_OUTPUT
+    fault_class : INT;  // 0=Normal, 1=InnerRace, 2=Ball, 3=OuterRace
+    confidence : REAL;  // max softmax probability
+END_VAR
+
+VAR
+    // ── Inference temporaries ──
+        v1 : ARRAY[0..27] OF REAL;  // silu output
+        v3 : ARRAY[0..447] OF REAL;  // BsplineLUT output (1D: o*28+i)
+        v2 : ARRAY[0..15] OF REAL;  // matmul output
+        v4 : ARRAY[0..15] OF REAL;  // add merge
+        v5 : ARRAY[0..15] OF REAL;  // silu output
+        v7 : ARRAY[0..63] OF REAL;  // BsplineLUT output (1D: o*16+i)
+        v6 : ARRAY[0..3] OF REAL;  // matmul output
+        v8 : ARRAY[0..3] OF REAL;  // add merge
+        v9 : ARRAY[0..3] OF REAL;  // softmax output
+
+    // ── Temporary variables ──
+    i, o, j, lo, hi, idx, base : INT;
+    sum, max_val, t_val : REAL;
+END_VAR
+
+BEGIN
+    // ═══ Inference forward pass ═══
+    // Parameters loaded from DB "NeuroPLC_KAN_Weights" (start values = data, not code)
+
+        // Input: features[0..27]
+
+        // StandardAct: silu
+        FOR i := 0 TO 27 DO
+            // SiLU = x / (1 + exp(-x))
+            v1[i] := features[i] / (1.0 + EXP(-features[i]));
+        END_FOR;
+
+        // BsplineLUT: l0_bspline (16x28, 15 pts)
+        FOR i := 0 TO 27 DO
+            // Linear scan: find largest grid[j] <= input[i]
+            lo := 0;
+            FOR j := 1 TO 13 DO
+                IF features[i] >= "NeuroPLC_KAN_Weights".g0[j] THEN
+                    lo := j;
+                END_IF;
+            END_FOR;
+            hi := lo + 1;
+            t_val := (features[i] - "NeuroPLC_KAN_Weights".g0[lo]) /
+                      ("NeuroPLC_KAN_Weights".g0[hi] - "NeuroPLC_KAN_Weights".g0[lo] + 1.0E-10);
+            FOR o := 0 TO 15 DO
+                base := (o * 28 + i) * 15;
+                idx := o * 28 + i;
+                v3[idx] :=
+                    "NeuroPLC_KAN_Weights".t1[base + lo] * (1.0 - t_val) +
+                    "NeuroPLC_KAN_Weights".t1[base + hi] * t_val;
+            END_FOR;
+        END_FOR;
+
+        // MatMul: l0_base
+        v2[0] := "NeuroPLC_KAN_Weights".b3[0] + "NeuroPLC_KAN_Weights".w2[0] * v1[0] + "NeuroPLC_KAN_Weights".w2[1] * v1[1] + "NeuroPLC_KAN_Weights".w2[2] * v1[2] + "NeuroPLC_KAN_Weights".w2[3] * v1[3] + "NeuroPLC_KAN_Weights".w2[4] * v1[4] + "NeuroPLC_KAN_Weights".w2[5] * v1[5] + "NeuroPLC_KAN_Weights".w2[6] * v1[6] + "NeuroPLC_KAN_Weights".w2[7] * v1[7] + "NeuroPLC_KAN_Weights".w2[8] * v1[8] + "NeuroPLC_KAN_Weights".w2[9] * v1[9] + "NeuroPLC_KAN_Weights".w2[10] * v1[10] + "NeuroPLC_KAN_Weights".w2[11] * v1[11] + "NeuroPLC_KAN_Weights".w2[12] * v1[12] + "NeuroPLC_KAN_Weights".w2[13] * v1[13] + "NeuroPLC_KAN_Weights".w2[14] * v1[14] + "NeuroPLC_KAN_Weights".w2[15] * v1[15] + "NeuroPLC_KAN_Weights".w2[16] * v1[16] + "NeuroPLC_KAN_Weights".w2[17] * v1[17] + "NeuroPLC_KAN_Weights".w2[18] * v1[18] + "NeuroPLC_KAN_Weights".w2[19] * v1[19] + "NeuroPLC_KAN_Weights".w2[20] * v1[20] + "NeuroPLC_KAN_Weights".w2[21] * v1[21] + "NeuroPLC_KAN_Weights".w2[22] * v1[22] + "NeuroPLC_KAN_Weights".w2[23] * v1[23] + "NeuroPLC_KAN_Weights".w2[24] * v1[24] + "NeuroPLC_KAN_Weights".w2[25] * v1[25] + "NeuroPLC_KAN_Weights".w2[26] * v1[26] + "NeuroPLC_KAN_Weights".w2[27] * v1[27];
+        v2[1] := "NeuroPLC_KAN_Weights".b3[1] + "NeuroPLC_KAN_Weights".w2[28] * v1[0] + "NeuroPLC_KAN_Weights".w2[29] * v1[1] + "NeuroPLC_KAN_Weights".w2[30] * v1[2] + "NeuroPLC_KAN_Weights".w2[31] * v1[3] + "NeuroPLC_KAN_Weights".w2[32] * v1[4] + "NeuroPLC_KAN_Weights".w2[33] * v1[5] + "NeuroPLC_KAN_Weights".w2[34] * v1[6] + "NeuroPLC_KAN_Weights".w2[35] * v1[7] + "NeuroPLC_KAN_Weights".w2[36] * v1[8] + "NeuroPLC_KAN_Weights".w2[37] * v1[9] + "NeuroPLC_KAN_Weights".w2[38] * v1[10] + "NeuroPLC_KAN_Weights".w2[39] * v1[11] + "NeuroPLC_KAN_Weights".w2[40] * v1[12] + "NeuroPLC_KAN_Weights".w2[41] * v1[13] + "NeuroPLC_KAN_Weights".w2[42] * v1[14] + "NeuroPLC_KAN_Weights".w2[43] * v1[15] + "NeuroPLC_KAN_Weights".w2[44] * v1[16] + "NeuroPLC_KAN_Weights".w2[45] * v1[17] + "NeuroPLC_KAN_Weights".w2[46] * v1[18] + "NeuroPLC_KAN_Weights".w2[47] * v1[19] + "NeuroPLC_KAN_Weights".w2[48] * v1[20] + "NeuroPLC_KAN_Weights".w2[49] * v1[21] + "NeuroPLC_KAN_Weights".w2[50] * v1[22] + "NeuroPLC_KAN_Weights".w2[51] * v1[23] + "NeuroPLC_KAN_Weights".w2[52] * v1[24] + "NeuroPLC_KAN_Weights".w2[53] * v1[25] + "NeuroPLC_KAN_Weights".w2[54] * v1[26] + "NeuroPLC_KAN_Weights".w2[55] * v1[27];
+        v2[2] := "NeuroPLC_KAN_Weights".b3[2] + "NeuroPLC_KAN_Weights".w2[56] * v1[0] + "NeuroPLC_KAN_Weights".w2[57] * v1[1] + "NeuroPLC_KAN_Weights".w2[58] * v1[2] + "NeuroPLC_KAN_Weights".w2[59] * v1[3] + "NeuroPLC_KAN_Weights".w2[60] * v1[4] + "NeuroPLC_KAN_Weights".w2[61] * v1[5] + "NeuroPLC_KAN_Weights".w2[62] * v1[6] + "NeuroPLC_KAN_Weights".w2[63] * v1[7] + "NeuroPLC_KAN_Weights".w2[64] * v1[8] + "NeuroPLC_KAN_Weights".w2[65] * v1[9] + "NeuroPLC_KAN_Weights".w2[66] * v1[10] + "NeuroPLC_KAN_Weights".w2[67] * v1[11] + "NeuroPLC_KAN_Weights".w2[68] * v1[12] + "NeuroPLC_KAN_Weights".w2[69] * v1[13] + "NeuroPLC_KAN_Weights".w2[70] * v1[14] + "NeuroPLC_KAN_Weights".w2[71] * v1[15] + "NeuroPLC_KAN_Weights".w2[72] * v1[16] + "NeuroPLC_KAN_Weights".w2[73] * v1[17] + "NeuroPLC_KAN_Weights".w2[74] * v1[18] + "NeuroPLC_KAN_Weights".w2[75] * v1[19] + "NeuroPLC_KAN_Weights".w2[76] * v1[20] + "NeuroPLC_KAN_Weights".w2[77] * v1[21] + "NeuroPLC_KAN_Weights".w2[78] * v1[22] + "NeuroPLC_KAN_Weights".w2[79] * v1[23] + "NeuroPLC_KAN_Weights".w2[80] * v1[24] + "NeuroPLC_KAN_Weights".w2[81] * v1[25] + "NeuroPLC_KAN_Weights".w2[82] * v1[26] + "NeuroPLC_KAN_Weights".w2[83] * v1[27];
+        v2[3] := "NeuroPLC_KAN_Weights".b3[3] + "NeuroPLC_KAN_Weights".w2[84] * v1[0] + "NeuroPLC_KAN_Weights".w2[85] * v1[1] + "NeuroPLC_KAN_Weights".w2[86] * v1[2] + "NeuroPLC_KAN_Weights".w2[87] * v1[3] + "NeuroPLC_KAN_Weights".w2[88] * v1[4] + "NeuroPLC_KAN_Weights".w2[89] * v1[5] + "NeuroPLC_KAN_Weights".w2[90] * v1[6] + "NeuroPLC_KAN_Weights".w2[91] * v1[7] + "NeuroPLC_KAN_Weights".w2[92] * v1[8] + "NeuroPLC_KAN_Weights".w2[93] * v1[9] + "NeuroPLC_KAN_Weights".w2[94] * v1[10] + "NeuroPLC_KAN_Weights".w2[95] * v1[11] + "NeuroPLC_KAN_Weights".w2[96] * v1[12] + "NeuroPLC_KAN_Weights".w2[97] * v1[13] + "NeuroPLC_KAN_Weights".w2[98] * v1[14] + "NeuroPLC_KAN_Weights".w2[99] * v1[15] + "NeuroPLC_KAN_Weights".w2[100] * v1[16] + "NeuroPLC_KAN_Weights".w2[101] * v1[17] + "NeuroPLC_KAN_Weights".w2[102] * v1[18] + "NeuroPLC_KAN_Weights".w2[103] * v1[19] + "NeuroPLC_KAN_Weights".w2[104] * v1[20] + "NeuroPLC_KAN_Weights".w2[105] * v1[21] + "NeuroPLC_KAN_Weights".w2[106] * v1[22] + "NeuroPLC_KAN_Weights".w2[107] * v1[23] + "NeuroPLC_KAN_Weights".w2[108] * v1[24] + "NeuroPLC_KAN_Weights".w2[109] * v1[25] + "NeuroPLC_KAN_Weights".w2[110] * v1[26] + "NeuroPLC_KAN_Weights".w2[111] * v1[27];
+        v2[4] := "NeuroPLC_KAN_Weights".b3[4] + "NeuroPLC_KAN_Weights".w2[112] * v1[0] + "NeuroPLC_KAN_Weights".w2[113] * v1[1] + "NeuroPLC_KAN_Weights".w2[114] * v1[2] + "NeuroPLC_KAN_Weights".w2[115] * v1[3] + "NeuroPLC_KAN_Weights".w2[116] * v1[4] + "NeuroPLC_KAN_Weights".w2[117] * v1[5] + "NeuroPLC_KAN_Weights".w2[118] * v1[6] + "NeuroPLC_KAN_Weights".w2[119] * v1[7] + "NeuroPLC_KAN_Weights".w2[120] * v1[8] + "NeuroPLC_KAN_Weights".w2[121] * v1[9] + "NeuroPLC_KAN_Weights".w2[122] * v1[10] + "NeuroPLC_KAN_Weights".w2[123] * v1[11] + "NeuroPLC_KAN_Weights".w2[124] * v1[12] + "NeuroPLC_KAN_Weights".w2[125] * v1[13] + "NeuroPLC_KAN_Weights".w2[126] * v1[14] + "NeuroPLC_KAN_Weights".w2[127] * v1[15] + "NeuroPLC_KAN_Weights".w2[128] * v1[16] + "NeuroPLC_KAN_Weights".w2[129] * v1[17] + "NeuroPLC_KAN_Weights".w2[130] * v1[18] + "NeuroPLC_KAN_Weights".w2[131] * v1[19] + "NeuroPLC_KAN_Weights".w2[132] * v1[20] + "NeuroPLC_KAN_Weights".w2[133] * v1[21] + "NeuroPLC_KAN_Weights".w2[134] * v1[22] + "NeuroPLC_KAN_Weights".w2[135] * v1[23] + "NeuroPLC_KAN_Weights".w2[136] * v1[24] + "NeuroPLC_KAN_Weights".w2[137] * v1[25] + "NeuroPLC_KAN_Weights".w2[138] * v1[26] + "NeuroPLC_KAN_Weights".w2[139] * v1[27];
+        v2[5] := "NeuroPLC_KAN_Weights".b3[5] + "NeuroPLC_KAN_Weights".w2[140] * v1[0] + "NeuroPLC_KAN_Weights".w2[141] * v1[1] + "NeuroPLC_KAN_Weights".w2[142] * v1[2] + "NeuroPLC_KAN_Weights".w2[143] * v1[3] + "NeuroPLC_KAN_Weights".w2[144] * v1[4] + "NeuroPLC_KAN_Weights".w2[145] * v1[5] + "NeuroPLC_KAN_Weights".w2[146] * v1[6] + "NeuroPLC_KAN_Weights".w2[147] * v1[7] + "NeuroPLC_KAN_Weights".w2[148] * v1[8] + "NeuroPLC_KAN_Weights".w2[149] * v1[9] + "NeuroPLC_KAN_Weights".w2[150] * v1[10] + "NeuroPLC_KAN_Weights".w2[151] * v1[11] + "NeuroPLC_KAN_Weights".w2[152] * v1[12] + "NeuroPLC_KAN_Weights".w2[153] * v1[13] + "NeuroPLC_KAN_Weights".w2[154] * v1[14] + "NeuroPLC_KAN_Weights".w2[155] * v1[15] + "NeuroPLC_KAN_Weights".w2[156] * v1[16] + "NeuroPLC_KAN_Weights".w2[157] * v1[17] + "NeuroPLC_KAN_Weights".w2[158] * v1[18] + "NeuroPLC_KAN_Weights".w2[159] * v1[19] + "NeuroPLC_KAN_Weights".w2[160] * v1[20] + "NeuroPLC_KAN_Weights".w2[161] * v1[21] + "NeuroPLC_KAN_Weights".w2[162] * v1[22] + "NeuroPLC_KAN_Weights".w2[163] * v1[23] + "NeuroPLC_KAN_Weights".w2[164] * v1[24] + "NeuroPLC_KAN_Weights".w2[165] * v1[25] + "NeuroPLC_KAN_Weights".w2[166] * v1[26] + "NeuroPLC_KAN_Weights".w2[167] * v1[27];
+        v2[6] := "NeuroPLC_KAN_Weights".b3[6] + "NeuroPLC_KAN_Weights".w2[168] * v1[0] + "NeuroPLC_KAN_Weights".w2[169] * v1[1] + "NeuroPLC_KAN_Weights".w2[170] * v1[2] + "NeuroPLC_KAN_Weights".w2[171] * v1[3] + "NeuroPLC_KAN_Weights".w2[172] * v1[4] + "NeuroPLC_KAN_Weights".w2[173] * v1[5] + "NeuroPLC_KAN_Weights".w2[174] * v1[6] + "NeuroPLC_KAN_Weights".w2[175] * v1[7] + "NeuroPLC_KAN_Weights".w2[176] * v1[8] + "NeuroPLC_KAN_Weights".w2[177] * v1[9] + "NeuroPLC_KAN_Weights".w2[178] * v1[10] + "NeuroPLC_KAN_Weights".w2[179] * v1[11] + "NeuroPLC_KAN_Weights".w2[180] * v1[12] + "NeuroPLC_KAN_Weights".w2[181] * v1[13] + "NeuroPLC_KAN_Weights".w2[182] * v1[14] + "NeuroPLC_KAN_Weights".w2[183] * v1[15] + "NeuroPLC_KAN_Weights".w2[184] * v1[16] + "NeuroPLC_KAN_Weights".w2[185] * v1[17] + "NeuroPLC_KAN_Weights".w2[186] * v1[18] + "NeuroPLC_KAN_Weights".w2[187] * v1[19] + "NeuroPLC_KAN_Weights".w2[188] * v1[20] + "NeuroPLC_KAN_Weights".w2[189] * v1[21] + "NeuroPLC_KAN_Weights".w2[190] * v1[22] + "NeuroPLC_KAN_Weights".w2[191] * v1[23] + "NeuroPLC_KAN_Weights".w2[192] * v1[24] + "NeuroPLC_KAN_Weights".w2[193] * v1[25] + "NeuroPLC_KAN_Weights".w2[194] * v1[26] + "NeuroPLC_KAN_Weights".w2[195] * v1[27];
+        v2[7] := "NeuroPLC_KAN_Weights".b3[7] + "NeuroPLC_KAN_Weights".w2[196] * v1[0] + "NeuroPLC_KAN_Weights".w2[197] * v1[1] + "NeuroPLC_KAN_Weights".w2[198] * v1[2] + "NeuroPLC_KAN_Weights".w2[199] * v1[3] + "NeuroPLC_KAN_Weights".w2[200] * v1[4] + "NeuroPLC_KAN_Weights".w2[201] * v1[5] + "NeuroPLC_KAN_Weights".w2[202] * v1[6] + "NeuroPLC_KAN_Weights".w2[203] * v1[7] + "NeuroPLC_KAN_Weights".w2[204] * v1[8] + "NeuroPLC_KAN_Weights".w2[205] * v1[9] + "NeuroPLC_KAN_Weights".w2[206] * v1[10] + "NeuroPLC_KAN_Weights".w2[207] * v1[11] + "NeuroPLC_KAN_Weights".w2[208] * v1[12] + "NeuroPLC_KAN_Weights".w2[209] * v1[13] + "NeuroPLC_KAN_Weights".w2[210] * v1[14] + "NeuroPLC_KAN_Weights".w2[211] * v1[15] + "NeuroPLC_KAN_Weights".w2[212] * v1[16] + "NeuroPLC_KAN_Weights".w2[213] * v1[17] + "NeuroPLC_KAN_Weights".w2[214] * v1[18] + "NeuroPLC_KAN_Weights".w2[215] * v1[19] + "NeuroPLC_KAN_Weights".w2[216] * v1[20] + "NeuroPLC_KAN_Weights".w2[217] * v1[21] + "NeuroPLC_KAN_Weights".w2[218] * v1[22] + "NeuroPLC_KAN_Weights".w2[219] * v1[23] + "NeuroPLC_KAN_Weights".w2[220] * v1[24] + "NeuroPLC_KAN_Weights".w2[221] * v1[25] + "NeuroPLC_KAN_Weights".w2[222] * v1[26] + "NeuroPLC_KAN_Weights".w2[223] * v1[27];
+        v2[8] := "NeuroPLC_KAN_Weights".b3[8] + "NeuroPLC_KAN_Weights".w2[224] * v1[0] + "NeuroPLC_KAN_Weights".w2[225] * v1[1] + "NeuroPLC_KAN_Weights".w2[226] * v1[2] + "NeuroPLC_KAN_Weights".w2[227] * v1[3] + "NeuroPLC_KAN_Weights".w2[228] * v1[4] + "NeuroPLC_KAN_Weights".w2[229] * v1[5] + "NeuroPLC_KAN_Weights".w2[230] * v1[6] + "NeuroPLC_KAN_Weights".w2[231] * v1[7] + "NeuroPLC_KAN_Weights".w2[232] * v1[8] + "NeuroPLC_KAN_Weights".w2[233] * v1[9] + "NeuroPLC_KAN_Weights".w2[234] * v1[10] + "NeuroPLC_KAN_Weights".w2[235] * v1[11] + "NeuroPLC_KAN_Weights".w2[236] * v1[12] + "NeuroPLC_KAN_Weights".w2[237] * v1[13] + "NeuroPLC_KAN_Weights".w2[238] * v1[14] + "NeuroPLC_KAN_Weights".w2[239] * v1[15] + "NeuroPLC_KAN_Weights".w2[240] * v1[16] + "NeuroPLC_KAN_Weights".w2[241] * v1[17] + "NeuroPLC_KAN_Weights".w2[242] * v1[18] + "NeuroPLC_KAN_Weights".w2[243] * v1[19] + "NeuroPLC_KAN_Weights".w2[244] * v1[20] + "NeuroPLC_KAN_Weights".w2[245] * v1[21] + "NeuroPLC_KAN_Weights".w2[246] * v1[22] + "NeuroPLC_KAN_Weights".w2[247] * v1[23] + "NeuroPLC_KAN_Weights".w2[248] * v1[24] + "NeuroPLC_KAN_Weights".w2[249] * v1[25] + "NeuroPLC_KAN_Weights".w2[250] * v1[26] + "NeuroPLC_KAN_Weights".w2[251] * v1[27];
+        v2[9] := "NeuroPLC_KAN_Weights".b3[9] + "NeuroPLC_KAN_Weights".w2[252] * v1[0] + "NeuroPLC_KAN_Weights".w2[253] * v1[1] + "NeuroPLC_KAN_Weights".w2[254] * v1[2] + "NeuroPLC_KAN_Weights".w2[255] * v1[3] + "NeuroPLC_KAN_Weights".w2[256] * v1[4] + "NeuroPLC_KAN_Weights".w2[257] * v1[5] + "NeuroPLC_KAN_Weights".w2[258] * v1[6] + "NeuroPLC_KAN_Weights".w2[259] * v1[7] + "NeuroPLC_KAN_Weights".w2[260] * v1[8] + "NeuroPLC_KAN_Weights".w2[261] * v1[9] + "NeuroPLC_KAN_Weights".w2[262] * v1[10] + "NeuroPLC_KAN_Weights".w2[263] * v1[11] + "NeuroPLC_KAN_Weights".w2[264] * v1[12] + "NeuroPLC_KAN_Weights".w2[265] * v1[13] + "NeuroPLC_KAN_Weights".w2[266] * v1[14] + "NeuroPLC_KAN_Weights".w2[267] * v1[15] + "NeuroPLC_KAN_Weights".w2[268] * v1[16] + "NeuroPLC_KAN_Weights".w2[269] * v1[17] + "NeuroPLC_KAN_Weights".w2[270] * v1[18] + "NeuroPLC_KAN_Weights".w2[271] * v1[19] + "NeuroPLC_KAN_Weights".w2[272] * v1[20] + "NeuroPLC_KAN_Weights".w2[273] * v1[21] + "NeuroPLC_KAN_Weights".w2[274] * v1[22] + "NeuroPLC_KAN_Weights".w2[275] * v1[23] + "NeuroPLC_KAN_Weights".w2[276] * v1[24] + "NeuroPLC_KAN_Weights".w2[277] * v1[25] + "NeuroPLC_KAN_Weights".w2[278] * v1[26] + "NeuroPLC_KAN_Weights".w2[279] * v1[27];
+        v2[10] := "NeuroPLC_KAN_Weights".b3[10] + "NeuroPLC_KAN_Weights".w2[280] * v1[0] + "NeuroPLC_KAN_Weights".w2[281] * v1[1] + "NeuroPLC_KAN_Weights".w2[282] * v1[2] + "NeuroPLC_KAN_Weights".w2[283] * v1[3] + "NeuroPLC_KAN_Weights".w2[284] * v1[4] + "NeuroPLC_KAN_Weights".w2[285] * v1[5] + "NeuroPLC_KAN_Weights".w2[286] * v1[6] + "NeuroPLC_KAN_Weights".w2[287] * v1[7] + "NeuroPLC_KAN_Weights".w2[288] * v1[8] + "NeuroPLC_KAN_Weights".w2[289] * v1[9] + "NeuroPLC_KAN_Weights".w2[290] * v1[10] + "NeuroPLC_KAN_Weights".w2[291] * v1[11] + "NeuroPLC_KAN_Weights".w2[292] * v1[12] + "NeuroPLC_KAN_Weights".w2[293] * v1[13] + "NeuroPLC_KAN_Weights".w2[294] * v1[14] + "NeuroPLC_KAN_Weights".w2[295] * v1[15] + "NeuroPLC_KAN_Weights".w2[296] * v1[16] + "NeuroPLC_KAN_Weights".w2[297] * v1[17] + "NeuroPLC_KAN_Weights".w2[298] * v1[18] + "NeuroPLC_KAN_Weights".w2[299] * v1[19] + "NeuroPLC_KAN_Weights".w2[300] * v1[20] + "NeuroPLC_KAN_Weights".w2[301] * v1[21] + "NeuroPLC_KAN_Weights".w2[302] * v1[22] + "NeuroPLC_KAN_Weights".w2[303] * v1[23] + "NeuroPLC_KAN_Weights".w2[304] * v1[24] + "NeuroPLC_KAN_Weights".w2[305] * v1[25] + "NeuroPLC_KAN_Weights".w2[306] * v1[26] + "NeuroPLC_KAN_Weights".w2[307] * v1[27];
+        v2[11] := "NeuroPLC_KAN_Weights".b3[11] + "NeuroPLC_KAN_Weights".w2[308] * v1[0] + "NeuroPLC_KAN_Weights".w2[309] * v1[1] + "NeuroPLC_KAN_Weights".w2[310] * v1[2] + "NeuroPLC_KAN_Weights".w2[311] * v1[3] + "NeuroPLC_KAN_Weights".w2[312] * v1[4] + "NeuroPLC_KAN_Weights".w2[313] * v1[5] + "NeuroPLC_KAN_Weights".w2[314] * v1[6] + "NeuroPLC_KAN_Weights".w2[315] * v1[7] + "NeuroPLC_KAN_Weights".w2[316] * v1[8] + "NeuroPLC_KAN_Weights".w2[317] * v1[9] + "NeuroPLC_KAN_Weights".w2[318] * v1[10] + "NeuroPLC_KAN_Weights".w2[319] * v1[11] + "NeuroPLC_KAN_Weights".w2[320] * v1[12] + "NeuroPLC_KAN_Weights".w2[321] * v1[13] + "NeuroPLC_KAN_Weights".w2[322] * v1[14] + "NeuroPLC_KAN_Weights".w2[323] * v1[15] + "NeuroPLC_KAN_Weights".w2[324] * v1[16] + "NeuroPLC_KAN_Weights".w2[325] * v1[17] + "NeuroPLC_KAN_Weights".w2[326] * v1[18] + "NeuroPLC_KAN_Weights".w2[327] * v1[19] + "NeuroPLC_KAN_Weights".w2[328] * v1[20] + "NeuroPLC_KAN_Weights".w2[329] * v1[21] + "NeuroPLC_KAN_Weights".w2[330] * v1[22] + "NeuroPLC_KAN_Weights".w2[331] * v1[23] + "NeuroPLC_KAN_Weights".w2[332] * v1[24] + "NeuroPLC_KAN_Weights".w2[333] * v1[25] + "NeuroPLC_KAN_Weights".w2[334] * v1[26] + "NeuroPLC_KAN_Weights".w2[335] * v1[27];
+        v2[12] := "NeuroPLC_KAN_Weights".b3[12] + "NeuroPLC_KAN_Weights".w2[336] * v1[0] + "NeuroPLC_KAN_Weights".w2[337] * v1[1] + "NeuroPLC_KAN_Weights".w2[338] * v1[2] + "NeuroPLC_KAN_Weights".w2[339] * v1[3] + "NeuroPLC_KAN_Weights".w2[340] * v1[4] + "NeuroPLC_KAN_Weights".w2[341] * v1[5] + "NeuroPLC_KAN_Weights".w2[342] * v1[6] + "NeuroPLC_KAN_Weights".w2[343] * v1[7] + "NeuroPLC_KAN_Weights".w2[344] * v1[8] + "NeuroPLC_KAN_Weights".w2[345] * v1[9] + "NeuroPLC_KAN_Weights".w2[346] * v1[10] + "NeuroPLC_KAN_Weights".w2[347] * v1[11] + "NeuroPLC_KAN_Weights".w2[348] * v1[12] + "NeuroPLC_KAN_Weights".w2[349] * v1[13] + "NeuroPLC_KAN_Weights".w2[350] * v1[14] + "NeuroPLC_KAN_Weights".w2[351] * v1[15] + "NeuroPLC_KAN_Weights".w2[352] * v1[16] + "NeuroPLC_KAN_Weights".w2[353] * v1[17] + "NeuroPLC_KAN_Weights".w2[354] * v1[18] + "NeuroPLC_KAN_Weights".w2[355] * v1[19] + "NeuroPLC_KAN_Weights".w2[356] * v1[20] + "NeuroPLC_KAN_Weights".w2[357] * v1[21] + "NeuroPLC_KAN_Weights".w2[358] * v1[22] + "NeuroPLC_KAN_Weights".w2[359] * v1[23] + "NeuroPLC_KAN_Weights".w2[360] * v1[24] + "NeuroPLC_KAN_Weights".w2[361] * v1[25] + "NeuroPLC_KAN_Weights".w2[362] * v1[26] + "NeuroPLC_KAN_Weights".w2[363] * v1[27];
+        v2[13] := "NeuroPLC_KAN_Weights".b3[13] + "NeuroPLC_KAN_Weights".w2[364] * v1[0] + "NeuroPLC_KAN_Weights".w2[365] * v1[1] + "NeuroPLC_KAN_Weights".w2[366] * v1[2] + "NeuroPLC_KAN_Weights".w2[367] * v1[3] + "NeuroPLC_KAN_Weights".w2[368] * v1[4] + "NeuroPLC_KAN_Weights".w2[369] * v1[5] + "NeuroPLC_KAN_Weights".w2[370] * v1[6] + "NeuroPLC_KAN_Weights".w2[371] * v1[7] + "NeuroPLC_KAN_Weights".w2[372] * v1[8] + "NeuroPLC_KAN_Weights".w2[373] * v1[9] + "NeuroPLC_KAN_Weights".w2[374] * v1[10] + "NeuroPLC_KAN_Weights".w2[375] * v1[11] + "NeuroPLC_KAN_Weights".w2[376] * v1[12] + "NeuroPLC_KAN_Weights".w2[377] * v1[13] + "NeuroPLC_KAN_Weights".w2[378] * v1[14] + "NeuroPLC_KAN_Weights".w2[379] * v1[15] + "NeuroPLC_KAN_Weights".w2[380] * v1[16] + "NeuroPLC_KAN_Weights".w2[381] * v1[17] + "NeuroPLC_KAN_Weights".w2[382] * v1[18] + "NeuroPLC_KAN_Weights".w2[383] * v1[19] + "NeuroPLC_KAN_Weights".w2[384] * v1[20] + "NeuroPLC_KAN_Weights".w2[385] * v1[21] + "NeuroPLC_KAN_Weights".w2[386] * v1[22] + "NeuroPLC_KAN_Weights".w2[387] * v1[23] + "NeuroPLC_KAN_Weights".w2[388] * v1[24] + "NeuroPLC_KAN_Weights".w2[389] * v1[25] + "NeuroPLC_KAN_Weights".w2[390] * v1[26] + "NeuroPLC_KAN_Weights".w2[391] * v1[27];
+        v2[14] := "NeuroPLC_KAN_Weights".b3[14] + "NeuroPLC_KAN_Weights".w2[392] * v1[0] + "NeuroPLC_KAN_Weights".w2[393] * v1[1] + "NeuroPLC_KAN_Weights".w2[394] * v1[2] + "NeuroPLC_KAN_Weights".w2[395] * v1[3] + "NeuroPLC_KAN_Weights".w2[396] * v1[4] + "NeuroPLC_KAN_Weights".w2[397] * v1[5] + "NeuroPLC_KAN_Weights".w2[398] * v1[6] + "NeuroPLC_KAN_Weights".w2[399] * v1[7] + "NeuroPLC_KAN_Weights".w2[400] * v1[8] + "NeuroPLC_KAN_Weights".w2[401] * v1[9] + "NeuroPLC_KAN_Weights".w2[402] * v1[10] + "NeuroPLC_KAN_Weights".w2[403] * v1[11] + "NeuroPLC_KAN_Weights".w2[404] * v1[12] + "NeuroPLC_KAN_Weights".w2[405] * v1[13] + "NeuroPLC_KAN_Weights".w2[406] * v1[14] + "NeuroPLC_KAN_Weights".w2[407] * v1[15] + "NeuroPLC_KAN_Weights".w2[408] * v1[16] + "NeuroPLC_KAN_Weights".w2[409] * v1[17] + "NeuroPLC_KAN_Weights".w2[410] * v1[18] + "NeuroPLC_KAN_Weights".w2[411] * v1[19] + "NeuroPLC_KAN_Weights".w2[412] * v1[20] + "NeuroPLC_KAN_Weights".w2[413] * v1[21] + "NeuroPLC_KAN_Weights".w2[414] * v1[22] + "NeuroPLC_KAN_Weights".w2[415] * v1[23] + "NeuroPLC_KAN_Weights".w2[416] * v1[24] + "NeuroPLC_KAN_Weights".w2[417] * v1[25] + "NeuroPLC_KAN_Weights".w2[418] * v1[26] + "NeuroPLC_KAN_Weights".w2[419] * v1[27];
+        v2[15] := "NeuroPLC_KAN_Weights".b3[15] + "NeuroPLC_KAN_Weights".w2[420] * v1[0] + "NeuroPLC_KAN_Weights".w2[421] * v1[1] + "NeuroPLC_KAN_Weights".w2[422] * v1[2] + "NeuroPLC_KAN_Weights".w2[423] * v1[3] + "NeuroPLC_KAN_Weights".w2[424] * v1[4] + "NeuroPLC_KAN_Weights".w2[425] * v1[5] + "NeuroPLC_KAN_Weights".w2[426] * v1[6] + "NeuroPLC_KAN_Weights".w2[427] * v1[7] + "NeuroPLC_KAN_Weights".w2[428] * v1[8] + "NeuroPLC_KAN_Weights".w2[429] * v1[9] + "NeuroPLC_KAN_Weights".w2[430] * v1[10] + "NeuroPLC_KAN_Weights".w2[431] * v1[11] + "NeuroPLC_KAN_Weights".w2[432] * v1[12] + "NeuroPLC_KAN_Weights".w2[433] * v1[13] + "NeuroPLC_KAN_Weights".w2[434] * v1[14] + "NeuroPLC_KAN_Weights".w2[435] * v1[15] + "NeuroPLC_KAN_Weights".w2[436] * v1[16] + "NeuroPLC_KAN_Weights".w2[437] * v1[17] + "NeuroPLC_KAN_Weights".w2[438] * v1[18] + "NeuroPLC_KAN_Weights".w2[439] * v1[19] + "NeuroPLC_KAN_Weights".w2[440] * v1[20] + "NeuroPLC_KAN_Weights".w2[441] * v1[21] + "NeuroPLC_KAN_Weights".w2[442] * v1[22] + "NeuroPLC_KAN_Weights".w2[443] * v1[23] + "NeuroPLC_KAN_Weights".w2[444] * v1[24] + "NeuroPLC_KAN_Weights".w2[445] * v1[25] + "NeuroPLC_KAN_Weights".w2[446] * v1[26] + "NeuroPLC_KAN_Weights".w2[447] * v1[27];
+
+        // Add: l0_merge
+        FOR o := 0 TO 15 DO
+            sum := v2[o];  // base path
+            FOR i := 0 TO 27 DO
+                idx := o * 28 + i;
+                sum := sum + v3[idx];  // spline path (1D)
+            END_FOR;
+            v4[o] := sum;
+        END_FOR;
+
+        // StandardAct: silu
+        FOR i := 0 TO 15 DO
+            // SiLU = x / (1 + exp(-x))
+            v5[i] := v4[i] / (1.0 + EXP(-v4[i]));
+        END_FOR;
+
+        // BsplineLUT: l1_bspline (4x16, 15 pts)
+        FOR i := 0 TO 15 DO
+            // Linear scan: find largest grid[j] <= input[i]
+            lo := 0;
+            FOR j := 1 TO 13 DO
+                IF v4[i] >= "NeuroPLC_KAN_Weights".g4[j] THEN
+                    lo := j;
+                END_IF;
+            END_FOR;
+            hi := lo + 1;
+            t_val := (v4[i] - "NeuroPLC_KAN_Weights".g4[lo]) /
+                      ("NeuroPLC_KAN_Weights".g4[hi] - "NeuroPLC_KAN_Weights".g4[lo] + 1.0E-10);
+            FOR o := 0 TO 3 DO
+                base := (o * 16 + i) * 15;
+                idx := o * 16 + i;
+                v7[idx] :=
+                    "NeuroPLC_KAN_Weights".t5[base + lo] * (1.0 - t_val) +
+                    "NeuroPLC_KAN_Weights".t5[base + hi] * t_val;
+            END_FOR;
+        END_FOR;
+
+        // MatMul: l1_base
+        v6[0] := "NeuroPLC_KAN_Weights".b7[0] + "NeuroPLC_KAN_Weights".w6[0] * v5[0] + "NeuroPLC_KAN_Weights".w6[1] * v5[1] + "NeuroPLC_KAN_Weights".w6[2] * v5[2] + "NeuroPLC_KAN_Weights".w6[3] * v5[3] + "NeuroPLC_KAN_Weights".w6[4] * v5[4] + "NeuroPLC_KAN_Weights".w6[5] * v5[5] + "NeuroPLC_KAN_Weights".w6[6] * v5[6] + "NeuroPLC_KAN_Weights".w6[7] * v5[7] + "NeuroPLC_KAN_Weights".w6[8] * v5[8] + "NeuroPLC_KAN_Weights".w6[9] * v5[9] + "NeuroPLC_KAN_Weights".w6[10] * v5[10] + "NeuroPLC_KAN_Weights".w6[11] * v5[11] + "NeuroPLC_KAN_Weights".w6[12] * v5[12] + "NeuroPLC_KAN_Weights".w6[13] * v5[13] + "NeuroPLC_KAN_Weights".w6[14] * v5[14] + "NeuroPLC_KAN_Weights".w6[15] * v5[15];
+        v6[1] := "NeuroPLC_KAN_Weights".b7[1] + "NeuroPLC_KAN_Weights".w6[16] * v5[0] + "NeuroPLC_KAN_Weights".w6[17] * v5[1] + "NeuroPLC_KAN_Weights".w6[18] * v5[2] + "NeuroPLC_KAN_Weights".w6[19] * v5[3] + "NeuroPLC_KAN_Weights".w6[20] * v5[4] + "NeuroPLC_KAN_Weights".w6[21] * v5[5] + "NeuroPLC_KAN_Weights".w6[22] * v5[6] + "NeuroPLC_KAN_Weights".w6[23] * v5[7] + "NeuroPLC_KAN_Weights".w6[24] * v5[8] + "NeuroPLC_KAN_Weights".w6[25] * v5[9] + "NeuroPLC_KAN_Weights".w6[26] * v5[10] + "NeuroPLC_KAN_Weights".w6[27] * v5[11] + "NeuroPLC_KAN_Weights".w6[28] * v5[12] + "NeuroPLC_KAN_Weights".w6[29] * v5[13] + "NeuroPLC_KAN_Weights".w6[30] * v5[14] + "NeuroPLC_KAN_Weights".w6[31] * v5[15];
+        v6[2] := "NeuroPLC_KAN_Weights".b7[2] + "NeuroPLC_KAN_Weights".w6[32] * v5[0] + "NeuroPLC_KAN_Weights".w6[33] * v5[1] + "NeuroPLC_KAN_Weights".w6[34] * v5[2] + "NeuroPLC_KAN_Weights".w6[35] * v5[3] + "NeuroPLC_KAN_Weights".w6[36] * v5[4] + "NeuroPLC_KAN_Weights".w6[37] * v5[5] + "NeuroPLC_KAN_Weights".w6[38] * v5[6] + "NeuroPLC_KAN_Weights".w6[39] * v5[7] + "NeuroPLC_KAN_Weights".w6[40] * v5[8] + "NeuroPLC_KAN_Weights".w6[41] * v5[9] + "NeuroPLC_KAN_Weights".w6[42] * v5[10] + "NeuroPLC_KAN_Weights".w6[43] * v5[11] + "NeuroPLC_KAN_Weights".w6[44] * v5[12] + "NeuroPLC_KAN_Weights".w6[45] * v5[13] + "NeuroPLC_KAN_Weights".w6[46] * v5[14] + "NeuroPLC_KAN_Weights".w6[47] * v5[15];
+        v6[3] := "NeuroPLC_KAN_Weights".b7[3] + "NeuroPLC_KAN_Weights".w6[48] * v5[0] + "NeuroPLC_KAN_Weights".w6[49] * v5[1] + "NeuroPLC_KAN_Weights".w6[50] * v5[2] + "NeuroPLC_KAN_Weights".w6[51] * v5[3] + "NeuroPLC_KAN_Weights".w6[52] * v5[4] + "NeuroPLC_KAN_Weights".w6[53] * v5[5] + "NeuroPLC_KAN_Weights".w6[54] * v5[6] + "NeuroPLC_KAN_Weights".w6[55] * v5[7] + "NeuroPLC_KAN_Weights".w6[56] * v5[8] + "NeuroPLC_KAN_Weights".w6[57] * v5[9] + "NeuroPLC_KAN_Weights".w6[58] * v5[10] + "NeuroPLC_KAN_Weights".w6[59] * v5[11] + "NeuroPLC_KAN_Weights".w6[60] * v5[12] + "NeuroPLC_KAN_Weights".w6[61] * v5[13] + "NeuroPLC_KAN_Weights".w6[62] * v5[14] + "NeuroPLC_KAN_Weights".w6[63] * v5[15];
+
+        // Add: l1_merge
+        FOR o := 0 TO 3 DO
+            sum := v6[o];  // base path
+            FOR i := 0 TO 15 DO
+                idx := o * 16 + i;
+                sum := sum + v7[idx];  // spline path (1D)
+            END_FOR;
+            v8[o] := sum;
+        END_FOR;
+
+        // Softmax
+        max_val := v8[0];
+        FOR i := 1 TO 3 DO
+            IF v8[i] > max_val THEN
+                max_val := v8[i];
+            END_IF;
+        END_FOR;
+        sum := 0.0;
+        FOR i := 0 TO 3 DO
+            v9[i] := EXP(v8[i] - max_val);
+            sum := sum + v9[i];
+        END_FOR;
+        FOR i := 0 TO 3 DO
+            v9[i] := v9[i] / sum;
+        END_FOR;
+
+        // Argmax
+        max_val := v9[0];
+        fault_class := 0;
+        FOR i := 1 TO 3 DO
+            IF v9[i] > max_val THEN
+                max_val := v9[i];
+                fault_class := i;
+            END_IF;
+        END_FOR;
+        confidence := max_val;
+
+END_FUNCTION_BLOCK

@@ -1,0 +1,27 @@
+{
+  "total_samples": 3200,
+  "n_features": 28,
+  "n_classes": 4,
+  "class_names": [
+    "Normal",
+    "InnerRace",
+    "OuterRace",
+    "Ball/Cage"
+  ],
+  "class_counts": {
+    "0": 200,
+    "1": 600,
+    "2": 2000,
+    "3": 400
+  },
+  "conditions": [
+    "35Hz12kN",
+    "37.5Hz11kN",
+    "40Hz10kN"
+  ],
+  "windows_per_bearing": 200,
+  "window_size": 1024,
+  "stride": 512,
+  "source": "XJTU-SY run-to-failure dataset",
+  "label_note": "Fault modes mapped to CWRU 4-class schema: Normal(early-life B1_1) / Inner race / Outer race / Cage+Ball(mapped to class 3)"
+}

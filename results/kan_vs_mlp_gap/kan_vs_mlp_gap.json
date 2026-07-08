@@ -1,0 +1,39 @@
+{
+  "architecture": [
+    28,
+    16,
+    4
+  ],
+  "kan": {
+    "params": 6148,
+    "verifiable_components": "512/512",
+    "component_pass_rate": 100.0,
+    "z3_verifiable": "YES (all B-splines are cubic polynomials)",
+    "da_bound": 0.21618042886257172,
+    "ia_bound": 0.6424410343170166,
+    "da_tightening": 2.9717816626472855,
+    "end_to_end_certificate": "VALID",
+    "svnn_condition1": "SATISFIED (linear + element-wise decomposition)",
+    "svnn_condition2": "SATISFIED (B-spline M2 computable from control points)",
+    "svnn_condition3": "SATISFIED (L_B * ||W|| < 1)"
+  },
+  "mlp": {
+    "params": 1524,
+    "verifiable_components": "0/48 (ReLU is piecewise linear but ENTANGLED with MatMul)",
+    "component_pass_rate": 0.0,
+    "z3_verifiable": "NO (ReLU+MatMul entanglement breaks compositional verification)",
+    "da_bound": "N/A (DA assumes univariate decomposition \u2014 invalid for MLP)",
+    "ia_bound": 3.0347824096679688,
+    "da_tightening": "N/A",
+    "end_to_end_certificate": "IMPOSSIBLE",
+    "svnn_condition1": "VIOLATED (MatMul+ReLU mixed in each layer \u2014 no clean decomposition)",
+    "svnn_condition2": "PARTIAL (ReLU C^0 not C^2 \u2014 second derivative doesn't exist at 0)",
+    "svnn_condition3": "VIOLATED (ReLU' \u2208 {0,1} gives data-dependent Lipschitz \u2014 no a priori bound)"
+  },
+  "gap_analysis": {
+    "verifiability_gap": "512 vs 0 \u2014 KAN is the ONLY architecture that admits compositional formal verification",
+    "error_propagation_gap": "MLP IA error 14.0x worse than KAN DA, for same error source magnitude",
+    "root_cause": "KAN's univariate B-spline decomposition is NECESSARY for Theorem 1's structural induction. MLP's entangled MatMul+ReLU layers prevent decomposition, making DA propagation invalid and Z3 verification impossible.",
+    "proposition_1_validated": true
+  }
+}

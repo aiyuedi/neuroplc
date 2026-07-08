@@ -1,0 +1,164 @@
+// Claude-generated KAN [28,16,4] inference for Siemens S7-1200
+// Generated without NeuroPLC compiler — raw LLM output
+// Architecture: 28 input features → 16 hidden (KAN) → 4 output classes
+
+DATA_BLOCK "Claude_KAN_DB"
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+NON_RETAIN
+   STRUCT
+      // Layer 0 weights: base_weight (16x28), spline_weight (16x28x20)
+      // Layer 1 weights: base_weight (4x16), spline_weight (4x16x20)
+      // B-spline grid: 15 points on [-3.0, 3.0]
+      
+      grid : ARRAY[0..14] OF REAL := [-3.0, -2.5714, -2.1429, -1.7143, -1.2857, -0.8571, -0.4286, 0.0, 0.4286, 0.8571, 1.2857, 1.7143, 2.1429, 2.5714, 3.0];
+      
+      w0_base : ARRAY[0..15, 0..27] OF REAL;
+      w1_base : ARRAY[0..3, 0..15] OF REAL;
+      
+      w0_spline_flat : ARRAY[0..6719] OF REAL;
+      w1_spline_flat : ARRAY[0..1279] OF REAL;
+      
+      bias0 : ARRAY[0..15] OF REAL;
+      bias1 : ARRAY[0..3] OF REAL;
+   END_STRUCT;
+BEGIN
+END_DATA_BLOCK
+
+FUNCTION_BLOCK "Claude_KAN_FB"
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+
+VAR_INPUT
+    features : ARRAY[0..27] OF REAL;
+END_VAR
+
+VAR_OUTPUT
+    fault_class : INT;
+    confidence : REAL;
+END_VAR
+
+VAR
+    i, j, k, lo, hi, mid : INT;
+    t_val : REAL;
+    v_silu : ARRAY[0..27] OF REAL;
+    v_base0 : ARRAY[0..15] OF REAL;
+    v_spline0 : ARRAY[0..15, 0..27] OF REAL;
+    v_layer0 : ARRAY[0..15] OF REAL;
+    v_silu1 : ARRAY[0..15] OF REAL;
+    v_base1 : ARRAY[0..3] OF REAL;
+    v_spline1 : ARRAY[0..3, 0..15] OF REAL;
+    v_layer1 : ARRAY[0..3] OF REAL;
+    v_softmax : ARRAY[0..3] OF REAL;
+    max_val, sum_val : REAL;
+END_VAR
+
+BEGIN
+    // ==== Layer 0: SiLU activation ====
+    FOR i := 0 TO 27 DO
+        v_silu[i] := features[i] / (1.0 + EXP(-features[i]));
+    END_FOR;
+
+    // ==== Layer 0: Base linear (16x28) ====
+    FOR j := 0 TO 15 DO
+        v_base0[j] := "Claude_KAN_DB".bias0[j];
+        FOR i := 0 TO 27 DO
+            v_base0[j] := v_base0[j] + "Claude_KAN_DB".w0_base[j, i] * v_silu[i];
+        END_FOR;
+    END_FOR;
+
+    // ==== Layer 0: B-spline LUT evaluation (16x28, 15 pts) ====
+    FOR i := 0 TO 27 DO
+        // Binary search for interval containing features[i]
+        lo := 0;
+        hi := 14;
+        WHILE hi - lo > 1 DO
+            mid := lo + (hi - lo) / 2;
+            IF features[i] > "Claude_KAN_DB".grid[mid] THEN
+                lo := mid;
+            ELSE
+                hi := mid;
+            END_IF;
+        END_WHILE;
+        
+        t_val := (features[i] - "Claude_KAN_DB".grid[lo]) / ("Claude_KAN_DB".grid[hi] - "Claude_KAN_DB".grid[lo] + 1.0E-10);
+        
+        FOR j := 0 TO 15 DO
+            v_spline0[j, i] := "Claude_KAN_DB".w0_spline_flat[j * 28 * 15 + i * 15 + lo] * (1.0 - t_val) + "Claude_KAN_DB".w0_spline_flat[j * 28 * 15 + i * 15 + hi] * t_val;
+        END_FOR;
+    END_FOR;
+
+    // ==== Layer 0: KAN merge (base + spline sum) ====
+    FOR j := 0 TO 15 DO
+        v_layer0[j] := v_base0[j];
+        FOR i := 0 TO 27 DO
+            v_layer0[j] := v_layer0[j] + v_spline0[j, i];
+        END_FOR;
+    END_FOR;
+
+    // ==== Layer 1: SiLU activation ====
+    FOR i := 0 TO 15 DO
+        v_silu1[i] := v_layer0[i] / (1.0 + EXP(-v_layer0[i]));
+    END_FOR;
+
+    // ==== Layer 1: Base linear (4x16) ====
+    FOR j := 0 TO 3 DO
+        v_base1[j] := "Claude_KAN_DB".bias1[j];
+        FOR i := 0 TO 15 DO
+            v_base1[j] := v_base1[j] + "Claude_KAN_DB".w1_base[j, i] * v_silu1[i];
+        END_FOR;
+    END_FOR;
+
+    // ==== Layer 1: B-spline LUT evaluation (4x16, 15 pts) ====
+    FOR i := 0 TO 15 DO
+        lo := 0;
+        hi := 14;
+        WHILE hi - lo > 1 DO
+            mid := lo + (hi - lo) / 2;
+            IF v_layer0[i] > "Claude_KAN_DB".grid[mid] THEN
+                lo := mid;
+            ELSE
+                hi := mid;
+            END_IF;
+        END_WHILE;
+        
+        t_val := (v_layer0[i] - "Claude_KAN_DB".grid[lo]) / ("Claude_KAN_DB".grid[hi] - "Claude_KAN_DB".grid[lo] + 1.0E-10);
+        
+        FOR j := 0 TO 3 DO
+            v_spline1[j, i] := "Claude_KAN_DB".w1_spline_flat[j * 16 * 15 + i * 15 + lo] * (1.0 - t_val) + "Claude_KAN_DB".w1_spline_flat[j * 16 * 15 + i * 15 + hi] * t_val;
+        END_FOR;
+    END_FOR;
+
+    // ==== Layer 1: KAN merge ====
+    FOR j := 0 TO 3 DO
+        v_layer1[j] := v_base1[j];
+        FOR i := 0 TO 15 DO
+            v_layer1[j] := v_layer1[j] + v_spline1[j, i];
+        END_FOR;
+    END_FOR;
+
+    // ==== Softmax ====
+    sum_val := 0.0;
+    FOR i := 0 TO 3 DO
+        v_softmax[i] := EXP(v_layer1[i]);
+        sum_val := sum_val + v_softmax[i];
+    END_FOR;
+    
+    IF sum_val > 0.0 THEN
+        FOR i := 0 TO 3 DO
+            v_softmax[i] := v_softmax[i] / sum_val;
+        END_FOR;
+    END_IF;
+
+    // ==== Argmax ====
+    max_val := v_softmax[0];
+    fault_class := 0;
+    FOR i := 1 TO 3 DO
+        IF v_softmax[i] > max_val THEN
+            max_val := v_softmax[i];
+            fault_class := i;
+        END_IF;
+    END_FOR;
+    confidence := max_val;
+
+END_FUNCTION_BLOCK

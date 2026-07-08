@@ -1,0 +1,14 @@
+{
+  "claude_lines": 164,
+  "neuroplc_lines": 2187,
+  "issues": 6,
+  "issue_list": [
+    "2D ARRAY declarations (4 found) in DATA_BLOCK without initializers = all zeros. TIA V21 cannot inline-initialize 2D arrays.",
+    "DATA_BLOCK has empty BEGIN/END \u2014 no parameter start values. NeuroPLC embeds 6,148 REAL literals in BEGIN...END_DATA_BLOCK.",
+    "Flat index computation j*28*15+i*15: correct in principle but S7-1200 INT range risk for large arrays. NeuroPLC uses pre-computed offsets.",
+    "CRITICAL: KAN output formula y = scale_base*base + scale_spline*spline is missing. The merge simply adds base+spline without learned scales = mathematically wrong.",
+    "CRITICAL: All weight arrays (w0_base, w1_base, w0_spline_flat, w1_spline_flat, bias0, bias1) are declared but UNINITIALIZED. The model has ZERO trained parameters. Inference output is numerically meaningless.",
+    "WHILE loop for binary search: Siemens SCL has strict type checking for INT/REAL in WHILE conditions. NeuroPLC learned this the hard way and uses FOR-loop linear scan to avoid Siemens-specific issues (see compile_log.txt)."
+  ],
+  "verdict": "Claude SCL incomplete: no weights, missing KAN scales. NeuroPLC: 0e 0w verified."
+}

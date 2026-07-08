@@ -146,12 +146,12 @@ def _build_bspline_lut(layer_data: dict, n_points: int = 20,
     out_dim, in_dim, _ = spline_w.shape
 
     if adaptive:
-        # Curvature-aware sampling (simplified: more points where curvature is high)
-        # For simplicity in this frontend, use uniform sampling —
-        # the optimizer.py module does the real adaptive work.
-        # This keeps the frontend clean and optimizer as a separate pass.
-        xs = np.linspace(x_range[0], x_range[1], n_points * 5)
-        # ... adaptive logic in optimizer.py
+        # Adaptive sampling is handled as an optimizer pass
+        # (adaptive_bspline_sampling in optimizer.py).
+        # The frontend produces uniform sampling as a baseline;
+        # the optimizer then refines knot placement based on curvature.
+        # To apply adaptive sampling at IR construction time, call
+        # optimizer.adaptive_bspline_sampling() as a post-frontend pass.
         xs = np.linspace(x_range[0], x_range[1], n_points)
     else:
         xs = np.linspace(x_range[0], x_range[1], n_points)

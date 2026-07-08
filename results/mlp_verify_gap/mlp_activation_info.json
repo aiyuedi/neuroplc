@@ -1,0 +1,15 @@
+{
+  "architecture": [
+    28,
+    16,
+    4
+  ],
+  "activation": "silu",
+  "hidden_neurons": 16,
+  "output_logits": 4,
+  "total_weights": 512,
+  "z3_verifiable_neurons": 0,
+  "unverifiable_neurons": 16,
+  "reason": "SiLU(x) = x/(1+exp(-x)) uses transcendental exp(x)",
+  "composition_note": "Even with ReLU (per-neuron Z3-verifiable), MLP composition fails: ReLU errors compose nonlinearly through MatMul \u2192 wrapping effect \u2192 no end-to-end guarantee without full-network SMT (infeasible for 512-parameter model)."
+}

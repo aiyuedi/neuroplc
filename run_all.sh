@@ -33,7 +33,7 @@ echo "============================================"
 echo ""
 echo "[1/8] Preprocessing CWRU data..."
 cd "$PROJECT"
-$PYTHON code/preprocess.py --mode both --cross-load
+$PYTHON code/data_pipeline/preprocess.py --mode both --cross-load
 
 # ── Step 2: Train Teacher ──
 echo ""
@@ -43,7 +43,7 @@ if [ "$MODE" = "--gpu" ] || [ "$MODE" = "--quick" ]; then
 else
     EPOCHS="--epochs 80"
 fi
-$PYTHON code/train_teacher.py $EPOCHS
+$PYTHON code/training/train_teacher.py $EPOCHS
 
 # ── Step 3: Train Student KAN (VRM-KD) ──
 echo ""
@@ -53,22 +53,22 @@ if [ "$MODE" = "--gpu" ] || [ "$MODE" = "--quick" ]; then
 else
     KAN_EPOCHS="--epochs 100"
 fi
-$PYTHON code/train_student_kd.py --student-type kan $KAN_EPOCHS --tag vrmKD
+$PYTHON code/training/train_student_kd.py --student-type kan $KAN_EPOCHS --tag vrmKD
 
 # ── Step 4: KD Ablation — Hinton-only ──
 echo ""
 echo "[4/8] KD Ablation: Hinton-only..."
-$PYTHON code/train_student_kd.py --student-type kan $KAN_EPOCHS --no-vrm --tag hintonKD
+$PYTHON code/training/train_student_kd.py --student-type kan $KAN_EPOCHS --no-vrm --tag hintonKD
 
 # ── Step 5: KD Ablation — No-KD (from scratch) ──
 echo ""
 echo "[5/8] KD Ablation: No-KD (scratch)..."
-$PYTHON code/train_student_kd.py --student-type kan $KAN_EPOCHS --no-kd --tag noKD
+$PYTHON code/training/train_student_kd.py --student-type kan $KAN_EPOCHS --no-kd --tag noKD
 
 # ── Step 6: MLP Baseline ──
 echo ""
 echo "[6/8] Training MLP baseline (VRM-KD)..."
-$PYTHON code/train_student_kd.py --student-type mlp $KAN_EPOCHS --tag vrmKD
+$PYTHON code/training/train_student_kd.py --student-type mlp $KAN_EPOCHS --tag vrmKD
 
 # ── Step 7: Evaluation (E1-E7) ──
 echo ""
@@ -78,7 +78,7 @@ $PYTHON code/evaluate.py --all
 # ── Step 8: Visualization ──
 echo ""
 echo "[8/8] Generating figures..."
-$PYTHON code/visualize.py --all
+$PYTHON code/analysis/visualize.py --all
 
 # ── Done ──
 echo ""

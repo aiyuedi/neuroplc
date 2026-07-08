@@ -1,0 +1,133 @@
+{
+  "graph_name": "kan_28_16_4",
+  "total_nodes": 11,
+  "passed": 11,
+  "failed": 0,
+  "exact_verified": 9,
+  "bounded_verified": 2,
+  "total_z3_time_ms": 599.4292999967001,
+  "n_random_tests": 100,
+  "results": [
+    {
+      "node_id": 0,
+      "node_name": "input_features",
+      "op_type": "MatMul",
+      "status": "PASS",
+      "strategy": "exact",
+      "z3_time_ms": 11.218300001928583,
+      "bound_used": null,
+      "max_error": 0.0,
+      "details": "Algebraic identity: SCL REAL MatMul = PyTorch MatMul (exact in Real arithmetic)"
+    },
+    {
+      "node_id": 1,
+      "node_name": "l0_silu",
+      "op_type": "StandardAct",
+      "status": "PASS",
+      "strategy": "exact",
+      "z3_time_ms": 0.840600005176384,
+      "bound_used": null,
+      "max_error": 0.0,
+      "details": "Analytic identity: SCL SILU = PyTorch SILU (exact formula)"
+    },
+    {
+      "node_id": 3,
+      "node_name": "l0_bspline",
+      "op_type": "BsplineLUT",
+      "status": "PASS_BOUNDED",
+      "strategy": "bounded_error",
+      "z3_time_ms": 474.3897000007564,
+      "bound_used": 0.045918367346938736,
+      "max_error": 0.045918367346938736,
+      "details": "Bounded-error verification: |LUT - Bspline| <= 0.045918 per function (M2_max=2.0, h=0.429, 16x28=448 functions)"
+    },
+    {
+      "node_id": 2,
+      "node_name": "l0_base",
+      "op_type": "MatMul",
+      "status": "PASS",
+      "strategy": "exact",
+      "z3_time_ms": 1.0168000007979572,
+      "bound_used": null,
+      "max_error": 0.0,
+      "details": "Algebraic identity: SCL REAL MatMul = PyTorch MatMul (exact in Real arithmetic) | Z3: unsat (0.3ms)"
+    },
+    {
+      "node_id": 4,
+      "node_name": "l0_merge",
+      "op_type": "Add",
+      "status": "PASS",
+      "strategy": "exact",
+      "z3_time_ms": 0.9777000013855286,
+      "bound_used": null,
+      "max_error": 0.0,
+      "details": "Algebraic identity: element-wise addition is exact | Z3: unsat (0.1ms)"
+    },
+    {
+      "node_id": 5,
+      "node_name": "l1_silu",
+      "op_type": "StandardAct",
+      "status": "PASS",
+      "strategy": "exact",
+      "z3_time_ms": 0.8344999951077625,
+      "bound_used": null,
+      "max_error": 0.0,
+      "details": "Analytic identity: SCL SILU = PyTorch SILU (exact formula)"
+    },
+    {
+      "node_id": 7,
+      "node_name": "l1_bspline",
+      "op_type": "BsplineLUT",
+      "status": "PASS_BOUNDED",
+      "strategy": "bounded_error",
+      "z3_time_ms": 65.48420000035549,
+      "bound_used": 0.045918367346938736,
+      "max_error": 0.045918367346938736,
+      "details": "Bounded-error verification: |LUT - Bspline| <= 0.045918 per function (M2_max=2.0, h=0.429, 4x16=64 functions)"
+    },
+    {
+      "node_id": 6,
+      "node_name": "l1_base",
+      "op_type": "MatMul",
+      "status": "PASS",
+      "strategy": "exact",
+      "z3_time_ms": 0.9588000029907562,
+      "bound_used": null,
+      "max_error": 0.0,
+      "details": "Algebraic identity: SCL REAL MatMul = PyTorch MatMul (exact in Real arithmetic) | Z3: unsat (0.1ms)"
+    },
+    {
+      "node_id": 8,
+      "node_name": "l1_merge",
+      "op_type": "Add",
+      "status": "PASS",
+      "strategy": "exact",
+      "z3_time_ms": 0.8850000012898818,
+      "bound_used": null,
+      "max_error": 0.0,
+      "details": "Algebraic identity: element-wise addition is exact | Z3: unsat (0.1ms)"
+    },
+    {
+      "node_id": 9,
+      "node_name": "softmax",
+      "op_type": "Softmax",
+      "status": "PASS",
+      "strategy": "exact",
+      "z3_time_ms": 1.057199995557312,
+      "bound_used": null,
+      "max_error": 0.0,
+      "details": "Analytic identity: SCL Softmax = PyTorch Softmax (exact formula)"
+    },
+    {
+      "node_id": 10,
+      "node_name": "argmax",
+      "op_type": "Argmax",
+      "status": "PASS",
+      "strategy": "exact",
+      "z3_time_ms": 0.5909999963478185,
+      "bound_used": null,
+      "max_error": 0.0,
+      "details": "Analytic identity: SCL Argmax = PyTorch Argmax (exact)"
+    }
+  ]
+}

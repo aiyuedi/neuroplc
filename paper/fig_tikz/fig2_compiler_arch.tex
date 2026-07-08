@@ -1,0 +1,74 @@
+% Fig 2: Compiler Architecture — standalone TikZ, compile with pdflatex
+\documentclass[tikz,border=4pt]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, fit, backgrounds}
+
+% Color scheme
+\definecolor{frontend}{HTML}{2563eb}
+\definecolor{irgraph}{HTML}{0d9488}
+\definecolor{backend}{HTML}{d97706}
+\definecolor{optim}{HTML}{7c3aed}
+\definecolor{analyze}{HTML}{0ea5e9}
+\definecolor{textlight}{HTML}{f8fafc}
+\definecolor{textdark}{HTML}{1e293b}
+
+\begin{document}
+\begin{tikzpicture}[
+    node distance=0.8cm and 0.6cm,
+    box/.style={
+        rectangle, rounded corners=6pt, draw=#1!70!black, fill=#1,
+        text=textlight, minimum width=3.6cm, minimum height=2.4cm,
+        font=\sffamily\footnotesize, align=center, line width=1pt,
+    },
+    smallbox/.style={
+        rectangle, rounded corners=5pt, draw=#1!70!black, fill=#1!90,
+        text=textlight, minimum width=4.0cm, minimum height=1.5cm,
+        font=\sffamily\footnotesize, align=center, line width=1pt,
+    },
+    arrow/.style={-{Stealth[scale=0.9]}, line width=1.4pt, #1!80!black},
+    label/.style={font=\sffamily\footnotesize\bfseries, text=textdark},
+]
+
+% === Main pipeline: Frontend -> IR -> Backend ===
+\node[box=frontend] (fe) {\textbf{FRONTEND}\\[4pt]
+                          PyTorch Model\\
+                          (KAN / MLP)\\[4pt]
+                          $\downarrow$\\
+                          IR Graph};
+
+\node[box=irgraph, right=of fe, xshift=0.4cm] (ir) {\textbf{IR GRAPH}\\[4pt]
+                          \footnotesize 6 Operation Types\\[2pt]
+                          \scriptsize MatMul\;$\cdot$\;BsplineLUT\\
+                          \scriptsize StandardAct\;$\cdot$\;Softmax\\
+                          \scriptsize Argmax\;$\cdot$\;Add};
+
+\node[box=backend, right=of ir, xshift=0.4cm] (be) {\textbf{BACKENDS}\\[4pt]
+                          \footnotesize S7-1200 (75\,KB)\\
+                          \scriptsize Compact · 15-pt LUT\\[3pt]
+                          \footnotesize S7-1500 (1.5\,MB)\\
+                          \scriptsize Unrolled · 50-pt LUT};
+
+% === Bottom: Optimizer + Analyzer ===
+\node[smallbox=optim, below=of fe, yshift=-0.6cm, xshift=0.8cm] (opt) {\textbf{OPTIMIZER}\\[3pt]
+                          \scriptsize Adaptive B-spline LUT\\
+                          \scriptsize Dead-Node Elimination};
+
+\node[smallbox=analyze, below=of be, yshift=-0.6cm, xshift=-0.8cm] (anl) {\textbf{STATIC ANALYZER}\\[3pt]
+                          \scriptsize Memory Budget\;$\cdot$\;FLOPs\\
+                          \scriptsize Per-Category\;$\cdot$\;Budget\,\%};
+
+% === Arrows: main pipeline ===
+\draw[arrow=textdark] (fe) -- (ir);
+\draw[arrow=textdark] (ir) -- (be);
+
+% === Arrows: from pipeline to optimizer/analyzer ===
+\draw[arrow=textdark] (fe.south) |- ($(fe.south)!0.5!(opt.north)$) -| (opt.north);
+\draw[arrow=textdark] (ir.south) -- ++(0,-0.3) -| (opt.north);
+\draw[arrow=textdark] (ir.south) -- ++(0,-0.3) -| (anl.north);
+\draw[arrow=textdark] (be.south) |- ($(be.south)!0.5!(anl.north)$) -| (anl.north);
+
+% === Arrow: optimizer -> backend (feedback/optimize loop) ===
+\draw[arrow=optim, dashed] (opt.east) -| ($(opt.east)!0.5!(anl.west)$) |- (be.south);
+
+\end{tikzpicture}
+\end{document}

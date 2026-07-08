@@ -1,0 +1,178 @@
+{
+  "experiment": "E32",
+  "name": "Non-Uniform LUT Optimal Placement",
+  "total_functions_sampled": 64,
+  "summary": {
+    "total_functions": 64,
+    "mean_uniform_err": 0.0009841615303303147,
+    "mean_nonuniform_err": 0.18345575912627476,
+    "median_improvement": 0.0052635304648137385,
+    "mean_improvement": 0.0056365058003852,
+    "max_improvement": 0.012523742546852805,
+    "min_improvement": 0.0012552895398861813,
+    "pct_improved": 0.0,
+    "geometric_mean_improvement": 0.005030787917325303
+  },
+  "results": [
+    {
+      "layer": 0,
+      "out_idx": 0,
+      "in_idx": 0,
+      "uniform_err": 0.00023210389912129564,
+      "nonuniform_err": 0.11451606168974676,
+      "improvement_ratio": 0.002026823972956076
+    },
+    {
+      "layer": 0,
+      "out_idx": 0,
+      "in_idx": 1,
+      "uniform_err": 0.000586409894749524,
+      "nonuniform_err": 0.07560798402460853,
+      "improvement_ratio": 0.007755925545623093
+    },
+    {
+      "layer": 0,
+      "out_idx": 0,
+      "in_idx": 2,
+      "uniform_err": 0.0001423665881156999,
+      "nonuniform_err": 0.04321325718888755,
+      "improvement_ratio": 0.0032945118553180945
+    },
+    {
+      "layer": 0,
+      "out_idx": 0,
+      "in_idx": 3,
+      "uniform_err": 0.0008900054693222192,
+      "nonuniform_err": 0.1065584267614969,
+      "improvement_ratio": 0.008352276740292564
+    },
+    {
+      "layer": 0,
+      "out_idx": 0,
+      "in_idx": 4,
+      "uniform_err": 0.0011376883685589034,
+      "nonuniform_err": 0.2316799841377024,
+      "improvement_ratio": 0.004910602755750801
+    },
+    {
+      "layer": 0,
+      "out_idx": 0,
+      "in_idx": 5,
+      "uniform_err": 0.0008208614289760552,
+      "nonuniform_err": 0.08065689168870449,
+      "improvement_ratio": 0.010177201374734006
+    },
+    {
+      "layer": 0,
+      "out_idx": 0,
+      "in_idx": 6,
+      "uniform_err": 0.0004931815862655731,
+      "nonuniform_err": 0.12181569583264684,
+      "improvement_ratio": 0.004048588179827968
+    },
+    {
+      "layer": 0,
+      "out_idx": 0,
+      "in_idx": 7,
+      "uniform_err": 0.0010126106142997748,
+      "nonuniform_err": 0.10996923688799143,
+      "improvement_ratio": 0.009208126226529733
+    },
+    {
+      "layer": 0,
+      "out_idx": 0,
+      "in_idx": 8,
+      "uniform_err": 0.0012857912778854452,
+      "nonuniform_err": 0.1562744863331318,
+      "improvement_ratio": 0.008227774783047514
+    },
+    {
+      "layer": 0,
+      "out_idx": 0,
+      "in_idx": 9,
+      "uniform_err": 0.0003828373104333982,
+      "nonuniform_err": 0.1283399450574541,
+      "improvement_ratio": 0.002982994189860475
+    },
+    {
+      "layer": 0,
+      "out_idx": 0,
+      "in_idx": 10,
+      "uniform_err": 0.00131466895341871,
+      "nonuniform_err": 0.22220279329687892,
+      "improvement_ratio": 0.00591652757336051
+    },
+    {
+      "layer": 0,
+      "out_idx": 0,
+      "in_idx": 11,
+      "uniform_err": 0.00015209853649139626,
+      "nonuniform_err": 0.12116609886288643,
+      "improvement_ratio": 0.0012552895398861813
+    },
+    {
+      "layer": 0,
+      "out_idx": 0,
+      "in_idx": 12,
+      "uniform_err": 0.0021502747535706024,
+      "nonuniform_err": 0.26994706771933447,
+      "improvement_ratio": 0.007965542177351063
+    },
+    {
+      "layer": 0,
+      "out_idx": 0,
+      "in_idx": 13,
+      "uniform_err": 0.0008604368865489931,
+      "nonuniform_err": 0.06870445342755943,
+      "improvement_ratio": 0.012523742546852805
+    },
+    {
+      "layer": 0,
+      "out_idx": 0,
+      "in_idx": 14,
+      "uniform_err": 0.0009390213191509261,
+      "nonuniform_err": 0.10852713044019945,
+      "improvement_ratio": 0.008652410833513608
+    },
+    {
+      "layer": 0,
+      "out_idx": 0,
+      "in_idx": 15,
+      "uniform_err": 0.0005611687898635642,
+      "nonuniform_err": 0.24824798293411732,
+      "improvement_ratio": 0.0022605170170204086
+    },
+    {
+      "layer": 0,
+      "out_idx": 0,
+      "in_idx": 16,
+      "uniform_err": 0.0018584265708923575,
+      "nonuniform_err": 0.17493520013473823,
+      "improvement_ratio": 0.010623514132438549
+    },
+    {
+      "layer": 0,
+      "out_idx": 0,
+      "in_idx": 17,
+      "uniform_err": 0.0015712237358093128,
+      "nonuniform_err": 0.32056752126663923,
+      "improvement_ratio": 0.004901381554815755
+    },
+    {
+      "layer": 0,
+      "out_idx": 0,
+      "in_idx": 18,
+      "uniform_err": 0.001630144596099864,
+      "nonuniform_err": 0.2402345106498907,
+      "improvement_ratio": 0.006785638714812208
+    },
+    {
+      "layer": 0,
+      "out_idx": 0,
+      "in_idx": 19,
+      "uniform_err": 0.00027894519269466844,
+      "nonuniform_err": 0.17162107210606337,
+      "improvement_ratio": 0.0016253551459128387
+    }
+  ]
+}

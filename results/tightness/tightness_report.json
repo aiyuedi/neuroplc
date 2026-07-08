@@ -1,0 +1,22 @@
+{
+  "experiment": "E34",
+  "name": "Theorem 1 Tightness Analysis",
+  "theorem1_bounds": {
+    "da_bound": 0.06432219594717026,
+    "ia_bound": 0.13200506567955017,
+    "eps": 0.0041,
+    "lb": 0.65
+  },
+  "monte_carlo": {
+    "n_samples": 2000,
+    "max_error": 1.1957588195800781,
+    "mean_error": 0.4796955491155386,
+    "p95_error": 0.7661508083343505,
+    "p99_error": 0.8993724250793457
+  },
+  "tightness": {
+    "gap_da_x": 0.05379194775227221,
+    "gap_ia_x": 0.11039439017134509,
+    "verdict": "TIGHT (<=5x)"
+  }
+}

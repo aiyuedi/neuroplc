@@ -1,0 +1,21 @@
+{
+  "architecture": [
+    28,
+    16,
+    4
+  ],
+  "total_components": 512,
+  "kan": {
+    "verifiable": 512,
+    "unverifiable": 0,
+    "coverage_pct": 100.0,
+    "end_to_end_verified": true
+  },
+  "mlp": {
+    "verifiable": 0,
+    "unverifiable": 8,
+    "coverage_pct": 0.0,
+    "end_to_end_verified": false
+  },
+  "verification_gap": "KAN achieves 100% component-level verifiability with end-to-end compositional guarantee. MLP (SILU) achieves 0% component-level verifiability with NO compositional guarantee. Gap: 512 more verifiable components in KAN. Fundamental reason: SiLU(x) = x/(1+exp(-x)) uses transcendental exp(x)."
+}

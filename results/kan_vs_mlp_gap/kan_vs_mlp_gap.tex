@@ -1,0 +1,31 @@
+\begin{table}[t]
+\centering
+\caption{KAN vs.\ MLP Verification Gap: Identical $[28,16,4]$ Architecture.
+KAN achieves 512/512 component Z3-verifiability with end-to-end certificate;
+MLP achieves 0/48 component verifiability with no certificate possible.
+This empirically validates SVNN Proposition~1.}
+\label{tab:kan_vs_mlp_gap}
+\small
+\begin{tabular}{@{}p{2.2cm}cc@{}}
+\toprule
+\textbf{Metric} & \textbf{KAN $[28,16,4]$} & \textbf{MLP $[28,32,16,4]$} \\
+\midrule
+Parameters & 6,148 & 1,524 \\
+Z3-verifiable components & \textbf{512/512} (100\%) & 0/48 (0\%) \\
+DA error bound & \textbf{0.2162} & N/A (DA invalid for MLP) \\
+IA error bound & 0.6424 & 3.0348 \\
+DA/IA tightening & \textbf{3.0$\times$} & N/A \\
+SVNN Condition 1 & \checkmark & $\times$ \\
+SVNN Condition 2 & \checkmark & $\times$ (ReLU $\notin C^2$) \\
+SVNN Condition 3 & \checkmark & $\times$ \\
+\midrule
+End-to-end certificate & \textbf{VALID} & IMPOSSIBLE \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+{\scriptsize KAN: 512 cubic B-spline functions, all within Z3's decidable NRA fragment.
+MLP: 48 ReLU activations entangled with MatMul in each layer ¡ª per-component Z3
+verification is possible (ReLU is piecewise linear) but compositional verification
+fails because error propagation through alternating MatMul+ReLU is not decomposable
+into independent univariate error sources (SVNN Condition~1 violation).}
+\end{table}

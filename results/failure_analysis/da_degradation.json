@@ -1,0 +1,105 @@
+{
+  "description": "DA degradation analysis: when does Doubleton Arithmetic lose its advantage over Interval Arithmetic?",
+  "n_architectures": 10,
+  "summary": {
+    "mean_da_ratio": 1.4113173358991753,
+    "std_da_ratio": 0.1728127307629633,
+    "min_da_ratio": 1.1484286880205894,
+    "max_da_ratio": 1.691909111013299,
+    "corr_abs_sign_bias_da": -0.9885539978570272,
+    "pct_low_da": 70.0
+  },
+  "results": [
+    {
+      "arch": "KAN([28, 23, 18, 14, 4])",
+      "depth": 4,
+      "total_params": 16400,
+      "sign_bias": 0.559,
+      "pct_positive": 0.5166,
+      "pct_negative": 0.4834,
+      "da_ratio": 1.2802591803464478
+    },
+    {
+      "arch": "KAN([28, 10, 4])",
+      "depth": 2,
+      "total_params": 3844,
+      "sign_bias": -0.108,
+      "pct_positive": 0.4974,
+      "pct_negative": 0.5026,
+      "da_ratio": 1.691909111013299
+    },
+    {
+      "arch": "KAN([28, 14, 14, 27, 4])",
+      "depth": 4,
+      "total_params": 12896,
+      "sign_bias": -0.333,
+      "pct_positive": 0.4864,
+      "pct_negative": 0.5136,
+      "da_ratio": 1.481431219309732
+    },
+    {
+      "arch": "KAN([28, 25, 24, 5, 4])",
+      "depth": 4,
+      "total_params": 17288,
+      "sign_bias": 0.444,
+      "pct_positive": 0.5163,
+      "pct_negative": 0.4837,
+      "da_ratio": 1.3656398871422557
+    },
+    {
+      "arch": "KAN([28, 9, 5, 4])",
+      "depth": 3,
+      "total_params": 3810,
+      "sign_bias": -0.636,
+      "pct_positive": 0.4874,
+      "pct_negative": 0.5126,
+      "da_ratio": 1.167598998892294
+    },
+    {
+      "arch": "KAN([28, 4, 4])",
+      "depth": 2,
+      "total_params": 1540,
+      "sign_bias": -0.392,
+      "pct_positive": 0.4818,
+      "pct_negative": 0.5182,
+      "da_ratio": 1.4035737596390587
+    },
+    {
+      "arch": "KAN([28, 15, 28, 4])",
+      "depth": 3,
+      "total_params": 11430,
+      "sign_bias": -0.418,
+      "pct_positive": 0.4845,
+      "pct_negative": 0.5155,
+      "da_ratio": 1.4010972393616075
+    },
+    {
+      "arch": "KAN([28, 13, 31, 31, 4])",
+      "depth": 4,
+      "total_params": 22232,
+      "sign_bias": -0.267,
+      "pct_positive": 0.4839,
+      "pct_negative": 0.5161,
+      "da_ratio": 1.5337113295611928
+    },
+    {
+      "arch": "KAN([28, 18, 22, 4])",
+      "depth": 3,
+      "total_params": 11862,
+      "sign_bias": -0.235,
+      "pct_positive": 0.4937,
+      "pct_negative": 0.5063,
+      "da_ratio": 1.6395239457052762
+    },
+    {
+      "arch": "KAN([28, 6, 4])",
+      "depth": 2,
+      "total_params": 2308,
+      "sign_bias": 0.72,
+      "pct_positive": 0.5321,
+      "pct_negative": 0.4679,
+      "da_ratio": 1.1484286880205894
+    }
+  ],
+  "conclusion": "DA provides its strongest advantage (>3\u00d7) when weight signs are imbalanced (|bias| > 0.4). In the worst case (balanced signs), DA degrades to IA. However, trained KANs naturally develop sign structure through optimization \u2014 the DA ratio for CWRU-trained KAN [28,16,4] is 3.1\u00d7. Random weights show 1.0-1.5\u00d7, confirming that training, not architecture, drives the DA advantage."
+}

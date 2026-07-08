@@ -1,0 +1,71 @@
+% Fig 1: NeuroPLC End-to-End Pipeline — standalone TikZ
+\documentclass[tikz,border=6pt]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, fit, backgrounds}
+
+\definecolor{steel}{HTML}{2563eb}
+\definecolor{teal}{HTML}{0d9488}
+\definecolor{amber}{HTML}{d97706}
+\definecolor{slate}{HTML}{64748b}
+\definecolor{ink}{HTML}{1e293b}
+\definecolor{snow}{HTML}{f8fafc}
+
+\begin{document}
+\begin{tikzpicture}[
+    box/.style={
+        rectangle, rounded corners=5pt, draw=#1!60!black, fill=#1!15,
+        text=ink, minimum width=3.0cm, minimum height=0.9cm,
+        font=\sffamily\footnotesize, align=center, line width=0.8pt,
+    },
+    bigbox/.style={
+        rectangle, rounded corners=6pt, draw=#1!60!black, fill=#1!20,
+        text=ink, minimum width=3.6cm, minimum height=1.2cm,
+        font=\sffamily\footnotesize\bfseries, align=center, line width=1pt,
+    },
+    arrow/.style={-{Stealth[scale=0.7]}, line width=1.0pt, slate!80!black},
+    phase/.style={font=\sffamily\scriptsize\itshape, text=slate},
+]
+
+% Phase labels (left side)
+\node[phase] at (-4.2, 3.5) {Feature};
+\node[phase] at (-4.2, 2.6) {Engineering};
+\node[phase] at (-4.2, 0.5) {Training};
+\node[phase] at (-4.2, -1.8) {Compilation};
+\node[phase] at (-4.2, -3.8) {Deployment};
+
+% Row 1: Data pipeline
+\node[box=slate] (cwru) at (0, 3.5) {CWRU Vibration\\\scriptsize 12\,kHz DE · 48 recordings};
+\node[box=slate] (win) at (3.5, 3.5) {Sliding Window\\\scriptsize 1024 pt · stride 512};
+\node[box=teal] (feat) at (7, 3.5) {28-D Features\\\scriptsize 10 time + 10 freq + 8 DE};
+
+% Row 2: Training
+\node[box=steel] (teacher) at (1.5, 0.5) {Teacher 1D-CNN\\\scriptsize 48\,K params · SA · FC};
+\node[box=amber] (kd) at (5.5, 0.5) {VRM-KD Distillation\\\scriptsize $\tau{=}4.0,\;\alpha{=}0.3,\;\lambda{=}0.5$};
+
+% Row 3: Student + Compiler
+\node[box=teal] (student) at (1.5, -1.8) {Student KAN\\\scriptsize [28,16,4] · 6\,148 params};
+\node[box=amber] (compiler) at (5.5, -1.8) {NeuroPLC Compiler\\\scriptsize IR → Optimizer → SCL};
+
+% Row 4: Deployment
+\node[bigbox=steel] (plc) at (3.5, -3.8) {S7-1200 CPU 1211C\\
+                              \footnotesize 40.3\,KB / 75\,KB · 7\,388 FLOPs · $\sim$22\,ms};
+
+% Arrows
+\draw[arrow] (cwru) -- (win);
+\draw[arrow] (win) -- (feat);
+\draw[arrow] (feat) |- (teacher);
+\draw[arrow] (teacher) -- (kd);
+\draw[arrow] (kd) -- (student);
+\draw[arrow] (student) -- (compiler);
+\draw[arrow] (compiler) |- (plc);
+\draw[arrow] (feat) |- (kd);
+\draw[arrow] (teacher) |- (student);
+
+% Annotations
+\node[font=\sffamily\tiny, text=slate, anchor=west] at (8.0, 3.5) {(1)};
+\node[font=\sffamily\tiny, text=slate, anchor=west] at (8.0, 0.5) {(2)--(3)};
+\node[font=\sffamily\tiny, text=slate, anchor=west] at (8.0, -1.8) {(4)};
+\node[font=\sffamily\tiny, text=slate, anchor=west] at (8.0, -3.8) {(5)};
+
+\end{tikzpicture}
+\end{document}

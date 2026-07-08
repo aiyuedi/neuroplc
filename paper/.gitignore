@@ -1,0 +1,20 @@
+# LaTeX build artifacts (generated, not source)
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.dvi
+*.lof
+*.lot
+*.brf
+*.idx
+*.ilg
+*.ind
+
+# Keep the compiled PDF
+!main.pdf

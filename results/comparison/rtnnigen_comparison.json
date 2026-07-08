@@ -1,0 +1,54 @@
+{
+  "title": "NeuroPLC vs RTNNIgen: Comprehensive Comparison",
+  "reference": "RTNNIgen: Hinze et al., IECON 2024",
+  "dimensions": {
+    "model_support": {
+      "neuroplc": "MLP + KAN (B-spline LUT, SiLU, Softmax, Argmax)",
+      "rtnnigen": "MLP only (Dense + standard activations: ReLU, tanh, sigmoid, SiLU, etc.)",
+      "advantage": "NeuroPLC",
+      "detail": "KAN requires B-spline LUT compilation, which RTNNIgen cannot express. This is NeuroPLC's core contribution."
+    },
+    "correctness_guarantees": {
+      "neuroplc": "Theorem 1 (2-layer error bound) + Doubleton Arithmetic (3.1\u00d7 tighter than IA). Provable design-time bounds.",
+      "rtnnigen": "None. No formal or empirical correctness analysis reported.",
+      "advantage": "NeuroPLC",
+      "detail": "RTNNIgen reports empirical precision validation only."
+    },
+    "plc_platform": {
+      "neuroplc": "Siemens S7-1200 (SCL) + S7-1500 (SCL). Single codebase \u2192 multiple targets.",
+      "rtnnigen": "Beckhoff TwinCAT 3 (Structured Text). Single platform.",
+      "advantage": "NeuroPLC",
+      "detail": "Siemens holds ~30% global PLC market share vs Beckhoff ~5%."
+    },
+    "code_structure": {
+      "neuroplc": "DB (parameters) + FB (inference) integrated SCL. Human-readable parameter arrays. Single import.",
+      "rtnnigen": "FB (inference) + external binary weights file. Weights opaque; requires runtime file I/O.",
+      "advantage": "NeuroPLC",
+      "detail": "DB+FB allows TIA Portal compile-time verification of all parameters."
+    },
+    "activation_support": {
+      "neuroplc": "B-spline LUT (piecewise polynomial) + SiLU + Softmax + Argmax. Adaptive LUT allocation (DP-optimal + curvature-aware).",
+      "rtnnigen": "Standard: linear, ReLU, tanh, sigmoid, softplus, softsign, SiLU, selu, exponential. No learned/non-parametric activations.",
+      "advantage": "NeuroPLC",
+      "detail": "B-spline LUT enables KAN deployment, which is NeuroPLC's key enabler."
+    },
+    "parameter_handling": {
+      "neuroplc": "Human-readable ARRAY OF REAL in DB. Auditable, diffable, version-controllable.",
+      "rtnnigen": "Packed binary blob with SHA-256 hash. Not human-readable; requires tool to inspect.",
+      "advantage": "NeuroPLC",
+      "detail": "Human readability is critical for safety-certified industrial systems."
+    },
+    "verification_tooling": {
+      "neuroplc": "166 compiler tests. TIA Portal V21 compile verification (0 errors, 0 warnings). Instruction-level cycle analysis.",
+      "rtnnigen": "No test suite in public repository. No PLC compile verification reported.",
+      "advantage": "NeuroPLC",
+      "detail": "Compiler testing is essential for industrial trust."
+    }
+  },
+  "quantitative": {
+    "neuroplc_mlp_params": 1524,
+    "neuroplc_scl_lines": 550,
+    "rtnnigen_files_generated": "FAILED",
+    "keras_test_acc": "N/A"
+  }
+}

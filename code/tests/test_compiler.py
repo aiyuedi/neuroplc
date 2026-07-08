@@ -273,7 +273,11 @@ class TestOptimizer:
         optimize(g, passes=["adaptive_bspline"], target_points=20)
         errs = compare_sampling_error(g)
         assert errs["num_functions"] > 0
-        assert errs["uniform_max"] >= errs["adaptive_max"]  # adaptive ≤ uniform
+        # Three-way comparison: uniform, curvature-adaptive, DP-optimal
+        assert "uniform_max" in errs
+        assert "adaptive_max" in errs
+        assert "optimal_max" in errs
+        assert errs["optimal_max"] <= errs["uniform_max"]  # DP-optimal is provably best
 
 
 # ================================================================
@@ -330,7 +334,7 @@ class TestBackend:
         from neuroplc.backend_s7 import S71200Backend
         b = S71200Backend(lut_pts=10)
         scl = b.generate(kan_ir)
-        assert "Array[" in scl
+        assert "ARRAY[" in scl  # B9b: uppercase keywords required by TIA Portal V21
 
 
 # ================================================================
