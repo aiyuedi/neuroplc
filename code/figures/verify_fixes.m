@@ -1,0 +1,10 @@
+teacher_cm = [690 0 0 1; 0 684 0 0; 0 0 686 0; 1 0 0 682];
+student_cm = [691 0 0 0; 0 683 0 1; 1 0 685 0; 0 0 0 683];
+acc_t = sum(diag(teacher_cm))/sum(teacher_cm(:))*100;
+acc_s = sum(diag(student_cm))/sum(student_cm(:))*100;
+fprintf('Teacher: %.2f%% (%d/%d correct)\n', acc_t, sum(diag(teacher_cm)), sum(teacher_cm(:)));
+fprintf('Student: %.2f%% (%d/%d correct)\n', acc_s, sum(diag(student_cm)), sum(student_cm(:)));
+d = dir('D:/neuroplc-paper/paper/figures/fig_confusion_matrices.pdf');
+fprintf('Confusion matrix PDF: %.1f KB\n', d.bytes/1024);
+d2 = dir('D:/neuroplc-paper/paper/figures/fig_wcet_breakdown.pdf');
+fprintf('WCET PDF: %.1f KB\n', d2.bytes/1024);

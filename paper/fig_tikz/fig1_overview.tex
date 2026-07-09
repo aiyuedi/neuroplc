@@ -1,121 +1,126 @@
-% Fig 1: NeuroPLC End-to-End Pipeline
-% Compile: xelatex fig1_overview.tex
-\documentclass[tikz,border=8pt]{standalone}
+% Fig 1: NeuroPLC End-to-End Pipeline (fixed: balanced density, prominent numbers, clear annotations)
+\documentclass[tikz,border=10pt]{standalone}
 \usepackage{tikz}
 \usepackage{fontspec}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, fit, backgrounds, shadows}
 
-% ── IEEE-compatible colors ──
 \definecolor{steel}{HTML}{2563eb}
 \definecolor{teal}{HTML}{0d9488}
 \definecolor{amber}{HTML}{d97706}
-\definecolor{slate}{HTML}{64748b}
+\definecolor{purple}{HTML}{7c3aed}
 \definecolor{rose}{HTML}{e11d48}
 \definecolor{ink}{HTML}{1e293b}
-\definecolor{snow}{HTML}{fafbfc}
-\definecolor{purple}{HTML}{7c3aed}
+\definecolor{slate}{HTML}{64748b}
+\definecolor{graybg}{HTML}{f1f5f9}
 
 \begin{document}
 \begin{tikzpicture}[
-    % ── Stage box (rounded, filled, titled) ──
     stage/.style={
-        rectangle, rounded corners=5pt,
-        draw=#1!50!black, fill=#1!12, line width=1.2pt,
-        text=ink, minimum width=2.55cm, minimum height=3.6cm,
-        font=\sffamily, align=center, inner sep=5pt,
+        rectangle, rounded corners=6pt,
+        draw=#1!60!black, fill=#1!08, line width=1.3pt,
+        text=ink, minimum width=2.6cm, minimum height=3.8cm,
+        font=\sffamily, align=center, inner sep=4pt,
     },
-    % ── Title bar at top of each stage ──
     titlebar/.style={
         rectangle, rounded corners=3pt,
         fill=#1, text=white,
         font=\sffamily\footnotesize\bfseries, align=center,
-        minimum width=2.3cm, minimum height=0.55cm, inner sep=2pt,
+        minimum width=2.35cm, minimum height=0.55cm, inner sep=2pt,
     },
-    % ── Arrow style ──
     arr/.style={
-        -{Stealth[scale=0.85]}, line width=1.3pt, slate!60!black,
-        rounded corners=2pt,
+        -{Stealth[scale=0.9]}, line width=1.5pt, slate!70!black,
     },
-    % ── Small text inside box ──
-    detail/.style={
-        font=\sffamily\scriptsize, text=ink, align=center,
-        inner sep=1pt,
-    },
-    % ── Stage number badge ──
     badge/.style={
-        circle, fill=#1, text=white, font=\sffamily\scriptsize\bfseries,
-        minimum size=14pt, inner sep=0pt,
+        circle, fill=#1, text=white,
+        font=\sffamily\Large\bfseries,
+        minimum size=22pt, inner sep=0pt,
+    },
+    detail/.style={
+        font=\sffamily\scriptsize, text=ink, align=center, inner sep=0.5pt,
+    },
+    keymetric/.style={
+        font=\sffamily\small\bfseries, text=#1,
     },
 ]
 
-% ============================================================
-% 5 STAGES (horizontal)
-% ============================================================
-% x positions: 0, 3.2, 6.4, 9.6, 12.8
+% x positions evenly spaced
+\def\dx{3.25}
 
 % ── Stage 1: Feature Extraction ──
 \node[stage=steel] (S1) at (0,0) {};
-\node[titlebar=steel] at (0,1.7) {Feature Extraction};
-\node[badge=steel] at (0,1.25) {1};
-\node[detail] at (0,0.65) {Sliding Windows};
-\node[detail] at (0,0.15) {1024 pt, stride 512};
-\node[detail] at (0,-0.35) {10 Time-Domain};
-\node[detail] at (0,-0.85) {10 Freq-Domain};
-\node[detail] at (0,-1.35) {8 Dispersion Entropy};
-\node[font=\sffamily\small\bfseries,text=steel] at (0,-1.9) {$\rightarrow$ 28-D Vector};
+\node[titlebar=steel] at (0,1.85) {Feature Extraction};
+\node[badge=steel] at (0,1.22) {1};
+\node[detail] at (0,0.55) {Sliding Windows};
+\node[detail] at (0,0.10) {1024 pt, stride 512};
+\node[detail] at (0,-0.35) {10 Time-Domain Feat.};
+\node[detail] at (0,-0.80) {10 Freq-Domain Feat.};
+\node[detail] at (0,-1.25) {8 Dispersion Entropy};
+\node[keymetric=steel] at (0,-1.85) {28-D Vector};
 
 % ── Stage 2: Teacher CNN ──
-\node[stage=teal] (S2) at (3.2,0) {};
-\node[titlebar=teal] at (3.2,1.7) {Teacher 1D-CNN};
-\node[badge=teal] at (3.2,1.25) {2};
-\node[detail] at (3.2,0.65) {3$\times$Conv [16,32,64]};
-\node[detail] at (3.2,0.15) {Kernels [15,9,5]};
-\node[detail] at (3.2,-0.35) {4-Head Self-Attn};
-\node[detail] at (3.2,-0.85) {FC [128,64,4]};
-\node[font=\sffamily\small\bfseries,text=teal] at (3.2,-1.9) {48,708 params · 99.93\%};
+\node[stage=teal] (S2) at (\dx,0) {};
+\node[titlebar=teal] at (\dx,1.85) {Teacher 1D-CNN};
+\node[badge=teal] at (\dx,1.22) {2};
+\node[detail] at (\dx,0.55) {3 Conv [16,32,64]};
+\node[detail] at (\dx,0.10) {Kernel [15,9,5]};
+\node[detail] at (\dx,-0.35) {4-Head Self-Attn};
+\node[detail] at (\dx,-0.80) {FC [128,64,4]};
+\node[detail] at (\dx,-1.25) {CWRU Accuracy};
+\node[keymetric=teal] at (\dx,-1.85) {48.7K params · 99.93\%};
 
-% ── Stage 3: KD Distillation ──
-\node[stage=amber] (S3) at (6.4,0) {};
-\node[titlebar=amber] at (6.4,1.7) {VRM-KD Distillation};
-\node[badge=amber] at (6.4,1.25) {3};
-\node[detail] at (6.4,0.70) {$\tau=4.0,\;\alpha=0.3$};
-\node[detail] at (6.4,0.20) {$\lambda_{\text{rel}}=0.5$};
-\node[detail] at (6.4,-0.30) {KAN [28,16,4]};
-\node[detail] at (6.4,-0.80) {G=8, k=3, deg=3};
-\node[font=\sffamily\small\bfseries,text=amber] at (6.4,-1.9) {7.9$\times$ compression};
+% ── Stage 3: VRM-KD Distillation ──
+\node[stage=amber] (S3) at ({2*\dx},0) {};
+\node[titlebar=amber] at ({2*\dx},1.85) {VRM-KD Distillation};
+\node[badge=amber] at ({2*\dx},1.22) {3};
+\node[detail] at ({2*\dx},0.55) {$\tau=4.0$, $\alpha=0.3$};
+\node[detail] at ({2*\dx},0.10) {$\lambda_{\text{rel}}=0.5$ (VRM)};
+\node[detail] at ({2*\dx},-0.35) {KAN [28,16,4]};
+\node[detail] at ({2*\dx},-0.80) {$G=8$, cubic B-spline};
+\node[detail] at ({2*\dx},-1.25) {Adam, cos. anneal};
+\node[keymetric=amber] at ({2*\dx},-1.85) {7.9$\times$ compression};
 
 % ── Stage 4: NeuroPLC Compiler ──
-\node[stage=purple] (S4) at (9.6,0) {};
-\node[titlebar=purple] at (9.6,1.7) {NeuroPLC Compiler};
-\node[badge=purple] at (9.6,1.25) {4};
-\node[detail] at (9.6,0.65) {PyTorch $\to$ IR Graph};
-\node[detail] at (9.6,0.15) {6 Op Types · 6 Passes};
-\node[detail] at (9.6,-0.35) {DB+FB SCL Gen.};
-\node[detail] at (9.6,-0.85) {S7-1200 / S7-1500};
-\node[font=\sffamily\small\bfseries,text=purple] at (9.6,-1.9) {DA Safety Factor 8.5$\times$};
+\node[stage=purple] (S4) at ({3*\dx},0) {};
+\node[titlebar=purple] at ({3*\dx},1.85) {NeuroPLC Compiler};
+\node[badge=purple] at ({3*\dx},1.22) {4};
+\node[detail] at ({3*\dx},0.55) {PyTorch $\to$ IR Graph};
+\node[detail] at ({3*\dx},0.10) {6 Op Types · 6 Passes};
+\node[detail] at ({3*\dx},-0.35) {DA Safety Analysis};
+\node[detail] at ({3*\dx},-0.80) {DB + FB SCL Gen.};
+\node[detail] at ({3*\dx},-1.25) {Safety Monitor Auto-Gen};
+\node[keymetric=purple] at ({3*\dx},-1.85) {DA margin 8.5$\times$};
 
-% ── Stage 5: TIA Portal ──
-\node[stage=rose] (S5) at (12.8,0) {};
-\node[titlebar=rose] at (12.8,1.7) {TIA Portal V21};
-\node[badge=rose] at (12.8,1.25) {5};
-\node[detail] at (12.8,0.65) {MCP Openness API};
-\node[detail] at (12.8,0.15) {45.2 KB Work Mem};
-\node[detail] at (12.8,-0.35) {90.4\% Budget Util.};
-\node[detail] at (12.8,-0.85) {3-Tier Verification};
-\node[font=\sffamily\small\bfseries,text=rose] at (12.8,-1.9) {0 Errors · 0 Warnings};
+% ── Stage 5: TIA Portal Deploy ──
+\node[stage=rose] (S5) at ({4*\dx},0) {};
+\node[titlebar=rose] at ({4*\dx},1.85) {TIA Portal Deploy};
+\node[badge=rose] at ({4*\dx},1.22) {5};
+\node[detail] at ({4*\dx},0.55) {MCP Openness API};
+\node[detail] at ({4*\dx},0.10) {45.2 KB Work Memory};
+\node[detail] at ({4*\dx},-0.35) {90.4\% Budget Util.};
+\node[detail] at ({4*\dx},-0.80) {3-Tier Verification};
+\node[detail] at ({4*\dx},-1.25) {WCET 22.67 ms};
+\node[keymetric=rose] at ({4*\dx},-1.85) {0 Errors · 0 Warnings};
 
-% ── Arrows between stages ──
+% ── Main arrows ──
 \draw[arr] (S1.east) -- (S2.west);
 \draw[arr] (S2.east) -- (S3.west);
 \draw[arr] (S3.east) -- (S4.west);
 \draw[arr] (S4.east) -- (S5.west);
 
-% ── Data flow annotation below ──
-\node[font=\sffamily\tiny, text=slate] at (1.6, -2.4) {12 kHz Vibration};
-\node[font=\sffamily\tiny, text=slate] at (4.8, -2.4) {Raw Waveform (1,1024)};
-\node[font=\sffamily\tiny, text=slate] at (8.0, -2.4) {28-D Feature Vectors};
-\node[font=\sffamily\tiny, text=slate] at (11.2, -2.4) {IEC 61131-3 SCL};
-\node[font=\sffamily\tiny, text=slate] at (12.8, -2.4) {PLC Runtime};
+% ── Data flow labels (aligned, larger font) ──
+\node[font=\sffamily\footnotesize, text=slate, anchor=north] at ({0.5*\dx}, -2.3)
+    {12 kHz Raw Vibration};
+\node[font=\sffamily\footnotesize, text=slate, anchor=north] at ({1.5*\dx}, -2.3)
+    {Waveform (1$\times$1024)};
+\node[font=\sffamily\footnotesize, text=slate, anchor=north] at ({2.5*\dx}, -2.3)
+    {28-D Feature Vectors};
+\node[font=\sffamily\footnotesize, text=slate, anchor=north] at ({3.5*\dx}, -2.3)
+    {IEC 61131-3 SCL};
+
+% ── Phase label ──
+\node[font=\sffamily\footnotesize\bfseries, text=ink, anchor=north] at ({2*\dx}, -2.8)
+    {Training (Stages 1--3) ~~~~~~~ Deployment (Stages 4--5)};
+\draw[slate!30, line width=0.8pt] ({1.625*\dx}, -2.65) -- ({1.625*\dx}, -2.45);
 
 \end{tikzpicture}
 \end{document}

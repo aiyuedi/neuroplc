@@ -89,48 +89,43 @@ $\tau \in \{\texttt{linear}, \texttt{elemwise}, \texttt{svnn}\}$
 classify IR nodes by their operation category.
 
 \begin{center}
-\begin{minipage}{0.60\linewidth}
+\begin{minipage}{0.65\linewidth}
 \vspace{4pt}
 \begin{prooftree}
 \AxiomC{}
 \UnaryInfC{$\Gamma \vdash \texttt{Input}(x) : \texttt{linear}$}
-\DisplayProof
-\quad\textsc{[T-Input]}
 \end{prooftree}
+\quad\textsc{[T-Input]}
 
 \vspace{6pt}
 \begin{prooftree}
 \AxiomC{$\Gamma \vdash e : \texttt{linear}$}
 \UnaryInfC{$\Gamma \vdash \texttt{MatMul}(W, e) : \texttt{linear}$}
-\DisplayProof
-\quad\textsc{[T-MatMul]}
 \end{prooftree}
+\quad\textsc{[T-MatMul]}
 
 \vspace{6pt}
 \begin{prooftree}
 \AxiomC{$\Gamma \vdash e : \texttt{linear}$}
 \AxiomC{$M_2(T,g) < \infty$}
 \BinaryInfC{$\Gamma \vdash \texttt{BsplineLUT}(T, g, e) : \texttt{elemwise}$}
-\DisplayProof
-\quad\textsc{[T-BsplineLUT]}
 \end{prooftree}
+\quad\textsc{[T-BsplineLUT]}
 
 \vspace{6pt}
 \begin{prooftree}
 \AxiomC{$\Gamma \vdash e_1 : \texttt{linear}$}
 \AxiomC{$\Gamma \vdash e_2 : \texttt{elemwise}$}
 \BinaryInfC{$\Gamma \vdash \texttt{Add}(e_1, e_2) : \texttt{svnn}$}
-\DisplayProof
-\quad\textsc{[T-Add]}
 \end{prooftree}
+\quad\textsc{[T-Add]}
 
 \vspace{6pt}
 \begin{prooftree}
 \AxiomC{$\Gamma \vdash e : \texttt{svnn}$}
 \UnaryInfC{$\Gamma \vdash \texttt{Softmax}(e) : \texttt{svnn}$}
-\DisplayProof
-\quad\textsc{[T-Softmax]}
 \end{prooftree}
+\quad\textsc{[T-Softmax]}
 \vspace{4pt}
 \end{minipage}
 \end{center}

@@ -1,6 +1,5 @@
-% Fig 2: NeuroPLC Compiler Architecture
-% Compile: xelatex fig2_compiler_arch.tex
-\documentclass[tikz,border=8pt]{standalone}
+% Fig 2: NeuroPLC Compiler Architecture (fixed: legend, de-cluttered, better text sizes)
+\documentclass[tikz,border=10pt]{standalone}
 \usepackage{tikz}
 \usepackage{fontspec}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, fit, backgrounds, shadows}
@@ -8,179 +7,200 @@
 \definecolor{steel}{HTML}{2563eb}
 \definecolor{teal}{HTML}{0d9488}
 \definecolor{amber}{HTML}{d97706}
-\definecolor{slate}{HTML}{64748b}
 \definecolor{rose}{HTML}{e11d48}
-\definecolor{ink}{HTML}{1e293b}
-\definecolor{snow}{HTML}{fafbfc}
 \definecolor{purple}{HTML}{7c3aed}
-\definecolor{cyan}{HTML}{06b6d4}
+\definecolor{ink}{HTML}{1e293b}
+\definecolor{slate}{HTML}{64748b}
+\definecolor{snow}{HTML}{fafbfc}
 
 \begin{document}
 \begin{tikzpicture}[
-    % ── Main stage container ──
-    mainbox/.style={
-        rectangle, rounded corners=5pt,
-        draw=#1!55!black, fill=#1!10, line width=1.2pt,
-        text=ink, minimum width=3.3cm, minimum height=4.0cm,
+    % ── Main pipeline stage ──
+    stage/.style={
+        rectangle, rounded corners=6pt,
+        draw=#1!60!black, fill=#1!10, line width=1.3pt,
+        text=ink, minimum width=3.2cm, minimum height=3.8cm,
         font=\sffamily, align=center, inner sep=4pt,
     },
-    % ── Title bar ──
-    titler/.style={
-        rectangle, rounded corners=2pt,
+    % ── Stage title bar ──
+    tbar/.style={
+        rectangle, rounded corners=3pt,
         fill=#1, text=white,
-        font=\sffamily\footnotesize\bfseries, align=center,
-        minimum width=3.0cm, minimum height=0.5cm, inner sep=2pt,
+        font=\sffamily\small\bfseries, align=center,
+        minimum width=2.9cm, minimum height=0.52cm, inner sep=2pt,
     },
-    % ── Sub-box inside main section ──
+    % ── Sub-box ──
     subbox/.style={
         rectangle, rounded corners=3pt,
-        draw=#1!40!black, fill=#1!30, line width=0.7pt,
-        text=ink, font=\sffamily\scriptsize, align=center,
-        inner sep=3pt, minimum width=2.6cm,
+        draw=#1!45!black, fill=#1!25, line width=0.7pt,
+        text=ink, font=\sffamily\footnotesize, align=center,
+        inner sep=3pt, minimum width=2.5cm,
+    },
+    % ── Detail line ──
+    dline/.style={
+        font=\sffamily\scriptsize, text=slate, align=center, inner sep=0.5pt,
     },
     % ── Bottom panel ──
     panel/.style={
-        rectangle, rounded corners=4pt,
-        draw=#1!50!black, fill=#1!12, line width=1.0pt,
-        text=ink, minimum width=4.6cm, minimum height=2.2cm,
-        font=\sffamily\footnotesize, align=center, inner sep=5pt,
+        rectangle, rounded corners=5pt,
+        draw=#1!55!black, fill=#1!10, line width=1.1pt,
+        text=ink, minimum width=4.8cm, minimum height=2.4cm,
+        font=\sffamily, align=center, inner sep=5pt,
     },
     % ── Panel title ──
-    ptitle/.style={
-        rectangle, rounded corners=2pt,
+    pbar/.style={
+        rectangle, rounded corners=3pt,
         fill=#1, text=white,
         font=\sffamily\small\bfseries, align=center,
-        minimum width=4.2cm, minimum height=0.45cm, inner sep=2pt,
+        minimum width=4.3cm, minimum height=0.48cm, inner sep=2pt,
     },
-    % ── Arrows ──
-    arr/.style={
-        -{Stealth[scale=0.8]}, line width=1.2pt, slate!60!black,
+    % ── Arrow: solid = data flow ──
+    dataflow/.style={
+        -{Stealth[scale=0.85]}, line width=1.3pt, slate!70!black,
     },
-    arrlight/.style={
-        -{Stealth[scale=0.7]}, line width=0.8pt, slate!40!black,
-        densely dotted,
+    % ── Arrow: dashed = cross-cutting / feedback ──
+    crosscut/.style={
+        -{Stealth[scale=0.7]}, line width=0.9pt, slate!45!black, densely dashed,
     },
-    % ── Small tag badges ──
+    % ── Tag badge ──
     tag/.style={
-        rectangle, rounded corners=2pt, fill=#1!25,
-        draw=#1!50, line width=0.5pt,
-        font=\sffamily\tiny, text=ink, inner sep=2pt,
+        rectangle, rounded corners=2pt, fill=#1!20, draw=#1!45, line width=0.5pt,
+        font=\sffamily\footnotesize, text=ink, inner sep=2.5pt,
+    },
+    % ── Tech badge ──
+    tech/.style={
+        rectangle, rounded corners=2pt, fill=slate!12, draw=slate!35, line width=0.4pt,
+        font=\sffamily\tiny\bfseries, text=slate, inner sep=2pt,
     },
 ]
 
 % ============================================================
-% TOP ROW: 4 Main Pipeline Stages
+% TOP ROW: 4 Pipeline Stages
 % ============================================================
-% x positions: -5.4, -1.8, 1.8, 5.4  (spaced 3.6cm apart)
+\def\gx{3.7}  % x spacing
 
 % ── S1: FRONTEND ──
-\node[mainbox=steel] (FE) at (-5.4, 2.0) {};
-\node[titler=steel] at (-5.4, 3.7) {Frontend};
-\node[subbox=steel] at (-5.4, 2.2) {PyTorch Model};
-\node[subbox=steel] at (-5.4, 1.1) {KAN / MLP};
-\node[font=\sffamily\tiny, text=slate] at (-5.4, 0.1) {State dict extraction};
-\node[font=\sffamily\tiny, text=slate] at (-5.4, -0.35) {B-spline coeff unpack};
-\node[font=\sffamily\tiny, text=slate] at (-5.4, -0.8) {SI units recognition};
-\node[tag=steel] at (-5.4, -1.5) {Python};
+\node[stage=steel]  (FE)  at ({-1.5*\gx}, 2.0) {};
+\node[tbar=steel]    at ({-1.5*\gx}, 3.65) {Frontend};
+\node[subbox=steel]  at ({-1.5*\gx}, 2.20) {PyTorch Model};
+\node[dline]         at ({-1.5*\gx}, 1.30) {KAN / MLP import};
+\node[dline]         at ({-1.5*\gx}, 0.85) {State dict extraction};
+\node[dline]         at ({-1.5*\gx}, 0.40) {B-spline coeff unpack};
+\node[dline]         at ({-1.5*\gx}, -0.05) {SI units recognition};
+\node[tech]          at ({-1.5*\gx}, -0.65) {Python};
 
 % ── S2: IR GRAPH ──
-\node[mainbox=teal] (IR) at (-1.8, 2.0) {};
-\node[titler=teal] at (-1.8, 3.7) {IR Graph};
-\node[font=\sffamily\footnotesize\bfseries, text=ink] at (-1.8, 2.65) {6 Operation Types};
-% Op type tags
-\node[tag=teal] at (-2.6, 1.95) {MatMul};
-\node[tag=teal] at (-1.0, 1.95) {BsplineLUT};
-\node[tag=teal] at (-2.6, 1.35) {StandardAct};
-\node[tag=teal] at (-1.0, 1.35) {Softmax};
-\node[tag=teal] at (-2.6, 0.75) {Add};
-\node[tag=teal] at (-1.0, 0.75) {Argmax};
-% Annotation
-\node[font=\sffamily\tiny, text=slate] at (-1.8, 0.0) {Typed attributes};
-\node[font=\sffamily\tiny, text=slate] at (-1.8, -0.4) {Topological sort};
-\node[font=\sffamily\tiny, text=slate] at (-1.8, -0.8) {Cycle detection};
-\node[font=\sffamily\tiny, text=slate] at (-1.8, -1.2) {JSON serialization};
-\node[tag=teal] at (-1.8, -1.75) {DAG};
+\node[stage=teal]   (IR)  at ({-0.5*\gx}, 2.0) {};
+\node[tbar=teal]     at ({-0.5*\gx}, 3.65) {IR Graph};
+\node[subbox=teal]   at ({-0.5*\gx}, 2.35) {6 Operation Types};
+% Op tags in 3x2 grid
+\node[tag=teal] at ({-0.9*\gx}, 1.45) {MatMul};
+\node[tag=teal] at ({-0.1*\gx}, 1.45) {BsplineLUT};
+\node[tag=teal] at ({-0.9*\gx}, 0.85) {StandardAct};
+\node[tag=teal] at ({-0.1*\gx}, 0.85) {Softmax};
+\node[tag=teal] at ({-0.9*\gx}, 0.25) {Add};
+\node[tag=teal] at ({-0.1*\gx}, 0.25) {Argmax};
+\node[dline]      at ({-0.5*\gx}, -0.45) {Typed attrs + Topo sort};
+\node[dline]      at ({-0.5*\gx}, -0.85) {Cycle detection};
+\node[tech]       at ({-0.5*\gx}, -1.35) {JSON DAG};
 
 % ── S3: BACKEND ──
-\node[mainbox=amber] (BE) at (1.8, 2.0) {};
-\node[titler=amber] at (1.8, 3.7) {Backend};
-\node[subbox=amber] at (1.8, 2.3) {S7-1200};
-\node[font=\sffamily\tiny, text=slate] at (1.8, 1.25) {50 KB work mem};
-\node[font=\sffamily\tiny, text=slate] at (1.8, 0.85) {DB+FB split};
-\node[font=\sffamily\tiny, text=slate] at (1.8, 0.45) {15-pt LUT};
-\node[font=\sffamily\tiny, text=slate] at (1.8, 0.05) {FOR-loop compact};
-\node[subbox=amber] at (1.8, -0.55) {S7-1500};
-\node[font=\sffamily\tiny, text=slate] at (1.8, -1.15) {1.5 MB budget};
-\node[font=\sffamily\tiny, text=slate] at (1.8, -1.5) {50-pt LUT · Unrolled};
-\node[tag=amber] at (1.8, -2.05) {IEC 61131-3 SCL};
+\node[stage=amber]  (BE)  at ({0.5*\gx}, 2.0) {};
+\node[tbar=amber]    at ({0.5*\gx}, 3.65) {Backend};
+\node[subbox=amber]  at ({0.5*\gx}, 2.35) {S7-1200 Target};
+\node[dline]         at ({0.5*\gx}, 1.35) {50 KB work memory};
+\node[dline]         at ({0.5*\gx}, 0.90) {DB + FB SCL split};
+\node[dline]         at ({0.5*\gx}, 0.45) {15-pt LUT, FOR-loop};
+\node[subbox=amber]  at ({0.5*\gx}, -0.20) {S7-1500 Target};
+\node[dline]         at ({0.5*\gx}, -0.85) {1.5 MB budget};
+\node[dline]         at ({0.5*\gx}, -1.25) {50-pt LUT, unrolled};
+\node[tech]          at ({0.5*\gx}, -1.75) {IEC 61131-3 SCL};
 
 % ── S4: VALIDATION ──
-\node[mainbox=rose] (VAL) at (5.4, 2.0) {};
-\node[titler=rose] at (5.4, 3.7) {Validation};
-\node[subbox=rose] at (5.4, 2.3) {TIA Portal V21};
-\node[font=\sffamily\tiny, text=slate] at (5.4, 1.25) {MCP Openness API};
-\node[font=\sffamily\tiny, text=slate] at (5.4, 0.85) {Compile \& Diagnose};
-\node[font=\sffamily\tiny, text=ink] at (5.4, 0.35) {\textbf{0 errors · 0 warnings}};
-\node[subbox=rose] at (5.4, -0.3) {Cross-Validation};
-\node[font=\sffamily\tiny, text=slate] at (5.4, -0.95) {Python vs SCL LUT};
-\node[font=\sffamily\tiny, text=slate] at (5.4, -1.35) {1,000 samples};
-\node[font=\sffamily\tiny, text=ink] at (5.4, -1.7) {100\% class agreement};
-\node[tag=rose] at (5.4, -2.25) {S7-1200|1500};
+\node[stage=rose]   (VAL) at ({1.5*\gx}, 2.0) {};
+\node[tbar=rose]     at ({1.5*\gx}, 3.65) {Validation};
+\node[subbox=rose]   at ({1.5*\gx}, 2.35) {TIA Portal V21};
+\node[dline]         at ({1.5*\gx}, 1.40) {MCP Openness API};
+\node[dline]         at ({1.5*\gx}, 0.95) {Compile \& Diagnose};
+\node[font=\sffamily\footnotesize\bfseries, text=ink] at ({1.5*\gx}, 0.45)
+    {0 errors $\cdot$ 0 warnings};
+\node[subbox=rose]   at ({1.5*\gx}, -0.20) {Cross-Validation};
+\node[dline]         at ({1.5*\gx}, -0.85) {Python vs SCL LUT};
+\node[font=\sffamily\footnotesize\bfseries, text=ink] at ({1.5*\gx}, -1.30)
+    {100\% class agreement};
+\node[tech]          at ({1.5*\gx}, -1.85) {S7-1200/S7-1500};
 
-% ── Arrows: main pipeline ──
-\draw[arr] (FE.east) -- (IR.west) node[midway, above, font=\sffamily\tiny, text=slate] {Model $\to$ IR};
-\draw[arr] (IR.east) -- (BE.west) node[midway, above, font=\sffamily\tiny, text=slate] {IR $\to$ SCL};
-\draw[arr] (BE.east) -- (VAL.west) node[midway, above, font=\sffamily\tiny, text=slate] {SCL $\to$ TIA};
+% ── Pipeline arrows (solid = data flow) ──
+\draw[dataflow] (FE.east) -- (IR.west)
+    node[midway, above, font=\sffamily\scriptsize, text=steel] {Model $\to$ IR};
+\draw[dataflow] (IR.east) -- (BE.west)
+    node[midway, above, font=\sffamily\scriptsize, text=teal] {IR $\to$ SCL};
+\draw[dataflow] (BE.east) -- (VAL.west)
+    node[midway, above, font=\sffamily\scriptsize, text=amber] {SCL $\to$ TIA};
 
 % ============================================================
-% BOTTOM ROW: 3 Panels (cross-cutting)
+% BOTTOM ROW: 3 Cross-Cutting Concern Panels
 % ============================================================
-% x positions: -4.0, 0.0, 4.0
+\def\px{4.0}  % panel x spacing
 
-% ── Panel 1: OPTIMIZER ──
-\node[panel=steel] (OPT) at (-4.0, -3.2) {};
-\node[ptitle=steel] at (-4.0, -2.05) {Optimizer (6 Passes)};
-% Passes as tags
-\node[tag=steel] at (-5.6, -2.65) {Adaptive B-spline LUT};
-\node[tag=steel] at (-5.6, -3.15) {FuseMatMulAdd};
-\node[tag=steel] at (-2.4, -2.65) {HoistBinarySearch};
-\node[tag=steel] at (-2.4, -3.15) {LUTizeEXP};
-\node[tag=steel] at (-5.6, -3.65) {Dead-Node Elim.};
-\node[tag=steel] at (-2.4, -3.65) {Strength Reduction};
-\node[font=\sffamily\tiny, text=slate] at (-4.0, -4.25) {Code-level transforms, 0 acc loss};
+% ── P1: OPTIMIZER ──
+\node[panel=steel] (OPT) at ({-1.0*\px}, -3.3) {};
+\node[pbar=steel]  at ({-1.0*\px}, -2.05) {Optimizer (6 Passes)};
+\node[tag=steel] at ({-2.2*\px/4 - 4.0}, -2.65) {Adaptive B-spline LUT};
+\node[tag=steel] at ({-2.2*\px/4 - 4.0}, -3.15) {FuseMatMulAdd};
+\node[tag=steel] at ({-2.2*\px/4 - 4.0}, -3.65) {Dead-Node Elim.};
+\node[tag=steel] at ({ 0.2*\px/4 + 0.0}, -2.65) {HoistBinarySearch};
+\node[tag=steel] at ({ 0.2*\px/4 + 0.0}, -3.15) {LUTizeEXP};
+\node[tag=steel] at ({ 0.2*\px/4 + 0.0}, -3.65) {Strength Reduction};
+\node[dline]      at ({-1.0*\px}, -4.25) {Code-level transforms, 0 accuracy loss};
 
-% ── Panel 2: STATIC ANALYZER ──
-\node[panel=teal] (ANL) at (0.0, -3.2) {};
-\node[ptitle=teal] at (0.0, -2.05) {Static Analyzer};
-\node[tag=teal] at (0.0, -2.55) {Memory budget (KB)};
-\node[tag=teal] at (0.0, -3.0) {FLOPs · Instructions};
-\node[tag=teal] at (0.0, -3.45) {WCET (Z3 SMT)};
-\node[tag=teal] at (0.0, -3.9) {DA Safety Factor};
-\node[font=\sffamily\tiny, text=slate] at (0.0, -4.25) {TIA V21 measured values};
+% ── P2: STATIC ANALYZER ──
+\node[panel=teal] (ANL) at (0, -3.3) {};
+\node[pbar=teal]  at (0, -2.05) {Static Analyzer};
+\node[tag=teal] at (0, -2.55) {Memory budget (KB)};
+\node[tag=teal] at (0, -3.00) {FLOPs + Instructions};
+\node[tag=teal] at (0, -3.45) {WCET bound (Z3 SMT)};
+\node[tag=teal] at (0, -3.90) {DA Safety Factor};
+\node[dline]     at (0, -4.25) {TIA V21 measured values};
 
-% ── Panel 3: VERIFICATION ──
-\node[panel=purple] (VFY) at (4.0, -3.2) {};
-\node[ptitle=purple] at (4.0, -2.05) {Verification (3-Tier)};
-\node[tag=purple] at (4.0, -2.55) {Tier 1: Template Proofs};
-\node[tag=purple] at (4.0, -3.0) {Tier 2: Per-Func Z3};
-\node[tag=purple] at (4.0, -3.45) {Tier 3: Comp. Cert.};
-\node[font=\sffamily\tiny, text=slate] at (4.0, -3.85) {4/6 op types proved};
-\node[font=\sffamily\tiny, text=slate] at (4.0, -4.1) {512/512 UNSAT};
-\node[font=\sffamily\tiny, text=slate] at (4.0, -4.35) {$\sim$200-line TCB};
+% ── P3: VERIFICATION ──
+\node[panel=purple] (VFY) at ({1.0*\px}, -3.3) {};
+\node[pbar=purple]  at ({1.0*\px}, -2.05) {Verification (3-Tier)};
+\node[tag=purple] at ({1.0*\px}, -2.55) {Tier 1: Template Proofs (4/6 ops)};
+\node[tag=purple] at ({1.0*\px}, -3.00) {Tier 2: Per-Func Z3 (512/512 UNSAT)};
+\node[tag=purple] at ({1.0*\px}, -3.45) {Tier 3: Compiler Cert ($\sim$200-line TCB)};
 
-% ── Arrows: main boxes to panels ──
-\draw[arrlight] (FE.south) -- ++(0,-0.15) -| (OPT.north);
-\draw[arrlight] (IR.south) -- ++(0,-0.15) -| (OPT.north);
-\draw[arrlight] (IR.south) -- ++(0,-0.15) -| (ANL.north);
-\draw[arrlight] (BE.south) -- ++(0,-0.15) -| (ANL.north);
-\draw[arrlight] (BE.south) -- ++(0,-0.15) -| (VFY.north);
-\draw[arrlight] (VAL.south) -- ++(0,-0.15) -| (VFY.north);
+% ── Cross-cutting arrows (dashed) from stages to panels ──
+\draw[crosscut] (FE.south)  -- ++(0,-0.18) -| ([xshift=-12pt]OPT.north);
+\draw[crosscut] (IR.south)  -- ++(0,-0.18) -| ([xshift=+12pt]OPT.north);
+\draw[crosscut] (IR.south)  -- ++(0,-0.18) -| ([xshift=-12pt]ANL.north);
+\draw[crosscut] (BE.south)  -- ++(0,-0.18) -| ([xshift=+12pt]ANL.north);
+\draw[crosscut] (BE.south)  -- ++(0,-0.18) -| ([xshift=-12pt]VFY.north);
+\draw[crosscut] (VAL.south) -- ++(0,-0.18) -| ([xshift=+12pt]VFY.north);
 
-% ── Loop arrows among panels ──
-\draw[arrlight, slate!50!black] (OPT.east) -- (ANL.west)
-    node[midway, above, font=\sffamily\tiny, text=slate] {budget};
-\draw[arrlight, slate!50!black] (ANL.east) -- (VFY.west)
-    node[midway, above, font=\sffamily\tiny, text=slate] {bounds};
+% ── Inter-panel flow ──
+\draw[crosscut] (OPT.east) -- (ANL.west)
+    node[midway, above, font=\sffamily\scriptsize, text=slate] {budget};
+\draw[crosscut] (ANL.east) -- (VFY.west)
+    node[midway, above, font=\sffamily\scriptsize, text=slate] {bounds};
+
+% ============================================================
+% LEGEND
+% ============================================================
+\node[rectangle, rounded corners=4pt, draw=slate!30, fill=white, inner sep=6pt,
+      font=\sffamily\footnotesize, align=left, text=ink]
+      (LEG) at ({1.5*\gx}, -5.35) {
+    \textbf{Legend}\\[2pt]
+    \tikz{\draw[dataflow] (0,0) -- (0.5,0);} ~~ Data flow (pipeline)\\[2pt]
+    \tikz{\draw[crosscut] (0,0) -- (0.5,0);} ~~ Cross-cutting concern\\[2pt]
+    \begin{tabular}{ll}
+    \tikz{\node[rectangle,fill=steel,minimum width=0.4cm,minimum height=0.15cm]{};} & Compiler frontend/optimizer \\
+    \tikz{\node[rectangle,fill=teal,minimum width=0.4cm,minimum height=0.15cm]{};} & IR / static analysis \\
+    \tikz{\node[rectangle,fill=amber,minimum width=0.4cm,minimum height=0.15cm]{};} & Backend / code generation \\
+    \tikz{\node[rectangle,fill=rose,minimum width=0.4cm,minimum height=0.15cm]{};} & Validation / deployment \\
+    \tikz{\node[rectangle,fill=purple,minimum width=0.4cm,minimum height=0.15cm]{};} & Verification / certification \\
+    \end{tabular}
+};
 
 \end{tikzpicture}
 \end{document}
