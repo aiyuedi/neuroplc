@@ -1,0 +1,22 @@
+[
+  {
+    "architecture": "FourierKAN",
+    "target_accuracy": 1.0,
+    "n_verified": 512,
+    "n_total": 512,
+    "verification_rate": 1.0,
+    "M2_max": 2.297531843185425,
+    "M2_mean": 0.9272322591277771,
+    "safety_margin": 3.450272615817824
+  },
+  {
+    "architecture": "WaveletKAN",
+    "target_accuracy": 1.0,
+    "n_verified": 512,
+    "n_total": 512,
+    "verification_rate": 1.0,
+    "M2_max": 1.7810081243515015,
+    "M2_mean": 0.5130752741242759,
+    "safety_margin": 4.450912397423649
+  }
+]

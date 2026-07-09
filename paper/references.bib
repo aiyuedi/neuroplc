@@ -214,7 +214,7 @@
   number = {A5E02486680-AP},
   edition = {4.6},
   year = {2022},
-  note = {CPU 1211C AC/DC/Relay: 75 kB work memory}
+  note = {CPU 1211C AC/DC/Relay: 50 kB work memory}
 }
 
 % ── 22. ONNX Runtime 引用 ──
@@ -599,6 +599,26 @@
 % 第五轮补充: 2026-07-06 深度审查 — KAN形式化验证 + PLC验证生态 + 安全认证
 % ===========================================================================
 
+% ── QuantKAN — KAN统一量化框架 (Fuad & Chen, 2025) ──
+@article{quantkan2025,
+  title = {{QuantKAN: A Unified Quantization Framework for Kolmogorov-Arnold Networks}},
+  author = {Fuad, Kazi Ahmed Asif and Chen, Lizhong},
+  journal = {arXiv preprint arXiv:2511.18689},
+  year = {2025}
+}
+
+% ── SHARe-KAN — 后训练向量量化 (2025) ──
+@article{sharekan2025,
+  title = {{SHARe-KAN: Post-Training Vector Quantization for Cache-Resident KAN Inference}},
+  author = {Smith, Jeff},
+  journal = {arXiv preprint arXiv:2512.15742},
+  year = {2025}
+}
+
+% ===========================================================================
+% 第六轮补充: 2026-07-09 质的飞跃 — SVNN完备性 + DA最优性 + WCET + Safety Monitor
+% ===========================================================================
+
 % ── 69. Tankman — Layer-wise Lipschitz-Product Control for Deep KAN (Apr 2026) ──
 @article{tankman2026lipschitz,
   title = {{Layer-wise Lipschitz-Product Control for Deep Kolmogorov-Arnold Network Representations of Compositionally Structured Functions}},
@@ -734,6 +754,14 @@
   year = {2019}
 }
 
+@inproceedings{cousot1977abstract,
+  author = {Patrick Cousot and Radhia Cousot},
+  title = {Abstract Interpretation: A Unified Lattice Model for Static Analysis of Programs by Construction or Approximation of Fixpoints},
+  booktitle = {ACM Symposium on Principles of Programming Languages (POPL)},
+  year = {1977},
+  pages = {238--252}
+}
+
 @inproceedings{mirman2018differentiable,
   author = {Matthew Mirman and Timon Gehr and Martin Vechev},
   title = {Differentiable Abstract Interpretation for Provably Robust Neural Networks},
@@ -778,15 +806,7 @@
   year   = {2024},
   eprint = {2405.12832},
   archivePrefix = {arXiv},
-  note   = {Includes ChebyKAN variant using Chebyshev polynomial basis functions},
-}
-
-@misc{bozorgasl2024waveletkan,
-  author = {Zavareh Bozorgasl and Hao Chen},
-  title  = {{Wav-KAN}: Wavelet Kolmogorov-Arnold Networks},
-  year   = {2024},
-  eprint = {2405.12832},
-  archivePrefix = {arXiv},
+  note   = {Introduces ChebyKAN (Chebyshev polynomial) and Wavelet-KAN variants},
 }
 
 @book{mason2002chebyshev,
@@ -802,23 +822,6 @@
   year    = {1916},
   journal = {Izvestiya Akademii Nauk},
   note    = {Reprinted in Collected Works, 1948. Contains the Markov Brothers' Inequality: $||p'|| \leq n^2||p||$ for polynomials on $[-1,1]$.},
-}
-
-@article{wang2020xjtu,
-  author  = {Biao Wang and Yaguo Lei and Naipeng Li and Ningbo Li},
-  title   = {A Hybrid Prognostics Approach for Estimating Remaining Useful Life of Rolling Element Bearings},
-  journal = {IEEE Transactions on Reliability},
-  year    = {2020},
-  volume  = {69},
-  number  = {1},
-  pages   = {401--412},
-}
-
-@manual{z3prover,
-  author = {Leonardo de Moura and Nikolaj Bj{\o}rner},
-  title  = {{Z3}: An Efficient {SMT} Solver},
-  year   = {2008},
-  note   = {Microsoft Research},
 }
 
 % ── Theorem 3: Computational Necessity ──────────────────────────────────────
@@ -884,10 +887,32 @@
   note    = {First KAN-on-PLC demonstration via Snap7 distributed execution; MLP achieved 98\% on S7-1511TF, KAN achieved 88.5\% (distributed). No native SCL compilation, no correctness guarantees.},
 }
 
-@inproceedings{kan_soc_2025,
-  author    = {Anonymous},
-  title     = {Kolmogorov-Arnold Networks under TinyML Constraints: A Study on {SoC} Estimation for Electric Vehicles},
-  booktitle = {IEEE International Conference on Emerging Technologies and Factory Automation (ETFA)},
-  year      = {2025},
-  note      = {KAN achieved 10× smaller memory (693 bytes vs.\ 6,807 bytes) vs.\ MLP on microcontrollers with competitive accuracy.},
+% ===========================================================================
+% 第七轮补充: 2026-07-09 王者计划 — 类型理论 + 非干扰 + 刻画定理
+% ===========================================================================
+
+@article{milner1978theory,
+  title = {{A Theory of Type Polymorphism in Programming}},
+  author = {Milner, Robin},
+  journal = {Journal of Computer and System Sciences},
+  volume = {17},
+  number = {3},
+  pages = {348--375},
+  year = {1978}
+}
+
+@book{pierce2002types,
+  title = {{Types and Programming Languages}},
+  author = {Pierce, Benjamin C.},
+  publisher = {MIT Press},
+  year = {2002}
+}
+
+@techreport{iec61508_2010,
+  title = {{Functional Safety of Electrical/Electronic/Programmable Electronic Safety-Related Systems}},
+  author = {{International Electrotechnical Commission}},
+  institution = {IEC},
+  number = {IEC 61508},
+  edition = {2.0},
+  year = {2010}
 }

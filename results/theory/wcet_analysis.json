@@ -1,0 +1,67 @@
+{
+  "experiment": "Theorem 10 (WCET)",
+  "arch": [
+    28,
+    16,
+    4
+  ],
+  "n_lut": 15,
+  "wcet_us": 22673.9,
+  "wcet_ms": 22.674,
+  "scan_cycle_ms": 100,
+  "margin_x": 4.4,
+  "usage_pct": 22.7,
+  "c_lut_us": 36.7,
+  "c_matmul_per_edge_us": 7.2,
+  "per_layer": [
+    {
+      "layer": 0,
+      "in_dim": 28,
+      "out_dim": 16,
+      "n_edges": 448,
+      "edge_time_us": 36.7,
+      "layer_edge_total_us": 16441.600000000002,
+      "matmul_total_us": 3241.6,
+      "layer_total_us": 19713.2,
+      "edge_ops": {
+        "real_sub": 3,
+        "real_div": 1,
+        "real_mul": 1,
+        "real_add": 1,
+        "array_access": 4,
+        "cmp": 4,
+        "loop_iters": 4
+      },
+      "matmul_ops": {
+        "mul": 448,
+        "add": 432,
+        "array_reads": 448
+      }
+    },
+    {
+      "layer": 1,
+      "in_dim": 16,
+      "out_dim": 4,
+      "n_edges": 64,
+      "edge_time_us": 36.7,
+      "layer_edge_total_us": 2348.8,
+      "matmul_total_us": 460.0,
+      "layer_total_us": 2838.8,
+      "edge_ops": {
+        "real_sub": 3,
+        "real_div": 1,
+        "real_mul": 1,
+        "real_add": 1,
+        "array_access": 4,
+        "cmp": 4,
+        "loop_iters": 4
+      },
+      "matmul_ops": {
+        "mul": 64,
+        "add": 60,
+        "array_reads": 64
+      }
+    }
+  ],
+  "safety_monitor_overhead_us": 66
+}

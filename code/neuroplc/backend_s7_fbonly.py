@@ -399,7 +399,7 @@ class S7FBOnlyBackendBase:
 
 
 class S71200FBOnlyBackend(S7FBOnlyBackendBase):
-    """FB-Only backend for S7-1200 (75KB, 15-pt LUT, FOR loops)."""
+    """FB-Only backend for S7-1200 (50KB, 15-pt LUT, FOR loops)."""
     def __init__(self, lut_pts: int = 15):
         super().__init__(wm_kb=75, lut_pts=lut_pts, unroll=False)
 

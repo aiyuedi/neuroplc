@@ -1,0 +1,36 @@
+{
+  "experiment": "E61",
+  "architecture": "WaveletKAN",
+  "arch": [
+    28,
+    16,
+    4
+  ],
+  "n_scales": 8,
+  "n_params": 4628,
+  "n_edges": 512,
+  "test_accuracy": 1.0,
+  "h_lut": 0.42857142857142855,
+  "N_lut": 15,
+  "deployment_margin": 0.182,
+  "n_verified": 512,
+  "n_total": 512,
+  "verification_rate": 1.0,
+  "mexican_hat_M2_sup": 2.602,
+  "M2_stats": {
+    "mean": 0.4581019124452723,
+    "p50": 0.4201435446739197,
+    "p95": 0.8792656004428863,
+    "max": 1.4185435771942139
+  },
+  "M2h2_stats": {
+    "mean": 0.010517646045400397,
+    "p50": 0.009646153077483177,
+    "p95": 0.02018722044304013,
+    "max": 0.03256860375404358
+  },
+  "svnn_conditions": {
+    "condition_1": "PASS (operation-type closure: wavelet basis is element-wise)",
+    "condition_2": "PASS (M2 from wavelet params = computable, sup|psi''| = 2.602)"
+  }
+}

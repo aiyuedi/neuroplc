@@ -1,9 +1,9 @@
 # LightChuan Target Contract
 
 - root: `D:\neuroplc-paper`
-- main: `paper/main.tex`
+- main: `paper/main_cn.tex`
 - documentclass: `IEEEtran`
-- recommended_engine: `pdflatex`
+- recommended_engine: `xelatex`
 - venue_hints: (none)
 
 ## Template Files

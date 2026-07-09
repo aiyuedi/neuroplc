@@ -1,0 +1,243 @@
+{
+  "affine_exactness": {
+    "degree": 1,
+    "n_trials": 1000,
+    "exact_count": 1000,
+    "near_exact_count": 1000,
+    "max_overestimation": 3.0531133177191805e-16,
+    "mean_overestimation": 1.592096680186339e-17,
+    "all_exact": true
+  },
+  "scaling_law": {
+    "degree": 3,
+    "n_trials": 100,
+    "da_exponent_mean": 2.1847490353637578,
+    "da_exponent_std": 0.19581843232015744,
+    "ia_exponent_mean": 2.10648973792007,
+    "ia_exponent_std": 0.2270353519309481
+  },
+  "full_comparison": {
+    "1": {
+      "by_radius": {
+        "0.1": {
+          "input_radius_fraction": 0.1,
+          "n_valid": 0,
+          "n_degenerate": 500,
+          "da_mean_overest": 0.0,
+          "da_median_overest": 0.0,
+          "ia_mean_overest": 0.0,
+          "ia_median_overest": 0.0,
+          "da_ia_ratio_mean": 0.0,
+          "da_ia_ratio_median": 0.0,
+          "da_relative_mean": 4.472777367352629e-16,
+          "ia_relative_mean": 0.0,
+          "da_higher_frac_mean": 0.0
+        },
+        "0.2": {
+          "input_radius_fraction": 0.2,
+          "n_valid": 0,
+          "n_degenerate": 500,
+          "da_mean_overest": 0.0,
+          "da_median_overest": 0.0,
+          "ia_mean_overest": 0.0,
+          "ia_median_overest": 0.0,
+          "da_ia_ratio_mean": 0.0,
+          "da_ia_ratio_median": 0.0,
+          "da_relative_mean": 3.075530444607252e-16,
+          "ia_relative_mean": 0.0,
+          "da_higher_frac_mean": 0.0
+        },
+        "0.3": {
+          "input_radius_fraction": 0.3,
+          "n_valid": 0,
+          "n_degenerate": 500,
+          "da_mean_overest": 0.0,
+          "da_median_overest": 0.0,
+          "ia_mean_overest": 0.0,
+          "ia_median_overest": 0.0,
+          "da_ia_ratio_mean": 0.0,
+          "da_ia_ratio_median": 0.0,
+          "da_relative_mean": 1.0821278254012114e-16,
+          "ia_relative_mean": 0.0,
+          "da_higher_frac_mean": 0.0
+        },
+        "0.4": {
+          "input_radius_fraction": 0.4,
+          "n_valid": 0,
+          "n_degenerate": 500,
+          "da_mean_overest": 0.0,
+          "da_median_overest": 0.0,
+          "ia_mean_overest": 0.0,
+          "ia_median_overest": 0.0,
+          "da_ia_ratio_mean": 0.0,
+          "da_ia_ratio_median": 0.0,
+          "da_relative_mean": 1.464761515726339e-16,
+          "ia_relative_mean": 0.0,
+          "da_higher_frac_mean": 0.0
+        },
+        "0.5": {
+          "input_radius_fraction": 0.5,
+          "n_valid": 0,
+          "n_degenerate": 500,
+          "da_mean_overest": 0.0,
+          "da_median_overest": 0.0,
+          "ia_mean_overest": 0.0,
+          "ia_median_overest": 0.0,
+          "da_ia_ratio_mean": 0.0,
+          "da_ia_ratio_median": 0.0,
+          "da_relative_mean": 4.5545511333202943e-17,
+          "ia_relative_mean": 0.0,
+          "da_higher_frac_mean": 0.0
+        }
+      }
+    },
+    "2": {
+      "by_radius": {
+        "0.1": {
+          "input_radius_fraction": 0.1,
+          "n_valid": 250,
+          "n_degenerate": 250,
+          "da_mean_overest": 0.009007290563926148,
+          "da_median_overest": 0.007610735558511571,
+          "ia_mean_overest": 0.07781461486084913,
+          "ia_median_overest": 0.06897449878254447,
+          "da_ia_ratio_mean": 0.37177469702311633,
+          "da_ia_ratio_median": 0.08168611443922671,
+          "da_relative_mean": 0.13897778407767242,
+          "ia_relative_mean": 1.7934370363130643,
+          "da_higher_frac_mean": 0.11367024775740603
+        },
+        "0.2": {
+          "input_radius_fraction": 0.2,
+          "n_valid": 250,
+          "n_degenerate": 250,
+          "da_mean_overest": 0.03544630919394098,
+          "da_median_overest": 0.029322392876583683,
+          "ia_mean_overest": 0.15478182867724952,
+          "ia_median_overest": 0.137948997565089,
+          "da_ia_ratio_mean": 0.7417484347213223,
+          "da_ia_ratio_median": 0.16328562726977103,
+          "da_relative_mean": 0.23974171861778198,
+          "ia_relative_mean": 1.4098297768847587,
+          "da_higher_frac_mean": 0.1862397390537969
+        },
+        "0.3": {
+          "input_radius_fraction": 0.3,
+          "n_valid": 250,
+          "n_degenerate": 250,
+          "da_mean_overest": 0.07824502014141126,
+          "da_median_overest": 0.061570164285070283,
+          "ia_mean_overest": 0.22982960570056804,
+          "ia_median_overest": 0.2069234963476335,
+          "da_ia_ratio_mean": 1.109626964531903,
+          "da_ia_ratio_median": 0.23330126622709166,
+          "da_relative_mean": 0.3249826612245386,
+          "ia_relative_mean": 1.1867230413385075,
+          "da_higher_frac_mean": 0.24310047201189014
+        },
+        "0.4": {
+          "input_radius_fraction": 0.4,
+          "n_valid": 250,
+          "n_degenerate": 250,
+          "da_mean_overest": 0.1358498693527463,
+          "da_median_overest": 0.10664399828183031,
+          "ia_mean_overest": 0.3014043918772137,
+          "ia_median_overest": 0.27435955526219535,
+          "da_ia_ratio_mean": 1.4753551786141683,
+          "da_ia_ratio_median": 0.2962195241713115,
+          "da_relative_mean": 0.39867790835030503,
+          "ia_relative_mean": 1.0261604379251354,
+          "da_higher_frac_mean": 0.2900363781153142
+        },
+        "0.5": {
+          "input_radius_fraction": 0.5,
+          "n_valid": 250,
+          "n_degenerate": 250,
+          "da_mean_overest": 0.20619550585994983,
+          "da_median_overest": 0.1606964483695884,
+          "ia_mean_overest": 0.36744083623919044,
+          "ia_median_overest": 0.3344217324098641,
+          "da_ia_ratio_mean": 1.845230185082184,
+          "da_ia_ratio_median": 0.3594042462890813,
+          "da_relative_mean": 0.4627627701919887,
+          "ia_relative_mean": 0.8997193346850061,
+          "da_higher_frac_mean": 0.32992073479406075
+        }
+      }
+    },
+    "3": {
+      "by_radius": {
+        "0.1": {
+          "input_radius_fraction": 0.1,
+          "n_valid": 414,
+          "n_degenerate": 86,
+          "da_mean_overest": 0.030941537789469026,
+          "da_median_overest": 0.02619410758708071,
+          "ia_mean_overest": 0.16781921899215888,
+          "ia_median_overest": 0.151592838781625,
+          "da_ia_ratio_mean": 3.330732037420802,
+          "da_ia_ratio_median": 0.15623356794745125,
+          "da_relative_mean": 0.3004200126904038,
+          "ia_relative_mean": 2.8572237914028773,
+          "da_higher_frac_mean": 0.21834036310535468
+        },
+        "0.2": {
+          "input_radius_fraction": 0.2,
+          "n_valid": 414,
+          "n_degenerate": 86,
+          "da_mean_overest": 0.13867655828955885,
+          "da_median_overest": 0.12185725451802228,
+          "ia_mean_overest": 0.33660175675163134,
+          "ia_median_overest": 0.3087774744610705,
+          "da_ia_ratio_mean": 7.300881190964736,
+          "da_ia_ratio_median": 0.34391153322519163,
+          "da_relative_mean": 0.5744192754435142,
+          "ia_relative_mean": 2.2464423248937146,
+          "da_higher_frac_mean": 0.3603907385359005
+        },
+        "0.3": {
+          "input_radius_fraction": 0.3,
+          "n_valid": 414,
+          "n_degenerate": 86,
+          "da_mean_overest": 0.3454494793702435,
+          "da_median_overest": 0.30853667246382144,
+          "ia_mean_overest": 0.5072221576116801,
+          "ia_median_overest": 0.4619725027851624,
+          "da_ia_ratio_mean": 11.902784684054287,
+          "da_ia_ratio_median": 0.5597835822980757,
+          "da_relative_mean": 0.8519676196056474,
+          "ia_relative_mean": 1.9222523991893838,
+          "da_higher_frac_mean": 0.4677811171719786
+        },
+        "0.4": {
+          "input_radius_fraction": 0.4,
+          "n_valid": 414,
+          "n_degenerate": 86,
+          "da_mean_overest": 0.6743469582042235,
+          "da_median_overest": 0.6066791216280523,
+          "ia_mean_overest": 0.6813972052082924,
+          "ia_median_overest": 0.6233720132153865,
+          "da_ia_ratio_mean": 17.135768177054423,
+          "da_ia_ratio_median": 0.8107823505508339,
+          "da_relative_mean": 1.1441712748599784,
+          "ia_relative_mean": 1.7497056381582952,
+          "da_higher_frac_mean": 0.5509680761187717
+        },
+        "0.5": {
+          "input_radius_fraction": 0.5,
+          "n_valid": 414,
+          "n_degenerate": 86,
+          "da_mean_overest": 1.148230517542095,
+          "da_median_overest": 1.012166314447657,
+          "ia_mean_overest": 0.8606185487553539,
+          "ia_median_overest": 0.7916692440666329,
+          "da_ia_ratio_mean": 23.024107871069486,
+          "da_ia_ratio_median": 1.1023644087966482,
+          "da_relative_mean": 1.4358737329239912,
+          "ia_relative_mean": 1.6361526932261072,
+          "da_higher_frac_mean": 0.616424240794533
+        }
+      }
+    }
+  }
+}

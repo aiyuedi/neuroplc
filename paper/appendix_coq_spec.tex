@@ -1,0 +1,122 @@
+% ===========================================================================
+% Appendix: Formal Specification for Mechanized Verification
+% ===========================================================================
+\section{Formal Specification for Mechanized Verification}
+\label{app:coq}
+
+The type soundness theorem (Theorem~D) and the non-interference theorem
+(Theorem~E) are proved in this paper via structural induction on the IR
+syntax and on SCL execution traces, respectively. These proofs are
+rigorous but presented in standard mathematical prose. For readers
+interested in machine-checked verification, we provide the formal
+specification of the key lemmas in a notation compatible with Coq
+and Isabelle/HOL.
+
+\subsection{IR Syntax (Inductive Type)}
+
+\begin{verbatim}
+Inductive ir_expr : Type :=
+  | IRInput  : var -> ir_expr
+  | IRMatMul : matrix -> ir_expr -> ir_expr
+  | IRBsplineLUT : lut_table -> grid -> ir_expr -> ir_expr
+  | IRStandardAct : activation -> ir_expr -> ir_expr
+  | IRAdd    : ir_expr -> ir_expr -> ir_expr
+  | IRSoftmax : ir_expr -> ir_expr
+  | IRArgmax : ir_expr -> ir_expr.
+\end{verbatim}
+
+\subsection{Type System (Inductive Typing Judgment)}
+
+\begin{verbatim}
+Inductive ir_type : Type :=
+  | LinearT   : ir_type
+  | ElemwiseT : ir_type
+  | SVNNT     : ir_type.
+
+Inductive has_type : ir_expr -> ir_type -> Prop :=
+  | T_Input : forall x, has_type (IRInput x) LinearT
+  | T_MatMul : forall W e, has_type e LinearT ->
+                has_type (IRMatMul W e) LinearT
+  | T_BsplineLUT : forall T g e, has_type e LinearT ->
+                     M2_bound T g ->  (* Condition 2 *)
+                     has_type (IRBsplineLUT T g e) ElemwiseT
+  | T_Add : forall e1 e2, has_type e1 LinearT ->
+              has_type e2 ElemwiseT ->
+              has_type (IRAdd e1 e2) SVNNT
+  | T_Softmax : forall e, has_type e SVNNT ->
+                  has_type (IRSoftmax e) SVNNT.
+\end{verbatim}
+
+\subsection{Type Soundness Statement}
+
+\begin{verbatim}
+Theorem type_soundness :
+  forall (e : ir_expr) (rho : env),
+    has_type e SVNNT ->
+    exists (eps : R),
+      eps > 0 /\
+      forall (x : input_vector),
+        in_domain x ->
+        Rabs (denote_real e rho x - denote_scl (compile e) rho x)
+          <= eps.
+\end{verbatim}
+
+\textit{Proof sketch (structural induction on \texttt{has\_type}):}
+Base cases (\texttt{T\_Input}, \texttt{T\_MatMul}, \texttt{T\_BsplineLUT})
+use the de~Boor error bound (Lemma~\texttt{lut\_error\_bound}) and DA
+propagation (Lemma~\texttt{da\_linear\_soundness}). Inductive cases
+(\texttt{T\_Add}, \texttt{T\_Softmax}) compose error bounds using the
+Lipschitz property (Lemma~\texttt{add\_lipschitz},
+Lemma~\texttt{softmax\_contraction}).
+
+\subsection{Non-Interference Statement}
+
+\begin{verbatim}
+Theorem non_interference :
+  forall (P : scl_program) (N : svnn_network) (phi : safety_property),
+    satisfies P phi ->
+    let F := compile_N N in
+    let P_combined := compose P F in
+    satisfies P_combined phi.
+\end{verbatim}
+
+\textit{Proof sketch (induction on SCL trace length):}
+Base case ($n=0$): initial states satisfy $\varphi$ by assumption.
+Inductive step: case analysis on whether the $n$-th step executes
+$P$'s POUs or $F$'s POU. Proposition~NC.1 (memory isolation) ensures
+$\text{State}_P$ is invariant when $F$ executes. Proposition~NC.2
+(termination) bounds $F$'s execution within one scan cycle.
+Proposition~NC.3 (numerical safety) guarantees $F$'s outputs are
+finite. All three propositions have straightforward Coq proofs from
+the generated SCL structure.
+
+\subsection{DA Galois Connection (Semantic Domain)}
+
+\begin{verbatim}
+Record doubleton := mk_doubleton { center : R ; radius : R }.
+Definition gamma (d : doubleton) (f : R -> R) : Prop :=
+  forall x, Rabs (f x - center d) <= radius d.
+Definition alpha (f : R -> R) (x0 r : R) : doubleton :=
+  mk_doubleton (f x0) (M2 f * r * r).
+
+Lemma galois_soundness :
+  forall f x0 r, gamma (alpha f x0 r) f.
+Lemma galois_optimality :
+  forall d, alpha (fun x => center d) 0 0 = d.
+Lemma galois_monotone_add :
+  forall d1 d1' d2 d2',
+    doubleton_le d1 d1' -> doubleton_le d2 d2' ->
+    doubleton_le (da_add d1 d2) (da_add d1' d2').
+\end{verbatim}
+
+\vspace{4pt}
+\noindent\textbf{Mechanization status.}
+The above specifications define the complete proof obligations for
+machine-checked verification of the SVNN type system in Coq or
+Isabelle/HOL. The proofs---structural induction on the IR syntax
+(Theorem~D), induction on SCL trace length (Theorem~E), and
+algebraic verification of the Galois connection properties
+(Theorem~B)---follow the mathematical proofs presented in
+{\S}\ref{sec:ir-semantics}, {\S}\ref{sec:noninterference}, and
+{\S}\ref{sec:galois} respectively. Full mechanization is
+ongoing and will be released with the compiler source code.

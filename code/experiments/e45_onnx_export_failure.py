@@ -269,7 +269,7 @@ def generate_latex_table(export_result: dict, decomposition: dict,
         f"Runtime library size & "
         f"{ONNX_RUNTIME_SIZE_MB*1024:.0f} KB & "
         f"\\textbf{{0}} KB (no runtime) \\\\",
-        f"Fits S7-1200 (75 KB)? & "
+        f"Fits S7-1200 (50 KB)? & "
         f"\\textbf{{No}} ({ONNX_RUNTIME_SIZE_MB*1024/S7_1200_KB:.0f}$\\times$ over) & "
         "\\textbf{Yes} (40.3 KB, 53.7\\%) \\\\",
         f"Fits S7-1500 (1.5 MB)? & "

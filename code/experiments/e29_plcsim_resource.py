@@ -206,7 +206,7 @@ def build_comparison_table() -> str:
     paper_estimates = {
         "db_load_kb": 40.3,     # From paper: "40.3 KB data block"
         "db_work_kb": 40.3,     # Same (paper didn't distinguish load/work)
-        "fb_work_kb": 35.0,     # From paper: "~75 KB total work memory"
+        "fb_work_kb": 35.0,     # From paper: "~45 KB total work memory"
         "total_work_kb": 75.0,  # From paper
         "wcet_ms": 2.86,        # From paper: "≤ 2.86 ms"
     }

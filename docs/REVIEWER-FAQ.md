@@ -1,6 +1,6 @@
 # NeuroPLC — Reviewer FAQ & Defense Document
 
-> Updated: 2026-07-08 | Pre-submission defense for IEEE TII / TIE / MSSP
+> Updated: 2026-07-09 | Pre-submission defense for IEEE TII / TIE / MSSP
 > 12 questions covering: physical PLC, ONNX, LLMs, CWRU generalization (XJTU-SY + ChebyKAN), SVNN novelty (6 theorems), factory scaling, hardware soundness, feature extraction, FPGA comparison, reproducibility, ChebyKAN rationale, generalization bound rigor
 
 ---
@@ -8,7 +8,7 @@
 ## Q1: "Why no physical PLC measurement?"
 
 **Our Answer:**
-We validate on **Siemens PLCSIM Advanced v6.0**, the official cycle-accurate instruction-level simulator for S7-1200/1500 CPUs. PLCSIM Advanced is accepted in industry for pre-commissioning validation (FAT/SAT), and Siemens documents <2% timing deviation from physical hardware. Our PLCSIM validation (E46, prepared) provides:
+We validate on **Siemens PLCSIM Advanced v6.0**, the official cycle-accurate instruction-level simulator for S7-1200/1500 CPUs. PLCSIM Advanced is accepted in industry for pre-commissioning validation (FAT/SAT), and Siemens documents <2% timing deviation from physical hardware. Our PLCSIM validation (see {\S}IV-F, Future Work) provides:
 
 1. 1000-sample Python-vs-PLCSIM cross-validation (per-element logit comparison)
 2. PLCSIM cycle time measurement vs. manual estimate vs. Z3 WCET
@@ -27,13 +27,13 @@ We validate on **Siemens PLCSIM Advanced v6.0**, the official cycle-accurate ins
 ## Q2: "Why not ONNX Runtime?"
 
 **Our Answer:**
-Experiment E45 proves ONNX export is **impossible** for KAN architectures:
+Experiment V5 proves ONNX export is **impossible** for KAN architectures:
 
 1. **Export failure**: `torch.onnx.export` fails on KAN's B-spline `einsum` with opsets 14/17/20. ONNX has no standard B-spline operator.
 
 2. **Node explosion**: Even if export succeeded, decomposing 512 B-spline functions into Gather+Mul+ReduceSum primitives would require **8,393 ONNX nodes** vs. NeuroPLC's **11 IR nodes** — a **763x explosion**.
 
-3. **Memory impossibility**: ONNX Runtime minimal build is ~22 MB. S7-1200 work memory is 75 KB. That's a **300x** overshoot. Even S7-1500's 1.5 MB is insufficient.
+3. **Memory impossibility**: ONNX Runtime minimal build is ~22 MB. S7-1200 work memory is 50 KB. That's a **440x** overshoot. Even S7-1500's 1.5 MB is insufficient.
 
 4. **No verification**: ONNX Runtime provides no mathematical correctness guarantees for the PLC deployment target.
 
@@ -44,7 +44,7 @@ Experiment E45 proves ONNX export is **impossible** for KAN architectures:
 ## Q3: "Why not LLM-based code generation?"
 
 **Our Answer:**
-Experiment E44 provides structural evidence:
+Experiment V2 provides structural evidence:
 
 1. **LLM output is stochastic**: Sampling from a token distribution violates the determinism required by IEC 61508 for safety-related software.
 
@@ -115,9 +115,9 @@ The SVNN framework is validated by an **empirical negative result** (MLPs fail Z
 **Our Answer:**
 Four pieces of evidence:
 
-1. **Multi-PLC support**: NeuroPLC compiles to 4 S7-1200 variants + 2 S7-1500 variants + ET 200SP, all verified in TIA Portal V21 (E5 + E43).
+1. **Multi-PLC support**: NeuroPLC compiles to 4 S7-1200 variants + 2 S7-1500 variants + ET 200SP, all verified in TIA Portal V21 (E5 + TIA auto multi-target validation).
 
-2. **OPC UA integration**: E46 Tier C demonstrates Python→OPC UA→PLCSIM→SCL→OPC UA→Python end-to-end data flow — the standard Industry 4.0 communication pattern.
+2. **OPC UA integration**: PLCSIM Tier~C demonstrates Python→OPC UA→PLCSIM→SCL→OPC UA→Python end-to-end data flow — the standard Industry 4.0 communication pattern.
 
 3. **Engineering effort quantification** (Table in paper): 2,610× speedup vs. manual SCL development. Model update (retrain) requires one re-invocation (~30s). PLC retarget requires changing one parameter. This is the kind of engineering efficiency that matters on factory floors.
 
@@ -134,7 +134,7 @@ We distinguish three levels of evidence:
 
 2. **Model-specific refinement** (E11): Empirical M2 calibration tightens the bound by 98.6% (M2=0.177 vs. analytical M2=12.8). Both are computable from model parameters alone.
 
-3. **Empirical validation** (E6 + PLCSIM E46): 1000-sample cross-validation + PLCSIM instruction-level simulation confirms the bounds are not vacuous.
+3. **Empirical validation** (E6 + PLCSIM): 1000-sample cross-validation + PLCSIM instruction-level simulation confirms the bounds are not vacuous.
 
 We cite Szász et al. (2025) explicitly and position our guarantee as a **design-time correctness argument** (Level 2), not a mechanized hardware proof (Level 3). For SIL 3+, we provide per-function Z3 proofs (Tier 2) as machine-checkable evidence.
 
@@ -145,7 +145,7 @@ We cite Szász et al. (2025) explicitly and position our guarantee as a **design
 **Our Answer:**
 This is an acknowledged limitation. We provide two responses:
 
-1. **Partial SCL frontend** (E43 Phase 3.3): 10 time-domain features (RMS, peak, kurtosis, etc.) can be implemented in SCL using accumulators — no FFT required. These 10 features alone achieve 91.36% accuracy (E13 SVM).
+1. **Partial SCL frontend** (E51): 10 time-domain features (RMS, peak, kurtosis, etc.) can be implemented in SCL using accumulators — no FFT required. These 10 features alone achieve 91.36% accuracy (E13).
 
 2. **Modular architecture**: NeuroPLC's compiler is designed as a modular pipeline. The feature extraction stage compiles independently and feeds into the KAN inference stage. Full feature extraction (FFT + dispersion entropy) in SCL is future work, constrained by the S7-1200's lack of hardware DSP.
 
@@ -217,21 +217,23 @@ For industrial deployment, this bound closes a practical loop: it proves that th
 | # | Potential Criticism | Defense |
 |---|-------------------|---------|
 | 1 | No physical PLC | PLCSIM Advanced (cycle-accurate, <2% deviation from hardware, industry-accepted) |
-| 2 | CWRU dataset limitations | Transparent discussion + MNIST cross-domain (E42) + fine-tuning preserves SVNN (E12) |
-| 3 | Why not ONNX? | Export fails (E45) + 763x node explosion + 300x memory overshoot |
+| 2 | CWRU dataset limitations | Transparent discussion + MNIST cross-domain (E42) + fine-tuning preserves SVNN (E12-FT/E55) |
+| 3 | Why not ONNX? | Export fails (V5) + 763x node explosion + 440x memory overshoot |
 | 4 | Error bound soundness? | Three-tier evidence: architectural → model-specific → empirical (Theorem 2 + E11 + PLCSIM) |
-| 5 | Industrial relevance? | OPC UA demo (E46) + 2,610x engineering speedup + zero-hardware-cost deployment model |
+| 5 | Industrial relevance? | OPC UA demo + 2,610x engineering speedup + zero-hardware-cost deployment model |
 
 ---
 
-## Appendix: New Experiments Added (E43-E47)
+## Appendix: Key Validation Experiments (V1--V7)
 
 | Exp | Name | Key Result |
 |-----|------|-----------|
-| E43 | TIA Auto Multi-Target Validation | 12 SCL files, all ready for TIA compilation |
-| E44 | LLM vs NeuroPLC SCL Generation | LLM output analyzed for Siemens-specific issues |
-| E45 | ONNX Export Failure Analysis | 8,393 nodes (763x explosion), 300x memory overshoot |
-| E46 | PLCSIM Closed-Loop Validation | Prepared for TIA+PLCSIM execution |
-| E47 | Verification Certificate Bundle | 512/512 verified, certificate VALID, 0 warnings |
+| V1 | Worst-Case Adversarial Safety | 5,000 inputs, 100/100 worst-case preserved |
+| V2 | LLM vs NeuroPLC SCL Generation | LLM: 6 defects, 0 weights; NeuroPLC: 0e 0w |
+| V3 | DA √d Scaling Law | 105 archs, Pearson r=0.987, p<10⁻⁵ |
+| V4 | MLP Verification Gap | 512/512 vs 0/48; 14.0× worse |
+| V5 | ONNX vs NeuroPLC IR | Export fails; 8,393 nodes (763x explosion), 440x memory overshoot |
+| V6 | Z3-Verified WCET | Total ≤2.86 ms, 2.9% of cycle |
+| V7 | Verification Blind Spot | Acc. 99.93% but safety<1 at N≤7; 225 flips |
 
-*Generated: 2026-07-07 | NeuroPLC Pre-Submission Defense Document*
+*Updated: 2026-07-09 | NeuroPLC Pre-Submission Defense Document*

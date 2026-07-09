@@ -6,7 +6,7 @@ Generates compact, array-based SCL code for Siemens S7 PLCs.
 
 Architecture:
     S7BackendBase          — shared logic: IR traversal, array-based SCL
-      ├── S71200Backend    — compact mode (FOR loops, small LUT, 75KB budget)
+      ├── S71200Backend    — compact mode (FOR loops, small LUT, 50KB budget)
       └── S71500Backend    — performance mode (unrolled, large LUT, 1.5MB)
 
 Generated files:

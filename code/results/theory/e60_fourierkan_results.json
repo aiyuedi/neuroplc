@@ -1,0 +1,36 @@
+{
+  "experiment": "E60",
+  "architecture": "FourierKAN",
+  "arch": [
+    28,
+    16,
+    4
+  ],
+  "n_harmonics": 6,
+  "omega": 0.4,
+  "n_params": 6676,
+  "n_edges": 512,
+  "test_accuracy": 1.0,
+  "h_lut": 0.42857142857142855,
+  "N_lut": 15,
+  "deployment_margin": 0.182,
+  "n_verified": 512,
+  "n_total": 512,
+  "verification_rate": 1.0,
+  "M2_stats": {
+    "mean": 0.955248263780959,
+    "p50": 0.8663271367549896,
+    "p95": 1.7816272437572478,
+    "max": 2.7239983081817627
+  },
+  "M2h2_stats": {
+    "mean": 0.021931720543761912,
+    "p50": 0.019890164025127888,
+    "p95": 0.04090470802038908,
+    "max": 0.06254077702760696
+  },
+  "svnn_conditions": {
+    "condition_1": "PASS (operation-type closure: Fourier basis is element-wise)",
+    "condition_2": "PASS (M2 = w^2 * sum k^2*(|c|+|d|) = computable)"
+  }
+}

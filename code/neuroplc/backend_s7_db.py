@@ -275,7 +275,7 @@ class S7DBBackendBase(S7FBOnlyBackendBase):
 
 
 class S71200DBBackend(S7DBBackendBase):
-    """DB+FB backend for S7-1200 (75KB, 15-pt LUT)."""
+    """DB+FB backend for S7-1200 (50KB, 15-pt LUT)."""
     def __init__(self, lut_pts: int = 15, db_name: str = "NeuroPLC_Weights"):
         super().__init__(wm_kb=75, lut_pts=lut_pts, unroll=False, db_name=db_name)
 

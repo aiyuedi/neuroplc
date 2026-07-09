@@ -184,7 +184,7 @@ def fig2_compiler_arch():
     _draw_box(ax, (3.0, 5.5), 2.4, 2.8,
               "IR GRAPH\n\n6 Operation Types\nMatMul  BsplineLUT\nStandardAct  Softmax\nArgmax  Add", TEAL)
     _draw_box(ax, (5.8, 5.5), 2.4, 2.8,
-              "BACKENDS\n\nS7-1200 (75 KB)\nCompact FOR-loop\n15-pt LUT\n\nS7-1500 (1.5 MB)\nUnrolled · 50-pt LUT", AMBER)
+              "BACKENDS\n\nS7-1200 (50 KB)\nCompact FOR-loop\n15-pt LUT\n\nS7-1500 (1.5 MB)\nUnrolled · 50-pt LUT", AMBER)
 
     # --- optimizer + analyzer below ---
     _draw_box(ax, (0.8, 1.2), 3.2, 1.8,

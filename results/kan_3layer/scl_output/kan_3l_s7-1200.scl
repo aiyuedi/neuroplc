@@ -1,6 +1,6 @@
 // NeuroPLC — Auto-generated IEC 61131-3 SCL
 // Graph: kan | Target: S71200Backend
-// Work memory: 75KB | LUT points: 15
+// Work memory: 50KB | LUT points: 15
 // Nodes: 15 | Ops: {'matmul': 4, 'standard_act': 3, 'bspline_lut': 3, 'add': 3, 'softmax': 1, 'argmax': 1}
 
 

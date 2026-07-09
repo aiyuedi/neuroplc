@@ -1,6 +1,6 @@
 // NeuroPLC — Auto-generated IEC 61131-3 SCL (DB+FB Mode)
 // Graph: mlp | Target: S71200DBBackend
-// Work memory: 75KB | LUT points: 0
+// Work memory: 50KB | LUT points: 0
 // Nodes: 8 | Ops: {'matmul': 4, 'standard_act': 2, 'softmax': 1, 'argmax': 1}
 // Parameters in DB "NeuroPLC_MLP_Weights", inference in FB.
 

@@ -167,7 +167,7 @@ requirement in two ways:
           $T_n(y)$ are expressible as explicit polynomials in $y$ (e.g.,
           $T_2(y) = 2y^2 - 1$, $T_3(y) = 4y^3 - 3y$). Z3's Nonlinear
           Real Arithmetic (NRA) theory handles polynomial equalities and
-          inequalities natively~\cite{z3prover}, making each segment's
+          inequalities natively~\cite{de2008z3}, making each segment's
           verification a polynomial feasibility query.
 
     \item \textbf{Tanh preprocessing is standard.} The tanh bound mapping
@@ -281,7 +281,7 @@ family. $\square$
 The proof technique of Proposition~\ref{prop:chebykan-svnn}---verifying
 Condition~1 via explicit decomposition and Condition~2 via analytical
 derivative bounds---extends naturally to other orthogonal polynomial and
-wavelet bases. Wavelet-KAN~\cite{bozorgasl2024waveletkan}, which uses
+wavelet bases. Wavelet-KAN~\cite{bozorgasl2024chebykan}, which uses
 Daubechies or Haar wavelet basis functions, satisfies Condition~1 by the
 same decomposition argument (element-wise wavelet evaluation + linear
 combination). Condition~2 holds if the wavelet basis is

@@ -255,11 +255,27 @@ architecture for the SVNN framework:
           \textit{Sufficiency}---Conditions~1--2 guarantee design-time
           correctness for any SVNN architecture.
     \item \textbf{Theorem~3} ({\S}\ref{sec:method}):
-          \textit{DA minimax optimality}---the Doubleton Arithmetic bound is
-          information-theoretically optimal for sign-structured weight matrices.
+          \textit{Greedy LUT allocation optimality}---the max-heap algorithm is
+          minimax-optimal via exchange argument.
     \item \textbf{Theorem~4} ({\S}\ref{sec:method}):
-          \textit{$L$-layer depth-uniform bound}---under Condition~3, the
-          error bound is depth-uniform: $O(L \cdot M_{\max} \cdot h^2 \cdot d_{\max})$.
+          \textit{Probabilistic depth-scaling}---under the random-sign model,
+          error grows only linearly with depth (martingale concentration).
+    \item \textbf{Theorem~7} ({\S}\ref{sec:z3-verifiability}):
+          \textit{Z3 NRA verifiability}---per-function Z3 queries are guaranteed
+          UNSAT when $M_2 \cdot h^2 / 8 \leq C(3)$ (de~Boor guarantee).
+    \item \textbf{Theorem~8} ({\S}\ref{sec:svnn-conditions}):
+          \textit{SVNN Compositional Closure}---the SVNN class forms an algebraic
+          monoid, enabling modular certification.
+    \item \textbf{Theorem~9} ({\S}\ref{sec:da-segment-exactness}):
+          \textit{DA Optimality}---DA is the tightest-possible sound first-order
+          abstract domain for $C^2$ univariate functions.
+    \item \textbf{Theorem~10} ({\S}\ref{sec:wcet}):
+          \textit{WCET Guarantee}---parameterized worst-case execution time bound
+          of $22.67$~ms for KAN $[28,16,4]$ on S7-1200.
+    \item \textbf{Theorem~A--E} ({\S}\ref{sec:characterization}--{\S}\ref{sec:noninterference}):
+          Five king-level theorems---Compilable Frontier Characterization (A),
+          DA Galois Connection (B), DA Tightness (C), IR Type Soundness (D),
+          and Non-Interference (E)---completing the theoretical framework.
     \item \textbf{Theorem~5} ({\S}\ref{sec:svnn-necessity}):
           \textit{Computational necessity}---violating Condition~1 makes
           tight bound computation NP-hard, justifying why the conditions
@@ -273,7 +289,29 @@ architecture for the SVNN framework:
     \item \textbf{Proposition~1} ({\S}\ref{sec:svnn-mlp}): Standard MLPs
           \textit{do not} satisfy the SVNN tight-bound structure.
     \item \textbf{Proposition~2} ({\S}\ref{sec:svnn-chebykan}): ChebyKAN
-          \textit{does} satisfy SVNN Conditions~1--2, with Z3 verifiability 496/512.
+          \textit{does} satisfy SVNN Conditions~1--2, 496/512 Z3-verifiable.
+    \item \textbf{Proposition~9} ({\S}\ref{sec:c2bv-family}): Operation
+          Separation Principle---the $C^2$-BV family (B-spline, Fourier,
+          Wavelet, RBF, Chebyshev) is universally SVNN-compliant.
+    \item \textbf{Propositions~3--8}: DA Segment-Exactness, ChebyKAN SVNN,
+          Fine-Tuning Stability, IR Minimality, Compiler Complexity,
+          and Optimization Pass Soundness (see respective sections).
+\end{itemize}
+\vspace{4pt}
+\noindent\textbf{King-Level Theorems A--E} (abstract interpretation + formal methods):
+\begin{itemize}
+    \item \textbf{Theorem~A} ({\S}\ref{sec:characterization}): Compilable
+          Frontier Characterization---SVNN Conditions~1--2 are necessary
+          and sufficient for dimension-optimal affine certification.
+    \item \textbf{Theorem~B} ({\S}\ref{sec:galois}): DA Galois Connection---
+          DA is a canonical instance of Cousot abstract interpretation.
+    \item \textbf{Theorem~C} ({\S}\ref{sec:tightness}): DA Tightness---the
+          $M_2 \cdot h^2 / 8$ bound is semantically attained.
+    \item \textbf{Theorem~D} ({\S}\ref{sec:ir-semantics}): IR Type Soundness---
+          compiler correctness as a type-theoretic result.
+    \item \textbf{Theorem~E} ({\S}\ref{sec:noninterference}): SVNN
+          Non-Interference---first formal proof of safe neural inference
+          insertion in certified PLC programs.
 \end{itemize}
 Together, these theorems characterize the SVNN framework across four
 dimensions: \textit{what} correctness guarantee is achievable (T1, T3, T4),

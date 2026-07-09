@@ -1,0 +1,213 @@
+% ===========================================================================
+% Formal Semantics of the NeuroPLC Intermediate Representation
+% ===========================================================================
+\subsection{Formal Semantics of the NeuroPLC IR}
+\label{sec:ir-semantics}
+
+The NeuroPLC IR is not merely a compiler data structure---it is a
+\textbf{formal language} with a defined syntax, operational semantics,
+and type system. This formalization serves two purposes:
+(1)~it makes Theorem~\ref{thm:compiler} (compiler correctness)
+precise as a \textbf{type soundness} theorem in the style of programming
+language theory~\cite{milner1978theory,pierce2002types}; and
+(2)~it establishes that the SVNN conditions
+(Definition~\ref{def:svnn}, Theorem~\ref{thm:svnn_conditions}) constitute
+a \textbf{type system} for neural computation graphs.
+
+\subsubsection{Syntax}
+
+The IR language $\mathcal{L}_{\text{IR}}$ is defined by the following BNF grammar:
+
+\begin{equation}
+\begin{aligned}
+e \;::=&\; \texttt{Input}(x)                                    &&\text{input variable} \\
+\mid&\; \texttt{MatMul}(W,\; e)                                  &&\text{matrix multiplication} \\
+\mid&\; \texttt{BsplineLUT}(T,\; g,\; e)                         &&\text{B-spline LUT evaluation} \\
+\mid&\; \texttt{StandardAct}(\sigma,\; e)                        &&\text{standard activation (SiLU)} \\
+\mid&\; \texttt{Add}(e_1,\; e_2)                                 &&\text{element-wise addition} \\
+\mid&\; \texttt{Softmax}(e)                                      &&\text{softmax normalization} \\
+\mid&\; \texttt{Argmax}(e)                                       &&\text{argmax classification}
+\end{aligned}
+\label{eq:ir_bnf}
+\end{equation}
+
+where $W \in \mathbb{R}^{m \times n}$ is a weight matrix,
+$T \in \mathbb{R}^{N}$ is a precomputed LUT array,
+$g \in \mathbb{R}^{N_{\text{grid}}}$ is a knot grid,
+$\sigma \in \{\text{SiLU}\}$, and $x$ denotes a named input variable.
+The grammar is \textit{closed under the SVNN operation set}: every
+production corresponds to either a pure linear operation (MatMul, Add)
+or a pure element-wise operation (BsplineLUT, StandardAct, Softmax,
+Argmax), satisfying Condition~1 by construction.
+
+\subsubsection{Denotational Semantics}
+
+We define two interpretation functions for each IR expression:
+
+\begin{itemize}
+    \item $\llbracket e \rrbracket_{\mathbb{R}}$: the
+    \textbf{real-valued semantics}---the mathematical function computed
+    by $e$ under exact real arithmetic (matching PyTorch's float32
+    training semantics up to IEEE~754 roundoff).
+
+    \item $\llbracket e \rrbracket_{\text{SCL}}$: the
+    \textbf{SCL execution semantics}---the function computed by the
+    compiled SCL code on a Siemens PLC under IEC~61131-3 REAL
+    arithmetic (IEEE~754 binary32 with soft-float execution).
+\end{itemize}
+
+The real-valued semantics $\llbracket \cdot \rrbracket_{\mathbb{R}}$
+is defined by structural induction on $e$:
+
+\begin{align}
+\llbracket \texttt{Input}(x) \rrbracket_{\mathbb{R}}(\rho) &= \rho(x) \\
+\llbracket \texttt{MatMul}(W, e) \rrbracket_{\mathbb{R}}(\rho) &= W \cdot \llbracket e \rrbracket_{\mathbb{R}}(\rho) \\
+\llbracket \texttt{BsplineLUT}(T, g, e) \rrbracket_{\mathbb{R}}(\rho) &=
+\text{interp}\bigl(T, g, \text{clamp}(\llbracket e \rrbracket_{\mathbb{R}}(\rho),
+[g_0, g_{N_g-1}])\bigr) \\
+\llbracket \texttt{StandardAct}(\text{SiLU}, e) \rrbracket_{\mathbb{R}}(\rho) &=
+\text{SiLU}(\llbracket e \rrbracket_{\mathbb{R}}(\rho)) \\
+\llbracket \texttt{Add}(e_1, e_2) \rrbracket_{\mathbb{R}}(\rho) &=
+\llbracket e_1 \rrbracket_{\mathbb{R}}(\rho) + \llbracket e_2 \rrbracket_{\mathbb{R}}(\rho) \\
+\llbracket \texttt{Softmax}(e) \rrbracket_{\mathbb{R}}(\rho) &=
+\text{softmax}(\llbracket e \rrbracket_{\mathbb{R}}(\rho)) \\
+\llbracket \texttt{Argmax}(e) \rrbracket_{\mathbb{R}}(\rho) &=
+\argmax_i\; \llbracket e \rrbracket_{\mathbb{R}}(\rho)_i
+\end{align}
+
+where $\rho: \text{Var} \to \mathbb{R}^{d_{\text{in}}}$ is an
+environment mapping input variables to their real-valued vectors,
+$\text{interp}(T, g, x)$ performs piecewise-linear interpolation of
+table $T$ on grid $g$ at point $x$, and $\text{clamp}(x, [a,b])$
+clamps $x$ to the validated domain $[a,b]$.
+
+\subsubsection{Type System}
+
+The NeuroPLC IR is equipped with a simple type system whose judgments
+have the form $\Gamma \vdash e : \tau$, where types
+$\tau \in \{\texttt{linear}, \texttt{elemwise}, \texttt{svnn}\}$
+classify IR nodes by their operation category.
+
+\begin{center}
+\framebox{
+\begin{minipage}{0.80\linewidth}
+\vspace{4pt}
+\begin{prooftree}
+\AxiomC{}
+\UnaryInfC{$\Gamma \vdash \texttt{Input}(x) : \texttt{linear}$}
+\DisplayProof
+\quad\textsc{[T-Input]}
+\end{prooftree}
+
+\vspace{6pt}
+\begin{prooftree}
+\AxiomC{$\Gamma \vdash e : \texttt{linear}$}
+\UnaryInfC{$\Gamma \vdash \texttt{MatMul}(W, e) : \texttt{linear}$}
+\DisplayProof
+\quad\textsc{[T-MatMul]}
+\end{prooftree}
+
+\vspace{6pt}
+\begin{prooftree}
+\AxiomC{$\Gamma \vdash e : \texttt{linear}$}
+\AxiomC{$M_2(T,g) < \infty$}
+\BinaryInfC{$\Gamma \vdash \texttt{BsplineLUT}(T, g, e) : \texttt{elemwise}$}
+\DisplayProof
+\quad\textsc{[T-BsplineLUT]}
+\end{prooftree}
+
+\vspace{6pt}
+\begin{prooftree}
+\AxiomC{$\Gamma \vdash e_1 : \texttt{linear}$}
+\AxiomC{$\Gamma \vdash e_2 : \texttt{elemwise}$}
+\BinaryInfC{$\Gamma \vdash \texttt{Add}(e_1, e_2) : \texttt{svnn}$}
+\DisplayProof
+\quad\textsc{[T-Add]}
+\end{prooftree}
+
+\vspace{6pt}
+\begin{prooftree}
+\AxiomC{$\Gamma \vdash e : \texttt{svnn}$}
+\UnaryInfC{$\Gamma \vdash \texttt{Softmax}(e) : \texttt{svnn}$}
+\DisplayProof
+\quad\textsc{[T-Softmax]}
+\end{prooftree}
+\vspace{4pt}
+\end{minipage}
+}
+\end{center}
+
+The typing rules directly encode SVNN Conditions~1--2:
+\textsc{[T-BsplineLUT]} requires $M_2(T,g) < \infty$ (Condition~2:
+computable curvature bound); \textsc{[T-Add]} requires one argument
+of linear type and one of element-wise type, enforcing the dual-path
+structure of KAN layers; \textsc{[T-MatMul]} preserves linear type,
+reflecting Condition~1 (linear operations remain linear); and
+\textsc{[T-Softmax]} propagates the SVNN type to the output.
+
+\vspace{4pt}
+\begin{kingthm}[IR Type Soundness]
+\label{thm:ir-soundness}
+If $\vdash e : \texttt{svnn}$ (i.e., $e$ is well-typed under the
+IR type system), then the compiled SCL program $C(e)$ satisfies:
+\begin{equation}
+\forall \rho \in \text{Domain}(X):\;
+\|\llbracket e \rrbracket_{\mathbb{R}}(\rho) -
+\llbracket C(e) \rrbracket_{\text{SCL}}(\rho)\|_\infty
+\leq \varepsilon(e)
+\label{eq:type_soundness}
+\end{equation}
+where $\varepsilon(e)$ is the DA-computed error bound
+(Theorem~\ref{thm:svnn_conditions}, Eq.~\ref{eq:total_bound}).
+\end{kingthm}
+
+\vspace{2pt}
+\noindent\textit{Proof.}
+By structural induction on the typing derivation of $e$.
+Each typing rule corresponds to a proof obligation in
+Theorem~\ref{thm:compiler}:
+
+\begin{itemize}
+    \item \textsc{[T-Input]}: Input carries no error by construction
+    ($\Delta^{(0)} = 0$).
+
+    \item \textsc{[T-MatMul]}: Linear layer error amplification is
+    bounded by $\|W\|_{1,\infty} \cdot \|\delta\|_\infty$
+    (Theorem~\ref{thm:svnn_conditions}, Step~1). DA improves the
+    constant via sign-structural tightening.
+
+    \item \textsc{[T-BsplineLUT]}: The $M_2 < \infty$ premise
+    guarantees the de~Boor LUT error bound
+    $M_2 \cdot h^2 / 8$ (Eq.~\ref{eq:de_boor_general}).
+
+    \item \textsc{[T-Add]}: Addition introduces no new error
+    sources; the error is the sum of branch errors.
+
+    \item \textsc{[T-Softmax]}: Softmax is a contraction mapping
+    in $\ell_\infty$ (Lipschitz constant $\leq 1$)---it does not
+    amplify upstream errors.
+\end{itemize}
+
+The induction composes these per-node bounds into the
+end-to-end guarantee of Eq.~\ref{eq:type_soundness}, exactly
+recovering Theorem~\ref{thm:compiler} but now
+phrased as a \textbf{type soundness} result: well-typed IR
+programs compile to SCL with bounded semantic deviation. $\square$
+
+\vspace{4pt}
+\noindent\textbf{Relationship to Programming Language Theory.}
+Theorem~\ref{thm:ir-soundness} is the neural-network analogue of the
+canonical type soundness theorem in programming languages~\cite{milner1978theory}:
+``well-typed programs cannot go wrong.'' In our setting, ``going wrong''
+means producing an output whose deviation from the trained model exceeds
+the certified bound $\varepsilon$. The SVNN type system guarantees that
+this cannot happen---a property that standard MLP architectures lack
+because they are \textit{ill-typed} under these rules (the coupled
+$\sigma(W\mathbf{x} + \mathbf{b})$ operation has no typing rule).
+
+This perspective reframes the central contribution of NeuroPLC: it is
+not merely a compiler, but a \textbf{type-theoretic framework} for
+certifiable neural architectures, in which the PLC deployment is one
+concrete instantiation of a more general principle---that
+\textit{well-typedness of an architecture implies certifiability of
+its compilation}.

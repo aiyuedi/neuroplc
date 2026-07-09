@@ -1,0 +1,217 @@
+FUNCTION_BLOCK "NeuroPLC_SafetyMonitor"
+
+// ============================================================
+// NeuroPLC Safety Monitor ¡ª Auto-Generated (Algorithm 3)
+// Generated for: NeuroPLC_Inference
+// Validated domain: [-3.0, 3.0]^28
+// Confidence threshold: 0.5
+// Cycle timeout: 5000 us
+// ============================================================
+
+VAR_INPUT
+    "monitor_feat_1" : REAL;   // Input feature 1 (from inference input)
+    "monitor_feat_2" : REAL;   // Input feature 2 (from inference input)
+    "monitor_feat_3" : REAL;   // Input feature 3 (from inference input)
+    "monitor_feat_4" : REAL;   // Input feature 4 (from inference input)
+    "monitor_feat_5" : REAL;   // Input feature 5 (from inference input)
+    "monitor_feat_6" : REAL;   // Input feature 6 (from inference input)
+    "monitor_feat_7" : REAL;   // Input feature 7 (from inference input)
+    "monitor_feat_8" : REAL;   // Input feature 8 (from inference input)
+    "monitor_feat_9" : REAL;   // Input feature 9 (from inference input)
+    "monitor_feat_10" : REAL;   // Input feature 10 (from inference input)
+    "monitor_feat_11" : REAL;   // Input feature 11 (from inference input)
+    "monitor_feat_12" : REAL;   // Input feature 12 (from inference input)
+    "monitor_feat_13" : REAL;   // Input feature 13 (from inference input)
+    "monitor_feat_14" : REAL;   // Input feature 14 (from inference input)
+    "monitor_feat_15" : REAL;   // Input feature 15 (from inference input)
+    "monitor_feat_16" : REAL;   // Input feature 16 (from inference input)
+    "monitor_feat_17" : REAL;   // Input feature 17 (from inference input)
+    "monitor_feat_18" : REAL;   // Input feature 18 (from inference input)
+    "monitor_feat_19" : REAL;   // Input feature 19 (from inference input)
+    "monitor_feat_20" : REAL;   // Input feature 20 (from inference input)
+    "monitor_feat_21" : REAL;   // Input feature 21 (from inference input)
+    "monitor_feat_22" : REAL;   // Input feature 22 (from inference input)
+    "monitor_feat_23" : REAL;   // Input feature 23 (from inference input)
+    "monitor_feat_24" : REAL;   // Input feature 24 (from inference input)
+    "monitor_feat_25" : REAL;   // Input feature 25 (from inference input)
+    "monitor_feat_26" : REAL;   // Input feature 26 (from inference input)
+    "monitor_feat_27" : REAL;   // Input feature 27 (from inference input)
+    "monitor_feat_28" : REAL;   // Input feature 28 (from inference input)
+    "monitor_output_1" : REAL;  // Class 1 output (from inference output)
+    "monitor_output_2" : REAL;  // Class 2 output (from inference output)
+    "monitor_output_3" : REAL;  // Class 3 output (from inference output)
+    "monitor_output_4" : REAL;  // Class 4 output (from inference output)
+    "monitor_inference_done" : BOOL;  // Inference FB execution complete
+END_VAR
+
+VAR_OUTPUT
+    "monitor_domain_violation" : BOOL := FALSE;    // Input outside validated domain
+    "monitor_low_confidence" : BOOL := FALSE;     // Max softmax < threshold
+    "monitor_output_range_violation" : BOOL := FALSE; // Output outside expected range
+    "monitor_safe_state_request" : BOOL := FALSE;  // Trigger fallback/safe state
+    "monitor_violation_code" : INT := 0;           // 0=OK, 1=domain, 2=conf, 3=range
+    "monitor_max_confidence" : REAL := 0.0;        // Max softmax output value
+    "monitor_predicted_class" : INT := 0;          // Argmax of softmax outputs
+END_VAR
+
+VAR
+    "monitor_i" : INT;                            // Loop index
+    "monitor_max_val" : REAL;                     // Temp for argmax
+    "monitor_max_idx" : INT;                      // Temp for argmax index
+END_VAR
+
+BEGIN
+
+    // === Reset on each cycle ===
+    "monitor_domain_violation" := FALSE;
+    "monitor_low_confidence" := FALSE;
+    "monitor_output_range_violation" := FALSE;
+    "monitor_safe_state_request" := FALSE;
+    "monitor_violation_code" := 0;
+
+    // === Check 1: Input domain validation ===
+    IF ("monitor_feat_1" < -3.0 OR "monitor_feat_1" > 3.0)
+       OR ("monitor_feat_2" < -3.0 OR "monitor_feat_2" > 3.0)
+       OR ("monitor_feat_3" < -3.0 OR "monitor_feat_3" > 3.0)
+       OR ("monitor_feat_4" < -3.0 OR "monitor_feat_4" > 3.0) THEN
+        "monitor_domain_violation" := TRUE;
+        "monitor_violation_code" := 1;
+    END_IF;
+
+    IF ("monitor_feat_5" < -3.0 OR "monitor_feat_5" > 3.0)
+       OR ("monitor_feat_6" < -3.0 OR "monitor_feat_6" > 3.0)
+       OR ("monitor_feat_7" < -3.0 OR "monitor_feat_7" > 3.0)
+       OR ("monitor_feat_8" < -3.0 OR "monitor_feat_8" > 3.0) THEN
+        "monitor_domain_violation" := TRUE;
+        "monitor_violation_code" := 1;
+    END_IF;
+
+    IF ("monitor_feat_9" < -3.0 OR "monitor_feat_9" > 3.0)
+       OR ("monitor_feat_10" < -3.0 OR "monitor_feat_10" > 3.0)
+       OR ("monitor_feat_11" < -3.0 OR "monitor_feat_11" > 3.0)
+       OR ("monitor_feat_12" < -3.0 OR "monitor_feat_12" > 3.0) THEN
+        "monitor_domain_violation" := TRUE;
+        "monitor_violation_code" := 1;
+    END_IF;
+
+    IF ("monitor_feat_13" < -3.0 OR "monitor_feat_13" > 3.0)
+       OR ("monitor_feat_14" < -3.0 OR "monitor_feat_14" > 3.0)
+       OR ("monitor_feat_15" < -3.0 OR "monitor_feat_15" > 3.0)
+       OR ("monitor_feat_16" < -3.0 OR "monitor_feat_16" > 3.0) THEN
+        "monitor_domain_violation" := TRUE;
+        "monitor_violation_code" := 1;
+    END_IF;
+
+    IF ("monitor_feat_17" < -3.0 OR "monitor_feat_17" > 3.0)
+       OR ("monitor_feat_18" < -3.0 OR "monitor_feat_18" > 3.0)
+       OR ("monitor_feat_19" < -3.0 OR "monitor_feat_19" > 3.0)
+       OR ("monitor_feat_20" < -3.0 OR "monitor_feat_20" > 3.0) THEN
+        "monitor_domain_violation" := TRUE;
+        "monitor_violation_code" := 1;
+    END_IF;
+
+    IF ("monitor_feat_21" < -3.0 OR "monitor_feat_21" > 3.0)
+       OR ("monitor_feat_22" < -3.0 OR "monitor_feat_22" > 3.0)
+       OR ("monitor_feat_23" < -3.0 OR "monitor_feat_23" > 3.0)
+       OR ("monitor_feat_24" < -3.0 OR "monitor_feat_24" > 3.0) THEN
+        "monitor_domain_violation" := TRUE;
+        "monitor_violation_code" := 1;
+    END_IF;
+
+    IF ("monitor_feat_25" < -3.0 OR "monitor_feat_25" > 3.0)
+       OR ("monitor_feat_26" < -3.0 OR "monitor_feat_26" > 3.0)
+       OR ("monitor_feat_27" < -3.0 OR "monitor_feat_27" > 3.0)
+       OR ("monitor_feat_28" < -3.0 OR "monitor_feat_28" > 3.0) THEN
+        "monitor_domain_violation" := TRUE;
+        "monitor_violation_code" := 1;
+    END_IF;
+
+    // === Check 2: Argmax + confidence threshold ===
+    "monitor_max_val" := "monitor_output_1";
+    "monitor_max_idx" := 1;
+    IF "monitor_output_2" > "monitor_max_val" THEN
+        "monitor_max_val" := "monitor_output_2";
+        "monitor_max_idx" := 2;
+    END_IF;
+    IF "monitor_output_3" > "monitor_max_val" THEN
+        "monitor_max_val" := "monitor_output_3";
+        "monitor_max_idx" := 3;
+    END_IF;
+    IF "monitor_output_4" > "monitor_max_val" THEN
+        "monitor_max_val" := "monitor_output_4";
+        "monitor_max_idx" := 4;
+    END_IF;
+    "monitor_max_confidence" := "monitor_max_val";
+    "monitor_predicted_class" := "monitor_max_idx";
+
+    IF "monitor_max_val" < 0.5 THEN
+        "monitor_low_confidence" := TRUE;
+        "monitor_violation_code" := 2;
+    END_IF;
+
+    // === Check 3: Output range bounds ===
+    IF "monitor_output_1" < -10.0 OR "monitor_output_1" > 10.0 THEN
+        "monitor_output_range_violation" := TRUE;
+        "monitor_violation_code" := 3;
+    ELSIF "monitor_output_2" < -10.0 OR "monitor_output_2" > 10.0 THEN
+    ELSIF "monitor_output_3" < -10.0 OR "monitor_output_3" > 10.0 THEN
+    ELSIF "monitor_output_4" < -10.0 OR "monitor_output_4" > 10.0 THEN
+    END_IF;
+
+    // === Safety state aggregation ===
+    IF "monitor_domain_violation" OR "monitor_low_confidence" OR "monitor_output_range_violation" THEN
+        "monitor_safe_state_request" := TRUE;
+    END_IF;
+
+END_FUNCTION_BLOCK
+
+============================================================
+// Example Integration (OB1)
+============================================================
+
+// ============================================================
+// Example: PLC Main OB1 ¡ª Integrating NeuroPLC Inference + Safety Monitor
+// ============================================================
+
+ORGANIZATION_BLOCK "Main"
+VAR
+    // NeuroPLC inference FB instance
+    "NeuroPLC_Inference"_Instance : "NeuroPLC_Inference";
+    // Safety monitor FB instance
+    "NeuroPLC_SafetyMonitor"_Instance : "NeuroPLC_SafetyMonitor";
+    // Application decision
+    "system_mode" : INT := 0;   // 0=AUTO (KAN), 1=SAFE (bypass)
+    "actuator_command" : REAL;
+END_VAR
+
+BEGIN
+
+    // Step 1: Read sensor features (from PROFINET / OPC UA / onboard ADC)
+    // "sensor_feat_1" := ... (read from fieldbus)
+    // "sensor_feat_2" := ... (read from fieldbus)
+    // "sensor_feat_3" := ... (read from fieldbus)
+    // "sensor_feat_4" := ... (read from fieldbus)
+    // ... (all 28 features)
+
+    // Step 2: Run NeuroPLC inference
+    "NeuroPLC_Inference"_Instance."monitor_feat_1" := "sensor_feat_1";
+    "NeuroPLC_Inference"_Instance."monitor_feat_2" := "sensor_feat_2";
+    // ...
+    "NeuroPLC_Inference"_Instance."trigger" := TRUE;
+
+    // Step 3: Safety monitor checks inference outputs
+    "NeuroPLC_SafetyMonitor"_Instance."monitor_feat_1" := "sensor_feat_1";
+    // ... (copy all features)
+    "NeuroPLC_SafetyMonitor"_Instance."monitor_output_1" := "NeuroPLC_Inference"_Instance."class_output_1";
+    // ... (copy all outputs)
+
+    // Step 4: Decision logic
+    IF "NeuroPLC_SafetyMonitor"_Instance."monitor_safe_state_request" THEN
+        "system_mode" := 1;  // SAFE: bypass KAN, use manual / rule-based fallback
+        "actuator_command" := 0.0;  // Safe default
+    ELSE
+        "system_mode" := 0;  // AUTO: KAN prediction is trusted
+        "actuator_command" := ...;  // Use KAN output for control
+    END_IF;
+
+END_ORGANIZATION_BLOCK
