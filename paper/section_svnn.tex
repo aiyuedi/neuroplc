@@ -1228,28 +1228,23 @@ safe neural architectures, not merely a post-hoc certification
 scheme for KANs.
 
 \vspace{4pt}
-\begin{figure}[t]
+\begin{figure*}[t]
     \centering
-    \includegraphics[width=\linewidth]{figures/fig_c2bv_basis_functions}
+    \includegraphics[width=0.88\textwidth]{figures/fig_c2bv_basis_functions}
     \caption{\textbf{$C^2$-BV Architecture Family: Activation Basis Functions.}
     Five SVNN-compliant activation function families on $[-3,3]$ with
     $N{=}15$ LUT grid points. All are $C^2$ with computable $M_2$ bounds
-    (annotated per subplot). B-spline KAN (cubic local basis), FourierKAN
-    ($\omega{=}0.4$, 6 harmonics), WaveletKAN (Mexican hat, 4 scales),
-    ChebyKAN (degree 5), RBF-KAN ($\sigma{=}0.6$). Despite diverse functional
-    forms, all share the SVNN-critical property: each $\phi_{j,i}(x_i)$ is a
-    \textbf{univariate} $C^2$ function on a compact domain, enabling uniform
-    LUT compilation with de~Boor error bound $M_2 \cdot h^2 / 8$
-    (Theorem~\ref{thm:tightness}). The bottom-right panel overlays all five
-    families with the $N{=}15$ LUT grid, illustrating the universal
-    discretization strategy.}
+    (annotated per subplot). Despite diverse functional forms, all share the
+    SVNN-critical property: each $\phi_{j,i}(x_i)$ is a \textbf{univariate}
+    $C^2$ function on a compact domain, enabling uniform LUT compilation with
+    de~Boor error bound $M_2 h^2 / 8$ (Theorem~\ref{thm:tightness}).}
     \label{fig:c2bv_basis_functions}
-\end{figure}
+\end{figure*}
 
 \vspace{4pt}
-\begin{figure}[t]
+\begin{figure*}[t]
     \centering
-    \includegraphics[width=\linewidth]{figures/fig_c2bv_verification}
+    \includegraphics[width=0.85\textwidth]{figures/fig_c2bv_verification}
     \caption{\textbf{$C^2$-BV Architecture Family: SVNN Verification Across 5 Architectures.}
     Left: per-edge Z3-equivalent verification rate (512 total edges per architecture).
     All four $C^2$-BV architectures (B-spline, Fourier, Wavelet, ChebyKAN) achieve $\geq$96.9\%
@@ -1260,5 +1255,5 @@ scheme for KANs.
     Safety margins $\geq 2\times$ confirm deployability
     for all $C^2$-BV architectures.}
     \label{fig:c2bv_verification}
-\end{figure}
+\end{figure*}
 

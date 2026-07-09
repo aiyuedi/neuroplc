@@ -81,7 +81,7 @@
 \author{Fuyue~Liu,~\IEEEmembership{Guilin~University~of~Electronic~Technology, Guilin 541004, China}}
 
 \markboth{IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS, VOL. XX, NO. XX, 2026}%
-         {Liu: NeuroPLC --- A Type Theory of Certifiable Neural Architectures}
+         {Liu: NeuroPLC --- A Type Theory for Certifiable Neural Nets}
 
 \maketitle
 
@@ -221,8 +221,9 @@ contribution. Its 6-op IR has a formal syntax, operational semantics, and
 typing rules ({\S}\ref{sec:ir-semantics}). Three verification mechanisms
 compose: (1) one-time Z3 SMT template proofs; (2) compositional per-function
 certificates (512/512 verified); and (3) DA---the optimal first-order
-error bound than interval arithmetic (safety factor $8.5\times$,
-up to $3.1\times$ vs.\ $\sqrt{d}$ random-weights baseline,
+abstract domain for $C^2$ functions---achieving $2.2\times$ tighter
+error bounds than interval arithmetic ($8.5\times$ safety factor,
+up to $3.1\times$ vs.\ the $\sqrt{d}$ random-weights baseline,
 {\S}\ref{sec:da}). KAN's B-spline decomposition is \textit{structural
 necessity}: identically-sized KAN vs.\ MLP yield 512/512 vs.\ 0/48
 Z3-verifiable components (MLP~$[28,32,16,4]$, E41).
@@ -846,7 +847,7 @@ compiler's LUT discretization data-driven (Fig.~\ref{fig:bspline_adaptive}).
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=\linewidth]{figures/fig3_bspline_adaptive}
+    \includegraphics[width=\linewidth]{figures/fig_adaptive_lut_compare}
     \caption{Comparison of uniform vs.\ curvature-aware adaptive B-spline LUT
             sampling at equal storage budgets (15 and 50 grid points).
             Adaptive sampling concentrates points in regions of high curvature,
@@ -1356,13 +1357,14 @@ We further decompose the ratio into contributing factors:
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=\linewidth]{figures/fig8_da_scaling}
-    \caption{DA/IA tightening ratio distribution across 30 random KAN seeds
-            for the fixed architecture $[28,16,4]$, with per-factor analysis
-             (hidden dimension, network depth, sign balance). The trained KAN's
-             $3.1\times$ ratio lies near the mean of the distribution
-             ($3.71 \pm 0.81$), confirming it is representative rather than
-            cherry-picked.}
+    \includegraphics[width=\linewidth]{figures/fig_da_scaling_law}
+    \caption{DA/IA tightening ratio scaling law across 105 random KAN architectures
+            $[28,d,4]$. Left: scatter of 15 seeds per dimension with mean $\pm 1\sigma$
+            overlaid; best-fit line $\text{ratio} = 0.896\sqrt{d} + 0.349$, Pearson
+            $r = 0.987$ ($p = 3.6\times10^{-5}$). Right: measured ratio vs.\ theoretical
+            $\sqrt{d}$, confirming the random-walk mechanism of DA tightening.
+            The trained KAN's $3.1\times$ ratio ($d{=}16$) lies at the 23rd percentile
+            of its dimension group.}
     \label{fig:da_ratio_dist}
 \end{figure}
 
@@ -1416,21 +1418,16 @@ $\text{ratio} = 0.896\sqrt{d} + 0.349$.}
 \end{table}
 
 \vspace{2pt}
-\begin{figure}[t]
+\begin{figure*}[t]
     \centering
-    \includegraphics[width=\linewidth]{figures/fig_da_vs_ia}
+    \includegraphics[width=0.88\textwidth]{figures/fig_da_vs_ia}
     \caption{\textbf{DA vs.\ IA Bound Comparison with LUT Resolution.}
-   Left: DA achieves consistently $2.2\times$ tighter error bounds than IA across
-   all LUT resolutions ($N = 8$--$20$). DA bound decreases as $\propto 1/N^2$ per
-   Theorem~\ref{thm:tightness}; IA bound follows the same asymptotic but with a
-    $2.2\times$ constant-factor penalty from wrapping effects in dense Hessian
-   propagation. At $N{=}15$ (S7-1200 default): DA bound $= 0.079$ vs.\ IA bound
-    $= 0.172$. Right: bar comparison showing DA's consistent $2.2\times$ advantage.
-   The gap is \textit{not} empirically contingent---it is a consequence of DA's
-   Galois-optimality (Theorem~\ref{thm:galois}) and sign-structural tightening
-    (Theorem~\ref{thm:da-optimality}).}
+    Left: DA achieves $2.2\times$ tighter bounds than IA across all LUT resolutions
+    ($N=8$--$20$), decreasing $\propto 1/N^2$ (Theorem~\ref{thm:tightness}).
+    At $N{=}15$: DA $=0.079$, IA $=0.172$. Right: bar comparison.
+    The gap follows from DA's Galois-optimality (Theorem~\ref{thm:galois}).}
     \label{fig:da_vs_ia}
-\end{figure}
+\end{figure*}
 
 \subsubsection{Segment-Aware de Boor Bounds}
 \label{sec:segment-aware}
@@ -1478,27 +1475,18 @@ achieves a safety factor approximately $8.5 \times 1.4 \approx 11.9\times$ (cf.\
 at $N=15$ LUT points, providing the strongest formal guarantee for compiled
 KAN inference to date.
 
-\begin{table}[t]
-\centering
-\caption{Segment-Aware vs.\ Global de Boor Bound (N=15 LUT Points)}
-\label{tab:segment_bound}
-\footnotesize
-\begin{tabular}{@{}lccccc@{}}
-\toprule
-\textbf{Metric} & \textbf{N=10} & \textbf{N=15} & \textbf{N=20} & \textbf{N=50} \\
-\midrule
-Global $\varepsilon$ (de Boor) & 0.00998 & 0.00412 & 0.00224 & 0.00034 \\
-Per-segment $\varepsilon$ (mean) & 0.00179 & 0.00069 & 0.00036 & 0.00005 \\
-Tightening ratio (global/mean) & 5.6$\times$ & 6.0$\times$ & 6.2$\times$ & 6.7$\times$ \\
-Segments with $\varepsilon_j < 0.5\varepsilon$ & 96.2\% & 96.7\% & 97.0\% & 97.4\% \\
-Segments with $\varepsilon_j < 0.2\varepsilon$ & 63.5\% & 67.6\% & 69.2\% & 72.3\% \\
-DA segment-aware improvement & 1.4$\times$ & 1.4$\times$ & 1.4$\times$ & 1.4$\times$ \\
-\bottomrule
-\end{tabular}
-\vspace{1pt}
-{\scriptsize Per-segment $\varepsilon$ values are $6.0\times$ tighter on average,
-enabling input-dependent verification that composes additively with DA.}
-\end{table}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{figures/fig_segment_bounds}
+    \caption{\textbf{Segment-Aware Bound Comparison Across LUT Resolutions.}
+    (a) Global vs.\ per-segment worst-case error: segment-aware $M_{2,j}$ achieves
+    $6.0\times$ mean tightening across all resolutions. (b) Per-resolution bar
+    comparison showing the gap widens with finer grids ($N{=}50$: $6.7\times$).
+    (c) Segment coverage: $>96\%$ of LUT segments have error $<50\%$ of the global
+    bound; $67$--$72\%$ have error $<20\%$ of global. The dashed line shows the
+    monotonic improvement with LUT resolution $N$.}
+    \label{fig:segment_bounds}
+\end{figure}
 
 \subsubsection{Adaptive Mixed-Precision LUT Allocation}
 \label{sec:adaptive-lut}
@@ -2334,11 +2322,18 @@ and $\lambda_{\text{rel}}=0.5$. Training: 100 epochs, Adam
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=\linewidth]{figures/fig4_kan_activations}
-    \caption{Learned B-spline activation functions from the trained KAN student
-             (layer 0, 16 output dimensions $\times$ 28 input dimensions).
-            Each univariate curve is directly visualizable and compilable
-            as a lookup table.}
+    \includegraphics[width=\linewidth]{figures/fig_c2bv_basis_functions}
+    \caption{$C^2$-BV Architecture Family: representative activation basis
+            functions with $N{=}15$ LUT grid points (vertical stems).
+            Panel (a): B-spline KAN (cubic local basis, $M_2 {\approx} 0.68$);
+            (b): FourierKAN ($\omega{=}0.4$, $K{=}6$, $M_2 {\approx} 2.30$);
+            (c): WaveletKAN (Mexican hat, $M_2 {\approx} 2.60$);
+            (d): ChebyKAN (degree 5, $M_2 {\approx} 3.12$);
+            (e): RBF-KAN ($\sigma{=}0.6$, $M_2 {\approx} 3.09$);
+            (f): all five overlaid with $N{=}15$ LUT grid.
+            The filled area under each curve illustrates that all $C^2$-BV
+            activations are positive on compact domains, enabling the universal
+            discretization strategy of Proposition~\ref{prop:c2bv-family}.}
     \label{fig:kan_activations}
 \end{figure}
 
@@ -2806,15 +2801,10 @@ tool provides.
 \vspace{4pt}
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.9\linewidth]{figures/fig_wcet_breakdown}
-    \caption{\textbf{WCET Breakdown: KAN $[28,16,4]$ Compiled SCL on S7-1200 CPU~1211C.}
-   Dominated by B-spline LUT evaluation ($73.4\%$ of total): 448 Layer-0 edges
-    ($16.4$~ms) + 64 Layer-1 edges ($2.3$~ms). MatMul contributes $16.3\%$,
-   Softmax $0.5\%$, and FB overhead $0.3\%$. Total analysis bound $= 22.67$~ms,
-   representing $22.7\%$ of the 100~ms scan cycle ($4.4\times$ margin).
-   The worst-case per-edge LUT time of $36.7$~$\mu$s includes binary search
-    (4 REAL comparisons), linear interpolation (3 REAL SUB, 1 REAL DIV,
-    1 REAL MUL, 1 REAL ADD), and 4 array accesses.}
+    \includegraphics[width=0.55\linewidth]{figures/fig_wcet_breakdown}
+    \caption{\textbf{WCET Breakdown: KAN $[28,16,4]$ on S7-1200 CPU~1211C.}
+    LUT dominates at $73.4\%$ (448+64 edges). MatMul $16.3\%$, Softmax $0.5\%$,
+    overhead $0.3\%$. Total: $22.67$~ms ($22.7\%$ of 100~ms scan cycle).}
     \label{fig:wcet_breakdown}
 \end{figure}
 
@@ -2962,7 +2952,7 @@ parity with 12.6\% of the teacher's parameters (6,148 vs.\ 48,708)---a
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=\linewidth]{figures/fig5_confusion_matrices}
+    \includegraphics[width=\linewidth]{figures/fig_confusion_matrices}
     \caption{Confusion matrices. Teacher 1D-CNN (left, 99.93\%) and
             KAN student under VRM-KD (right, 99.93\%) on the CWRU held-out
             test set (2,743 samples). Both models achieve near-perfect
@@ -3028,7 +3018,7 @@ on this task. Fig.~\ref{fig:tsne_features} shows the t-SNE embeddings for each K
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=\linewidth]{figures/fig6_tsne_features}
+    \includegraphics[width=\linewidth]{figures/fig_tsne_features}
     \caption{Feature embeddings (t-SNE~\cite{maaten2008tsne}). Under No-KD (24.13\%, left),
             Hinton-KD (99.89\%, center), and VRM-KD (99.93\%, right).
             VRM-KD produces the most well-separated class clusters,
@@ -3365,7 +3355,7 @@ by the SCL-compiled feature extraction front-end.}
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=\linewidth]{figures/fig7_cross_validation}
+    \includegraphics[width=\linewidth]{figures/fig_cross_validation}
     \caption{E6: LUT cross-validation. Left: per-element logit error
             histogram (MAE 0.15, MaxAE 3.65, dominated by inter-class
             margins $\ge$1.35). Right: per-class agreement (all four
@@ -3923,8 +3913,8 @@ generalization of the 28-D feature space.}
 \centering
 \caption{Results Summary: Core Experiments (E1--E20, E52--E57, E60--E62) and Validation Experiments (V1--V7)}
 \label{tab:summary}
-\footnotesize
-\begin{tabular}{@{}p{0.8cm}p{2.5cm}p{2.4cm}p{2.3cm}@{}}
+\scriptsize
+\begin{tabular}{@{}p{0.75cm}p{2.3cm}p{2.2cm}p{2.2cm}@{}}
 \toprule
 \textbf{Exp} & \textbf{Description} & \textbf{Metric} & \textbf{Result} \\
 \midrule
@@ -4030,7 +4020,7 @@ When composed with DA, replacing the global $\varepsilon$ with per-input-segment
 $\varepsilon_i$ values tightens the DA error bound by an additional
 $1.4\times$---the safety factor improves from $8.5\times$ (uniform DA)
 to $\sim 11.9\times$ (segment-aware DA) at $N=15$.
-Table~\ref{tab:segment_bound} already reported the per-density breakdown;
+Fig.~\ref{fig:segment_bounds} already reported the per-resolution breakdown;
 the $6.0\times$ per-segment tightening and the $1.4\times$ DA compositional
 improvement are both \textbf{structural properties} of trained KAN B-spline
 activations, not dataset-specific artifacts. The segment-aware DA guarantee
@@ -4210,16 +4200,16 @@ ML$\rightarrow$PLC compiler rather than a bearing-diagnosis tool.
 
 \subsection{Why KAN Is Compilable}
 
-The expectation from prior ML$\to$PLC tools is that any neural network can
-be compiled to a PLC---the only question is engineering effort. Our central
-finding contradicts this expectation: \textit{whether} a network can be
-compiled with design-time correctness guarantees depends on its
-\textit{architecture}, not on the compiler's sophistication. The same
-compiler, the same LUT mechanism, the same error-bounding machinery
-produces 512/512 Z3-verified components for KAN and 0/48 for an
-identically-sized MLP. This $14.0\times$ per-component gap in error propagation ($38\times$ end-to-end) is not an
-implementation artifact---it is a structural consequence of the SVNN
-conditions (Theorem~2, Proposition~1, Theorem~5).
+Prior ML$\to$PLC tools treat compilation as a purely engineering problem:
+any network can be ported to a PLC given sufficient effort. Our central
+finding contradicts this assumption: \textit{whether} a network admits
+design-time correctness certification depends on its \textit{architecture},
+not on the sophistication of the compiler. The same compiler, LUT mechanism,
+and error-bounding machinery produce 512/512 Z3-verified components for KAN
+and 0/48 for an identically-sized MLP. This $14.0\times$ per-component gap
+in error propagation ($38\times$ end-to-end) is not an implementation
+artifact---it is a structural consequence of the SVNN conditions
+(Theorem~2, Proposition~1, Theorem~5).
 
 Three architectural properties---each absent from MLPs---enable this gap.
 They are not additive advantages; they form a \textit{composite} where any
@@ -4697,7 +4687,7 @@ Input format & Keras Sequential & scikit-learn (DT, MLP) &
 IR / optimization & None & None &
 \textbf{4-stage IR, 6 passes} \\
 B-spline / KAN & \ding{55} & \ding{55} &
-\textbf{$C^2$-BV: B-spline+Fourier+Wavelet+Cheby+RBF} \\
+\textbf{$C^2$-BV: 5 architectures} \\
 Siemens SCL & Not validated & ABB-specific &
 \textbf{0e 0w TIA V21} \\
 Correctness & \ding{55} & \ding{55} &

@@ -1,0 +1,15 @@
+// Origin LabTalk — Figure 2: DA vs IA Comparison (Grouped Bar + Line)
+doc -n;
+wks.ncols = 4;
+wks.col1.label$ = "N"; wks.col2.label$ = "DA Bound"; wks.col3.label$ = "IA Bound"; wks.col4.label$ = "Tightening";
+wks.col1.SetData([8,10,12,15,18,20], 0);
+wks.col2.SetData([0.419,0.305,0.212,0.079,0.055,0.044], 0);
+wks.col3.SetData([0.922,0.671,0.466,0.172,0.121,0.097], 0);
+wks.col4.SetData([2.20,2.20,2.20,2.18,2.20,2.20], 0);
+plotgroup iy:=(1,3) plot:=200 type:=1;
+page.title = 0;
+layer.x.label.text$ = "LUT Points N";
+layer.y.label.text$ = "Error Bound";
+expGraph type:=pdf filename:="D:\neuroplc-paper\paper\figures\fig_da_vs_ia_origin.pdf" tr:=origin;
+expGraph type:=png filename:="D:\neuroplc-paper\paper\figures\fig_da_vs_ia_origin.png" width:=1200 tr:=origin;
+type -a "Figure 2 DA vs IA exported";

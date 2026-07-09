@@ -1,0 +1,106 @@
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  NeuroPLC — All 5 Publication Figures for Origin Pro 2025b  ║
+// ║  Run: Window → Script Window → run.file("this_file.ogs")    ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+type -a "NeuroPLC Origin Figure Generation Starting...";
+
+// ═══════════════════════════════════════════════
+// Figure 1: C2-BV Architecture Z3 Verification
+// ═══════════════════════════════════════════════
+doc -n;
+wks.ncols = 4;
+wks.col1.label$ = "Arch";
+wks.col1.text$ = B-spline; wks.col1.cell2$ = Fourier; wks.col1.cell3$ = Wavelet; wks.col1.cell4$ = ChebyKAN; wks.col1.cell5$ = MLP;
+wks.col2.label$ = "Z3 Rate (%)";
+wks.col3.label$ = "CWRU Acc (%)";
+wks.col4.label$ = "Safety Margin";
+wks.col2.SetData([100,100,100,96.9,0], 0);
+wks.col3.SetData([99.93,100,100,99.87,24.13], 0);
+wks.col4.SetData([4.5,2.9,5.6,1.1,0], 0);
+plotgroup iy:=(1,3) plot:=200 type:=1;
+page.title = 0;
+layer.x.label.text$ = "C\+(2)-BV Architecture";
+layer.y.label.text$ = "Value";
+expGraph type:=pdf filename:="fig_c2bv_origin" path:="D:\neuroplc-paper\paper\figures" tr:=origin;
+expGraph type:=png filename:="fig_c2bv_origin" path:="D:\neuroplc-paper\paper\figures" width:=1600 tr:=origin;
+type -a "[1/5] C2-BV done";
+
+// ═══════════════════════════════════════════════
+// Figure 2: DA vs IA Comparison
+// ═══════════════════════════════════════════════
+doc -n;
+wks.ncols = 3;
+wks.col1.label$ = "N";
+wks.col2.label$ = "DA";
+wks.col3.label$ = "IA";
+wks.col1.SetData([8,10,12,15,18,20], 0);
+wks.col2.SetData([0.419,0.305,0.212,0.079,0.055,0.044], 0);
+wks.col3.SetData([0.922,0.671,0.466,0.172,0.121,0.097], 0);
+plotgroup iy:=(1,2) plot:=200 type:=1;
+page.title = 0;
+layer.x.label.text$ = "LUT Points N";
+layer.y.label.text$ = "Error Bound";
+expGraph type:=pdf filename:="fig_da_vs_ia_origin" path:="D:\neuroplc-paper\paper\figures" tr:=origin;
+expGraph type:=png filename:="fig_da_vs_ia_origin" path:="D:\neuroplc-paper\paper\figures" width:=1600 tr:=origin;
+type -a "[2/5] DA vs IA done";
+
+// ═══════════════════════════════════════════════
+// Figure 3: Model Comparison
+// ═══════════════════════════════════════════════
+doc -n;
+wks.ncols = 3;
+wks.col1.label$ = "Model";
+wks.col2.label$ = "Parameters";
+wks.col3.label$ = "Accuracy (%)";
+wks.col1.text$ = Teacher; wks.col1.cell2$ = B-KAN; wks.col1.cell3$ = F-KAN; wks.col1.cell4$ = W-KAN; wks.col1.cell5$ = C-KAN; wks.col1.cell6$ = MLP;
+wks.col2.SetData([48708,6148,6676,4628,6400,1524], 0);
+wks.col3.SetData([99.93,99.93,100,100,99.87,99.89], 0);
+plotgroup iy:=(1,2) plot:=200 type:=1;
+page.title = 0;
+layer.x.label.text$ = "Model";
+layer.y.label.text$ = "Value";
+expGraph type:=pdf filename:="fig_models_origin" path:="D:\neuroplc-paper\paper\figures" tr:=origin;
+expGraph type:=png filename:="fig_models_origin" path:="D:\neuroplc-paper\paper\figures" width:=1600 tr:=origin;
+type -a "[3/5] Models done";
+
+// ═══════════════════════════════════════════════
+// Figure 4: Cross-Domain Transfer
+// ═══════════════════════════════════════════════
+doc -n;
+wks.ncols = 4;
+wks.col1.label$ = "Arch";
+wks.col1.text$ = B-KAN; wks.col1.cell2$ = F-KAN; wks.col1.cell3$ = W-KAN; wks.col1.cell4$ = C-KAN; wks.col1.cell5$ = MLP;
+wks.col2.label$ = "CWRU";
+wks.col3.label$ = "XJTU-SY";
+wks.col4.label$ = "Z3 Rate";
+wks.col2.SetData([99.93,100,100,99.87,24.13], 0);
+wks.col3.SetData([91.7,100,100,0,0], 0);
+wks.col4.SetData([100,100,100,96.9,0], 0);
+plotgroup iy:=(1,3) plot:=200 type:=1;
+page.title = 0;
+layer.x.label.text$ = "Architecture";
+layer.y.label.text$ = "Value (%)";
+expGraph type:=pdf filename:="fig_cross_domain_origin" path:="D:\neuroplc-paper\paper\figures" tr:=origin;
+expGraph type:=png filename:="fig_cross_domain_origin" path:="D:\neuroplc-paper\paper\figures" width:=1600 tr:=origin;
+type -a "[4/5] Cross-Domain done";
+
+// ═══════════════════════════════════════════════
+// Figure 5: WCET Breakdown
+// ═══════════════════════════════════════════════
+doc -n;
+wks.ncols = 2;
+wks.col1.label$ = "Component";
+wks.col2.label$ = "Time (ms)";
+wks.col1.text$ = "LUT L0 (448)"; wks.col1.cell2$ = "LUT L1 (64)"; wks.col1.cell3$ = MatMul; wks.col1.cell4$ = Softmax; wks.col1.cell5$ = Overhead;
+wks.col2.SetData([16.44,2.35,3.70,0.11,0.07], 0);
+plotxy iy:=[%H]1!(1,2) plot:=200 ogl:=1;
+page.title = 0;
+layer.y.label.text$ = "Time (ms)";
+layer.x.label.text$ = "Component";
+expGraph type:=pdf filename:="fig_wcet_origin" path:="D:\neuroplc-paper\paper\figures" tr:=origin;
+expGraph type:=png filename:="fig_wcet_origin" path:="D:\neuroplc-paper\paper\figures" width:=1600 tr:=origin;
+type -a "[5/5] WCET done";
+
+type -a "=== ALL 5 NEUROPLC FIGURES GENERATED ===";
+type -a "Output: D:\neuroplc-paper\paper\figures\fig_*_origin.pdf";

@@ -1,0 +1,18 @@
+// Figure 3: Model Comparison — Parameters & Accuracy
+doc -n;
+wks.ncols = 3;
+wks.col1.label$ = "Model"; wks.col2.label$ = "Parameters"; wks.col3.label$ = "Accuracy (%)";
+wks.col1.text$ = "Teacher CNN"; wks.col2.cell1$ = 48708; wks.col3.cell1$ = 99.93;
+wks.col2.cell2$ = 6148;  wks.col3.cell2$ = 99.93;
+wks.col2.cell3$ = 6676;  wks.col3.cell3$ = 100.0;
+wks.col2.cell4$ = 4628;  wks.col3.cell4$ = 100.0;
+wks.col2.cell5$ = 6400;  wks.col3.cell5$ = 99.87;
+wks.col2.cell6$ = 1524;  wks.col3.cell6$ = 99.89;
+
+plotxy iy:=[%H]1!(1,2) plot:=200 ogl:=1;
+layer.y.label.text$ = "Parameters";
+layer.x.label.text$ = "Model";
+page.title = 0;
+expGraph type:=pdf filename:="D:\neuroplc-paper\paper\figures\fig_models_origin.pdf" tr:=origin;
+expGraph type:=png filename:="D:\neuroplc-paper\paper\figures\fig_models_origin.png" width:=1200 tr:=origin;
+type -a "Figure 3 Models exported";

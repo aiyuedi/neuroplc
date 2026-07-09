@@ -1,0 +1,33 @@
+// Origin LabTalk Script — Figure 1: C^2-BV Architecture Z3 Verification
+// Usage: Open Origin → Window → Script Window → run.file("D:\neuroplc-paper\code\figures\origin_figure1_c2bv.ogs")
+// Output: D:\neuroplc-paper\paper\figures\fig_c2bv_origin.pdf
+
+doc -n;  // new project
+wks.ncols = 4;
+wks.col1.label$ = "Architecture";
+wks.col2.label$ = "Z3 Rate (%)";
+wks.col3.label$ = "CWRU Acc (%)";
+wks.col4.label$ = "Safety Margin";
+
+// Data
+wks.col1.text$ = "B-spline KAN";
+wks.col2.cell1$ = 100.0; wks.col3.cell1$ = 99.93; wks.col4.cell1$ = 4.5;
+wks.col2.cell2$ = 100.0; wks.col3.cell2$ = 100.0; wks.col4.cell2$ = 2.9;
+wks.col2.cell3$ = 100.0; wks.col3.cell3$ = 100.0; wks.col4.cell3$ = 5.6;
+wks.col2.cell4$ = 96.9;  wks.col3.cell4$ = 99.87; wks.col4.cell4$ = 1.1;
+wks.col2.cell5$ = 0.0;   wks.col3.cell5$ = 24.13; wks.col4.cell5$ = 0.0;
+
+// Plot grouped bars
+plotgroup iy:=(1,3) plot:=200 type:=1;
+page.title = 0;
+
+// Style
+layer.x.label.text$ = "C\+(2)-BV Architecture";
+layer.y.label.text$ = "Value";
+set %C -w 1200;  // column width
+label -r legend;
+
+// Export
+expGraph type:=pdf filename:="D:\neuroplc-paper\paper\figures\fig_c2bv_origin.pdf" tr:=origin;
+expGraph type:=png filename:="D:\neuroplc-paper\paper\figures\fig_c2bv_origin.png" width:=1200 tr:=origin;
+type -a "Figure 1 C^2-BV exported";
