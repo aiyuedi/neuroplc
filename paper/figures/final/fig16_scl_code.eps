@@ -1,9 +1,9 @@
 %!PS-Adobe-3.0 EPSF-3.0
 %%Creator: (MATLAB, The MathWorks, Inc. Version 25.2.0.2998904 R2025b. Operating System: Microsoft Windows 11 家庭版 中文版)
 %%Title: ./fig16_scl_code.eps
-%%CreationDate: 2026-07-10T14:42:53
+%%CreationDate: 2026-07-10T14:53:32
 %%Pages: (atend)
-%%BoundingBox:    0     0   385   174
+%%BoundingBox:    0     0   385   155
 %%LanguageLevel: 3
 %%EndComments
 /bd{bind def}bind def
@@ -73,138 +73,130 @@
   N moveto { rlineto } repeat closepath fill } def
 
 %%Page: 1 1
-%%PageBoundingBox:    0     0   385   174
+%%PageBoundingBox:    0     0   385   155
 %%BeginPageSetup
 N
 0 0 M
 384.04 0 L
-384.04 173.78 L
-0 173.78 L
+384.04 154.45 L
+0 154.45 L
 cp
 clip
 1.00 GC
-0 173.78 384.04 173.78 384.04 0 3 0 0 DPLF
-[   0.6 0 0  -0.6 0 173.776] CT
+0 154.45 384.04 154.45 384.04 0 3 0 0 DPLF
+[   0.6 0 0  -0.6 0 154.448] CT
 %%EndPageSetup
--124.47 -40.69 TX
+-124.47 -35.13 TX
 1.00 LW
 0.98 GC
-125.3 41.52 763.7 41.52 763.7 329.48 3 125.3 329.48 DPLF
+125.3 35.96 763.7 35.96 763.7 288.04 3 125.3 288.04 DPLF
 1.67 0 0 [] 0 0.65 LAG
-125.3 41.52 763.7 41.52 763.7 329.48 3 125.3 329.48 DPL
+125.3 35.96 763.7 35.96 763.7 288.04 3 125.3 288.04 DPL
 /Arial-Bold 16.6667 F
 0.13 GC
 GS
-139 56 M
+139 49 M
 1 -1 scale
 (FB) t
 GR
 /Arial-Bold 13.3333 F
 GS
-161 64 M
+161 57 M
 1 -1 scale
 (I) t
 GR
 /Arial-Bold 16.6667 F
 GS
-165 56 M
+165 49 M
 1 -1 scale
-(nference -- generated SCL \(B-spline LUT\)) t
+(nference - SCL excerpt \(B-spline LUT\)) t
 GR
-/Consolas 13.6667 F
+/Consolas 12.5 F
 0.12 0.47 0.71 RC
 GS
-145.25 84.58 M
+145.25 76.82 M
 1 -1 scale
-(01  FUNCTION_BLOCK FB_Inference) t
+(FUNCTION_BLOCK FB_Inference) t
 GR
 GS
-145.25 99.61 M
+145.25 93.26 M
 1 -1 scale
-(02  VAR_INPUT  features: ARRAY[0..27] OF REAL;  END_VAR) t
+(VAR_INPUT features:ARRAY[0..27]OF REAL;END_VAR) t
 GR
 GS
-145.25 114.63 M
+145.25 109.7 M
 1 -1 scale
-(03  VAR_OUTPUT  class_id: INT;  confidence: REAL;  END_VAR) t
+(VAR_OUTPUT class_id:INT;confidence:REAL;END_VAR) t
 GR
 GS
-145.25 129.66 M
+145.25 126.14 M
 1 -1 scale
-(04  FOR i := 0 TO 27 DO) t
+(FOR i:=0 TO 27 DO) t
 GR
 0.10 GC
 GS
-145.25 144.68 M
+145.25 142.58 M
 1 -1 scale
-(05      lo := 0;) t
+(    lo:=0;) t
 GR
 0.12 0.47 0.71 RC
 GS
-145.25 159.7 M
+145.25 159.02 M
 1 -1 scale
-(06      FOR j := 1 TO 13 DO) t
-GR
-GS
-145.25 174.73 M
-1 -1 scale
-(07          IF features[i] >= W_DB.g0[j] THEN lo := j; END_IF;) t
-GR
-GS
-145.25 189.75 M
-1 -1 scale
-(08      END_FOR;) t
+(    FOR j:=1 TO 13 DO) t
 GR
 0.10 GC
 GS
-145.25 204.78 M
+145.25 175.46 M
 1 -1 scale
-(09      t_val := \(features[i]-W_DB.g0[lo]\) /) t
-GR
-GS
-145.25 219.8 M
-1 -1 scale
-(10             \(W_DB.g0[lo+1]-W_DB.g0[lo]+1.0E-10\);) t
+(        IF features[i]>=W_DB.g0[j] THEN lo:=j;END_IF;) t
 GR
 0.12 0.47 0.71 RC
 GS
-145.25 234.82 M
+145.25 191.9 M
 1 -1 scale
-(11      FOR o := 0 TO 15 DO) t
+(    END_FOR;) t
 GR
 0.10 GC
 GS
-145.25 249.85 M
+145.25 208.34 M
 1 -1 scale
-(12          v3[o*28+i] := W_DB.t1[base+lo]*\(1-t_val\)) t
-GR
-GS
-145.25 264.87 M
-1 -1 scale
-(13                     + W_DB.t1[base+lo+1]*t_val;) t
+(    t_val:=\(features[i]-W_DB.g0[lo]\)/\(W_DB.g0[lo+1]-W_DB.g0[lo]+1E-10\);) t
 GR
 0.12 0.47 0.71 RC
 GS
-145.25 279.9 M
+145.25 224.78 M
 1 -1 scale
-(14      END_FOR;) t
+(    FOR o:=0 TO 15 DO) t
+GR
+0.10 GC
+GS
+145.25 241.22 M
+1 -1 scale
+(        v3[o*28+i]:=W_DB.t1[base+lo]*\(1-t_val\)+W_DB.t1[base+lo+1]*t_val;) t
+GR
+0.12 0.47 0.71 RC
+GS
+145.25 257.66 M
+1 -1 scale
+(    END_FOR;) t
 GR
 GS
-145.25 294.92 M
+145.25 274.1 M
 1 -1 scale
-(15  END_FOR;) t
+(END_FOR;) t
 GR
 GS
-145.25 309.94 M
+145.25 290.54 M
 1 -1 scale
-(16  END_FUNCTION_BLOCK) t
+(END_FUNCTION_BLOCK) t
 GR
 /Arial 11.6667 F
 0.45 GC
 GS
-145.25 326.72 M
+145.25 286.06 M
 1 -1 scale
-(Line numbers and syntax highlighting rendered as print-ready vector figure.) t
+(Syntax-highlighted SCL rendered as print-ready vector figure.) t
 GR
 %%Trailer
 %%Pages: 1
