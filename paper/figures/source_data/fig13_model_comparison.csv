@@ -1,0 +1,7 @@
+model,parameters,accuracy_percent,accuracy_std
+Teacher,48708,99.93,0.05
+B-KAN,6148,99.93,0.06
+F-KAN,6676,100,0
+W-KAN,4628,100,0
+C-KAN,6400,99.87,0.08
+MLP,1524,99.89,0.12

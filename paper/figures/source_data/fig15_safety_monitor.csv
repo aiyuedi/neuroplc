@@ -1,0 +1,4 @@
+component,wcet_us,wcet_ms,share_percent
+Inference,22673,22.673,99.70974976911914
+Safety Monitor,66,0.066,0.2902502308808655
+Combined,22739,22.739,100.0

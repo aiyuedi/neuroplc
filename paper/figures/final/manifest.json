@@ -1,0 +1,27 @@
+{
+  "matlab_native": [
+    "fig01_c2bv_basis",
+    "fig03_da_tightness",
+    "fig04_sharp_bound",
+    "fig07_da_scaling",
+    "fig08_segment_bounds",
+    "fig10_confusion_matrices",
+    "fig11_tsne_features",
+    "fig12_cross_validation",
+    "fig16_scl_code"
+  ],
+  "origin_suited": [
+    "fig02_verification",
+    "fig05_da_vs_ia",
+    "fig06_adaptive_lut",
+    "fig09_wcet_breakdown",
+    "fig13_model_comparison",
+    "fig14_cross_domain",
+    "fig15_safety_monitor"
+  ],
+  "diagram_native": [
+    "fig1_overview",
+    "fig2_compiler_arch"
+  ],
+  "source_data_count": 13
+}

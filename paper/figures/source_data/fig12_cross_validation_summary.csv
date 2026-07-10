@@ -1,0 +1,5 @@
+class,mean_abs_logit_error,std_abs_logit_error,da_bound
+Class 1,0.0011,0.00034,0.004
+Class 2,0.00112,0.00032,0.004
+Class 3,0.00111,0.00031,0.004
+Class 4,0.00109,0.00033,0.004

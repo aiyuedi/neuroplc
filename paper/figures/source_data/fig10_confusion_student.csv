@@ -1,0 +1,5 @@
+true_label,pred_ball,pred_inner,pred_outer,pred_normal
+Ball,691,0,0,0
+Inner,0,683,0,1
+Outer,1,0,685,0
+Normal,0,0,0,683

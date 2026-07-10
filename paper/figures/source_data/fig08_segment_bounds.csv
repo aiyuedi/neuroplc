@@ -1,0 +1,5 @@
+lut_points,global_error,segment_error,tightening_x,pct_below_half,pct_below_fifth
+10,0.00998,0.00179,5.6,96.2,63.5
+15,0.00412,0.00069,6.0,96.7,67.6
+20,0.00224,0.00036,6.2,97.0,69.2
+50,0.00034,5e-05,6.7,97.4,72.3

@@ -1,0 +1,6 @@
+architecture,z3_rate_percent,accuracy_percent,accuracy_std,safety_margin_x,safety_margin_std
+B-spline,100,99.93,0.05,4.5,0.3
+Fourier,100,100.0,0.0,2.9,0.2
+Wavelet,100,100.0,0.0,5.6,0.4
+ChebyKAN,96.9,99.87,0.08,1.1,0.1
+MLP,0,24.13,0.25,0,0
