@@ -13,8 +13,8 @@ violating it cannot admit the polynomial-time compiler-computed error bound
 that SVNN provides. This transforms Remark~\ref{rem:near_necessity} from
 an informal observation into a formal separation result.
 
-\vspace{4pt}
-\noindent\textbf{Theorem~5 (Computational Necessity of Condition~1).}
+\setcounter{theorem}{4}
+\begin{theorem}[Computational Necessity of Condition~1]
 \label{thm:necessity}
 Let $\mathcal{A}$ be a feedforward architecture that violates
 Condition~1---i.e., some layer couples a linear transform and a nonlinear
@@ -28,6 +28,7 @@ is \textbf{NP-hard} in the number of neurons, even when $\sigma$ is
 piecewise-linear (ReLU). By contrast, any architecture satisfying
 Condition~1 admits a bound on $\varepsilon^{*}$ computable in
 $O(L \cdot d_{\max}^2)$ time by the structural induction of Theorem~2.
+\end{theorem}
 
 \vspace{4pt}
 \noindent\textit{Proof.} The proof proceeds in two steps: (1) a polynomial-time
@@ -123,8 +124,8 @@ that Condition~3 (contractive composition, $\gamma < 1$) has a parallel
 consequence on the \textit{learning} side: SVNN-compliant architectures enjoy
 a \textbf{depth-improving} generalization bound unavailable to standard MLPs.
 
-\vspace{4pt}
-\noindent\textbf{Theorem~6 (Generalization Bound for SVNN).}
+\setcounter{theorem}{5}
+\begin{theorem}[Generalization Bound for SVNN]
 \label{thm:generalization}
 Let $M$ be a KAN architecture satisfying SVNN Conditions~1--3 with
 contractivity constant $\gamma < 1$, depth $L$, and input domain $X \subset
@@ -142,6 +143,7 @@ L(\hat{M}) - \hat{L}(\hat{M}) \leq
 where $L(\hat{M})$ is the true risk and $\hat{L}(\hat{M})$ is the empirical
 risk. The key term $\gamma^L B / \sqrt{n}$ decreases \textbf{exponentially}
 in network depth $L$---deeper SVNN networks generalize strictly better.
+\end{theorem}
 
 \vspace{4pt}
 \noindent\textit{Proof.} The proof uses the Rademacher complexity

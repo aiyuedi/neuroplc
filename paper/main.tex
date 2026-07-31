@@ -219,7 +219,7 @@ The SVNN type system is distinguished by three properties:
     functions---the first Galois connection for neural network activations---
     and its bound $M_2 h^2 / 8$ is \textbf{semantically tight} (attained
     by $f^*(x) = M_2 x^2 / 2$ at every LUT midpoint, $1{,}000/1{,}000$
-    exact). Any tighter coefficient violates soundness on $32.1\%$ of
+    exact). Any tighter coefficient violates soundness on $62.4\%$ of
     random $C^3$ instances.
 
     \item \textbf{Compositionality (Theorem~8).}
@@ -301,7 +301,7 @@ over PROFINET/OPC UA. An on-PLC time-domain subset is also compiled
           $\Omega(d^2 \cdot r^2)$---a $\Theta(d)$ gap verified on networks
          up to $d=128$ (MATLAB). \textbf{DA Optimality} (Theorem~9) proves
          Doubleton Arithmetic is the tightest sound first-order abstract
-         domain for $C^2$ functions ($32.1\%$ of $C^3$ instances reject
+         domain for $C^2$ functions ($62.4\%$ of $C^3$ instances reject
          any tighter linear coefficient). \textbf{SVNN Compositionality}
           (Theorem~8) proves the SVNN class forms an algebraic monoid,
          enabling modular certification.
@@ -722,12 +722,13 @@ cycle detection, reachability analysis, and JSON serialization---enabling
 separate testing and debugging of each compilation stage.
 
 \vspace{4pt}
-\noindent\textbf{Lemma 1 (IR Minimality).}
+\begin{lemma}[IR Minimality]
 The 6-op IR type set $\mathcal{O} = \{\text{MatMul}, \text{BsplineLUT},
 \text{StandardAct}, \text{Add}, \text{Softmax}, \text{Argmax}\}$ is both
 \textit{necessary} and \textit{sufficient} for any KAN classifier under
 SVNN Conditions~1--2 (Theorem~2), and is the \textit{maximal} set
 preserving those conditions.
+\end{lemma}
 
 \vspace{2pt}
 \noindent\textit{Proof sketch.}
@@ -1267,8 +1268,8 @@ $W^{(1)}$ (L1) & $4{\times}16$ & 33 (52\%) & 31 (48\%) & --- \\
 isolates sign-cancellation. Dominant sign per row: lower $\rightarrow$ more balanced $\rightarrow$ greater DA benefit.}
 \end{table}
 
-\vspace{4pt}
-\noindent\textbf{Lemma 3 (DA Probabilistic Tightening Guarantee).}
+\setcounter{lemma}{2}
+\begin{lemma}[DA Probabilistic Tightening Guarantee]
 Let $W^{(0)} \in \mathbb{R}^{d_1 \times d_0}$ and $W^{(1)} \in
 \mathbb{R}^{d_2 \times d_1}$ be the weight matrices of layers 1 and 2
 of a KAN. Assume each weight is drawn independently from a symmetric
@@ -1293,6 +1294,7 @@ In particular, for $d_1 = 16$, $d_0 = 28$, $\delta = 0.05$, and
 $w_{\min}^2/w_{\max}^2 \geq 0.6$ (typical for KANs with weight decay):
 $R \geq 2.2$ with 95\% confidence. The empirical $R = 3.1\times$ for
 the trained KAN exceeds this conservative lower bound.
+\end{lemma}
 
 \vspace{2pt}
 \noindent\textit{Proof.}
@@ -2057,8 +2059,8 @@ over-counts correlated cancellations and is reported only to bracket the
 empirical MaxAE (3.65).
 \end{remark}
 
-\vspace{4pt}
-\noindent\textbf{Lemma 2 (Adversarial Lower Bound).}
+\setcounter{lemma}{1}
+\begin{lemma}[Adversarial Lower Bound]
 There exists an input $\mathbf{x}^* \in [-3,3]^{28}$ such that the
 LUT-compiled KAN $[28,16,4]$ forward pass differs from PyTorch FP32
 by $\Delta(\mathbf{x}^*) \geq 0.131$ in $\ell_\infty$ norm (measured
@@ -2100,7 +2102,7 @@ identifies inputs achieving $\ell_\infty$ logit error up to
 $14.17$. This demonstrates that the bound's tightness is input-dependent
 and that the segment-aware + DA framework correctly bounds even
 pathological cases when per-function $M_2$ values are used.
-\hfill $\blacksquare$
+\end{lemma}
 
 \setcounter{theorem}{3}
 \begin{theorem}[Probabilistic Depth-Scaling under the Random-Sign Model]
@@ -5029,7 +5031,8 @@ a companion safety monitor (Algorithm~3, $\leq 5\%$ overhead).
 
 \vspace{4pt}
 \noindent\textbf{Open directions.} Mechanized proof of the IR type soundness
-theorem in Coq/Lean, physical PLC WCET measurement, and online fine-tuning
+theorem in Coq/Lean, physical PLC WCET measurement (all current timing
+evidence is simulation-based via PLCSIM Advanced and Z3 SMT), and online fine-tuning
 on PLC hardware remain for future work. The type-theoretic framework
 established here---defining well-typedness conditions for certifiable
 neural architectures---provides the foundation for these extensions and
@@ -5053,6 +5056,7 @@ and evaluation scripts are available at
 \url{https://github.com/aiyuedi/neuroplc}. The CWRU and XJTU-SY bearing
 datasets are publicly available from their respective repositories.
 
+\appendix
 \input{appendix_coq_spec}
 
 % ===========================================================================

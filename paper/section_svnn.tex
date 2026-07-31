@@ -108,8 +108,8 @@ We now establish the architectural conditions that enable SVNN compilation.
 The conditions formalize why some architectures admit tight, composable
 error bounds while others do not.
 
-\vspace{4pt}
-\noindent\textbf{Theorem 2 (SVNN Sufficient Conditions).}
+\setcounter{theorem}{1}
+\begin{theorem}[SVNN Sufficient Conditions]
 \label{thm:svnn_conditions}
 Let $\mathcal{A}$ be a feedforward neural network architecture. If $\mathcal{A}$
 satisfies Conditions~1 and~2 below, then $\mathcal{A}$ is structurally
@@ -136,6 +136,7 @@ decompose naturally at the IR level into separate MatMul, BsplineLUT,
 StandardAct, and Add nodes---each satisfies one of the two pure types.
 Conditions~1--2 thus characterize exactly the class that admits the
 induction, and KAN belongs to it; standard MLPs do not.
+\end{theorem}
 
 \begin{enumerate}
     \item \textbf{Operation-Type Closure (Condition~1).} The architecture
@@ -319,8 +320,8 @@ $[28,16,4]$ KAN, the combined segment-aware DA safety factor is approximately
 $11.9\times$ above the minimum required for classification correctness
 ({\S}\ref{sec:method}, Table~\ref{tab:da_bounds_summary}).
 
-\vspace{4pt}
-\noindent\textbf{Theorem 8 (SVNN Compositional Closure).}
+\setcounter{theorem}{7}
+\begin{theorem}[SVNN Compositional Closure]
 \label{thm:svnn-closure}
 The SVNN class is closed under sequential composition: if
 $N_1 \in \text{SVNN}(\varepsilon_1, L_1)$ and
@@ -330,6 +331,7 @@ $N = N_2 \circ N_1 \in \text{SVNN}(\varepsilon, L)$ with:
 \varepsilon = \varepsilon_2 + L_2 \cdot \varepsilon_1,\qquad
 L = L_2 \cdot L_1 \label{eq:svnn_closure}
 \end{equation}
+\end{theorem}
 
 \vspace{2pt}
 \noindent\textit{Proof.} Let $x$ be any valid input. By SVNN of $N_1$:
@@ -363,7 +365,6 @@ new error (Theorem~2, Step~1). Modular certification is essential for
 industrial scalability: as diagnostic pipelines grow to include preprocessing,
 multiple sensor modalities, and hierarchical classification, each module's
 certificate composes automatically---no end-to-end re-certification required.
-\hfill $\blacksquare$
 
 \vspace{4pt}
 \begin{remark}[Near-Necessity of the SVNN Conditions]
@@ -688,8 +689,7 @@ Perceptron (MLP) with standard activations---does not. This result
 clarifies \textit{why} prior ML$\to$PLC tools provide no correctness
 guarantees: the architecture itself precludes them.
 
-\vspace{4pt}
-\noindent\textbf{Proposition 1 (Standard MLPs Do Not Admit the SVNN Tight-Bound Structure).}
+\begin{proposition}[Standard MLPs Do Not Admit the SVNN Tight-Bound Structure]
 \label{prop:mlp_negative}
 Let $\mathcal{M}$ be a feedforward MLP using ReLU, SiLU, Sigmoid, or Tanh
 activations. Then $\mathcal{M}$ does not admit the compiler-computable
@@ -699,6 +699,7 @@ general (tools such as Reluplex and $\alpha$-$\beta$-CROWN verify ReLU
 networks)---it means the \emph{KAN-style} de~Boor curvature bound, which
 is computable from parameters alone without knowing the input distribution,
 does not apply to MLP activations.
+\end{proposition}
 
 \vspace{4pt}
 \noindent\textit{Proof.} We analyze each activation function:
