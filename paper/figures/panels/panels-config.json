@@ -1,0 +1,39 @@
+{
+  "width_mm": 183,
+  "height_mm": 120,
+  "journal": "ieee",
+  "panels": [
+    {
+      "id": "A",
+      "src": "D:\\neuroplc-paper\\paper\\figures\\panels\\panel_a_da_vs_ia.svg",
+      "x_mm": 0,
+      "y_mm": 0,
+      "scale": 1.0,
+      "label": "A"
+    },
+    {
+      "id": "B",
+      "src": "D:\\neuroplc-paper\\paper\\figures\\panels\\panel_b_adaptive_lut.svg",
+      "x_mm": 92,
+      "y_mm": 0,
+      "scale": 1.0,
+      "label": "B"
+    },
+    {
+      "id": "C",
+      "src": "D:\\neuroplc-paper\\paper\\figures\\panels\\panel_c_da_scaling.svg",
+      "x_mm": 0,
+      "y_mm": 62,
+      "scale": 1.0,
+      "label": "C"
+    },
+    {
+      "id": "D",
+      "src": "D:\\neuroplc-paper\\paper\\figures\\panels\\panel_d_segment_bounds.svg",
+      "x_mm": 92,
+      "y_mm": 62,
+      "scale": 1.0,
+      "label": "D"
+    }
+  ]
+}
