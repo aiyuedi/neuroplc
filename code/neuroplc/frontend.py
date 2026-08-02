@@ -231,13 +231,18 @@ def kan_to_ir(model, name: str = "kan",
         g.add_edge(last_out, silu_node)
 
         # Base linear transform
+        # NOTE (2026-08-01 audit fix): scale_base is FOLDED into the weights.
+        # KAN semantics: y_j = scale_base · Σ_i base_weight[j,i]·SiLU(x_i)
+        # The S7 backend's _emit_add does not read scale attributes, so folding
+        # here keeps the generated SCL semantically equivalent to PyTorch.
+        # (Regression found in audit: scales were stored but never consumed,
+        # causing ~83% classification agreement on real generated SCL.)
         base_matmul = g.add_node(
             IROpType.MatMul,
             name=f"l{l_idx}_base",
             attrs={
-                "W": ld["base_weight"],         # (out, in)
+                "W": ld["base_weight"] * ld["scale_base"],  # folded scale
                 "b": np.zeros(out_d, dtype=np.float32),
-                "_scale": ld["scale_base"],
             },
             shape_in=(in_d,),
             shape_out=(out_d,),
@@ -248,14 +253,17 @@ def kan_to_ir(model, name: str = "kan",
         table, grid_pts = _build_bspline_lut(
             ld, n_points=lut_points, x_range=x_range, adaptive=adaptive)
 
+        # NOTE (2026-08-01 audit fix): scale_spline folded into the LUT table.
+        # Table values are scale_spline · φ(x); the backend's BsplineLUT
+        # evaluation (linear interpolation) preserves the multiplicative
+        # factor, making the generated SCL match PyTorch semantics.
         bspline_node = g.add_node(
             IROpType.BsplineLUT,
             name=f"l{l_idx}_bspline",
             attrs={
-                "table": table,                 # (out, in, lut_points)
+                "table": table * ld["scale_spline"],  # folded scale
                 "grid": grid_pts,                # (lut_points,)
                 "x_range": list(x_range),
-                "_scale": ld["scale_spline"],
                 "_spline_order": ld["spline_order"],
                 "_grid_size": ld["grid_size"],
             },

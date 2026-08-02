@@ -1,0 +1,141 @@
+% ============================================================================
+% Theorem 9': Sharp k-th Order LUT Interpolation Bounds
+% (upgrades the DA optimality claim from cubic-only to all orders)
+% ============================================================================
+
+\subsection{Sharp k-th Order LUT Error Bounds}
+\label{sec:lut-sharp}
+
+The de~Boor bound $\varepsilon = M_2 h^2/8$ (Eq.~\ref{eq:de_boor_general})
+governs \emph{linear} interpolation of $C^2$ activations. We now generalize
+to LUTs of arbitrary interpolation order $k$ and establish the \emph{sharp
+constants}---the best possible coefficients for every order---together with
+an explicit extremal family attaining them. This upgrades the DA
+optimality claim (Theorem~\ref{thm:da-optimality}) from an empirical
+statement restricted to cubic polynomials to an exact, all-orders minimax
+optimality theorem.
+
+Define the \emph{window product constant}
+\begin{equation}
+Q_k \;=\; \max_{u \in [0, k-1]} \prod_{i=0}^{k-1} |u - i|,
+\qquad k \geq 2.
+\label{eq:window_product}
+\end{equation}
+For $k=2$ (linear interpolation), $Q_2 = 1/4$; for $k=3$ (quadratic
+interpolation), $Q_3 = 1/(3\sqrt{3})$; for $k=4$, $Q_4 = 1$; for $k=5$,
+$Q_5 \approx 3.631$. The \emph{sharp constant} is
+$c_k = Q_k / k!$:
+\begin{equation}
+c_2 = \tfrac{1}{8}, \qquad
+c_3 = \tfrac{1}{9\sqrt{3}} \approx 0.0642, \qquad
+c_4 = \tfrac{1}{24} \approx 0.0417, \qquad
+c_5 \approx 0.0303.
+\label{eq:sharp_constants}
+\end{equation}
+
+\setcounter{theorem}{8}
+\begin{theorem}[Sharp k-th Order LUT Error Bounds; Minimax Optimality of the DA Bound]
+\label{thm:sharp-lut}
+Let $\sigma \in C^k([a,b])$, $k \geq 2$, with $\|\sigma^{(k)}\|_\infty \leq M_k$.
+Let $\mathrm{LUT}_k(\sigma)$ be the order-$k$ LUT on an equispaced grid of
+cell width $h = (b-a)/N$---each window of $k$ consecutive nodes interpolated
+by the degree-$(k-1)$ polynomial through them. Then:
+
+\begin{enumerate}
+    \item \textbf{Soundness (all orders, certified bound).}
+    \begin{equation}
+    \|\sigma - \mathrm{LUT}_k(\sigma)\|_\infty
+    \;\leq\; \frac{M_k}{k!}\, Q_k\, h^k.
+    \label{eq:sharp_soundness}
+    \end{equation}
+
+    \item \textbf{Exactness (sharpness).} The constant in
+    Eq.~\eqref{eq:sharp_soundness} is \emph{attained exactly}: there exists
+    $\sigma^{*} \in C^\infty$ with $\|\sigma^{*(k)}\|_\infty = M_k$ such that
+    \begin{equation}
+    \|\sigma^{*} - \mathrm{LUT}_k(\sigma^{*})\|_\infty
+    \;=\; \frac{M_k}{k!}\, Q_k\, h^k,
+    \label{eq:sharp_exactness}
+    \end{equation}
+    namely the extremal family
+    $\sigma^{*}(x) = (M_k/k!) \prod_{i=0}^{k-1} (x - x_i)$ on each window
+    (its $k$-th derivative is $M_k$ identically, and its LUT interpolant is
+    the zero polynomial). Hence $\sup$ over the class equals the bound
+    exactly---no closure or asymptotic argument is needed.
+
+    \item \textbf{Minimax optimality of the abstract domain.} Among all
+    sound affine (first-order) design-time schemes---any map from the
+    $N{+}1$ LUT values to a piecewise-affine certificate---the worst-case
+    certified bound over the class is at least
+    $(M_k/k!)\,Q_k\,h^k$, and the LUT achieves it. For $k=2$ this
+    recovers the classical optimal-recovery result: no affine method beats
+    the de~Boor constant $M_2 h^2/8$.
+\end{enumerate}
+\end{theorem}
+
+\vspace{2pt}
+\noindent\textit{Proof sketch.}
+\textbf{(1)} The pointwise interpolation remainder theorem gives, for
+$\sigma \in C^k$ interpolated at nodes $x_0, \dots, x_{k-1}$,
+\begin{equation}
+|\sigma(x) - p(x)| = \frac{|\sigma^{(k)}(\xi_x)|}{k!}
+\prod_{i=0}^{k-1} |x - x_i|
+\;\leq\; \frac{M_k}{k!} \prod_{i=0}^{k-1} |x - x_i|.
+\label{eq:interp_remainder}
+\end{equation}
+Writing $x = x_0 + u h$ with $u \in [0, k-1]$ gives
+$\prod_i |x - x_i| = h^k \prod_i |u - i| \leq Q_k h^k$, whence
+Eq.~\eqref{eq:sharp_soundness}. \textbf{(2)} For
+$\sigma^{*}(x) = (M_k/k!)\prod_{i=0}^{k-1}(x - x_i)$, the leading
+coefficient is $M_k/k!$, so $\sigma^{*(k)} \equiv M_k$; and
+$\sigma^{*}$ vanishes at every node, so its LUT interpolant is the zero
+polynomial. The error at $x$ is exactly
+$(M_k/k!) \prod_i |x - x_i|$, whose window supremum is
+$(M_k/k!) Q_k h^k$ by definition of $Q_k$
+(Eq.~\eqref{eq:window_product}). \textbf{(3)} Any sound affine scheme
+must be sound at $\sigma^{*}$ (a member of the class); since the true
+supremum of $|\sigma^{*} - \mathrm{LUT}_k(\sigma^{*})|$ is the constant
+above, any certificate bound below it is violated. The LUT attains it.
+For $k = 2$ this is the classical minimax optimality of piecewise-linear
+interpolation over the $C^2$ class. $\square$
+
+\vspace{2pt}
+\noindent\textbf{Remarks.}
+\textit{(i) The folklore formula $M_k h^k / 2^k$ is false for $k \geq 3$.}
+The sharp constants are $c_3 = 1/(9\sqrt{3}) \approx 0.0642 \neq 1/8$ and
+$c_4 = 1/24 \neq 1/16$; the coincidental agreement holds only for $k \leq 2$.
+\textit{(ii) The extremal family is a degree-$k$ polynomial with a specific
+sign profile}---random cubic sampling (as in prior empirical claims) cannot
+approach the constant, which is exactly why sharpness requires the explicit
+construction above rather than Monte Carlo.
+\textit{(iii) Compositional soundness.} For an $L$-layer SVNN with
+activation layer $\ell$ having an order-$k_\ell$ LUT of width $h_\ell$,
+\begin{equation}
+B_{\mathrm{total}} \;=\;
+\sum_{\ell=1}^{L} \Bigl( \prod_{j>\ell} \|W_j\|_\infty \Bigr)
+\cdot \frac{M_k^{(\ell)}}{k_\ell!}\, Q_{k_\ell}\, h_\ell^{k_\ell}
+\label{eq:sharp_compositional}
+\end{equation}
+is sound by induction (the pointwise error $e_\ell$ at layer $\ell$
+satisfies $|e_\ell| \leq c_k M_k h^k$, and propagation through subsequent
+linear maps amplifies by $\|W_j\|_\infty$). Each term is individually
+attained by the sign-perturbed extremal
+$\sigma_j = \pm \sigma^{*}$ (the involution $\sigma \mapsto -\sigma$
+preserves $\|\sigma^{(k)}\|_\infty$). Exact \emph{simultaneous} attainment
+holds for $L=1$; for $L \geq 2$ the bound is sharp up to the composition
+(per-neuron sign freedom aligns intermediate pre-activations onto extremal
+cells only under injectivity of the intermediate maps).
+
+\vspace{2pt}
+\noindent\textbf{Connection to DA (Theorem~\ref{thm:da-optimality}).}
+Setting $k = 2$ in Theorem~\ref{thm:sharp-lut} yields the de~Boor bound
+with sharp constant $1/8$ and the extremal quadratic
+$\sigma^{*}(x) = (M_2/2)(x - x_0)(x - x_1)$, whose error attains
+$M_2 h^2/8$ at the window midpoint---the semantic tightness of the DA
+bound established in Theorem~\ref{thm:tightness} (King~C). The upgrade
+here is threefold: (i)~the optimality claim extends from quadratic
+functions (degree-$\leq 2$) to \emph{all} interpolation orders;
+(ii)~the extremal family is explicit and verified to machine precision
+($10{,}000$ random $C^k$ functions: soundness ratio $\leq 1$; extremal
+ratio $= 1.000000$ exactly, E63); (iii)~the minimax optimality statement
+is made formal over the class of affine design-time schemes.

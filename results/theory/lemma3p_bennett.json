@@ -1,0 +1,132 @@
+{
+  "theorem": "Lemma3p_bennett",
+  "rows": [
+    {
+      "family": "gaussian",
+      "d": 16,
+      "kappa": 1.2524363827696126,
+      "bennett_coverage": 1.0,
+      "ratio_separation_pass": 1.0,
+      "empirical_median_R": 4.633286882844564,
+      "coverage_ok": true,
+      "separation_ok": true
+    },
+    {
+      "family": "gaussian",
+      "d": 64,
+      "kappa": 1.2530298658262482,
+      "bennett_coverage": 1.0,
+      "ratio_separation_pass": 1.0,
+      "empirical_median_R": 9.474779370401208,
+      "coverage_ok": true,
+      "separation_ok": true
+    },
+    {
+      "family": "gaussian",
+      "d": 256,
+      "kappa": 1.253207178755632,
+      "bennett_coverage": 1.0,
+      "ratio_separation_pass": 1.0,
+      "empirical_median_R": 18.791024655489622,
+      "coverage_ok": true,
+      "separation_ok": true
+    },
+    {
+      "family": "gaussian",
+      "d": 1024,
+      "kappa": 1.2534163453969345,
+      "bennett_coverage": 1.0,
+      "ratio_separation_pass": 1.0,
+      "empirical_median_R": 37.744449654964114,
+      "coverage_ok": true,
+      "separation_ok": true
+    },
+    {
+      "family": "uniform",
+      "d": 16,
+      "kappa": 1.1544333041170156,
+      "bennett_coverage": 1.0,
+      "ratio_separation_pass": 1.0,
+      "empirical_median_R": 5.058588180763446,
+      "coverage_ok": true,
+      "separation_ok": true
+    },
+    {
+      "family": "uniform",
+      "d": 64,
+      "kappa": 1.1547697710734741,
+      "bennett_coverage": 1.0,
+      "ratio_separation_pass": 1.0,
+      "empirical_median_R": 10.263075241002387,
+      "coverage_ok": true,
+      "separation_ok": true
+    },
+    {
+      "family": "uniform",
+      "d": 256,
+      "kappa": 1.154752992076576,
+      "bennett_coverage": 1.0,
+      "ratio_separation_pass": 1.0,
+      "empirical_median_R": 20.87924557012755,
+      "coverage_ok": true,
+      "separation_ok": true
+    },
+    {
+      "family": "uniform",
+      "d": 1024,
+      "kappa": 1.1546979495539809,
+      "bennett_coverage": 1.0,
+      "ratio_separation_pass": 1.0,
+      "empirical_median_R": 41.1243005597144,
+      "coverage_ok": true,
+      "separation_ok": true
+    },
+    {
+      "family": "laplace",
+      "d": 16,
+      "kappa": 1.4169821477991915,
+      "bennett_coverage": 1.0,
+      "ratio_separation_pass": 1.0,
+      "empirical_median_R": 4.113213956470643,
+      "coverage_ok": true,
+      "separation_ok": true
+    },
+    {
+      "family": "laplace",
+      "d": 64,
+      "kappa": 1.4145548180693936,
+      "bennett_coverage": 1.0,
+      "ratio_separation_pass": 1.0,
+      "empirical_median_R": 8.3722204663148,
+      "coverage_ok": true,
+      "separation_ok": true
+    },
+    {
+      "family": "laplace",
+      "d": 256,
+      "kappa": 1.414241034332103,
+      "bennett_coverage": 1.0,
+      "ratio_separation_pass": 1.0,
+      "empirical_median_R": 16.796677713650716,
+      "coverage_ok": true,
+      "separation_ok": true
+    },
+    {
+      "family": "laplace",
+      "d": 1024,
+      "kappa": 1.4141850799050009,
+      "bennett_coverage": 1.0,
+      "ratio_separation_pass": 1.0,
+      "empirical_median_R": 33.42388478340985,
+      "coverage_ok": true,
+      "separation_ok": true
+    }
+  ],
+  "pass": true,
+  "sparse_outlier": {
+    "d": 256,
+    "kappa": 15.974859379150153,
+    "median_R": 1.0,
+    "no_sqrtd_separation": true
+  }
+}

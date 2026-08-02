@@ -461,7 +461,7 @@ Liu et~al.~\cite{liu2024kan} introduced KANs by replacing MLPs' fixed
 activations with learnable univariate B-splines---a structural change whose
 implications for compiler design have been underestimated.
 \textbf{What the literature has established:} Rigas et~al.~\cite{rigas2025explainable},
-CNN-1D-KAN~\cite{cnn1dkan2025}, and AdaptPolyKAN~\cite{adaptpolykan2025}
+CNN-1D-KAN~\cite{cnn1dkan2025}, and polynomial-basis KAN variants
 independently confirmed that KANs match or exceed MLP accuracy on bearing
 fault diagnosis while using far fewer parameters. \textbf{What the literature
 has not addressed:} none of these works consider whether the B-spline
@@ -473,7 +473,7 @@ that KAN's univariate B-spline structure is uniquely amenable to LUT-based
 hardware evaluation---a property absent from MLPs. On FPGA, KANEL\'{E}%
 ~\cite{kanele2026} (ISFPGA 2026 Best Paper) achieves 2,700$\times$ speedup
 via LUT-based evaluation with quantized B-splines. On microcontrollers,
-LUT-KAN~\cite{lutkan2025} replaces Cox-de~Boor recursion with precomputed
+LUT-KAN~\cite{lutkan2024} replaces Cox-de~Boor recursion with precomputed
 LUT operations (7--25$\times$ speedup, as little as 68~bytes/edge);
 KAN-SoC~\cite{flores2025kan} achieved 10$\times$ memory reduction vs.\ MLP
 (693~bytes vs.\ 6{,}807~bytes) for EV battery estimation. On PLCs,
@@ -493,9 +493,11 @@ native SCL compilation, no correctness guarantee, and no compiler toolchain.
 
 \textbf{KAN verification.} Schwartz et~al.~\cite{schwartz2026optimal} proposed
 PWA abstraction with MILP encoding for KAN verification---operating at SVNN
-Level~3 (exact certification within PWA abstraction error). Tankman%
-~\cite{tankman2026lipschitz} proved layer-wise Lipschitz $P(\text{KAN})\leq 1$
-as a structural property. KAN4CBC~\cite{zhang2025kan4cbc} demonstrated
+Level~3 (exact certification within PWA abstraction error). In this paper we
+verify layer-wise contractivity $P(\text{KAN})\leq 1$ empirically for the trained
+model (Condition~3, {\S}\ref{sec:svnn-conditions}), noting that
+polynomial-basis KANs admit structural Lipschitz bounds via coefficient
+magnitudes. KAN4CBC~\cite{zhang2025kan4cbc} demonstrated
 SMT-based safe controller synthesis. GloroKAN~\cite{glorokan2025} and
 PolyKAN~\cite{polykan2025} provide complementary robustness and compression.
 These are synergistic with \neuroplc: Schwartz et~al.'s MILP verification can
@@ -1269,99 +1271,122 @@ isolates sign-cancellation. Dominant sign per row: lower $\rightarrow$ more bala
 \end{table}
 
 \setcounter{lemma}{2}
-\begin{lemma}[DA Probabilistic Tightening Guarantee]
-Let $W^{(0)} \in \mathbb{R}^{d_1 \times d_0}$ and $W^{(1)} \in
-\mathbb{R}^{d_2 \times d_1}$ be the weight matrices of layers 1 and 2
-of a KAN. Assume each weight is drawn independently from a symmetric
-distribution ($\mathbb{P}(W > 0) = \mathbb{P}(W < 0) = 1/2$) and that
-all weight magnitudes are bounded: $w_{\min}^2 \leq |W^{(1)}_{k,j}
-\cdot W^{(0)}_{j,i}| \leq w_{\max}^2$ for all $(k,j,i)$. Define the
-combined coefficient $C_{k,i} = \sum_{j=1}^{d_1} W^{(1)}_{k,j} \cdot
-W^{(0)}_{j,i}$, the DA error term $E_{\text{DA}} = \sum_{i=1}^{d_0}
-|C_{k,i}|$, and the IA error term $E_{\text{IA}} = \sum_{i=1}^{d_0}
-\sum_{j=1}^{d_1} |W^{(1)}_{k,j} \cdot W^{(0)}_{j,i}|$.
+\begin{lemma}[Moment-Robust DA/IA Tightening Ratio]
+\label{lem:da_moment}
+Let $\mathbf{w} = (w_1, \dots, w_{d_1}) \in \mathbb{R}^{d_1}$ be
+i.i.d.\ weights with symmetric, mean-zero distribution, bounded
+$|w_j| \leq w_{\max}$ a.s., with $\mu := \mathbb{E}|w| > 0$,
+$\nu^2 := \mathbb{E} w^2$, and finite moment ratio
+$\kappa := \nu/\mu$. Let $\boldsymbol{\delta} = (\delta_1, \dots,
+\delta_{d_1})$ be the per-neuron LUT errors, with $|\delta_j| \leq e$
+and $\boldsymbol{\delta}$ \emph{independent of} $\mathbf{w}$ (LUT error
+signs are determined by B-spline geometry, not by weight values). Define
+the DA error term $S = \sum_j w_j \delta_j$ and the IA error term
+$E_{\text{IA}} = e \sum_j |w_j|$. Then for every $p \in (0,1)$:
 
-Then for any $\delta \in (0,1)$, with probability at least $1-\delta$:
+\begin{enumerate}
+    \item \textbf{Upper tail (Bennett).} With probability at least
+    $1-p$ over $\mathbf{w}$,
+    \begin{equation}
+    |S| \;\leq\; C \cdot e \cdot \nu \cdot \sqrt{d_1 \log(2/p)}
+    \label{eq:bennett_upper}
+    \end{equation}
+    for an absolute constant $C$ (e.g., $C = 4$ suffices when
+    $w_{\max} \leq 3\nu$, which holds for Gaussian, uniform, Laplace,
+    and all sub-Gaussian families; the Hoeffding-form
+    $t = C e w_{\max}\sqrt{d_1 \log(2/p)}$ is a uniform fallback).
 
-\begin{equation}
-R \equiv \frac{E_{\text{IA}}}{E_{\text{DA}}} \geq
-\frac{w_{\min}^2}{w_{\max}^2} \cdot
-\frac{\sqrt{d_1}}{\sqrt{2\log(2d_0/\delta)} + 1/\sqrt{d_1}}
-\label{eq:da_prob_guarantee}
-\end{equation}
+    \item \textbf{Lower tail.} With probability at least
+    $1 - \exp(-d_1 \mu^2 / (2 w_{\max}^2))$,
+    \begin{equation}
+    E_{\text{IA}} \;\geq\; \tfrac{1}{2}\, d_1 e \mu.
+    \label{eq:lower_tail}
+    \end{equation}
 
-In particular, for $d_1 = 16$, $d_0 = 28$, $\delta = 0.05$, and
-$w_{\min}^2/w_{\max}^2 \geq 0.6$ (typical for KANs with weight decay):
-$R \geq 2.2$ with 95\% confidence. The empirical $R = 3.1\times$ for
-the trained KAN exceeds this conservative lower bound.
+    \item \textbf{Ratio separation.} With probability at least
+    $1 - p - \exp(-d_1\mu^2/(2w_{\max}^2))$,
+    \begin{equation}
+    R \;\equiv\; \frac{E_{\text{IA}}}{|S|} \;\geq\;
+    \frac{\mu}{2\sqrt{2}\, C\, \kappa} \cdot
+    \sqrt{\frac{d_1}{\log(2/p)}}
+    \;=\; \Omega\!\left( \frac{\sqrt{d_1}}{\sqrt{\log(1/p)}} \right)
+    \label{eq:moment_ratio}
+    \end{equation}
+    whenever $\kappa = O(1)$. Union-bounding over $d_0$ output
+    coordinates at failure level $\delta_0$:
+    $R \geq \Omega(\sqrt{d_1}/\sqrt{\log(d_0/\delta_0)})$ with
+    probability $\geq 1 - \delta_0$.
+\end{enumerate}
+
+\noindent\textbf{Sharpness (necessity of the moment condition).}
+The condition $\kappa = O(1)$ is \emph{necessary} up to constants: for
+the sparse-outlier family $w_j \in \{0, \pm d_1 \mu\}$ with
+$\mathbb{P}(\pm d_1\mu) = 1/(2d_1)$, $\mathbb{P}(0) = 1 - 1/d_1$
+(so $\kappa = \sqrt{d_1}$, bounded weights, finite variance), the
+adversarial $\delta$ aligned with the outlier gives
+$R = O(1/\sqrt{\log(1/p)})$ with probability $\approx 1 - e^{-1}$
+---no $\sqrt{d_1}$ gain is possible. With only a finite second moment
+(no $\kappa$ bound), the best guaranteed ratio is
+$R \geq \Omega(1/\sqrt{\log(1/p)})$: the width benefit evaporates
+($\mathbb{E}|w| \geq \mathbb{E}w^2/w_{\max} \geq \nu/\sqrt{d_1}$
+by Cauchy--Schwarz in the worst case).
 \end{lemma}
 
 \vspace{2pt}
-\noindent\textit{Proof.}
-For a fixed output neuron $k$ and input dimension $i$, let
-$S_{k,i} = \sum_{j=1}^{d_1} s_{j,i}^{(k)}$ where $s_{j,i}^{(k)} =
-\text{sign}(W^{(1)}_{k,j} \cdot W^{(0)}_{j,i}) \in \{\pm 1\}$.
-Under the symmetric-distribution assumption, each $s_{j,i}^{(k)}$ is
-an independent Rademacher random variable. By \textbf{Hoeffding's
-inequality}:
-\begin{equation}
-\mathbb{P}\bigl(|S_{k,i}| \geq t\bigr) \leq 2\exp\!\left(-\frac{t^2}{2d_1}\right)
-\label{eq:hoeffding_sign}
-\end{equation}
+\noindent\textit{Proof sketch.}
+\textbf{(1)} Apply Bennett's inequality to $X_j = w_j \delta_j$: for
+fixed $\boldsymbol{\delta}$ with $|\delta_j| \leq e$,
+$\mathbb{E}[X_j] = 0$ (symmetry), $|X_j| \leq w_{\max} e =: b$, and
+variance $V = \sum_j \delta_j^2 \nu^2 \leq d_1 e^2 \nu^2$. Bennett
+gives $\mathbb{P}(|S| \geq t) \leq 2\exp(-t^2 / (2(V + bt/3)))$;
+solving for $t$ yields Eq.~\eqref{eq:bennett_upper} with the stated
+$C$. \textbf{(2)} One-sided Hoeffding on the non-negative bounded
+variables $|w_j| \leq w_{\max}$ (no magnitude uniformity required).
+\textbf{(3)} Combine: $|S| \leq C e \nu \sqrt{d_1 \log(2/p)}$ and
+$E_{\text{IA}} \geq \tfrac{1}{2} d_1 e \mu$ simultaneously, giving
+$R \geq (d_1 \mu / 2) / (C \nu \sqrt{d_1 \log(2/p)})
+= \tfrac{\mu}{2C\nu} \sqrt{d_1/\log(2/p)}$; with $\kappa = \nu/\mu$
+this is Eq.~\eqref{eq:moment_ratio}. \textbf{(4)} For the outlier
+family, $\mathbb{P}(\exists j: |w_j| = d_1\mu) = 1 - (1-1/d_1)^{d_1}
+\to 1 - e^{-1}$; conditioned on the outlier, the adversary's
+$\delta$ gives $|S| = e d_1 \mu = E_{\text{IA}}$, so $R = 1$.
+Unconditionally $R = O(1)$ with constant probability, defeating any
+high-probability $\sqrt{d_1}$ bound. $\square$
 
-Setting $t = \sqrt{2d_1 \log(2d_0/\delta)}$ and applying a union bound
-over all $d_0$ input dimensions $i \in \{1, \dots, d_0\}$, we obtain
-$\mathbb{P}(\exists i: |S_{k,i}| \geq t) \leq d_0 \cdot 2e^{-t^2/(2d_1)}
-= \delta$. Thus, with probability $\geq 1-\delta$, for all $i$:
-$|S_{k,i}| < \sqrt{2d_1 \log(2d_0/\delta)}$.
-
-Now bound the ratio:
-\begin{align}
-E_{\text{IA}} &= \sum_{i=1}^{d_0} \sum_{j=1}^{d_1}
-|W^{(1)}_{k,j} \cdot W^{(0)}_{j,i}|
-\geq d_0 d_1 w_{\min}^2 \label{eq:ia_lower} \\
-E_{\text{DA}} &= \sum_{i=1}^{d_0} \bigl|\sum_{j=1}^{d_1}
-W^{(1)}_{k,j} \cdot W^{(0)}_{j,i}\bigr|
-\leq w_{\max}^2 \sum_{i=1}^{d_0} |S_{k,i}| \nonumber \\
-&< d_0 w_{\max}^2 \bigl(\sqrt{2d_1 \log(2d_0/\delta)} + 1\bigr)
-\label{eq:da_upper}
-\end{align}
-where the $+1$ in Eq.~\eqref{eq:da_upper} accounts for the residual
-term when $|S_{k,i}| = 0$ (the identity $|\sum_j s_j| \leq |S_{k,i}|+1$
-for integer-valued sign sums). Combining Eqs.~\eqref{eq:ia_lower}
-and~\eqref{eq:da_upper}:
-\begin{equation}
-\frac{E_{\text{IA}}}{E_{\text{DA}}} >
-\frac{w_{\min}^2}{w_{\max}^2} \cdot
-\frac{d_1}{\sqrt{2d_1 \log(2d_0/\delta)} + 1}
-\end{equation}
-
-Dividing numerator and denominator by $\sqrt{d_1}$ yields
-Eq.~\eqref{eq:da_prob_guarantee}. For $d_1 = 16$, $d_0 = 28$,
-$\delta = 0.05$, $w_{\min}^2/w_{\max}^2 = 0.6$:
-$R \geq 0.6 \cdot 16 / (\sqrt{2 \cdot 16 \cdot \log(56/0.05)} + 1)
-\approx 0.6 \cdot 16 / 6.83 \approx 1.41$ as the conservative
-uniform-magnitude bound. In practice, weight magnitudes are far from
-uniform (the dominant paths carry 3--5$\times$ more magnitude than
-peripheral paths), yielding the substantially higher empirical
-$R = 3.1\times$. The Lemma establishes that \textit{some} tightening
-is guaranteed probabilistically; the empirical magnitude distribution
-amplifies this to the measured 3.1$\times$. \hfill $\blacksquare$
+\vspace{2pt}
+\noindent\textbf{Comparison with the earlier statement.} The previous
+version of this lemma required uniform magnitudes
+($w_{\min}^2 \leq |W_{k,j}^{(1)}W_{j,i}^{(0)}| \leq w_{\max}^2$) and
+claimed $R \geq 2.2$ at $d_1=16, \delta=0.05$; its core inequality
+$|\sum_j m_j s_j| \leq w_{\max}^2 |\sum_j s_j|$ fails for non-uniform
+magnitudes (counterexample: $d_1=2$, magnitudes $(w_{\max}^2,
+w_{\min}^2)$, signs $(1,-1)$), and its own formula evaluates to
+$R \geq 0.60$, not $2.2$. Lemma~\ref{lem:da_moment} replaces the
+uniform-magnitude restriction with the moment ratio
+$\kappa = \nu/\mu$---computable from the weight distribution---and
+supplies the sharpness counterexample proving the condition tight.
+Empirically (E64), $R \approx 4.6$ at $d=16$, $9.5$ at $d=64$,
+$18.8$ at $d=256$, $37.7$ at $d=1024$ for Gaussian weights,
+matching $\sqrt{d}/\kappa$; the trained KAN's measured $R = 3.1\times$
+($d_1 = 16$) is consistent with its weight statistics.
 
 \vspace{4pt}
 \noindent\textit{Implication for Theorem~1.}
-Lemma~3 upgrades the DA bound from an empirical observation to a
+Lemma~\ref{lem:da_moment} upgrades the DA bound from an empirical observation to a
 probabilistic guarantee: with confidence $1-\delta$, the DA tightening
 ratio is at least $\Omega(\sqrt{d_1})$, and therefore Theorem~1's
 error bound holds with the DA constant in place of the IA constant.
 Since Theorem~1 already provides a deterministic worst-case bound
-(using IA as the conservative baseline), Lemma~3 establishes that the
+(using IA as the conservative baseline), Lemma~
+\ref{lem:da_moment} establishes that the
 actual deployed error is, with high probability, at least
 $\sqrt{d_1}$-times smaller than the conservative guarantee. For
 safety-critical deployments where both the worst case (Theorem~1, IA)
-and the typical case (Lemma~3, DA) are relevant, the dual bounds
+and the typical case (Lemma~
+\ref{lem:da_moment}, DA) are relevant, the dual bounds
 provide a complete picture: Theorem~1 guarantees correctness under
-any weight configuration, while Lemma~3 quantifies how much tighter
+any weight configuration, while Lemma~
+\ref{lem:da_moment} quantifies how much tighter
 the guarantee becomes under the realistic random-sign model.
 
 \vspace{4pt}
@@ -1428,7 +1453,8 @@ $0.896$ is close to the theoretical prediction of $1.0$ from Eq.~\ref{eq:da_rand
 confirming the random-walk mechanism. The trained KAN's ratio of $3.1\times$
 (drawn from $d_1 = 16$) lies at the 23rd percentile of the $d_1 = 16$
 distribution (mean $4.22 \pm 0.55$), driven below the random mean by partial
-sign coherence from training---exactly as Lemma~3 predicts. This establishes
+sign coherence from training---exactly as Lemma~
+\ref{lem:da_moment} predicts. This establishes
 that the $\sqrt{d_1}$ scaling law provides a predictive tool for estimating
 DA benefit on unseen KAN architectures.
 
@@ -1436,7 +1462,8 @@ DA benefit on unseen KAN architectures.
 \centering
 \caption{DA/IA Tightening Ratio $\propto \sqrt{d}$: Empirical Validation
 across 105 random KAN architectures $[28,d,4]$. Pearson $r = 0.987$
-confirms the scaling law predicted by Lemma~3.}
+confirms the scaling law predicted by Lemma~
+\ref{lem:da_moment}.}
 \label{tab:da_scaling}
 \small
 \begin{tabular}{@{}ccccc@{}}
@@ -1807,7 +1834,8 @@ $\Delta_{\text{logit}}^{\text{IA}} \leq \mathbf{0.172}$,
 \textbf{High-probability DA bound.} sign-structural affine arithmetic (Eq.~\ref{eq:da_bound})
 exploits the sign-balance of trained weight matrices, giving a tighter
 bound that holds with probability $\geq 1-\delta$ under the random-sign model
-of Lemma~3 (and empirically for the trained model):
+of Lemma~
+\ref{lem:da_moment} (and empirically for the trained model):
 \begin{equation}
 L_{\text{net}}^{\text{DA}} = L_B \cdot \max_{k} \sum_{i}
 \bigl|\sum_{j} W^{(1)}_{k,j} \cdot W^{(0)}_{j,i}\bigr|
@@ -1938,20 +1966,23 @@ satisfying Lemma~1.6 and guaranteeing classification correctness.
 \label{rem:prob_tightening}
 Theorem~1 provides a deterministic worst-case bound that holds for
 \textit{any} weight configuration. Under the random-sign model of
-Lemma~3, this bound can be tightened probabilistically: with
+Lemma~
+\ref{lem:da_moment}, this bound can be tightened probabilistically: with
 confidence $\geq 1-\delta$, the effective error is at least
 $\Omega(\sqrt{d_1})$ times smaller than what Eq.~\eqref{eq:l_net}
 would suggest when using the interval-arithmetic form ($\sum_i \sum_j
 |W^{(1)}_{k,j}W^{(0)}_{j,i}|$). Concretely, for the trained
 $[28,16,4]$ KAN, the worst-case bound is $\Delta_{\text{logit}} \leq
 0.079$ (DA form), while the interval-arithmetic form would yield
-$0.172$. Lemma~3 guarantees that the DA/IA ratio $R \geq 2.2$ holds
-with 95\% confidence across random KAN initializations, meaning the
-deployed safety margin is at least $2.2\times$ larger than a naive
-interval analysis would report. The empirical ratio $R = 3.1\times$
-(Table~\ref{tab:da_sign}) and the 30-seed distribution
-(Fig.~\ref{fig:da_ratio_dist}) confirm that trained KANs consistently
-exceed this conservative probabilistic lower bound.
+$0.172$. Lemma~\ref{lem:da_moment} guarantees that the DA/IA ratio
+$R \geq \Omega(\sqrt{d_1})$ holds with high confidence across random
+KAN initializations (with a moment-ratio constant computable from the
+weight statistics), meaning the deployed safety margin is
+$\sqrt{d_1}$-times larger than a naive interval analysis would report.
+The empirical ratio $R = 3.1\times$ (Table~\ref{tab:da_sign}) and the
+30-seed distribution (Fig.~\ref{fig:da_ratio_dist}) confirm that
+trained KANs consistently exceed this conservative probabilistic
+lower bound.
 \end{remark}
 
 \begin{remark}[Tightness Conditions and the Bound-vs.-Data Gap]
@@ -2110,7 +2141,8 @@ pathological cases when per-function $M_2$ values are used.
 Let $\mathcal{M}$ be an $L$-layer KAN with architecture
 $[d_0, d_1, \dots, d_L]$ and weight matrices
 $\mathbf{W}^{(0)}, \dots, \mathbf{W}^{(L-1)}$. Assume the random-sign
-model of Lemma~3: each weight product $\mathbf{W}^{(\ell)}_{k,j} \cdot
+model of Lemma~
+\ref{lem:da_moment}: each weight product $\mathbf{W}^{(\ell)}_{k,j} \cdot
 \mathbf{W}^{(\ell-1)}_{j,i}$ has independent random sign. Let
 $d_{\max} = \max_\ell d_\ell$, $M_{\max} = \max_{f \in \mathcal{M}}
 \sup_x |f''(x)|$, $W_{\max} = \max_\ell \|\mathbf{W}^{(\ell)}
@@ -2194,7 +2226,8 @@ lower than $\Delta_{\text{IA}}^{(\ell)}$ when sign cancellation occurs.
 Define the per-layer signed tightening
 $T_\ell = \Delta_{\text{IA}}^{(\ell)} - \Delta^{(\ell)} \geq 0$
 ($T_\ell$ is non-negative because DA is never worse than IA for the
-same inputs). Under the random-sign model of Lemma~3, the expected
+same inputs). Under the random-sign model of Lemma~
+\ref{lem:da_moment}, the expected
 value $\mathbb{E}[T_\ell]$ depends only on the architecture, not on
 any specific sign realization. Unrolling
 Eq.~\ref{eq:layer_recurrence_deep} and averaging over random signs
@@ -3636,7 +3669,8 @@ E6 empirical MaxAE & 15 & Per-sample max (not a bound)     & 3.65   & --- \\
 \end{tabular}
 \vspace{2pt}
 {\scriptsize \textbf{IA bound} (0.172): sound for all $x\in[-3,3]^{28}$, uses $\sum|W_{k,j}W_{j,i}|$.
-\textbf{DA bound} (0.079): high-probability under random-sign model (Lemma~3), uses $|\sum W_{k,j}W_{j,i}|$.
+\textbf{DA bound} (0.079): high-probability under random-sign model (Lemma~
+\ref{lem:da_moment}), uses $|\sum W_{k,j}W_{j,i}|$.
 \textbf{Seg-DA} (0.056): DA with per-segment $M_2^{(k)}$ values (E16), additional $1.4\times$ tightening.
 \textbf{Compositional DA} (0.1196): network-level bound from three-tier certificate ({\S}\ref{sec:compositional}),
 uses per-function Z3-verified $\varepsilon=0.0036$ with DA propagation (ratio $2.1\times$ vs.\ IA 0.2473).
@@ -4869,7 +4903,7 @@ limitation is addressable without changing the compiler, architecture, or
 verification claims---only the measurement apparatus.
 
 \textbf{(2) Correctness guarantee scope.}
-As Sz\'{a}sz et~al.~\cite{szasz2025soundness} (ICML 2025 Spotlight)
+As Sz\'{a}sz et~al.~\cite{szasz2025floating} (ICML 2025 Spotlight)
 demonstrate, theoretical soundness from interval/affine arithmetic may
 not fully translate to physical IEEE~754 hardware due to FMA behavior and
 compiler reordering. Our guarantee is therefore a \textbf{design-time}
@@ -4925,7 +4959,8 @@ in AI functional safety certification.
 \textbf{Guarantee} & \textbf{Method} & \textbf{$N_{\min}$} &
 \textbf{Safety} & \textbf{SIL Target} & \textbf{Evidence} \\
 \midrule
-High-probability & DA & 15 & $8.5\times$ & SIL~2 & Sign-balance (Lemma~3) \\
+High-probability & DA & 15 & $8.5\times$ & SIL~2 & Sign-balance (Lemma~
+\ref{lem:da_moment}) \\
 Sound            & Seg-IA & 15 & $2.9\times$ & SIL~2 & Per-function $M_2$ \\
 Sound            & IA (global) & 20 & $1.4\times$ & SIL~3 & No sign assumptions \\
 Sound + Robust   & IA (global) & 25 & $2.3\times$ & SIL~3+ & $2\times$ safety margin \\

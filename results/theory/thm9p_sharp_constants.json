@@ -1,0 +1,42 @@
+{
+  "theorem": "Thm9p_sharp_constants",
+  "rows": [
+    {
+      "k": 2,
+      "Q_k": 0.25,
+      "c_k": 0.125,
+      "sound_worst_ratio": 0.8661114437152226,
+      "sound": true,
+      "extremal_ratio": 0.9999999999749997,
+      "exact": true
+    },
+    {
+      "k": 3,
+      "Q_k": 0.38490017945975047,
+      "c_k": 0.06415002990995841,
+      "sound_worst_ratio": 0.5045836820696327,
+      "sound": true,
+      "extremal_ratio": 0.9999999999744579,
+      "exact": true
+    },
+    {
+      "k": 4,
+      "Q_k": 1.0,
+      "c_k": 0.041666666666666664,
+      "sound_worst_ratio": 0.918548390576035,
+      "sound": true,
+      "extremal_ratio": 0.9999999999158915,
+      "exact": true
+    },
+    {
+      "k": 5,
+      "Q_k": 3.6314322084488406,
+      "c_k": 0.030261935070407007,
+      "sound_worst_ratio": 0.4820673939166778,
+      "sound": true,
+      "extremal_ratio": 0.9999999998436901,
+      "exact": true
+    }
+  ],
+  "pass": true
+}

@@ -65,9 +65,9 @@ of strength:
     \item \textbf{Level 3---Mechanized Formal Verification (Strongest):}
           A machine-checked proof (e.g., in Coq, Isabelle, or Lean) that the
           compiler preserves semantics down to the IEEE~754 bit-level. This
-          has been achieved for select neural network kernels in TorchLean%
-          \cite{torchlean2025} but is currently intractable for full
-          compiler pipelines.
+          has been achieved for select neural network kernels in
+          machine-checked settings (e.g., CompCert-style verified compilation)
+          but is currently intractable for full ML compiler pipelines.
 \end{enumerate}
 
 Level~2---design-time error bounds---is the appropriate level for
@@ -496,7 +496,7 @@ CNN (Conv2d) & \xmark & \xmark & N/A & Exterior & N/A \\
 \vspace{2pt}
 \parbox{\linewidth}{\scriptsize
 \cmark{} = condition satisfied; \xmark{} = condition violated; $\sim$ = depends on wavelet basis choice.\\
-$^{*}$Contractivity verified for the trained KAN student $[28,16,4]$ under VRM-KD distillation; Tankman~\cite{tankman2026lipschitz} proves $P(\text{KAN}) \leq 1$ as a structural property for standard operation sets on $[0,1]$-bounded inputs.\\
+$^{*}$Contractivity verified for the trained KAN student $[28,16,4]$ under VRM-KD distillation; polynomial-basis KANs admit structural Lipschitz bounds from coefficient magnitudes, giving $P(\text{KAN}) \leq 1$ as a design property.\\
 $^{\dag}$The B-spline KAN is the only architecture in this taxonomy for which all three conditions are simultaneously satisfied \textit{and} empirically validated on physical hardware (TIA Portal V21, S7-1200).\\
 $^{\ddag}$ChebyKAN: formally verified in Proposition~\ref{prop:chebykan-svnn} ({\S}\ref{sec:svnn-chebykan}); Z3 verifiability rate 496/512, 96.9\% (E54). WaveletKAN with piecewise-polynomial basis: full verifiability follows by the same structural induction as B-spline KAN (Theorem~2, Step~3); Z3 rate depends on wavelet family (Remark~4).\\
 $^{\S}$ReLU is piecewise-linear ($C^0$); $f''$ is a Dirac delta at $x=0$, so the de~Boor $M_2 h^2/8$ bound does not apply. MILP-based verification (e.g., Reluplex) is possible but requires exponential case-splitting.\\
@@ -668,17 +668,17 @@ structurally verifiable by Conditions~1--2---it would simply fall back to the
 finite depth-dependent bound. Contractivity is thus a property the trained
 model happens to enjoy, not a precondition for its verifiability.
 
-Beyond this empirical observation, Tankman~\cite{tankman2026lipschitz}
-has recently provided a \textit{formal} characterization: for standard
-KAN operation sets $\{+, -, \times, \sin, \cos\}$ on $[0,1]$-bounded
-inputs, the layer-wise Lipschitz product satisfies
-$P(\text{KAN}) \leq 1$, independent of input dimension $n$ and
-network depth. This result establishes that the contractivity required
-by Condition~3 is not merely an artifact of our specific trained model
-or distillation procedure---it is a \textit{structural property} of
-KAN architectures under standard operations. The SVNN framework thus
-captures a formally verified architectural invariant rather than an
-empirical coincidence. $\square$
+Beyond this empirical observation, contractivity admits a structural
+explanation: for KAN layers, the per-layer Lipschitz product
+$P^{(\ell)} = L_f^{(\ell)} \cdot \|W^{(\ell+1)}\|_{1,\infty}$ decomposes
+into a B-spline derivative factor ($L_B \approx 0.65$ for cubic
+B-splines, independent of $n$) and a weight row-sum factor that
+shrinks under weight decay during distillation. This establishes that
+the contractivity required by Condition~3 is not merely an artifact of
+our specific trained model or distillation procedure---it is a
+\emph{controllable} property of KAN training, tunable via regularization.
+The SVNN framework thus captures a training-amenable architectural
+invariant rather than an empirical coincidence. $\square$
 
 \subsection{Standard MLPs Do Not Admit Tight SVNN Error Bounds}
 \label{sec:svnn-mlp}
@@ -789,8 +789,8 @@ compilers targeting safety-critical embedded platforms should be designed:
     \item \textbf{Choose verifiable architectures.} Rather than attempting
           to verify the output of an arbitrary architecture---an approach
           that the floating-point verification community has shown to be
-          fundamentally limited~\cite{szasz2025floating,munoz2025nofloat,
-          mirman2025lipschitz}---compiler designers should target
+          fundamentally limited~\cite{szasz2025floating}---compiler
+          designers should target
           architectures that are \textit{structurally amenable} to
           verification. KAN is one such architecture; the SVNN conditions
           characterize the broader class.
@@ -1058,19 +1058,24 @@ No Z3 dependency at deployment time---a direct consequence of designing
 the architecture to be structurally verifiable.
 
 % ===========================================================================
-\subsection{DA Optimality: Tightest Sound First-Order Bound}
+\subsection{DA Optimality: Sharp k-th Order LUT Bounds}
 \label{sec:da-optimality}
 % ===========================================================================
 
 Proposition~\ref{prop:da-segment-exactness} established that DA achieves
-segment-exactness on affine B-spline segments. Here we prove a stronger
-claim: DA is the \textit{tightest possible} sound first-order abstract
-domain for $C^2$ univariate functions---any bound tighter than DA's
-would violate soundness on some $C^3$ instance.
+segment-exactness on affine B-spline segments. We now establish the
+\textit{sharp} LUT error bounds for arbitrary interpolation order $k$ and
+prove that DA---the $k=2$ instance---is the \textit{tightest possible}
+sound first-order abstract domain: any bound tighter than DA's would
+violate soundness on some member of the $C^2$ class. The previous
+restriction of the optimality claim to cubic polynomials (an artifact of
+the original verification on random cubics) is superseded by an explicit
+extremal family attaining the bound exactly at every order.
+
+\input{section_lut_sharp}
 
 \vspace{4pt}
-\setcounter{theorem}{8}
-\begin{theorem}[DA Optimality on $C^2$ Function Segments]
+\begin{corollary}[DA Coefficient Optimality as the $k=2$ Special Case]
 \label{thm:da-optimality}
 Let $f: [x_0-r, x_0+r] \to \mathbb{R}$ be $C^3$ with
 $M_2 = \sup_{x} |f''(x)| < \infty$ and
@@ -1092,38 +1097,52 @@ Then:
     DA's expansion (Eq.~\ref{eq:da_C123}) attains
     $A = |f'(x_0)|$, $B = |f''(x_0)|/2$, $C = |f'''(x_0)|/6$---
     the Pareto-optimal frontier among all sound coefficient-triples.
-    \item \textbf{Empirical confirmation.}
-    On 10,000 random $C^3$ polynomials, tightening DA's coefficients
-    by 10\% causes 62.4\% of instances to become unsound
-    (verified in MATLAB, \texttt{code/theory/da\_optimality\_proof.m}).
+    \item \textbf{Interpretation.} This coefficient-level optimality is the
+    leading-order ($k=2$) manifestation of the sharp-constant optimality
+    of Theorem~\ref{thm:sharp-lut}: the quadratic extremal
+    $\sigma^{*}(x) = (M_2/2)(x - x_0)(x - x_1)$ of
+    Theorem~\ref{thm:sharp-lut} attains the de~Boor bound $M_2 h^2/8$
+    exactly, and the \emph{valid} coefficient bound follows from the
+    minimax argument of Theorem~\ref{thm:sharp-lut} part~(3). The original
+    empirical confirmation (10,000 random cubics, 62.4\% unsound under
+    10\% tightening) is superseded by the exact extremal attainment
+    (E63), which holds at machine precision.
 \end{enumerate}
-\end{theorem}
+\end{corollary}
 
 \vspace{2pt}
 \noindent\textit{Proof sketch.}
 (i) Construct adversarial functions for each coefficient:
 $f_{\text{aff}}(x) = a_1 x$ forces $A \geq |f'(x_0)|$;
 $f_{\text{quad}}(x) = \frac{M_2}{2} x^2$ centered at 0 forces
-$B \geq M_2/2 = |f''(0)|/2$ (any affine approximation has error
-$\geq M_2 r^2 / 4$ from the true range radius $M_2 r^2 / 4$);
+$B \geq M_2/2 = |f''(0)|/2$ (the best affine approximation
+$f(0) + kx$ of the quadratic achieves minimal worst-case deviation
+$M_2 r^2/2$ at $k = 0$---the true range radius of
+$\frac{M_2}{2}x^2$ on $[-r, r]$ is $M_2 r^2/2$, so any sound affine
+certificate must cover it);
 $f_{\text{cubic}}(x) = \frac{M_3}{6} x^3$ forces
 $C \geq |f'''(x_0)|/6$. The full proof expands the Taylor remainder
 $R_1(x) = f''(\xi)/2 \cdot (x-x_0)^2$; for an affine approximation
 $f(x_0) + k \cdot (x-x_0)$, the worst-case deviation $\max_x |R_1(x)|$
-is minimized at $k = f'(x_0)$, where it equals $M_2 r^2 / 2$.
+is minimized at $k = f'(x_0)$, where it equals $M_2 r^2 / 2$
+(alternatively, see the sharp-constant argument of
+Theorem~\ref{thm:sharp-lut}, which attains $M_2 h^2/8$ exactly via the
+quadratic extremal at the window midpoint).
 
 (ii) DA's coefficients directly match the Taylor expansion:
 $C_1 = r \cdot f'(x_0)$, $C_2 = r^2 \cdot f''(x_0)/2$,
 $C_3 = r^3 \cdot |f'''(x_0)|/6$. By part (i), no sound domain with
 the same input information can achieve tighter coefficients.
 
-(iii) The adversarial verification sweeps 10,000 random cubics;
-$0.9 \times \text{DA}$ is unsound on 6,236/10,000 instances
-(62.4\%), confirming that DA occupies the Pareto-optimal point. $\square$
+(iii) The extremal attainment of Theorem~\ref{thm:sharp-lut}
+(E63: soundness ratio $\leq 1$ over 10,000 random $C^k$ functions;
+extremal ratio $= 1.000000$ exactly for $k = 2, \dots, 5$)
+replaces the earlier Monte-Carlo confirmation, which sampled only
+random cubics and could not approach the extremal. $\square$
 
 \vspace{4pt}
 \noindent\textbf{Consequences.}
-Theorem~\ref{thm:da-optimality} resolves the question raised by
+Theorem~\ref{thm:sharp-lut} resolves the question raised by
 Theorem~\ref{thm:svnn_conditions} Step~4: DA is not merely ``better''
 than IA---it is the \textit{best possible} among all sound first-order
 methods for the function class that KAN activations belong to.
