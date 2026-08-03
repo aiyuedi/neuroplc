@@ -13,7 +13,7 @@
 
 **一句话**：第一个证明"哪些神经网络架构天生可认证、以什么锐常数、什么复杂度、什么泛化保证"的类型理论框架。
 
-**当前状态**：**83页，0 errors, 0 warnings, 0 undefined refs，P0 硬修完成（2026-08-03 深度审稿后 10 commits）**
+**当前状态**：**85页，0e0w，P0 硬修 + P1 四定理完成（2026-08-03，20 commits：671e7b7 → bf39b74，已双推）**
 
 ---
 
@@ -61,7 +61,19 @@
 
 **待重生成图**（FIXME 已标）：fig02/fig04/fig05/fig09 + fig1_overview（数值已变，图内数据旧）。
 
+## 2.6 2026-08-03 P1 四定理完成（最强模式，同日）
 
+| 定理 | 位置 | 内容 | 验证 |
+|------|------|------|------|
+| **T-I** Thm 13 | section_lut_sharp.tex §sec:optimal-lut | 曲率感知两级最优 LUT：跨函数 n_i∝M₂^{1/2}（2.99×）+ 函数内 ρ∝√M₂(x)（3.32×） | verify_optimal_lut.py PASS；**发现并修复 optimizer.py κ 密度 bug（劣于均匀 2.1×）** |
+| **T-II** Thm 14 | section_svnn_theorems.tex §sec:compile-aware-minimax | R(n,N)≍max{n^{-2k/(2k+1)}, e*(N)}：样本-预算剪刀差 + 离散编译免费 | verify_compile_aware_minimax.py PASS（1.003 平坦 / 269× 衰减） |
+| **T-III** Thm 16 | section_trichotomy.tex §sec:necessity-first | necessity 第一格（affine 证书类）：kink 无证书 + 乘积耦合 NP-hard + 锐率⟹最优分配 | verify_necessity_first.py PASS；**修正 trichotomy kink 率论证真实错误**（单函数任意小 vs 类宽度 slope -1.05） |
+| **T-IV** Thm 15 | section_svnn_theorems.tex §sec:besov-pac | Besov 光滑度自适应率：bias 超收敛 N^{-2min(s,k)}、预算指数随 s 减小 | verify_besov_pac.py PASS（N=32 衰减 1.4×/6.5×/9.1× 随 s） |
+
+**进行中**：审稿复跑（0 CRITICAL 验证）+ 图重生成（fig02/04/05/09，agent 批次）。
+**剩余**：投稿材料（cover letter/bio/图清单）、REVIEWER-FAQ v3（新定理）、C11（加宽 LUT 实验，可 P3）。
+
+## 3. 关键文件索引
 
 | 文件 | 用途 |
 |------|------|
