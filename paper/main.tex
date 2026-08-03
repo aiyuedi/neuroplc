@@ -207,7 +207,7 @@ SVNN-composite ($\texttt{svnn}$). Its typing rules enforce two
 conditions: operation-type closure (Condition~1: linear and element-wise
 operations are never coupled in a single graph node) and $C^2$
 boundedness (Condition~2: every element-wise function has a computable
-curvature bound). The \textbf{Type Soundness Theorem} (Theorem~2)
+curvature bound). The \textbf{SVNN Sufficiency Theorem} (Theorem~2)
 guarantees that well-typed architectures have computable, finite
 per-output error bounds under fixed-point compilation---a property that
 ill-typed architectures (standard MLPs with $\sigma(W\mathbf{x}+\mathbf{b})$)
@@ -479,7 +479,7 @@ Z3 verification preserved post-adaptation. FourierKAN and WaveletKAN
 achieve 100\% CWRU and 100\% XJTU-SY domain-shift accuracy (E62),
 with 512/512 Z3-equivalent verification preserved, confirming the
 $C^2$-BV family's cross-architecture fine-tuning stability. In total,
-68 experiments (E1--E58 + E60--E62
+74 experiments (E1--E68
 + V1--V7) spanning compression, generalization, correctness bounds,
 scalability, cross-dataset transfer, cross-architecture verification
 (FourierKAN E60, WaveletKAN E61), and domain-shift SVNN preservation
@@ -4114,7 +4114,7 @@ generalization of the 28-D feature space.}
 
 \begin{table*}[tb]
 \centering
-\caption{Results Summary: Core Experiments (E1--E20, E52--E57, E60--E62) and Validation Experiments (V1--V7)}
+\caption{Results Summary: Core Experiments (E1--E20, E52--E68) and Validation Experiments (V1--V7)}
 \label{tab:summary}
 \scriptsize
 \begin{tabular}{@{}p{0.75cm}p{2.3cm}p{2.2cm}p{2.2cm}@{}}
@@ -4919,7 +4919,7 @@ IEC~61508 Aligned & \ding{55} & \ding{55} &
 \bottomrule
 \end{tabular}
 \vspace{1pt}
-{\scriptsize NeuroPLC provides the only design-time correctness guarantee (16 theorems),
+{\scriptsize NeuroPLC provides the only design-time correctness guarantee (18 theorems),
 universal IEC~61131-3:2025 compliance (Lemma~\ref{lem:iec_universal}), and
 IEC~61508-aligned non-interference proof (Theorem~E).}
 \end{table*}
@@ -4960,13 +4960,13 @@ Speedup & 2{,}700$\times$ & 7--25$\times$ & --- & Distrib. & Native OB1 \\
 \bottomrule
 \end{tabular}
 \vspace{2pt}
-{\scriptsize NeuroPLC is the only platform providing: formal certification (16 theorems),
+{\scriptsize NeuroPLC is the only platform providing: formal certification (18 theorems),
 universal IEC~61131-3 compliance, auto-generated safety monitor, non-interference proof
 for IEC~61508, and multi-architecture SVNN coverage (5 $C^2$-BV variants).}
 \end{table*}
 
 Five properties distinguish \neuroplc from prior KAN hardware deployment work:
-(1)~\textbf{type-theoretic foundation}---16 theorems providing the first formal
+(1)~\textbf{type-theoretic foundation}---18 theorems providing the first formal
 characterization of certifiable neural architectures;
 (2)~\textbf{universal IEC~61131-3 compliance}---Lemma~\ref{lem:iec_universal}
 extends certification to any IEC-compliant controller;
@@ -5256,7 +5256,7 @@ frontier.
 \end{enumerate}
 
 \vspace{4pt}
-\noindent\textbf{Empirical validation (68 experiments, 5 architectures).}
+\noindent\textbf{Empirical validation (74 experiments, 5 architectures).}
 B-spline KAN achieves 99.93\% CWRU accuracy; FourierKAN and WaveletKAN
 achieve 100\% on both CWRU and XJTU-SY domain-shift with 512/512
 Z3-equivalent verification preserved (E62); ChebyKAN achieves 496/512 Z3
