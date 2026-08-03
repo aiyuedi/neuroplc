@@ -1,0 +1,31 @@
+{
+  "date": "2026-08-04",
+  "script": "verify_width_constant.py",
+  "theorem": "Thm 17(4)/18(i) width constant c_*, numerical estimate",
+  "c_star_at_N": 8,
+  "rows": [
+    {
+      "N": 4,
+      "kt": 0.006944444444470441,
+      "kt_N2": 0.11111111111152705,
+      "peaked0": 0.004043312405152485,
+      "peaked0_N2": 0.06469299848243976,
+      "peaked1": 0.0046909595868172005,
+      "peaked1_N2": 0.07505535338907521
+    },
+    {
+      "N": 8,
+      "kt": 0.0012755102040897179,
+      "kt_N2": 0.08163265306174194,
+      "peaked0": 0.00038395742002464775,
+      "peaked0_N2": 0.024573274881577456,
+      "peaked1": 0.0011075384474044103,
+      "peaked1_N2": 0.07088246063388226
+    }
+  ],
+  "c_star_estimate": 0.08163265306174194,
+  "c_k_reference": 0.125,
+  "c_star_lt_c_k": true,
+  "gap_ratio_c_k_over_c_star": 1.5312499999902938,
+  "verdict": "PASS"
+}

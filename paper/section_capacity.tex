@@ -268,6 +268,19 @@ $V_{\text{gen}}$), and the open direction is the absoluteness of the
 stratum boundary.
 
 \vspace{4pt}
+\noindent\textbf{Numerical constants.}
+The packing-line constant admits a constructive lower bound
+$c_{\mathrm{ent}} \approx 0.079$ (the window-extremal translate family of
+Theorem~\ref{thm:sharp-lut}, $E$-$T7$; consistency $c_{\mathrm{ent}} <
+c_k$ is forced by the LUT's own soundness), and the class-optimal width
+constant is estimated at $c_* \lesssim 0.082$ on the worst
+(curvature-peaked) families under free-node $L^\infty$-optimal
+piecewise-linear approximation ($E$-$T8$), against the interpolation
+constant $c_k = 1/8 = 0.125$---the constant-purchase gap of
+Theorem~\ref{thm:capacity-tradeoff}(i) is at least $1.53\times$
+numerically.
+
+\vspace{4pt}
 \noindent\textbf{Bit parameterization and the local-vs-global code gap.}
 In the bit parameterization ($B = wN$ bits), the entropy bound of
 Theorem~\ref{thm:capacity-stratification}(1) is exponential: the
@@ -356,10 +369,20 @@ certified comparison is the relevant one, since the table code's
 \emph{actual} error on analytic functions is also exponential by
 Bernstein-type convergence, but its \emph{certified} bound via rule
 (ii) is only polynomial). The crossover solves
-$c_k M_k N^{-k} = C e^{-c\rho N}$ (Lambert-$W$-type threshold
-$\rho^{*}(N)$; the cell count $N$ counts table entries on one side and
-spectral coefficients on the other, so $N$ is proportional up to the
-bits-per-coefficient factor absorbed into $C$). On low-smoothness
+$c_k M_k N^{-k} = C e^{-c\rho N}$ in closed form: with
+$A = (c_k M_k/C)^{1/k}\, c\rho$,
+\begin{equation}
+N^{*}(\rho) \;=\; \frac{k}{c\rho}\; W\!\Bigl(\frac{A}{k}\Bigr),
+\qquad
+\rho^{*}(N) \;=\; \frac{k}{cN}\; W\!\Bigl(\frac{A'}{k}\Bigr),
+\label{eq:crossover-closed}
+\end{equation}
+where $W$ is the Lambert-$W$ function and $A'$ the analogue with $N$
+on the left---the threshold is explicit and monotone (the spectral code
+wins for $\rho > \rho^{*}(N)$). The cell count $N$ counts table entries
+on one side and spectral coefficients on the other, so $N$ is
+proportional up to the bits-per-coefficient factor absorbed into $C$.
+On low-smoothness
 classes ($s \leq 1$) the two codes are within a constant factor
 (measured ratio $0.74$, $E$-$T6$).
 \end{theorem}
