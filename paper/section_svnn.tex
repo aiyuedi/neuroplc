@@ -484,7 +484,7 @@ are merely depth-\textit{finite} (computable but potentially growing with $L$).
 \toprule
 \textbf{Architecture} & \textbf{Cond.~1} & \textbf{Cond.~2} & \textbf{Contract.} & \textbf{Frontier} & \textbf{Z3-Verif.} \\
 \midrule
-KAN (B-spline) & \cmark & \cmark & \cmark$^{*}$ & Interior$^{\dag}$ & 512/512 \\
+KAN (B-spline) & \cmark & \cmark & \xmark$^{*}$ & Interior$^{\dag}$ & 512/512 \\
 KAN (Chebyshev) & \cmark & \cmark & \cmark & Interior & Full$^{\ddag}$ \\
 KAN (Wavelet) & \cmark & \cmark & $\sim$ & Interior & Full$^{\ddag}$ \\
 \midrule
@@ -500,7 +500,7 @@ CNN (Conv2d) & \xmark & \xmark & N/A & Exterior & N/A \\
 \vspace{2pt}
 \parbox{\linewidth}{\scriptsize
 \cmark{} = condition satisfied; \xmark{} = condition violated; $\sim$ = depends on wavelet basis choice.\\
-$^{*}$Contractivity verified for the trained KAN student $[28,16,4]$ under VRM-KD distillation; polynomial-basis KANs admit structural Lipschitz bounds from coefficient magnitudes, giving $P(\text{KAN}) \leq 1$ as a design property.\\
+$^{*}$Condition~3 is \emph{not} satisfied by the trained KAN student $[28,16,4]$ (measured per-layer amplification $\gamma = [15.4, 5.3] > 1$, E68); the student is certified under Conditions~1--2 with the finite depth-dependent bound. Polynomial-basis KANs admit structural Lipschitz bounds from coefficient magnitudes, giving $P(\text{KAN}) \leq 1$ as a design-time property (ChebyKAN, {\S}\ref{sec:svnn-chebykan}).\\
 $^{\dag}$The B-spline KAN is the only architecture in this taxonomy for which all three conditions are simultaneously satisfied \textit{and} empirically validated on the TIA Portal V21 engineering toolchain (S7-1200 target).\\
 $^{\ddag}$ChebyKAN: formally verified in Proposition~\ref{prop:chebykan-svnn} ({\S}\ref{sec:svnn-chebykan}); Z3 verifiability rate 496/512, 96.9\% (E54). WaveletKAN with piecewise-polynomial basis: full verifiability follows by the same structural induction as B-spline KAN (Theorem~2, Step~3); Z3 rate depends on wavelet family (see the Remark on Wavelet-KAN and Fourier-KAN).\\
 $^{\S}$ReLU is piecewise-linear ($C^0$); $f''$ is a Dirac delta at $x=0$, so the de~Boor $M_2 h^2/8$ bound does not apply. MILP-based verification (e.g., Reluplex) is possible but requires exponential case-splitting.\\
@@ -527,13 +527,17 @@ architectural question, not a compiler engineering question (Remark~%
 Every Kolmogorov-Arnold Network (KAN) architecture, as defined by
 Liu et~al.~\cite{liu2024kan}, satisfies the SVNN sufficient conditions
 (Conditions~1 and~2) of Theorem~2 and is therefore an SVNN architecture.
-The trained KAN student additionally satisfies the contractivity refinement
-(Condition~3), placing it in the depth-uniform regime.
+The trained KAN student, however, does \emph{not} satisfy the contractivity
+refinement (Condition~3): its measured per-layer amplification is
+$\gamma = [15.4, 5.3] > 1$ (E68). It is therefore certified under
+Conditions~1--2 with the finite depth-dependent bound; the depth-uniform
+(convergent) regime is available to contractively trained instances
+(future work).
 \end{proposition}
 
 \vspace{4pt}
 \noindent\textit{Proof.} We verify Conditions~1 and~2, which establish SVNN
-membership, and then confirm the Condition~3 refinement:
+membership, and then report the Condition~3 status:
 
 \vspace{2pt}
 \noindent\textit{Condition~1 (Operation-Type Closure).}
@@ -633,7 +637,7 @@ $M_2^{\text{analytic}} \leq 10.67 \times \max|\Delta^2 w|$, both computable
 from the control points alone before any forward pass.
 
 \textit{Relationship to empirical values.}
-The empirically measured values ($L_B = 0.65$, $M_2 = 0.177$ from E11) are
+The empirically measured values ($L_B = 2.21$ layer-0 / $2.05$ layer-1, $M_2 = 0.177$ from E11) are
 substantially tighter than the analytical worst-case bounds, because the KAN's
 learned B-spline control points exhibit slow variation ($\max|\Delta w_c| \ll
 W_{\max}$). The analytical bounds serve as the \textbf{architectural guarantee}
@@ -651,38 +655,34 @@ tightening.
 Conditions~1 and~2 already establish that KAN is structurally verifiable
 (Theorem~2, Step~3): the finite-depth error bound of
 Eq.~\ref{eq:total_bound} exists and is computable from the control points
-alone. We now show that the trained KAN \emph{additionally} satisfies the
-contractivity refinement, which upgrades this guarantee to the depth-uniform,
-depth-independent form of Eq.~\ref{eq:convergent_bound}.
-For the trained KAN student $[28,16,4]$, the control-point difference bound
-(Eq.~\ref{eq:bspline_diff_bounds}) yields $L_B^{\text{analytic}} \leq 1.84$
-using the trained control points (analytically computed, no forward pass).
-The tighter empirical measurement gives $L_B = 0.65$ (maximum of $|\phi'(x)|$
-across all 512 B-spline activations on a 1,000-point grid).
-The weight matrix row-sum norms are
-$\|W^{(0)}\|_{1,\infty} \leq 0.32$ and $\|W^{(1)}\|_{1,\infty} \leq 0.28$.
-Even with the conservative analytical bound, the product satisfies
-$L_B^{\text{analytic}} \cdot \|W^{(1)}\|_{1,\infty} \leq 1.84 \times 0.28
-= 0.515 < 1$; with the empirical refinement, $L_B \cdot
-\|W^{(1)}\|_{1,\infty} = 0.65 \times 0.28 = 0.182 \ll 1$.
-Both satisfy the contractive condition, so the KAN student enjoys the
-strongest, depth-uniform form of the SVNN guarantee. We emphasize, however,
-that a KAN with larger weights violating $\gamma < 1$ would \emph{still} be
-structurally verifiable by Conditions~1--2---it would simply fall back to the
-finite depth-dependent bound. Contractivity is thus a property the trained
-model happens to enjoy, not a precondition for its verifiability.
+alone. Condition~3, \emph{when} it holds, upgrades this guarantee to the
+depth-uniform, depth-independent form of Eq.~\ref{eq:convergent_bound}.
+For the trained KAN student $[28,16,4]$, the honest checkpoint measurements
+(E68) are: $L_B = 2.21$ (layer-0) / $2.05$ (layer-1)---the maximum of
+$|\phi'(x)|$ over all 512 B-spline activations on a 1,000-point grid---
+effective weight row-sum norms $\|W_{\text{eff}}\|_{1,\infty} = 12.36$
+(layer-0) / $6.52$ (layer-1), and per-layer Lipschitz bounds of $25.1$
+(layer-0) / $11.9$ (layer-1). The measured per-activation-layer
+amplification of the trained student is $\gamma = [15.4, 5.3]$ (E68)---the
+trained network is \emph{not} contractive, so the depth-uniform
+(convergent) form does \emph{not} apply to this checkpoint. It remains
+structurally verifiable under Conditions~1--2 with the finite
+depth-dependent bound of Eq.~\ref{eq:total_bound}, and contractive
+training (e.g., spectral normalization of the weight row sums) is the
+deployment recipe for the convergent form---future work. (The earlier
+estimate $L_B \cdot \|W\|_{1,\infty} = 0.65 \times 0.28 = 0.182$
+double-counted the linear layers and is not a valid Lipschitz bound.)
 
-Beyond this empirical observation, contractivity admits a structural
-explanation: for KAN layers, the per-layer Lipschitz product
+Beyond this empirical finding, contractivity remains a structurally
+meaningful \emph{target}: for KAN layers, the per-layer Lipschitz product
 $P^{(\ell)} = L_f^{(\ell)} \cdot \|W^{(\ell+1)}\|_{1,\infty}$ decomposes
-into a B-spline derivative factor ($L_B \approx 0.65$ for cubic
-B-splines, independent of $n$) and a weight row-sum factor that
-shrinks under weight decay during distillation. This establishes that
-the contractivity required by Condition~3 is not merely an artifact of
-our specific trained model or distillation procedure---it is a
-\emph{controllable} property of KAN training, tunable via regularization.
-The SVNN framework thus captures a training-amenable architectural
-invariant rather than an empirical coincidence. $\square$
+into a B-spline derivative factor and a weight row-sum factor, and both
+factors are regularization-controllable (weight decay, spectral
+normalization, $\lambda$-regularization of the spline coefficients).
+Condition~3 is thus a \emph{trainable} property of KAN training rather
+than an automatic one---achieving it is the recipe for the depth-uniform
+certificate, and its absence does not affect verifiability under
+Conditions~1--2. $\square$
 
 \subsection{Standard MLPs Do Not Admit Tight SVNN Error Bounds}
 \label{sec:svnn-mlp}
@@ -901,10 +901,11 @@ $(r_{\text{seg}})^{d_{\text{hid}} \times L} \approx (0.41)^{32} \approx
 2.2 \times 10^{-13}$ for IA, vs.\ DA's tighter per-segment bound
 yielding the observed $2.2\times$ end-to-end advantage (E9). This
 explains \emph{why} a modest per-segment advantage ($2.4\times$) produces
-no further compounding: IA's coarser per-segment bound is already
-sufficiently tight at practical radii that the inter-layer Lipschitz
-contraction ($L_B \cdot \|W\|_{1,\infty} = 0.182$) dominates both
-methods.
+no further compounding: the inter-layer maps amplify DA and IA errors by
+the \emph{same} per-layer factor (measured amplification
+$\gamma = [15.4, 5.3]$ for the trained student, E68), which cancels in
+the end-to-end ratio, so the observed $2.2\times$ advantage tracks the
+per-segment ratio rather than compounding with depth.
 \end{proposition}
 
 \vspace{4pt}
@@ -942,19 +943,19 @@ $\square$
 
 \vspace{4pt}
 \noindent\textbf{Why the DA advantage is bounded.}
-The $2.2\times$ end-to-end tightening (E9) is smaller than the
-per-segment $2.4\times$ advantage might suggest, because the inter-layer
-Lipschitz contraction ($L_B \cdot \|W\|_{1,\infty} = 0.182$, from the
-trained KAN) attenuates errors of \emph{all} magnitudes uniformly before
-they reach the output. DA and IA both benefit from this contraction
-equally; the advantage of DA is limited to the \emph{input} side
-(Layer~0) where fresh LUT errors enter the pipeline. This bounded
-advantage is a feature, not a bug: it confirms that the SVNN
-contractivity ($\gamma = 0.182$) is the dominant safety mechanism,
-and DA's role is to provide a tighter initial bound that widens the
-safety margin from $5.6\times$ (IA, E9) to $17.0\times$ (DA, E9)---
-a 3.1$\times$ margin improvement that is the practical difference
-between ``possibly safe'' and ``certifiably safe'' at deployment time.
+The $2.2\times$ end-to-end tightening (E9) is close to the per-segment
+$2.4\times$ advantage because the inter-layer maps amplify DA and IA
+errors by the \emph{same} per-layer factor (measured amplification
+$\gamma = [15.4, 5.3]$ for the trained student, E68) before they reach
+the output---the trained network does not contract inter-layer errors,
+but identical amplification cancels in the DA/IA ratio. DA and IA both
+benefit from this propagation equally; the advantage of DA is limited
+to the \emph{input} side (Layer~0) where fresh LUT errors enter the
+pipeline. This bounded advantage is a feature, not a bug: DA's role is
+to provide a tighter initial bound that widens the safety margin from
+$5.6\times$ (IA, E9) to $17.0\times$ (DA, E9)---a 3.1$\times$ margin
+improvement that is the practical difference between ``possibly safe''
+and ``certifiably safe'' at deployment time.
 
 \vspace{4pt}
 \noindent\textbf{Per-segment vs.\ cross-layer DA advantage.}
@@ -1033,22 +1034,27 @@ trivially. $\square$
 On the trained KAN $[28,16,4]$ with $N=15$ LUT points ($h_{\text{LUT}}
 \approx 0.75$, domain $\approx [-3, 3]$ on Layer~0), all 512 B-spline
 activations satisfy $M_2 \cdot h_{\text{LUT}}^2 / 8 \leq 0.040$ (maximum),
-with mean $0.017$ and 95th-percentile $C(3) = 0.030$. The deployment
-margin $m = 0.182$ is exceeded by \textbf{none} of the 512 functions,
-yielding a minimum safety margin of $\mathbf{4.5\times}$
-($6.0\times$ at P95). The de~Boor guarantee therefore certifies all 512
+with mean $0.017$ and 95th-percentile $C(3) = 0.030$ (measured from the
+checkpoint). The de~Boor guarantee therefore certifies all 512
 per-function LUT bounds without invoking Z3.
+% TODO: the per-function threshold used in the E58 experiment (0.182) was
+% the stale contractivity constant, not a measured margin; the margin
+% ratios quoted in earlier versions (4.5x, 6.0x at P95) derived from it
+% and must be re-established against a properly measured per-function
+% margin before submission.
 
 This result explains \textit{why} the full KAN achieves 512/512 Z3
 verifiability (E40): the de~Boor bound is a mathematical theorem,
 not an empirical observation. Every B-spline activation satisfies
 it identically; the only question is whether the resulting bound
-falls within the deployment margin. For the standard KAN architecture
-$[28,16,4]$ on domain $[-3,3]$, the answer is unequivocally yes.
-For ChebyKAN (E54), the $5.4\times$ looser Markov analytical
-$M_2$ bound pushes 16 of 512 activations above the margin,
-explaining the 496/512 ($96.9\%$) verification rate---a limitation
-of the analytical bound, not of ChebyKAN's architecture.
+falls within the per-function verification threshold. For the standard
+KAN architecture
+$[28,16,4]$ on domain $[-3,3]$, all 512 measured bounds are
+$\leq 0.040$ (E58), so every activation is certified for any threshold
+above that maximum. For ChebyKAN (E54), the looser Markov analytical
+$M_2$ bound pushes 16 of 512 activations above the verification
+threshold, explaining the 496/512 ($96.9\%$) verification rate---a
+limitation of the analytical bound, not of ChebyKAN's architecture.
 
 \vspace{4pt}
 \noindent\textbf{Practical consequence.}
@@ -1276,9 +1282,13 @@ scheme for KANs.
     Left: per-edge Z3-equivalent verification rate (512 total edges per architecture).
     All four $C^2$-BV architectures (B-spline, Fourier, Wavelet, ChebyKAN) achieve $\geq$96.9\%
     Z3 verification; standard MLP achieves 0/48 (E41). Right: CWRU test accuracy and Z3 safety
-    margin (ratio of deployment margin 0.182 to $\max M_2 \cdot h^2/8$).
-    WaveletKAN's 5.6$\times$ margin reflects M2-regularized training ($\lambda=0.01$).
+    margin (ratio of the per-function margin to $\max M_2 \cdot h^2/8$).
+    WaveletKAN's wide margin reflects M2-regularized training ($\lambda=0.01$).
     FourierKAN's M$_2$ is bounded by $\omega^2 \sum k^2(|c_k|+|d_k|)$ (Proposition~\ref{prop:c2bv-family}(c)).
+    % TODO: the margin ratios shown in this figure used the stale
+    % contractivity constant 0.182 as the per-function threshold; the
+    % figure must be regenerated with an honestly measured margin before
+    % submission.
     Safety margins $\geq 2\times$ confirm deployability
     for all $C^2$-BV architectures.}
     \label{fig:c2bv_verification}

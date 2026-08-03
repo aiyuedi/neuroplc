@@ -78,6 +78,8 @@ ax=nexttile;loglog(d,m,'s-','Color',S.ia,'LineWidth',S.lw,'MarkerSize',7,'Marker
 loglog(d,k,'o--','Color',S.da,'LineWidth',S.lw,'MarkerSize',7,'MarkerFaceColor',S.da);
 set(ax,'XTick',d,'XTickLabel',string(d));pp(ax,S);xlabel('Width d','FontSize',S.a);ylabel('Amplification (log)','FontSize',S.a);
 qq(ax,'a','MLP vs KAN amplification',S);text(ax,.02,.05,'(log_1_0)','Units','n','FontSize',7,'Color',S.ga,'FontAngle','italic');
+% FIXME: 0.182 stale --- trained KAN non-contractive (gamma=[15.4,5.3], E68);
+% figure needs regeneration with honest values before submission
 legend('MLP sqrt(d)','KAN gamma=0.182','Location','nw','Box','off','FontSize',S.l);
 ax=nexttile;bar(r,'FaceColor',S.da,'EdgeColor','none','BarWidth',.55);set(ax,'YScale','log','XTickLabel',string(d));pp(ax,S);
 xlabel('Width d','FontSize',S.a);ylabel('MLP/KAN gap (log)','FontSize',S.a);qq(ax,'b','Certification gap',S);

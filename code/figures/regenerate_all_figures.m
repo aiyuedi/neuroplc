@@ -107,6 +107,8 @@ close(fig);
 %% ═══════════════════════════════════════════════════════════
 fprintf('[3/11] Sharp Lower Bound\n');
 
+% FIXME: 0.182 stale --- trained KAN non-contractive (gamma=[15.4,5.3], E68);
+% figure needs regeneration with honest values before submission
 dvals=[4 8 16 32 64 128 256]; gamma=0.182; mlpA=sqrt(dvals); kanA=gamma*ones(size(dvals)); ratio=mlpA./kanA;
 
 fig=figure('Units','inches','Position',[1 1 W2 HSTD],'Color','w','Visible','off');

@@ -42,6 +42,8 @@ function f03(S,dir),N=15;h=6/(N-1);n=180;tb=zeros(n,1);ae=zeros(n,1);for i=1:n,a
 fig=figure('Units','inches','Position',[1 1 S.W1*1.05 S.H*.88]);ax=axes;hold on;scatter(tb,ae,S.ms,S.bl,'filled','MarkerFaceAlpha',.30,'MarkerEdgeColor','none');plot([0 mx],[0 mx],'--','Color',S.or,'LineWidth',1.4);scatter(tb(ix),ae(ix),48,S.re,'o','LineWidth',1.2);rr(ax,tb(ix)+mx*.12,ae(ix),sprintf('dev %.1e',abs(ae(ix)-tb(ix))),S,'Color',S.re);xlim([0 mx]);ylim([0 mx]);axis square;xlabel('Bound M_2h^2/8','FontSize',S.a);ylabel('Measured max LUT error','FontSize',S.a);pp(ax,S);legend({'Quadratics','y=x','Outlier'},'Location','nw','Box','off','FontSize',S.l);e(fig,'fig03_da_tightness',dir);end
 
 % ---- f04 SHARP BOUND ----
+% FIXME: 0.182 stale --- trained KAN non-contractive (gamma=[15.4,5.3], E68);
+% figure needs regeneration with honest values before submission
 function f04(S,dir),d=[4 8 16 32 64 128 256];g=.182;m=sqrt(d);k=g*ones(size(d));r=m./k;
 fig=figure('Units','inches','Position',[1 1 S.W2 S.H]);tl=tiledlayout(1,2,'Padding','compact');
 ax=nexttile;loglog(d,m,'s-','Color',S.or,'LineWidth',S.lw,'MarkerSize',6,'MarkerFaceColor',S.or);hold on;loglog(d,k,'o--','Color',S.bl,'LineWidth',S.lw,'MarkerSize',6,'MarkerFaceColor',S.bl);set(ax,'XTick',d,'XTickLabel',string(d));pp(ax,S);xlabel('Width d','FontSize',S.a);ylabel('Amplification (log)','FontSize',S.a);qq(ax,'a','MLP vs KAN amplification',S);legend('MLP sqrt(d)','KAN gamma=0.182','Location','nw','Box','off','FontSize',S.l);

@@ -101,23 +101,19 @@ $\Delta^{(L)}_{\text{SVNN}} \leq O(M_{\max} \cdot h^2 \cdot d_{\max}
 
 \vspace{2pt}
 \noindent\textbf{Step 4 (Sharp ratio).}
-The per-layer gap is $R(d) = \sqrt{d} / \gamma \geq \sqrt{d}$. At the
-measured $\gamma = 0.182$ (KAN $[28,16,4]$, E9):
-
-\begin{center}
-\begin{tabular}{c|ccc}
-$d$ & $\sqrt{d}$ & Per-layer ratio & 2-layer ratio \\
-\hline
-16  & 4.000 & $22.0\times$ & $483\times$ \\
-32  & 5.657 & $31.1\times$ & $967\times$ \\
-64  & 8.000 & $44.0\times$ & $1{,}934\times$ \\
-128 & 11.31 & $62.2\times$ & $3{,}861\times$ \\
-\end{tabular}
-\end{center}
-
-For a realistic 3-layer KAN $[28,16,4]$ ($d_{\max}=28$, $\gamma=0.182$):
-the MLP analog ($d=28$, $L=3$) suffers $>10{,}000\times$ worse error
-amplification---making certification practically infeasible.
+The per-layer gap is $R(d) = \sqrt{d} / \gamma \geq \sqrt{d}$ for any
+contractive KAN ($\gamma < 1$). The trained student $[28,16,4]$,
+however, does \emph{not} realize this gap: its measured
+per-activation-layer amplification is $\gamma = [15.4, 5.3] > 1$ (E68),
+exceeding the MLP's $\sqrt{d} = 5.29$ at $d = 28$---the depth-uniform
+advantage is a property of \emph{contractively trained} KANs, not of
+the current checkpoint (contractive training is identified as the
+deployment recipe in {\S}\ref{sec:svnn-kan}). The MLP-side of the
+comparison remains unconditional: any MLP violating Condition~1 carries
+a deterministic per-layer factor $\sqrt{d}$ (Step~1), so its $L$-layer
+error amplification is $\Theta(d^{L/2})$ regardless of training---for
+the MLP analog ($d=28$, $L=3$) this is $>10{,}000\times$ worse than a
+contractive KAN, making MLP certification practically infeasible.
 
 \vspace{2pt}
 \noindent\textbf{Sharpness.}
@@ -137,12 +133,15 @@ domain-independent} factor of $\sqrt{d}$ per layer.
     \includegraphics[width=0.88\textwidth]{figures/final/fig04_sharp_bound}
     \caption{\textbf{Sharp Necessity Bound: Per-Layer Error Amplification Gap.}
     Left: MLP with adversarial weight matrix $W = (1/\sqrt{d}) \cdot J_d$ (all-ones)
-    achieves $\|W\|_{1,\infty} = \sqrt{d}$ exactly (solid red), while KAN's
-    contractivity constant $\gamma = 0.182$ is $d$-independent (solid blue).
+    achieves $\|W\|_{1,\infty} = \sqrt{d}$ exactly (solid red); the dashed blue
+    line is the illustrative contractive case $\gamma = 0.182$ used in earlier
+    versions---stale, since the trained student's measured per-layer
+    amplification is $\gamma = [15.4, 5.3] > 1$ (E68).
     Right: per-layer amplification ratio $R(d) = \sqrt{d} / \gamma$ for widths
-    $d$ from 4 to 256. For a standard KAN $[28,16,4]$ ($d_{\max}{=}28$,
-    $\gamma{=}0.182$): per-layer gap ${\approx}31\times$, 2-layer gap
-    ${\approx}967\times$. The all-ones construction is \textbf{sharp}:
+    $d$ from 4 to 256 (computed for the same illustrative $\gamma$).
+    % TODO: regenerate fig04_sharp_bound with honest values before
+    % submission (the trained KAN is non-contractive, gamma = [15.4, 5.3]).
+    The all-ones construction is \textbf{sharp}:
     $\|W\|_{1,\infty} \leq \sqrt{d} \cdot \|W\|_F$ by Cauchy-Schwarz,
     with equality at rank-1 equal-magnitude matrices.
     This gap is \textit{independent} of the choice of affine abstract domain

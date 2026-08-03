@@ -125,6 +125,8 @@ fprintf('[3/4] Sharp Lower Bound Plot\n');
 
 d_vals = [4, 8, 16, 32, 64, 128, 256];
 mlp_amp = sqrt(d_vals);  % all-ones construction
+% FIXME: 0.182 stale --- trained KAN non-contractive (gamma=[15.4,5.3], E68);
+% figure needs regeneration with honest values before submission
 kan_amp = 0.182 * ones(size(d_vals));  % measured γ
 ratio = mlp_amp ./ kan_amp;
 

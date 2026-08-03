@@ -467,13 +467,17 @@ over PROFINET/OPC UA. An on-PLC time-domain subset is also compiled
           \textbf{E60--E61} extend SVNN validation to FourierKAN
          and WaveletKAN architectures: FourierKAN $[28,16,4]$ (6 harmonics,
           $\omega=0.4$, 6,676 params) achieves 100.0\% CWRU accuracy with
-          512/512 edges $M_2 \cdot h^2 / 8 \leq 0.063 < 0.182$
-          ($\mathbf{100\%}$ Z3-equivalent, $2.9\times$ margin);
+          512/512 edges satisfying $M_2 \cdot h^2 / 8 \leq 0.063$
+          ($\mathbf{100\%}$ Z3-equivalent);
          WaveletKAN $[28,16,4]$ (8 Mexican hat scales, M2-regularized,
           $\sim$4,600 params)
          achieves 100.0\% CWRU accuracy with 512/512 edges verified
-          ($\mathbf{100\%}$ Z3-equivalent, $5.6\times$ margin), confirming the $C^2$-BV
+          ($\mathbf{100\%}$ Z3-equivalent), confirming the $C^2$-BV
          generalization (Proposition~\ref{prop:c2bv-family}).
+          % TODO: the margin ratios quoted in earlier versions (2.9x, 5.6x)
+          % compared M2*h^2/8 against the stale contractivity constant 0.182,
+          % which is not a measured margin; re-measure the per-function
+          % margin ratio before submission.
 
 We demonstrate the pipeline through a bearing fault diagnosis case study:
 a 6,148-parameter KAN student distilled via VRM-KD~\cite{zhang2025vrm} from
@@ -555,8 +559,11 @@ native SCL compilation, no correctness guarantee, and no compiler toolchain.
 \textbf{KAN verification.} Schwartz et~al.~\cite{schwartz2026optimal} proposed
 PWA abstraction with MILP encoding for KAN verification---operating at SVNN
 Level~3 (exact certification within PWA abstraction error). In this paper we
-verify layer-wise contractivity $P(\text{KAN})\leq 1$ empirically for the trained
-model (Condition~3, {\S}\ref{sec:svnn-conditions}), noting that
+certify the trained model under Conditions~1--2
+({\S}\ref{sec:svnn-conditions})---the trained student is \emph{not}
+contractive (measured per-layer amplification $\gamma = [15.4, 5.3]$,
+E68), and we identify contractive training as the recipe for the
+depth-uniform certificate---noting that
 polynomial-basis KANs admit structural Lipschitz bounds via coefficient
 magnitudes. KAN4CBC~\cite{zhang2025kan4cbc} demonstrated
 SMT-based safe controller synthesis. GloroKAN~\cite{glorokan2025} and
@@ -1220,9 +1227,15 @@ $W^{(1)}$ (16$\times$4), and B-spline Lipschitz bound $L_B$:
 
 where $\|\cdot\|_1$ denotes the L1 row norm. Eq.~\eqref{eq:ia_l0}
 propagates per-activation error through layer 0's linear combination.
-Eq.~\eqref{eq:ia_l1} accounts for Lipschitz amplification ($L_B \approx
-0.65$ for cubic B-splines) at the inter-layer transition before layer 1's
-linear combination. With measured $\|W^{(0)}\|_{1,\max} = 0.32$ and
+Eq.~\eqref{eq:ia_l1} accounts for Lipschitz amplification ($L_B = 2.21$
+layer-0 / $2.05$ layer-1, measured over the trained student's 512
+B-spline activations, E68) at the inter-layer transition before layer 1's
+linear combination.
+% TODO: the IA/DA logit bounds (0.172/0.079) and safety factors (3.9x/8.5x)
+% stated in this section were computed with the stale constants
+% L_B = 0.65 and ||W||_{1,inf} = 0.32/0.28; they must be recomputed from
+% the current checkpoint (L_B = 2.21/2.05, ||W_eff||_{1,inf} = 12.36/6.52)
+% before submission. With measured $\|W^{(0)}\|_{1,\max} = 0.32$ and
 $\|W^{(1)}\|_{1,\max} = 0.28$, and the model-specific $M_2 = 0.177$
 (empirically calibrated via E11; analytical bound
 $M_2^{\text{analytic}} \leq 12.8$ from Eq.~\ref{eq:bspline_curve_bounds}),
@@ -1870,7 +1883,11 @@ For cubic B-splines ($k=3$) learned by the KAN student, the first
 derivative satisfies $\max_{x \in [a,b]} |\phi'(x)| \leq L_B$.
 \end{lemma}
 
-\noindent\textit{Proof.} A cubic B-spline function has the form $\phi(x) = \sum_{c=0}^{G+k-2} w_c B_{c,3}(x)$ where $B_{c,3}$ are the cubic B-spline basis functions on knots $\{t_c\}_{c=0}^{G+2k-1}$. The derivative $\phi'(x) = \sum_c w_c B'_{c,3}(x)$ where $B'_{c,3}(x) = 3(\frac{B_{c,2}(x)}{t_{c+3}-t_c} - \frac{B_{c+1,2}(x)}{t_{c+4}-t_{c+1}})$ by the standard B-spline derivative recurrence. Each $B_{c,2}(x)$ satisfies $0 \leq B_{c,2}(x) \leq 1$ and $\sum_c B_{c,2}(x) = 1$, forming a partition of unity. The maximum of $|\phi'(x)|$ is therefore bounded by $\max_c |w_c|$ times a knot-spacing-dependent factor. For the uniform knot vector used in the KAN (grid extends slightly beyond $[-3,3]$ with $G=8$ interior knots), the bound evaluates to $L_B = 0.65$ empirically---measured as $\max_{x \in [a,b]} |\phi'(x)|$ on a 1,000-point grid across all 512 activation functions of the trained KAN. Under LUT interpolation error $\delta_{\text{in}}$ in the input, the mean value theorem gives $|\phi(x+\delta_{\text{in}}) - \phi(x)| = |\phi'(\xi)| \cdot |\delta_{\text{in}}| \leq L_B \cdot |\delta_{\text{in}}|$ for some $\xi \in [x, x+\delta_{\text{in}}]$.
+\noindent\textit{Proof.} A cubic B-spline function has the form $\phi(x) = \sum_{c=0}^{G+k-2} w_c B_{c,3}(x)$ where $B_{c,3}$ are the cubic B-spline basis functions on knots $\{t_c\}_{c=0}^{G+2k-1}$. The derivative $\phi'(x) = \sum_c w_c B'_{c,3}(x)$ where $B'_{c,3}(x) = 3(\frac{B_{c,2}(x)}{t_{c+3}-t_c} - \frac{B_{c+1,2}(x)}{t_{c+4}-t_{c+1}})$ by the standard B-spline derivative recurrence. Each $B_{c,2}(x)$ satisfies $0 \leq B_{c,2}(x) \leq 1$ and $\sum_c B_{c,2}(x) = 1$, forming a partition of unity. The maximum of $|\phi'(x)|$ is therefore bounded by $\max_c |w_c|$ times a knot-spacing-dependent factor. For the uniform knot vector used in the KAN (grid extends slightly beyond $[-3,3]$ with $G=8$ interior knots), the bound is evaluated empirically from the trained checkpoint---measured as $\max_{x \in [a,b]} |\phi'(x)|$ on a 1,000-point grid across all 512 activation functions: $L_B = 2.21$ (layer-0) / $2.05$ (layer-1), single maximum $2.21$ (E68).
+% TODO: the IA/DA logit bounds (0.172/0.079) and safety factors (3.9x/8.5x)
+% quoted in {\S}\ref{sec:da} and Theorem~1 were computed with the stale
+% L_B = 0.65 and must be recomputed from the current checkpoint.
+Under LUT interpolation error $\delta_{\text{in}}$ in the input, the mean value theorem gives $|\phi(x+\delta_{\text{in}}) - \phi(x)| = |\phi'(\xi)| \cdot |\delta_{\text{in}}| \leq L_B \cdot |\delta_{\text{in}}|$ for some $\xi \in [x, x+\delta_{\text{in}}]$.
 
 \setcounter{theorem}{0}
 \begin{theorem}[Compiler Semantic Preservation, 2-Layer KAN]
@@ -2249,11 +2266,15 @@ benign under the random-sign model.
 When $\gamma < 1$, the expected error converges to a
 \textbf{depth-independent} constant
 $O(d_{\max} M_{\max} h^2/(1-\gamma))$ as $L \to \infty$, while the
-concentration term grows only as $O(\sqrt{L \log(1/\delta)})$. For the
-trained $[28,16,4]$ KAN ($L=2$, $\gamma \approx 0.18$, $d_{\max}=28$,
-$M_{\max}=1.59$, $h=0.43$): the expected bound is $\approx 0.71$ and
-the concentration term adds $\approx 0.15$ at $\delta=0.05$, yielding a
-total probabilistic bound of $\approx 0.86$ with 95\% confidence.
+concentration term grows only as $O(\sqrt{L \log(1/\delta)})$.
+For the trained $[28,16,4]$ KAN, however, the honest checkpoint
+measurements are $L_B = 2.21$ (layer-0) / $2.05$ (layer-1) and
+$\|W_{\text{eff}}\|_{1,\infty} = 12.36$ (layer-0) / $6.52$ (layer-1),
+giving per-layer Lipschitz bounds of $25.1$ / $11.9$ and a measured
+per-activation-layer amplification $\gamma = [15.4, 5.3]$ (E68)---well
+above $1$, so the trained checkpoint falls in the $\gamma \geq 1$ branch
+below (the earlier instantiation with $\gamma \approx 0.18$ and an
+expected bound of $\approx 0.71$ used stale constants).
 
 When $\gamma \geq 1$, the expected error grows \textbf{linearly} in $L$
 as $O(L d_{\max} M_{\max} h^2)$---exponential growth (the worst-case
@@ -2352,46 +2373,52 @@ empirically for trained KANs (Table~\ref{tab:da_sign},
 Fig.~\ref{fig:da_ratio_dist})---the error grows only linearly with
 depth, and the deviation from this linear trend is
 $O(\sqrt{L \log(L/\delta)})$ with high probability. For the trained
-$[28,16,4]$ KAN ($L=2$, $\gamma \approx 0.18$, $d_{\max}=28$,
-$M_{\max}=1.59$, $h=0.43$): the expected bound is
-$\Delta \leq 0.71$ (consistent with Lemma~6) and the
-concentration term adds $\leq 0.15$ at $\delta=0.05$, yielding a
-total probabilistic bound of $\Delta \leq 0.86$ with 95\% confidence.
+$[28,16,4]$ KAN the measured per-activation-layer amplification is
+$\gamma = [15.4, 5.3] > 1$ (E68), placing it in the $\gamma \geq 1$
+branch: the expected-error term grows with depth rather than converging,
+and the earlier numeric instantiation ($\gamma \approx 0.18$,
+$\Delta \leq 0.71$, total $\Delta \leq 0.86$) used stale constants.
+% TODO: recompute the Theorem-4 expected/concentration instantiation
+% from the current checkpoint (gamma > 1 branch) before submission.
 
 \vspace{4pt}
 \noindent\textit{Practical significance.}
 Theorem~4 resolves the depth-scalability concern for industrial KAN
-deployment. Since $\gamma = L_B \cdot W_{\max}$ is typically
-$0.1$--$0.3$ for trained KANs (due to weight decay and the
-near-balanced sign structure), the expected error converges to a
-depth-independent constant $\varepsilon_{\text{LUT}} \cdot d_{\max}
-/ (1-\gamma)$ as $L$ increases. This means that \textit{deeper KANs
+deployment. When contractive training keeps $\gamma = L_B \cdot W_{\max}
+< 1$, the expected error converges to a depth-independent constant
+$\varepsilon_{\text{LUT}} \cdot d_{\max} / (1-\gamma)$ as $L$ increases.
+For the current checkpoint this regime is \emph{not} reached (measured
+per-activation-layer amplification $\gamma = [15.4, 5.3] > 1$, E68);
+the $\gamma \geq 1$ branch of Theorem~4 still rules out the adversarial
+exponential blowup (the random-sign concentration analysis applies
+regardless of $\gamma$). This means that \textit{deeper KANs
 do not incur exponentially growing compilation error}---a critical
-guarantee for deploying multi-layer KANs on resource-constrained PLCs.
+guarantee for deploying multi-layer KANs on resource-constrained PLCs,
+provided per-layer amplification is controlled during training.
 
 \end{theorem}
 
 \noindent\textit{Depth Feasibility Analysis.}
-Theorem~4 provides a practical test for depth feasibility. With
-$L_B = 0.65$ and $W_{\max} \approx 0.3$, the effective amplification
-$\gamma = L_B \cdot W_{\max} \approx 0.20 < 1$, so the expected error
-converges to $\varepsilon_{\text{LUT}} \cdot d_{\max} / (1-\gamma)
-\approx 0.0041 \times 28 / 0.80 \approx 0.14$ independent of depth.
-The concentration term adds $\leq 0.05$ at $\delta = 0.05$ for
-$L \leq 5$. For the $[28,16,8,4]$ 3-layer KAN tested in E5,
-Theorem~4 estimates $\Delta^{(3)} \leq 0.0041 \times 28 \times
-(1-0.20^3)/(1-0.20) + 0.05 \approx 0.19$---still well below the
-margin ($1.35$), confirming feasibility. For a 5-layer KAN $(L=5)$,
-the expected term is essentially unchanged ($\gamma^5 = 3.2\times
-10^{-4}$), and the concentration term increases only to $\sim 0.07$,
-yielding $\Delta^{(5)} \leq 0.21$.
+Theorem~4 provides a practical test for depth feasibility---provided the
+per-layer amplification factor $\gamma = L_B \cdot W_{\max}$ is known.
+For the trained $[28,16,4]$ student the honest checkpoint measurements
+($L_B = 2.21$ layer-0 / $2.05$ layer-1;
+$\|W_{\text{eff}}\|_{1,\infty} = 12.36$ / $6.52$; measured
+per-activation-layer amplification $\gamma = [15.4, 5.3]$, E68) put the
+network in the $\gamma \geq 1$ branch: the expected-error term grows
+with depth, so the earlier depth-independent feasibility estimates
+($\Delta^{(L)} \leq 0.14$--$0.21$) computed with the stale
+$\gamma \approx 0.20$ are obsolete.
+% TODO: recompute the Theorem-4 depth-feasibility instantiation for the
+% current checkpoint (gamma > 1 branch) before submission.
 
-\textit{Practical limit.} For $\gamma = L_B \cdot W_{\max} < 1$, Theorem~4
+\textit{Practical limit.} For a contractively trained KAN
+($\gamma = L_B \cdot W_{\max} < 1$), Theorem~4
 guarantees that the expected error converges to a depth-independent constant
-$\varepsilon_{\text{LUT}} \cdot d_{\max} / (1 - \gamma)$ as $L \to \infty$.
-The concentration term grows only as $O(\sqrt{L})$, so even at $L = 12$,
+$\varepsilon_{\text{LUT}} \cdot d_{\max} / (1 - \gamma)$ as $L \to \infty$,
+and the concentration term grows only as $O(\sqrt{L})$: even at $L = 12$,
 the 95\% confidence bound increases by at most $0.02$ relative to $L = 2$.
-The practical depth limit is therefore determined by the PLC's memory budget
+In that regime the practical depth limit is determined by the PLC's memory budget
 (SCL code size grows as $O(L \cdot d_{\max}^2 \cdot N_{\text{LUT}})$) rather
 than by error accumulation. The \texttt{auto\_bspline} optimizer pass
 ($\S$\ref{sec:method}) computes the Theorem~4 bound for the given architecture
@@ -3656,18 +3683,24 @@ with respect to B-spline coefficient perturbations.
 
 \begin{proposition}[SVNN Fine-Tuning Stability]
 \label{prop:svnn-ft-stability}
-Let $\mathcal{M}_0$ be a KAN satisfying the SVNN conditions with safety
-factor $\gamma_0 > 1$ (Definition~\ref{def:svnn}). Let $\mathcal{M}_1$
-be obtained from $\mathcal{M}_0$ by fine-tuning with weight perturbation
-$\|\Delta W\|_\infty \leq \delta$ per layer. Then $\mathcal{M}_1$
-satisfies the SVNN conditions with safety factor
-$\gamma_1 \geq \gamma_0 - C_{\text{FT}} \cdot \delta$, where
+Let $\mathcal{M}_0$ be a KAN satisfying the SVNN conditions
+(Conditions~1--2, Theorem~2) with safety factor
+$\mathrm{SF}_0 = \min_k \bigl(\text{margin}_k / \text{bound}_k\bigr) > 1$,
+where $\text{margin}_k$ is the inter-class margin of output $k$ and
+$\text{bound}_k$ the compiler's DA logit-perturbation bound for that
+output ({\S}\ref{sec:da}); we write $\mathrm{SF}$ rather than $\gamma$
+to avoid confusion with the Condition~3 contractivity constant. Let
+$\mathcal{M}_1$ be obtained from $\mathcal{M}_0$ by fine-tuning with
+weight perturbation $\|\Delta W\|_\infty \leq \delta$ per layer. Then
+$\mathcal{M}_1$ satisfies the SVNN conditions with safety factor
+$\mathrm{SF}_1 \geq \mathrm{SF}_0 - C_{\text{FT}} \cdot \delta$, where
 $C_{\text{FT}} = \frac{L \cdot d_{\max} \cdot L_B}{(1-\gamma)^2}$
 depends only on the architecture and $\gamma = L_B \cdot
-\|W\|_{1,\infty} < 1$ is the contractivity constant
-(Condition~3, Theorem~2). Consequently, there exists $\delta_{\max} =
-(\gamma_0 - 1) / C_{\text{FT}}$ such that fine-tuning with
-$\|\Delta W\|_\infty \leq \delta_{\max}$ preserves SVNN certification.
+\|W\|_{1,\infty} < 1$ is the per-layer amplification of the
+depth-uniform (Condition~3) regime. Consequently, there exists
+$\delta_{\max} = (\mathrm{SF}_0 - 1) / C_{\text{FT}}$ such that
+fine-tuning with $\|\Delta W\|_\infty \leq \delta_{\max}$ preserves SVNN
+certification.
 \end{proposition}
 
 \vspace{2pt}
@@ -3678,17 +3711,28 @@ $|\Delta z_k| \leq \varepsilon \cdot |\sum_j W_1[k,j]| +
 ({\S}\ref{sec:da}). This expression is $L_B$-Lipschitz in the weight
 matrices $W_0, W_1$: perturbing each entry by at most $\delta$ changes
 the bound by at most $L_B \cdot d_{\max} \cdot \delta$ per layer. The
-safety factor $\gamma = \min_k (\text{margin}_k / \text{bound}_k)$
+safety factor $\mathrm{SF} = \min_k (\text{margin}_k / \text{bound}_k)$
 therefore changes by at most $C_{\text{FT}} \cdot \delta$ for
 architecture-dependent constant $C_{\text{FT}}$.
 
-For the trained KAN $[28,16,4]$ with $\gamma = 0.182$, $L_B = 0.65$,
-and $d_{\max} = 28$, we have $C_{\text{FT}} \approx 28 \cdot 0.65 /
-0.67 \approx 27.2$. The observed fine-tuning perturbation
-$\|\Delta W\|_\infty \approx 0.003$---$50\times$ below the safety
-margin $\delta_{\max} \approx 0.007$---explains why SVNN conditions
-are not merely preserved but \textit{tightened} (DA bound improves
-from 0.064 to 0.049). $\square$
+The trained student $[28,16,4]$ is \emph{not} in the contractive
+regime (measured per-layer amplification $\gamma = [15.4, 5.3] > 1$,
+E68; $L_B = 2.21$ layer-0 / $2.05$ layer-1,
+$\|W_{\text{eff}}\|_{1,\infty} = 12.36$ / $6.52$), so the
+$(1-\gamma)^2$ form of $C_{\text{FT}}$ does not apply to this
+checkpoint and the earlier instantiation ($C_{\text{FT}} \approx 27.2$
+from the stale $\gamma = 0.182$, $L_B = 0.65$) is withdrawn.
+% TODO: re-derive C_FT for the trained checkpoint from the honest
+% constants (L_B = 2.21/2.05, ||W_eff||_{1,inf} = 12.36/6.52), or measure
+% the DA-bound sensitivity to weight perturbation directly; the earlier
+% "50x below delta_max" claim compared against a stale-derived delta_max
+% and is not reinstated until delta_max is re-derived.
+What remains directly measured is the fine-tuning story itself: the
+observed perturbation $\|\Delta W\|_\infty \approx 0.003$ left the
+certificate intact---the DA bound \textit{tightened} from 0.064 to 0.049
+(i.e., $\mathrm{SF}$ \emph{increased}), consistent with the DA bound
+being Lipschitz in the weights with a small architecture constant, and
+Z3 verification stayed at 512/512 (E55). $\square$
 
 Furthermore, the fine-tuned model compiles to SCL without errors
 (2,188 lines, E55), confirming that the compilation pipeline is
@@ -3720,7 +3764,7 @@ Outer Race   & 20.3\% & 96.5\% & +76.2 pp \\
 \midrule
 \multicolumn{4}{@{}l}{DA bound: 0.064 $\to$ 0.049 \quad Z3 verified: \textbf{512/512} (post-FT)} \\
 \multicolumn{4}{@{}l}{SCL compilation: 2,188 lines, \textbf{0 errors 0 warnings} (S7-1200)} \\
-\multicolumn{4}{@{}l}{SVNN Condition~3 ($\gamma<1$): \textbf{Preserved} ($\gamma_0{=}0.459$, $\gamma_1{=}0.502$)} \\
+\multicolumn{4}{@{}l}{SVNN Condition~3: \textbf{not satisfied by this checkpoint} (measured per-layer amplification $\gamma = [15.4, 5.3] > 1$, E68); Conditions~1--2 \textbf{preserved} (the certificate carried post-fine-tuning is the depth-dependent bound)} \\
 \bottomrule
 \end{tabular}
 \vspace{2pt}
@@ -4484,9 +4528,11 @@ parameters alone, requiring no runtime LP solver.
 \noindent\textbf{Depth Scaling: 3-Layer KAN Validation (E56).}
 Theorem~2 predicts that under Condition~3 ($\gamma<1$), the error bound is
 \textit{depth-independent}: adding layers does not cause exponential
-error growth. We validate this experimentally with a 3-layer KAN[28,16,8,4]
+error growth; absent Condition~3, the bound remains finite but grows
+with depth. We validate the depth-scaling behavior experimentally with a
+3-layer KAN[28,16,8,4]
 trained from scratch on CWRU (120 epochs, 99.60\% test accuracy, 7,302 parameters).
-The result confirms the theory:
+The result is consistent with the depth-dependent (non-convergent) form:
 \begin{itemize}
     \item \textbf{Z3 per-function verification:} 608/608 (100\%) B-spline
          functions pass Z3 verification — identical coverage to the 2-layer
@@ -4496,15 +4542,20 @@ The result confirms the theory:
          consistent with linear growth across the additional layer, not the
          exponential blowup that would occur for non-SVNN architectures
           (where $O(2^L)$ growth is expected from wrapping effects).
-    \item \textbf{Condition~3 preserved:} $\gamma_0 = 0.404$, $\gamma_1 = 0.318$,
-         both $< 1$ — the contractivity property holds at each layer.
+    \item \textbf{Condition~3 not certified:} the earlier $\gamma_0 = 0.404$ /
+         $\gamma_1 = 0.318$ figures used a crossed-index max-abs-weight
+         proxy, which is \emph{not} a valid contraction test; the honest
+         per-layer amplification of the 2-layer student is
+         $\gamma = [15.4, 5.3] > 1$ (E68), and contractivity was never
+         established for the 3-layer network either.
     \item \textbf{SCL compilation:} 2,612 lines, structurally valid (DB+FB
          structure verified), consistent with 0e 0w compilation expectation.
 \end{itemize}
 The empirical depth-scaling ratio ($14.6\times$ for $2\to 3$ layers, or
 $\approx 7.3\times$ per added layer) is substantially below the $O(2^L)$
-worst-case for MLP-style wrapping effects, directly supporting Theorem~2's
-depth-uniform bound and Theorem~4's depth-scaling analysis. The 3-layer
+worst-case for MLP-style wrapping effects, directly supporting
+Theorem~4's depth-scaling analysis (its $\gamma \geq 1$ branch applies
+to the trained networks, which are not contractive). The 3-layer
 KAN's 99.60\% accuracy (vs.\ 2-layer's 99.93\%) confirms that depth
 scaling is architecturally viable for industrial accuracy requirements.
 (Note: the compile-aware generalization bound

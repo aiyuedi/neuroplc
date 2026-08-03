@@ -224,6 +224,8 @@ close(fig);
 fprintf('[ 3/13] Sharp Lower Bound\n');
 
 dvals = [4 8 16 32 64 128 256];
+% FIXME: 0.182 stale --- trained KAN non-contractive (gamma=[15.4,5.3], E68);
+% figure needs regeneration with honest values before submission
 gamma_val = 0.182;
 mlpA = sqrt(dvals);
 kanA = gamma_val * ones(size(dvals));
