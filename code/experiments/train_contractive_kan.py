@@ -33,13 +33,13 @@ OUT_T = ROOT / "results" / "theory"
 
 ARCH = [28, 16, 4]
 XR = (-3.0, 3.0)
-EPOCHS = 60
+EPOCHS = 80
 BATCH = 128
 LR = 3e-3
 SEED = 42
-GAMMA_TARGET = 0.95          # Condition 3: per-layer amplification < 1
+GAMMA_TARGET = 0.85          # Condition 3: per-layer amplification < 1
 PROJ_EVERY = 10              # hard projection cadence (steps)
-GAMMA_LAMBDA = 8.0           # soft penalty weight
+GAMMA_LAMBDA = 20.0          # soft penalty weight
 N_GAMMA_SAMPLES = 600        # samples for numeric gamma measurement
 
 
@@ -67,7 +67,7 @@ def measure_gamma(model):
                                           (N_GAMMA_SAMPLES, ARCH[0]))
     gammas = []
     with torch.no_grad():
-        h = torch.from_numpy(xs)
+        h = torch.from_numpy(xs).float()
         for layer in model.kan_layers:
             h_next = layer(h)
             ratio = (h_next.abs().max(dim=1)[0] /
@@ -78,26 +78,23 @@ def measure_gamma(model):
 
 
 def project_contractive(model, target):
-    """Scale base+spline weights per layer so measured gamma <= target."""
-    for attempt in range(3):
+    """Numeric per-layer projection: measure gamma, scale weights iteratively.
+
+    Uses the measured (E68-semantics) per-layer amplification; each
+    layer is scaled by target/gamma_l (base and spline jointly), then
+    re-measured (up to 4 iterations).  This matches the metric that
+    Condition 3 is stated on.
+    """
+    for _ in range(4):
         g = measure_gamma(model)
         if max(g) <= target:
             return g
         with torch.no_grad():
             for l, layer in enumerate(model.kan_layers):
-                # row-sum-inf norm of effective weight
-                w_eff = (layer.base_weight + layer.spline_weight.mean(-1))
-                nrm = w_eff.abs().sum(dim=1).max().item()
-                if nrm > 1e-9:
-                    s = min(1.0, (target * nrm) / nrm)  # scale to target row-sum
-                    # row-wise scaling: keep relative structure, bound the max row
-                    rowsum = w_eff.abs().sum(dim=1)
-                    scale = torch.clamp(target / (rowsum + 1e-9), max=1.0)
-                    layer.base_weight.mul_(scale[:, None])
-                    layer.spline_weight.mul_(scale[:, None, None])
-        g = measure_gamma(model)
-        if max(g) <= target:
-            return g
+                if g[l] > target and g[l] > 0:
+                    s = target / g[l]
+                    layer.base_weight.mul_(s)
+                    layer.spline_weight.mul_(s)
     return measure_gamma(model)
 
 
@@ -145,7 +142,7 @@ def main():
             bad = 0
         else:
             bad += 1
-        if bad >= 8:
+        if bad >= 20:
             break
         if ep % 5 == 0 or ep == EPOCHS - 1:
             print(f"ep {ep}: val {va:.4f} gamma {[round(x, 3) for x in g]}",
