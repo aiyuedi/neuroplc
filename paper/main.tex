@@ -327,9 +327,11 @@ PC-to-PLC communication via Snap7 rather than native SCL compilation, and
 provided no correctness guarantees. The gap these tools leave is not an
 implementation gap---it is an \textit{architectural} gap. Our central finding
 is that no amount of compiler engineering can close it for architectures
-violating the SVNN conditions (Theorem~5). \neuroplc is the first compiler
-that compiles trained PyTorch models to IEC~61131-3 SCL for Siemens PLCs
-\textit{and} provides a formalism for when such compilation can be certified.
+violating the SVNN conditions (Theorem~5). \neuroplc instantiates the
+theory as the first verified PyTorch-to-IEC~61131-3 compiler,
+demonstrating that the certification transfers across vendors (a
+vendor-neutral IEC~61131-3 backend with identical semantics) and across
+model updates (Algorithm~4).
 
 \textbf{Scope.} \neuroplc compiles the classifier (KAN/MLP) to SCL.
 Frequency-domain features are assumed pre-extracted via DSP and transmitted
@@ -348,10 +350,12 @@ over PROFINET/OPC UA. An on-PLC time-domain subset is also compiled
          sufficient} for dimension-optimal affine certification ($O(d \cdot
          r^2)$ per layer), while ill-typed architectures degrade to
           $\Omega(d^2 \cdot r^2)$---a $\Theta(d)$ gap verified on networks
-         up to $d=128$ (MATLAB). \textbf{DA Optimality} (Theorem~9) proves
-         Doubleton Arithmetic is the tightest sound first-order abstract
-         domain for $C^2$ functions ($62.4\%$ of $C^3$ instances reject
-         any tighter linear coefficient). \textbf{SVNN Compositionality}
+         up to $d=128$ (MATLAB). \textbf{Sharp k-th Order LUT Bounds}
+          (Theorem~\ref{thm:sharp-lut}) generalize the de~Boor constant to
+         all orders with exact sharp constants $c_k = Q_k/k!$ and an
+         extremal family attaining them at machine precision (superseding
+         the earlier cubic-restricted, Monte-Carlo-verified DA optimality
+         claim). \textbf{SVNN Compositionality}
           (Theorem~8) proves the SVNN class forms an algebraic monoid,
          enabling modular certification.
     \item \textbf{Theory (Abstract Interpretation Foundation):}
@@ -5177,15 +5181,43 @@ containing neural inference blocks.
 \label{sec:conclusion}
 
 This paper established a \textbf{type theory of certifiable neural
-architectures} and instantiated it as the first verified PyTorch-to-IEC~61131-3
-SCL compiler. The central finding is that compiler correctness certification
-is not an engineering problem---it is an \textit{architectural} problem,
-governed by a precise mathematical frontier.
+architectures}---a formal characterization of which architectures admit
+design-time correctness certification under fixed-point compilation, with
+what sharp constants, at what computational cost, and with what
+learning-theoretic guarantee---and instantiated it as the first verified
+PyTorch-to-IEC~61131-3 compiler. The central finding is that compiler
+correctness certification is not an engineering problem---it is an
+\textit{architectural} problem, governed by a precise mathematical
+frontier.
 
 \vspace{4pt}
-\noindent\textbf{Theoretical contributions (16 theorems, 5 king-level):}
+\noindent\textbf{Theoretical contributions:}
 
 \begin{enumerate}[label=\arabic*.]
+    \item \textbf{Sharp k-th Order LUT Bounds (Theorem~\ref{thm:sharp-lut}).}
+   The de~Boor constant $M_2h^2/8$ is the $k=2$ instance of an exact
+   all-orders family $c_k = Q_k/k!$, attained by explicit extremal
+   functions at machine precision---DA optimality is a theorem with a
+   certificate, not an empirical observation.
+
+    \item \textbf{Verifiability Trichotomy (Theorem~\ref{thm:trichotomy}).}
+   The SVNN condition is the \emph{unique} regime where second-order
+   rate, linear LUT cost, closed-form sharp constants, and
+   reachability-freedom coexist; ReLU admits only first-order bounds,
+   multivariate gates suffer $N^m$ cost and NP-hard tightness, and
+   domain-dependent curvature requires reachability.
+
+    \item \textbf{$\varepsilon$-Separation (Theorem~\ref{thm:necessity}).}
+   The LUT-verification decision problem is polynomial for SVNN and
+   NP-hard for coupled architectures (self-contained 3-SAT reduction);
+   SVNN uniquely attains (polynomial time, zero slack).
+
+    \item \textbf{Compile-Aware Generalization
+   (Theorem~\ref{thm:generalization}).} The deployed risk decomposes as
+   $\hat{R}(N) + O(\gamma^{L-1}/\sqrt{n}) + O(\gamma^{L-1}c_kM_kh^k)$
+   with the resolution-matching law $N^{*} \asymp n^{1/(2k)}$---a
+   directly actionable compiler rule for embedded deployment.
+
     \item \textbf{Compilable Frontier (Theorem~A).} SVNN Conditions~1--2 are
    necessary and sufficient for dimension-optimal affine certification.
    Non-SVNN architectures (MLPs) degrade by $\Theta(d)$ per layer due to
@@ -5193,8 +5225,8 @@ governed by a precise mathematical frontier.
 
     \item \textbf{DA Galois Connection (Theorem~B).} Doubleton Arithmetic is a
    canonical instance of Cousot abstract interpretation with a defined Galois
-   connection $(\alpha, \gamma)$, making NeuroPLC the first neural network
-   compiler formally grounded in this framework.
+   connection $(\alpha, \gamma)$, making the framework the first neural
+   network compilation theory formally grounded in abstract interpretation.
 
     \item \textbf{DA Tightness (Theorem~C).} The DA bound $M_2 \cdot h^2 / 8$ is
    semantically tight---attained by $f^*(x) = M_2/2 \cdot x^2$ at every LUT
