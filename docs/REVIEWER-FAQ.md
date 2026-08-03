@@ -137,7 +137,7 @@ We distinguish three levels of evidence:
 
 2. **Model-specific refinement** (E11): Empirical M2 calibration tightens the bound by 98.6% (M2=0.177 vs. analytical M2=12.8). Both are computable from model parameters alone.
 
-3. **Empirical validation** (E6 + PLCSIM): 1000-sample cross-validation + PLCSIM instruction-level simulation confirms the bounds are not vacuous. **Additionally, the compiler now self-tests** (Tier 4, E67): a differential test compares PyTorch inference against an SCL-semantics simulator over 3,000 samples — 100% agreement, maxAE 0.24, and this test **caught the real scale-regression bug** that broke SCL consistency at 83%.
+3. **Empirical validation** (E6 + PLCSIM): 1000-sample cross-validation + PLCSIM instruction-level simulation confirms the bounds are not vacuous. **Additionally, the compiler now self-tests** (Tier 4, E67): a differential test compares PyTorch inference against an SCL-semantics simulator over 3,357 samples (2,743 CWRU test + 614 adversarial) — 100% agreement, maxAE 0.47, and this test **caught the real scale-regression bug** that broke SCL consistency at 83%.
 
 We cite Szász et al. (2025) explicitly and position our guarantee as a **design-time correctness argument** (Level 2), not a mechanized hardware proof (Level 3). For SIL 3+, we provide per-function Z3 proofs (Tier 2) as machine-checkable evidence.
 
@@ -266,7 +266,7 @@ Because it caught a bug that every *formal* verification layer missed — and it
 
 **The bug (E53/E67 story):** the S7 backend's `_emit_add` dropped the trained scale factors (scale_base ≈ 1.7, scale_spline ≈ 1.2–1.4). The DA bound, Z3 certificates, and TIA compilation all passed — each layer was internally self-consistent — but the *deployed SCL* disagreed with PyTorch on 17% of classifications (logit MAE 4.02, MaxAE 13.97, 177× over the claimed DA bound). The four verification layers each validated *their own* artifact; none validated the **emitted artifact against the source of truth**.
 
-**The fix is architectural:** `differential_test.py` runs a PyTorch-vs-SCL-semantics simulator comparison (3,000 samples, 100% agreement, maxAE 0.24 after fix), and the compiler **refuses to emit** when `compile(verify=True)` fails. This is the standard differential-testing argument from compiler construction (Leroy's CompCert validation methodology) transplanted into the ML-to-PLC toolchain, and it is precisely the "ground-truth artifact check" that the formal layers lack. We therefore report the bug honestly in the paper (E67) as evidence that the mechanism is not decorative — it has already caught a real regression in production use.
+**The fix is architectural:** `differential_test.py` runs a PyTorch-vs-SCL-semantics simulator comparison (3,357 samples, 100% agreement, maxAE 0.47 after fix), and the compiler **refuses to emit** when `compile(verify=True)` fails. This is the standard differential-testing argument from compiler construction (Leroy's CompCert validation methodology) transplanted into the ML-to-PLC toolchain, and it is precisely the "ground-truth artifact check" that the formal layers lack. We therefore report the bug honestly in the paper (E67) as evidence that the mechanism is not decorative — it has already caught a real regression in production use.
 
 ---
 
@@ -329,7 +329,7 @@ No — and we have removed even the appearance of lock-in:
 | E64 | `code/theory/verify_lemma3_bennett.py` | Lemma 3p: medR 4.6→37.7 as √d (d=16..1024); κ=√d outlier gives R=1 |
 | E65 | `code/theory/verify_thm5_eps_separation.py` | Thm 5p: 200/200 both directions; spline exact 5×10⁻⁸ |
 | E66 | `code/theory/verify_trichotomy_thm10p.py` | Thm 10p: slopes −2.04/−2.06/−1.77/−1.03 separation |
-| E67 | `python -m neuroplc.differential_test` | Tier 4: 3,000 samples 100% agree, maxAE 0.24; caught scale regression |
+| E67 | `python -m neuroplc.differential_test` | Tier 4: 3,357 samples (2,743 ID + 614 adv) 100% agree, maxAE 0.47; caught scale regression |
 | E68 | `code/experiments/e59_thm6p_compile_aware.py` | Thm 6p: bias slope 0.99 vs h²; per-act. ratio 0.996–1.000; N* knee 0.14 |
 
 *Updated: 2026-08-03 | NeuroPLC Pre-Submission Defense Document (TNNLS v2)*

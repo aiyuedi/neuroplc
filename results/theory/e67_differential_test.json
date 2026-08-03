@@ -1,0 +1,24 @@
+{
+  "experiment": "E67",
+  "tool": "neuroplc.differential_test (Tier-4)",
+  "date": "2026-08-03",
+  "model": "results/student/kan_kd_vrmKD_best.pt (StudentKAN [28,16,4])",
+  "lut_points": 15,
+  "in_distribution": {
+    "source": "CWRU test features (stratified 80/20, random_state=42), clipped to [-3,3]",
+    "n": 2743,
+    "classification_agreement": 1.0,
+    "max_logit_error": 0.4724,
+    "margin_used": 1.35,
+    "pass": true
+  },
+  "out_of_distribution": {
+    "source": "random in-domain + LUT knot midpoints + grid corners",
+    "n": 614,
+    "classification_agreement": 1.0,
+    "max_logit_error": 0.4850,
+    "pass": true
+  },
+  "verdict": "PASS",
+  "notes": "Simulator fixed to match SCL semantics (linear extrapolation outside grid, backend_s7._emit_blut); np.interp clamps and was not faithful. All three fixes: broadcast bug L183, real test features in __main__, extrapolation semantics."
+}

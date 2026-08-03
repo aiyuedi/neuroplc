@@ -64,9 +64,21 @@ def simulate_scl_logits(graph: IRGraph, x: np.ndarray) -> np.ndarray:
             B, in_d = x_np.shape
             out_d, _, _ = table.shape
             spline = np.zeros((B, out_d), dtype=np.float32)
+            grid_a = np.asarray(grid)
             for o in range(out_d):
                 for i in range(in_d):
-                    spline[:, o] += np.interp(x_np[:, i], grid, table[o, i])
+                    x_i = x_np[:, i]
+                    # SCL semantics (backend_s7._emit_blut): binary search
+                    # + linear interpolation with EXTRAPOLATION outside the
+                    # grid (t > 1 or t < 0) — NOT np.interp, which clamps.
+                    # searchsorted('right')-1 reproduces the SCL lo/hi loop.
+                    lo = np.searchsorted(grid_a, x_i, side="right") - 1
+                    lo = np.clip(lo, 0, len(grid_a) - 2)
+                    hi = lo + 1
+                    denom = grid_a[hi] - grid_a[lo]
+                    t = (x_i - grid_a[lo]) / np.where(denom == 0, 1e-10, denom)
+                    spline[:, o] += (
+                        table[o, i, lo] * (1.0 - t) + table[o, i, hi] * t)
             vals[nid] = torch.from_numpy(spline).float()
         elif node.op == IROpType.Add:
             vals[nid] = vals[node.inputs[0]] + vals[node.inputs[1]]
@@ -180,7 +192,7 @@ class DifferentialTester:
             per_in = sorted_id[:, -1] - sorted_id[:, -2]
             diff_id = np.abs(y_pt_id - y_scl_id)
             flips_id = (y_pt_id.argmax(1) != y_scl_id.argmax(1)).sum()
-            safe = float((diff_id <= margin_frac * per_in).mean())
+            safe = float((diff_id.max(axis=1) <= margin_frac * per_in).mean())
             r_id = {
                 "label": "in-distribution (self-margin)", "n": len(y_pt_id),
                 "classification_agreement": float(1.0 - flips_id / len(y_pt_id)),
@@ -233,6 +245,16 @@ if __name__ == "__main__":
     model = StudentKAN([28, 16, 4])
     model.load_state_dict(ckpt["student_state_dict"])
     model.eval()
+    # Load the CWRU test-set features (stratified 80/20 split, random_state
+    # 42, matching data_pipeline.preprocess.create_splits) for the certified
+    # in-distribution check. Without real features the random-input
+    # self-margin branch flags expected out-of-domain flips as failures.
+    from sklearn.model_selection import train_test_split
+    X_all = np.load(os.path.join(BASE, "data", "processed", "features_X.npy"))
+    y_all = np.load(os.path.join(BASE, "data", "processed", "features_y.npy"))
+    _, X_te, _, _ = train_test_split(
+        X_all, y_all, test_size=0.2, stratify=y_all, random_state=42)
     tester = DifferentialTester(model, lut_points=15)
-    report = tester.run()
+    report = tester.run(n_random=2000, n_adversarial=500, margin_frac=0.5,
+                        test_features=X_te)
     print(f"\nTier 4 verdict: {'PASS' if report['pass'] else 'FAIL'}")

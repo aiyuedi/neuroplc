@@ -909,7 +909,7 @@ DB/FB identifiers---so the same IR and the same verification chain
 \texttt{FUNCTION\_BLOCK} syntax with zero Siemens-specific tokens,
 compilable by CODESYS/TwinCAT/any IEC-compliant toolchain. The generated
 vendor-neutral ST has identical semantics to the Siemens SCL
-(Tier~4 differential test: 100\% agreement, max logit error 0.24, E67),
+(Tier~4 differential test: 100\% agreement, max logit error 0.47, E67),
 confirming that the certification is target-independent---the
 IEC~61131-3:2025 REAL semantics (Lemma~\ref{lem:iec_universal}) transfer
 to any compliant controller. This is the multi-vendor deployment path
@@ -4162,7 +4162,7 @@ E63& Sharp k-th Order LUT Bounds & $k{=}2..5$, extremal family & \textbf{extrema
 E64& Moment-Robust DA Ratio    & Bennett, 4 weight families & $R$: 4.6/9.5/18.8/37.7 at $d{=}16..1024$; outlier $\kappa{=}\sqrt{d}$: $R{=}1$ \\
 E65& $\varepsilon$-Separation   & 3-SAT product-gate encoding & 200/200 both directions; spline exact $5{\times}10^{-8}$ \\
 E66& Verifiability Trichotomy  & Rates: tanh/sin/B-spline/ReLU & slopes $-2.04/-2.06/-1.77/-1.03$; tensor LUT $N^m$ \\
-E67& Tier-4 Differential Test  & PyTorch vs SCL-sim (emitter) & 3{,}000 samples 100\% agree; maxAE 0.24; \textbf{caught scale regression} \\
+E67& Tier-4 Differential Test  & PyTorch vs SCL-sim (emitter) & 3{,}357 samples 100\% agree; maxAE 0.47; \textbf{caught scale regression} \\
 E68& Compile-Aware PAC         & Decomp.\ + resolution matching & bias slope 0.99 vs $h^2$; per-act.\ ratio 0.996--1.000; knee $N^{*}$ exp.\ 0.14 \\
 \midrule
 \multicolumn{4}{l}{\textit{Validation Experiments (V1--V7):}} \\
@@ -4586,7 +4586,7 @@ four independent tiers, each with a distinct role and verification scope:
          agreement on generated code---which no Tier~1--3 proof detected
          (the templates and bounds were individually sound; the emitter
          was not). After the fix, Tier~4 passes: 3{,}000 in-distribution
-         samples, 100\% agreement, max logit error 0.24 (E67).
+         samples, 100\% agreement, max logit error 0.47 (E67).
 \end{enumerate}
 
 \vspace{4pt}
