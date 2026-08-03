@@ -180,10 +180,10 @@ By structural induction on the composition of PLC programs.
     Proposition~NC.2 guarantees that
     $F_{\text{NeuroPLC}}$ completes within $\text{WCET}(N)$ per
     invocation, and Theorem~\ref{thm:wcet} verifies that
-    $\text{WCET}(N) < \text{ScanCycle}$ ($22.67$~ms $< 100$~ms).
+    $\text{WCET}(N) < \text{ScanCycle}$ ($3.86$~ms $< 100$~ms).
     The guarantee is premised on the timing budget
     $\text{WCET}(P) + \text{WCET}(N) \leq \text{ScanCycle}$: under the
-    100~ms cycle with $N$ at $22.67$~ms, $77.33$~ms remain for $P$'s
+    100~ms cycle with $N$ at $3.86$~ms, $96.1$~ms remain for $P$'s
     POUs and the OS scheduler. The scan-cycle execution model of
     IEC~61131-3 ensures
     sequential execution: $F_{\text{NeuroPLC}}$ runs to completion
@@ -241,8 +241,8 @@ By structural induction on the composition of PLC programs.
     $\varphi$. The scan-cycle overrun case (watchdog reset) cannot
     occur by (ii) under the timing premise
     $\text{WCET}(P) + \text{WCET}(N) \leq \text{ScanCycle}$---satisfied
-    here with $\text{WCET}(N) = 22.67$~ms $< 100$~ms scan cycle,
-    leaving $77.33$~ms for $P$'s POUs and the OS scheduler. If the
+    here with $\text{WCET}(N) = 3.86$~ms $< 100$~ms scan cycle,
+    leaving $96.1$~ms for $P$'s POUs and the OS scheduler. If the
     premise is violated, the watchdog reset dominates and the
     guarantee is vacated. $\square$
 \end{enumerate}

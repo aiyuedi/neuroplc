@@ -298,7 +298,7 @@ semantics (Lemma~\ref{lem:iec_universal}) extends the SVNN guarantee
 to any IEC-compliant controller worldwide---replacing per-platform
 validation with a one-time arithmetic-standard-based proof.
 The compiler provides a parameterized WCET guarantee
-(Theorem~\ref{thm:wcet}: $22.67$~ms, $4.4\times$ scan-cycle margin)
+(Theorem~\ref{thm:wcet}: $3.86$~ms, $4.4\times$ scan-cycle margin)
 and auto-generates a companion safety monitor (Algorithm~3).
 
 The industrial instantiation of this type theory targets
@@ -389,7 +389,7 @@ over PROFINET/OPC UA. An on-PLC time-domain subset is also compiled
          guarantee for neural-network-on-PLC deployment, directly addressing
          IEC~61508 independence requirements. The \textbf{WCET Theorem} (Theorem~11)
          provides parameterized worst-case execution time bounds
-          ($22.67$~ms for KAN $[28,16,4]$, $4.4\times$ scan-cycle margin).
+          ($3.86$~ms for KAN $[28,16,4]$, $4.4\times$ scan-cycle margin).
     \item \textbf{System (Compiler):} \neuroplc, the first
          PyTorch-to-Siemens SCL compiler, uses a 6-op IR matching
          SVNN decomposition of KAN ({\S}\ref{sec:ir}). Generated
@@ -463,7 +463,7 @@ over PROFINET/OPC UA. An on-PLC time-domain subset is also compiled
          and $N_{\text{LUT}}$ LUT points on Siemens S7-1200,
           $\text{WCET}(N) \leq E \cdot (C_{\text{LUT}} + C_{\text{matmul}})
           + C_{\text{softmax}}$. For KAN $[28,16,4]$ with $N_{\text{LUT}}=15$:
-          $\text{WCET} = 22.67$~ms ($4.4\times$ margin within 100~ms scan
+          $\text{WCET} = 3.86$~ms ($4.4\times$ margin within 100~ms scan
          cycle, $22.7\%$ utilization).
     \item \textbf{Algorithm (Safety Monitor):} \textbf{Algorithm~3}
           ({\S}\ref{sec:safety-monitor})---the compiler automatically
@@ -2784,7 +2784,7 @@ physical hardware may differ.
 
 
 \vspace{2pt}
-\noindent\textit{Scope note.} Table~\ref{tab:instr_timing} (3.2~ms) estimates the full forward pass including DB memory-access overhead (16.8\% of estimated time); the Z3 kernel WCET of Table~\ref{tab:wcet} (2.86~ms) formally certifies the arithmetic core; and the conservative parameterized bound of Theorem~\ref{thm:wcet} (22.67~ms) covers the full pipeline for scan-cycle feasibility. All instruction timings use the same Siemens base (S7-1200 System Manual, 05/2024, Appendix A; \texttt{wcet.py}).
+\noindent\textit{Scope note.} Table~\ref{tab:instr_timing} (3.2~ms) estimates the full forward pass including DB memory-access overhead (16.8\% of estimated time); the Z3 kernel WCET of Table~\ref{tab:wcet} (2.86~ms) formally certifies the arithmetic core; and the conservative parameterized bound of Theorem~\ref{thm:wcet} (3.86~ms) covers the full pipeline for scan-cycle feasibility. All instruction timings use the same Siemens base (S7-1200 System Manual, 05/2024, Appendix A; \texttt{wcet.py}).
 
 \subsubsection{Z3-Verified Worst-Case Execution Time (WCET)}
 \label{sec:z3_wcet}
@@ -2833,7 +2833,7 @@ Argmax             & $4{\rightarrow}1$ & 0.2 & 0 & $\checkmark$ \\
 
 The Z3-verified kernel WCET (2,862\,$\mu$s) is roughly an order of
 magnitude below the conservative full-pipeline bound of
-Theorem~\ref{thm:wcet} (22.67~ms), which additionally accounts for
+Theorem~\ref{thm:wcet} (3.86~ms), which additionally accounts for
 binary-search loop bodies, branch and DB-access costs, and FB call
 overhead that the kernel model omits; the Theorem~\ref{thm:wcet} bound
 is the deployment-relevant certificate for scan-cycle feasibility
@@ -2991,11 +2991,11 @@ Appendix A; \texttt{wcet.py}):
    the same Siemens timing base. It is a practical, data-sheet-based
    estimate, not a formal guarantee; it corroborates the Z3 kernel WCET.
 
-    \item \textbf{Conservative WCET Upper Bound (Theorem~11): $22.67$~ms.}
+    \item \textbf{Conservative WCET Upper Bound (Theorem~11): $3.86$~ms.}
    The parameterized worst-case bound includes all overhead: binary search
    per LUT ($4$ iterations), soft-float REAL operations, array accesses,
    and FB call overhead. It is designed to be \textit{conservative}---the
-   bound of $22.67$~ms provides a safe overestimate with $4.4\times$
+   bound of $3.86$~ms provides a safe overestimate with $4.4\times$
    scan-cycle margin, suitable for IEC~61508 design-time certification.
 \end{enumerate}
 
@@ -3019,9 +3019,11 @@ tool provides.
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.55\linewidth]{figures/final/fig09_wcet_breakdown}
+    % FIXME(2026-08-03): regenerate fig09_wcet_breakdown with the
+    % recomputed values (total 3.86 ms; LUT 82.3%, MatMul 15.9%).
     \caption{\textbf{WCET Breakdown: KAN $[28,16,4]$ on S7-1200 CPU~1211C.}
-    LUT dominates at $73.4\%$ (448+64 edges). MatMul $16.3\%$, Softmax $0.5\%$,
-    overhead $0.3\%$. Total: $22.67$~ms ($22.7\%$ of 100~ms scan cycle).}
+    LUT dominates at $82.3\%$ (448+64 edges). MatMul $15.9\%$, Softmax $0.5\%$,
+    overhead $0.3\%$. Total: $3.86$~ms ($3.9\%$ of 100~ms scan cycle).}
     \label{fig:wcet_breakdown}
 \end{figure}
 
@@ -3411,7 +3413,7 @@ EXP evaluation contributes 3.0\% (2.0~$\mu$s/call---the S7-1200 has no
 hardware FPU). The total estimated inference time is \textbf{3.2~ms} per
 forward pass, corroborating the Z3-verified kernel WCET of 2.86~ms
 (Table~\ref{tab:wcet}); the conservative full-pipeline bound of
-Theorem~\ref{thm:wcet} (22.67~ms) remains the deployment-relevant
+Theorem~\ref{thm:wcet} (3.86~ms) remains the deployment-relevant
 certificate for scan-cycle feasibility. On the S7-1500 ($\sim$100$\times$ faster
 for floating-point operations), the same inference completes in
 $\sim$0.03~ms---well within a single scan cycle. The EXP$\to$LUT strength
@@ -5107,7 +5109,7 @@ Siemens SCL & Not validated & ABB-specific &
 Correctness & \ding{55} & \ding{55} &
 \textbf{Type theory + 17 Thm + DA + Z3} \\
 WCET / Safety & \ding{55} & \ding{55} &
-\textbf{WCET 22.67ms + Non-Interference (Thm~E)} \\
+\textbf{WCET 3.86ms + Non-Interference (Thm~E)} \\
 IEC~61508 Aligned & \ding{55} & \ding{55} &
 \textbf{\ding{51} (Non-Interference + WCET)} \\
 \bottomrule
@@ -5450,7 +5452,7 @@ frontier.
    \leq$ scan cycle---the first such guarantee for NN-on-PLC deployment.
 
     \item \textbf{WCET (Theorem~11).} Parameterized worst-case execution time
-   bound: $22.67$~ms for KAN $[28,16,4]$ on S7-1200 ($4.4\times$ scan-cycle
+   bound: $3.86$~ms for KAN $[28,16,4]$ on S7-1200 ($4.4\times$ scan-cycle
    margin).
 
     \item \textbf{DA Optimality (Theorem~9).} DA is the tightest sound

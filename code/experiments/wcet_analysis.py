@@ -7,12 +7,12 @@ Derives the theoretical WCET bound for compiled KAN SCL on Siemens S7-1200 CPU 1
 S7-1200 CPU 1211C instruction timing (from Siemens technical data):
   - Basic bit/logic/MOV: 0.075 us
   - Integer operations (ADD/SUB/MUL/DIV): 0.2 us
-  - REAL (IEEE 754 soft-float) MUL: ~3.5 us
-  - REAL (IEEE 754 soft-float) ADD: ~1.8 us
-  - REAL (IEEE 754 soft-float) DIV: ~8 us
-  - REAL (IEEE 754 soft-float) EXP: ~14 us
-  - Array element access (indexed): ~2 us
-  - Comparison (REAL): ~1.5 us
+  - REAL (IEEE 754 soft-float) MUL: ~0.60 us
+  - REAL (IEEE 754 soft-float) ADD: ~0.50 us
+  - REAL (IEEE 754 soft-float) DIV: ~1.20 us
+  - REAL (IEEE 754 soft-float) EXP: ~2.0 us
+  - Array element access (indexed): ~0.10 us
+  - Comparison (REAL): ~0.30 us
   - FB call overhead: ~30 us
 
 For KAN [28,16,4]:
@@ -28,17 +28,21 @@ import json
 from pathlib import Path
 
 # ── S7-1200 CPU 1211C timing constants (us) ──
+# Timings aligned with wcet.py (code values): Siemens S7-1200 System
+# Manual, 05/2024, Appendix A. (2026-08-03 audit: the previous values
+# 3.5/1.8/8.0 us had no manual citation and disagreed with the compiler's
+# own WCET model.)
 T = {
     'basic': 0.075,
-    'int_op': 0.2,
-    'real_mul': 3.5,
-    'real_add': 1.8,
-    'real_div': 8.0,
-    'real_exp': 14.0,
-    'array_access': 2.0,
-    'real_cmp': 1.5,
-    'fb_overhead': 30.0,
-    'loop_overhead': 1.0,  # per iteration
+    'int_op': 0.15,      # int_add (wcet.py)
+    'real_mul': 0.60,
+    'real_add': 0.50,
+    'real_div': 1.20,
+    'real_exp': 2.00,
+    'array_access': 0.10,  # array_idx
+    'real_cmp': 0.30,
+    'fb_overhead': 30.0,   # FB call, separate quantity (not an instruction)
+    'loop_overhead': 0.20, # loop_iter (wcet.py)
 }
 
 # ── Architectural params ──
