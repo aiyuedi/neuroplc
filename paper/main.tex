@@ -115,12 +115,12 @@
 % ===========================================================================
 % Title
 % ===========================================================================
-\title{NeuroPLC: A Type Theory of Certifiable Neural Architectures, with Industrial PLC Instantiation}
+\title{A Type Theory of Certifiable Neural Architectures: Sharp LUT Bounds, Complexity Separation, and Compile-Aware Generalization, with an Industrial PLC Instantiation}
 
 \author{Fuyue~Liu,~\IEEEmembership{Guilin~University~of~Electronic~Technology, Guilin 541004, China}}
 
-\markboth{IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS, VOL. XX, NO. XX, 2026}%
-         {Liu: NeuroPLC --- A Type Theory for Certifiable Neural Nets}
+\markboth{IEEE TRANSACTIONS ON NEURAL NETWORKS AND LEARNING SYSTEMS, VOL. XX, NO. XX, 2026}%
+         {Liu: A Type Theory of Certifiable Neural Architectures}
 
 \maketitle
 
@@ -134,45 +134,53 @@
 % Abstract
 % ===========================================================================
 \begin{abstract}
-We present \neuroplc: a \textbf{type theory of certifiable neural
-architectures}, in which well-typed architectures admit design-time
-correctness certification under fixed-point compilation. Three results
-anchor the theory. First, the \textbf{Compilable Frontier Characterization}
-(Theorem~\ref{thm:characterization}) proves that the SVNN conditions are
-\textit{necessary and sufficient} for dimension-optimal affine certification
----a $\Theta(d)$ per-layer gap separating certifiable architectures from
-standard MLPs, verified through a sharp adversarial construction
-($\|W\|_{1,\infty} = \sqrt{d}$, $d=4$--$256$). Second,
-\textbf{Doubleton Arithmetic} (DA) is the \textbf{Galois-optimal} abstract
-domain for $C^2$ univariate functions (Theorem~\ref{thm:galois})---the
-first Galois connection defined for neural network activation
-functions---with \textbf{semantically tight} bounds
-(Theorem~\ref{thm:tightness}: $f^*(x) = M_2 x^2 / 2$ attains
-$M_2 h^2 / 8$ at every LUT midpoint, $1{,}000/1{,}000$ exact).
-Third, an IEC~61131-3 REAL arithmetic semantics extends the SVNN
-guarantee to \textbf{any} IEC-compliant controller worldwide
-(Lemma~\ref{lem:iec_universal}). The type system is \textbf{sound}
-(Theorem~2), \textbf{compositional} (Theorem~8: algebraic monoid),
-and deployed with \textbf{non-interference} guarantees
-(Theorem~\ref{thm:noninterference}). Compiler correctness is
-\textbf{type soundness} (Theorem~\ref{thm:ir-soundness}).
+We present a \textbf{type theory of certifiable neural architectures}:
+a formal characterization of which architectures admit design-time
+correctness certification under fixed-point (LUT) compilation, and why.
+Four results anchor the theory. First, the \textbf{sharp k-th order LUT
+bounds} (Theorem~\ref{thm:sharp-lut}): the classical de~Boor constant
+$M_2h^2/8$ generalizes to all interpolation orders with explicit sharp
+constants $c_k = Q_k/k!$ and an extremal family attaining them
+\emph{exactly}---upgrading the DA optimality claim from an empirical
+statement on random cubics to an exact minimax-optimality theorem with a
+certificate. Second, the \textbf{verifiability trichotomy}
+(Theorem~\ref{thm:trichotomy}): the SVNN condition is the \emph{unique}
+regime where second-order rate, linear LUT cost, closed-form sharp
+constants, and freedom from reachability computation coexist---ReLU
+architectures admit only first-order bounds, multivariate gates suffer
+$N^m$ LUT cost and NP-hard tightness, and domain-dependent curvature
+requires reachability. Third, \textbf{$\varepsilon$-separation}
+(Theorem~\ref{thm:necessity}): the LUT-verification decision problem is
+polynomial for SVNN (self-contained 3-SAT reduction showing NP-hardness
+for coupled architectures), and SVNN uniquely attains (polynomial time,
+zero slack). Fourth, the \textbf{compile-aware generalization bound}
+(Theorem~\ref{thm:generalization}): the deployed (compiled) risk
+decomposes into a generalization gap $O(\gamma^{L-1}/\sqrt{n})$ and a
+LUT bias $O(\gamma^{L-1}c_kM_kh^k)$, yielding the
+\emph{resolution-matching law} $N^{*} \asymp n^{1/(2k)}$---the deployed
+LUT memory should scale as the $2k$-th root of the sample count.
 
 We instantiate this theory in \neuroplc, the first verified
-PyTorch-to-IEC~61131-3 SCL compiler. Generated SCL compiles to
-\textbf{0e 0w} in TIA Portal V21 (45.2~KB, 90.4\% S7-1200 budget,
-WCET $22.67$~ms, $4.4\times$ scan-cycle margin). The compiler
-auto-generates a companion safety monitor (Algorithm~3). Five
-$C^2$-BV architectures are validated: B-spline KAN reaches 99.93\%
-CWRU accuracy (91.7\% XJTU-SY, 512/512 Z3 preserved); FourierKAN
-and WaveletKAN each achieve 100\% CWRU and 100\% XJTU-SY domain-shift
-accuracy with 512/512 Z3 preserved (E62). In total, 68 experiments
-spanning 5 architectures and 3 datasets validate the framework.
+PyTorch-to-IEC~61131-3 compiler, with four-tier verification: Z3
+template proofs, 512/512 per-function certificates, a machine-checkable
+composition certificate, and a \emph{differential self-test} that catches
+code-generation regressions (it detected and validated the fix of a real
+emitter bug that degraded deployed accuracy to 83\%). Generated code
+compiles to 0 errors/0 warnings in TIA Portal V21 with a vendor-neutral
+IEC~61131-3 variant, and the runtime hot-swap protocol maintains the
+certified safety state across model updates. Five $C^2$-BV architectures
+(B-spline, Chebyshev, Fourier, Wavelet, RBF) and three datasets validate
+the framework. The theory answers not ``can we compile neural networks to
+embedded targets''---prior tools showed that---but ``which architectures
+admit \emph{certified} compilation, with what sharp constants, at what
+complexity, and with what generalization guarantee?''
 \end{abstract}
 
 \begin{IEEEkeywords}
-Type Theory, Neural Architecture Certification, Compilable Frontier,
-Galois Connection, Optimal Abstract Domain, IEC 61131-3,
-Kolmogorov-Arnold Networks, Non-Interference, Formal Semantics.
+Neural Architecture Certification, Sharp Interpolation Constants,
+Verifiability Trichotomy, Complexity Separation, Compile-Aware
+Generalization, Resolution Matching, Galois Connection, IEC 61131-3,
+Kolmogorov-Arnold Networks, Type Theory.
 \end{IEEEkeywords}
 
 % ===========================================================================
@@ -182,8 +190,12 @@ Kolmogorov-Arnold Networks, Non-Interference, Formal Semantics.
 \label{sec:intro}
 
 This paper introduces a \textbf{type theory for certifiable neural
-architectures}. The central insight is that the question ``can a neural
-network compiler provide design-time correctness guarantees?'' is, at its
+architectures}---a formal characterization of which architectures admit
+design-time correctness certification under fixed-point (LUT) compilation,
+with what sharp constants, at what computational cost, and with what
+learning-theoretic guarantee. The central insight is that the question
+``can a neural network compiler provide design-time correctness
+guarantees?'' is, at its
 core, a \textbf{type-theoretic question}: the answer depends on whether
 the architecture is \textit{well-typed} under a type system whose rules
 encode the structural preconditions for certifiable compilation.
@@ -226,6 +238,43 @@ The SVNN type system is distinguished by three properties:
     The SVNN type system forms an \textbf{algebraic monoid} under
     serial composition, enabling modular certification without
     re-analysis across independently-certified subnetworks.
+\end{enumerate}
+
+This paper goes beyond sufficiency to establish the \textbf{exact
+boundaries and quantitative laws} of certifiable compilation:
+
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Sharp constants (Theorem~\ref{thm:sharp-lut}).}
+    The de~Boor bound $M_2 h^2/8$ is the $k=2$ instance of a sharp
+    all-orders family: $c_k = Q_k/k!$ with explicit extremal functions
+    attaining the bound \emph{exactly} ($k=3$: $1/(9\sqrt{3})$, not the
+    folklore $1/8$; $k=4$: $1/24$). DA's optimality is exact, not
+    asymptotic---verified at machine precision.
+
+    \item \textbf{The verifiability trichotomy
+    (Theorem~\ref{thm:trichotomy}).}
+    The SVNN condition is not one sufficient criterion among many: it is
+    the \emph{unique} regime where second-order rate, linear LUT cost,
+    closed-form sharp constants, and reachability-freedom coexist.
+    ReLU admits only first-order bounds; multivariate gates (products,
+    softmax) suffer $N^m$ LUT cost and NP-hard tightness; domain-dependent
+    curvature ($e^x$) requires reachability.
+
+    \item \textbf{$\varepsilon$-separation
+    (Theorem~\ref{thm:necessity}).}
+    The LUT-verification \emph{decision problem} is polynomial for SVNN
+    and NP-hard for coupled architectures (self-contained 3-SAT reduction
+    via product gates); SVNN uniquely attains (polynomial time, zero
+    slack) simultaneously.
+
+    \item \textbf{Compile-aware generalization
+    (Theorem~\ref{thm:generalization}).}
+    The deployed risk decomposes as
+    $\hat{R}(N) + O(\gamma^{L-1}/\sqrt{n}) + O(\gamma^{L-1}c_kM_kh^k)$,
+    yielding the \textbf{resolution-matching law}
+    $N^{*} \asymp n^{1/(2k)}$: deployed LUT memory should scale as the
+    $2k$-th root of the sample count---a directly actionable compiler
+    rule no existing PAC bound states.
 \end{enumerate}
 
 We give the NeuroPLC IR a \textbf{formal operational semantics} and
