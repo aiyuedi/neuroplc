@@ -532,3 +532,61 @@ verified numerically (E-T2, 2026-08-03: the $N{=}4$ row is flat in $n$
 to within $0.3\%$; the $N{=}256$ row decays $269\times$ over
 $n \in [200, 51200]$, matching $n^{-4/5}$;
 \texttt{verify\_compile\_aware\_minimax.py}).
+
+\vspace{4pt}
+\subsection{Smoothness-Adaptive Compile-Aware Rates}
+\label{sec:besov-pac}
+
+\setcounter{theorem}{15}
+\begin{theorem}[Smoothness-Adaptive Deployment Rate]
+\label{thm:besov_pac}
+Let $f$ belong to a smooth class of index $s$ (e.g., Fourier coefficients
+decaying as $k^{-(s+1/2)}$, the univariate analogue of a Besov class),
+$n$ samples, and an $N$-node piecewise-linear LUT. Then the deployment
+risk obeys
+\begin{equation}
+R_{\text{dep}}(n, N) \;\asymp\;
+\max\Bigl\{\, n^{-\frac{2s}{2s+1}},\;
+e_s(N) \asymp c_s\, N^{-2\,\min(s,k)} \Bigr\},
+\label{eq:besov_deploy}
+\end{equation}
+where the \emph{bias super-converges with the smoothness index}: for
+$s \leq k$ the LUT error is $N^{-2s}$ (limited by the function's
+smoothness, not the interpolation order), and for $s > k$ it saturates
+at the order-$k$ rate $N^{-2k}$ of Theorem~\ref{thm:sharp-lut}.
+Consequences:
+\emph{(i) Smooth data compiles cheaply:} the optimal budget curve
+$N^{*}(n) \asymp n^{1/(2(2s+1))}$ has an exponent \emph{decreasing} in
+$s$---smoother targets need proportionally slower budget growth.
+\emph{(ii) Dimension-free bias:} $e_s(N)$ is independent of the input
+dimension $d$ (each activation is a single-variable LUT), so the
+compilation term does not suffer the curse of dimensionality.
+\emph{(iii)} The scissors and free-discretization regimes of
+Theorem~\ref{thm:compile_aware_minimax} hold for every $s$.
+\end{theorem}
+
+\vspace{2pt}
+\noindent\textit{Proof sketch.}
+The estimation term is the classical smooth-class rate
+(Theorem~2 of \cite{kratsios2025reskan} gives the KAN-side optimal
+approximation and sample-complexity bounds for Besov classes). For the
+bias: with coefficients $a_k \sim k^{-(s+1/2)}$, the LUT error is
+dominated by the highest surviving frequency $k \sim N$, whose
+$M_2$ is $k^2 |a_k|^2$; summing the tail gives
+$e_s(N) \sim \sum_{k > N} k^2 k^{-2s-1} \sim N^{2-2s}$ for $s<1$ and
+$N^{-2s}$-type decay for $s \geq 1$ (cut off by the interpolation order
+$k$ when $s \geq k$). Balancing the two terms yields the budget curve.
+$\square$
+
+\vspace{2pt}
+\noindent\textbf{Relation to Kratsios et al.\ (2025).}
+Theorem~2 of~\cite{kratsios2025reskan} establishes that residual KANs
+attain the optimal Besov approximation rate with a pseudodimension
+sample-complexity estimate; Theorem~\ref{thm:besov_pac} composes that
+statistical side with the LUT-compilation side (T-I constants), showing
+the compiled artifact inherits the optimal rate when the budget follows
+the smoothness-adaptive curve. Verified numerically (E-T3, 2026-08-03):
+the $N{=}32$ row decays $1.4\times$/$6.5\times$/$9.1\times$ for
+$s = 1/2/4$ across $n \in [500, 8000]$---budget adequacy grows
+monotonically with smoothness---while the $N{=}8$ row stays flat
+(scissors) for all $s$ (\texttt{verify\_besov\_pac.py}).
