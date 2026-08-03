@@ -33,11 +33,14 @@ for a feedforward network $N$ on a compact box $\Omega$.
     ($N = \Theta(\varepsilon^{-1/k})$ cells to certify error $\leq
     \varepsilon$) and $O(L \cdot d_{\max}^2)$ evaluation time; the
     $\varepsilon$-decision is $O(1)$ given the LUT (compare the closed-form
-    bound to $\varepsilon$). For B-spline KAN activations the order-$k$
-    LUT reproduces the spline \emph{exactly} (polynomial reproduction:
-    each segment is a cubic polynomial, degree-3 interpolation through 4
-    points is exact---verified to $5 \times 10^{-8}$, E65), so
-    $\varepsilon = 0$ is achieved at training-defined cost.
+    bound to $\varepsilon$). For B-spline KAN activations with
+    \emph{knot-aligned} LUT grids, the order-$k$ LUT reproduces the spline
+    \emph{exactly} (polynomial reproduction: each segment is a cubic
+    polynomial, degree-3 interpolation through 4 points in a segment is
+    exact; verified to $5 \times 10^{-8}$ per segment, E65). For
+    non-aligned equispaced grids the interpolation error is bounded by the
+    sharp constants of Theorem~\ref{thm:sharp-lut}---still $O(h^k)$,
+    so $\varepsilon$ is driven to zero at the standard rate.
 
     \item \textbf{Non-SVNN regime (NP-hard, self-contained).} Let
     $N_\varphi$ be the network with product gates computing
@@ -106,11 +109,16 @@ $2^{\Omega(n)}$ under ETH. $\square$
 
 \vspace{2pt}
 \noindent\textbf{Remarks.}
-\textit{(i) The single-layer case is polynomial.} For a \emph{single}
-fused layer $\sigma(Wx + b)$, the supremum
+\textit{(i) The single-layer case is polynomial for piecewise-linear
+gates.} For a \emph{single} fused layer with a piecewise-linear gate
+$\sigma$ (e.g., ReLU), the supremum
 $\sup_x |\sigma(Wx+b) - \tilde{\sigma}(Wx+b)|$ is a piecewise-linear
 function of $x$ whose supremum over a polytope is the max of finitely
-many linear programs---polynomial. The hardness in part~(2) lives in the
+many linear programs---polynomial. (For piecewise-cubic gates such as
+B-spline activations, the single-layer supremum is also polynomial:
+each segment's error is a cubic polynomial in the scalar pre-activation,
+whose supremum over an interval is found by root-finding on the
+derivative in $O(1)$ per segment.) The hardness in part~(2) lives in the
 \emph{nested} composition of coupled gates (the product structure),
 not in any single fused layer; earlier reductions to ``single-layer
 NP-hardness'' were incorrect and are superseded here.
@@ -149,13 +157,18 @@ per-activation-layer Lipschitz product $\leq \gamma$ (an \emph{amplification
 factor}; $\gamma < 1$ is Condition~3 contractivity but the bound is valid
 for $\gamma \geq 1$ as well), trained on $n$ i.i.d.\ samples; let
 $\bar{N} = \mathrm{Compile}(N, h)$ be the deployed order-$k$ LUT version
-with cell width $h$. \textbf{Assume the intermediate signals of every layer
-remain within the LUT's validated domain}---guaranteed by the
-Box-Continuation Lemma~\ref{lem:box_continuation}, which propagates
-certified boxes in polynomial time (for compact-support B-spline KAN the
-domain is all of $\mathbb{R}$, so the assumption is vacuous). Let $\ell$
-be the loss, Lipschitz $L_\ell$, with outputs and targets bounded in
-$[-C, C]$, inputs in a compact box $\Omega \subset
+with cell width $h$. \textbf{Assume the intermediate signals of every
+layer remain within the LUT table's validated grid range}---this is
+precisely what the Box-Continuation Lemma~\ref{lem:box_continuation}
+certifies, by propagating reachable boxes in polynomial time and
+checking containment in the (finite) table domain; where containment
+fails, the table must be widened (per-layer domains) or the deployment
+flagged. (The B-spline \emph{activation} is defined on all of
+$\mathbb{R}$, but the \emph{LUT table} is finite; signals outside the
+grid hit the clamped-endpoint behavior, an $N$-independent error the
+bias term does not cover---E53 and E68 measure exactly this at depth
+$\geq 2$.) Let $\ell$ be the loss, Lipschitz $L_\ell$, with outputs and
+targets bounded in $[-C, C]$, inputs in a compact box $\Omega \subset
 [-B, B]^{d_{\text{in}}}$. Then with probability at least $1-\delta$ over
 the sample:
 \begin{equation}
@@ -189,14 +202,21 @@ activation layers; the Box-Continuation Lemma below validates that the
 reachable intermediate signals lie within the LUT domains, so the $M_k$
 constants apply without reachability computation). Floating-point
 roundoff contributes $\varepsilon_{\mathrm{fp}}\|\mathrm{scale}\|$ per
-layer. \textbf{(2) Gap term.} Standard Rademacher complexity of the SVNN
-class with spectrally bounded weights
-(Bartlett--Foster--Telgarsky-type chain), applying Talagrand's contraction
-\emph{once per activation layer} ($L-1$ contractions)---this is the source
-of the constant $C_1$ with no unexplained factor (the earlier ``factor~4''
-arose from applying the contraction twice on one activation layer, and the
-log-term arithmetic was in error: $3\sqrt{\log(2/\delta)/(2n)} = 0.0389$,
-not $0.0117$, at $n = 10{,}971$, $\delta = 0.05$; and $2\rho\gamma^L B /
+layer. \textbf{(2) Gap term.} Rademacher complexity of the SVNN class
+with spectrally bounded weights, using the Lipschitz-class bound:
+for a class of $\Lambda$-Lipschitz functions on inputs bounded by $B$
+in $\ell_\infty$, the empirical Rademacher complexity is
+$\leq \Lambda \cdot 2B\sqrt{d_{\max}/n}$
+(standard covering argument, cf.\ Bartlett--Mendelson~\cite{bartlett2002rademacher});
+with $\Lambda = L_\ell \gamma^{L-1}$ and a union bound over $d_{\max}$
+output coordinates this yields the stated $C_1 L_\ell \gamma^{L-1}
+\sqrt{L\, d_{\max}} \sqrt{(\log(2d_{\max}) + \log(1/\delta))/n}$
+(the $\sqrt{L}$ factor is a crude union over layers, conservative in the
+safe direction). This corrects the earlier ``factor~4'' inflation (which
+arose from applying Talagrand's contraction twice on one activation
+layer, and whose log-term arithmetic was also in error:
+$3\sqrt{\log(2/\delta)/(2n)} = 0.0389$, not $0.0117$, at
+$n = 10{,}971$, $\delta = 0.05$; and $2\rho\gamma^L B /
 \sqrt{n} = 0.0038$, not $0.0019$). \textbf{(3) Decomposition} by the
 triangle inequality: $R(\bar{N}) \leq R(N) + L_\ell \|N - \bar{N}\|_\infty$,
 then $R(N) \leq \hat{R}(N) + \mathrm{gap}$. $\square$
@@ -232,7 +252,7 @@ h^{*} = \Theta\!\left( \Bigl(
 \frac{C_1 L_\ell}{C_2}
 \Bigr)^{1/k} \right),
 \qquad
-N^{*} = \Theta\!\left( n^{1/(2k)} \cdot \bigl(c_k M_k L^2 d_{\max}^{-1/2}\bigr)^{1/k} \right).
+N^{*} = \Theta\!\left( n^{1/(2k)} \cdot \bigl(c_k M_k L^{1/2} d_{\max}^{-1/2}\bigr)^{1/k} \right).
 \label{eq:resolution_matching}
 \end{equation}
 The qualitative law: \emph{deployed LUT memory should scale as the $2k$-th
@@ -263,20 +283,23 @@ a quantitative threshold, which is both true and more useful.
 \noindent\textbf{Quantitative instantiation and empirical validation (E68).}
 For the trained KAN $[28,16,4]$ with input domain $[-3,3]^{28}$ ($B=3$),
 cross-entropy loss ($L_\ell = 1$), and $n=10{,}971$ training samples, the
-corrected bound is
-\begin{equation}
-R(\bar{N}) \leq \hat{R}(N) + \frac{2 \cdot 1 \cdot 0.182 \cdot 3}{\sqrt{10{,}971}}
-+ 3\sqrt{\frac{\log(2/0.05)}{2 \cdot 10{,}971}}
-+ C_2 \cdot 0.182 \cdot 2 \cdot \tfrac{1}{8} M_2 h^2,
-\label{eq:quant_gen_bound}
-\end{equation}
-i.e., gap $\leq 0.0038 + 0.0389 = 0.0427$ (corrected from the earlier
-$0.0136$, whose arithmetic was inconsistent with its own formula) plus the
-LUT bias $0.0455\, C_2 M_2 h^2$. The empirical generalization gap (training
-vs.\ test accuracy) is $0.0\%$, consistent with the certificate. The
-resolution-matching law (Corollary~\ref{cor:resolution_matching}) predicts
-$N^{*} \asymp n^{1/4} \approx 10{,}971^{1/4} \approx 10.3$ for $k=2$,
-matching the deployed $N = 15$ within $1.5\times$.
+bound (Eq.~\eqref{eq:compile_aware}) evaluates as follows. The trained
+network is \emph{not} contractive: the measured per-activation-layer
+amplification is $\gamma = [15.4, 5.3]$ (E68), giving
+$\gamma^{L-1} = 15.4$ for the bias term; the gap term
+$C_1 L_\ell \gamma^{L-1}\sqrt{L d_{\max}}\sqrt{(\log(2d_{\max}) +
+\log(1/\delta))/n}$ evaluates to $\approx 1.5$ at $\delta = 0.05$
+(dominated by $\gamma^{L-1}$), and the log-term alone
+$3\sqrt{\log(2/\delta)/(2n)} = 0.0389$ (corrected from the earlier
+$0.0117$, whose arithmetic was inconsistent with its own formula; the
+earlier $0.0019$ term had a wrong $\gamma$ exponent and $\rho$). The
+empirical generalization gap (training vs.\ test) is $0.036\%$
+(E68), far below the worst-case gap term---as expected, since the
+$n^{-1/2}$ rate is a worst-case envelope not achieved on a
+well-separated task (measured gap decays as $n^{-0.84}$). The
+resolution-matching law (Corollary~\ref{cor:resolution_matching})
+predicts $N^{*} \asymp n^{1/4} \approx 10{,}971^{1/4} \approx 10.3$
+for $k=2$, matching the deployed $N = 15$ within $1.5\times$.
 
 \vspace{2pt}
 \noindent\textbf{Empirical findings (E68, honest report).}
@@ -299,11 +322,16 @@ $\gamma = [15.4, 5.3] > 1$, so $\gamma$ acts as an amplification factor
 (which the bound accommodates; contractivity is a training target, not
 an automatic property). \textbf{(iii) Resolution matching is weakly
 supported:} the empirical knee $N^{*}$ grows with $n$ (slope
-$0.14 \pm 0.09$ vs.\ predicted $0.25$; the 0-1 loss variant is
-unobservable at near-ceiling accuracy), and the empirical gap decays as
-$n^{-0.84}$ (faster than the worst-case $n^{-1/2}$, as expected on a
-well-separated task). These findings sharpen---rather than weaken---the
-theory: the $h^k$ bias term is exact where its domain assumption holds,
+$0.14 \pm 0.09$ vs.\ predicted $0.25$); the 0-1-loss variant of the
+knee is \emph{unmeasurable}: at near-ceiling accuracy (test error
+$0.04\%$) the 0-1 risk is saturated and its measured knee exponent
+($-0.10 \pm 0.15$) is not statistically distinguishable from zero
+(E68, reported honestly; the cross-entropy knee is the reliable
+estimator and shows the predicted positive trend). The empirical gap
+decays as $n^{-0.84}$ (faster than the worst-case $n^{-1/2}$, as
+expected on a well-separated task). These findings sharpen---rather
+than weaken---the theory: the $h^k$ bias term is exact where its
+domain assumption holds,
 and the assumption itself is certified-polynomial to check
 (Lemma~\ref{lem:box_continuation}).
 
@@ -350,7 +378,7 @@ architecture for the SVNN framework:
           constants $c_k = Q_k/k!$ and an extremal family attaining them
           exactly; DA ($k=2$) is minimax-optimal among affine design-time
           schemes.
-    \item \textbf{Theorem~10} ({\S}\ref{sec:wcet}):
+    \item \textbf{Theorem~11} ({\S}\ref{sec:wcet}):
           \textit{WCET Guarantee}---parameterized worst-case execution time bound
           of $22.67$~ms for KAN $[28,16,4]$ on S7-1200.
     \item \textbf{Theorem~A--E} ({\S}\ref{sec:characterization}--{\S}\ref{sec:noninterference}):

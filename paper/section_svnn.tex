@@ -23,7 +23,7 @@ their decomposition into pure linear and element-wise operations enables the
 structural induction that Theorem~2's proof relies on. Architectures violating
 any condition lie on the \textit{exterior} (empirical-only side): they can
 still be compiled and deployed, but their correctness guarantees are limited
-to test-set validation. Proposition~1 (below) establishes that standard MLPs
+to test-set validation. Proposition~\ref{prop:mlp_negative} (below) establishes that standard MLPs
 with SiLU, Sigmoid, or Tanh activations---the dominant architectures in
 industrial ML---lie on the exterior. This frontier is not an implementation
 artifact; it reflects a fundamental property of which function classes admit
@@ -1079,7 +1079,7 @@ extremal family attaining the bound exactly at every order.
 
 \vspace{4pt}
 \begin{corollary}[DA Coefficient Optimality as the $k=2$ Special Case]
-\label{thm:da-optimality}
+\label{cor:da-optimality}
 Let $f: [x_0-r, x_0+r] \to \mathbb{R}$ be $C^3$ with
 $M_2 = \sup_{x} |f''(x)| < \infty$ and
 $M_3 = \sup_{x} |f'''(x)| < \infty$.

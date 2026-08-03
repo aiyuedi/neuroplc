@@ -211,7 +211,7 @@ curvature bound). The \textbf{SVNN Sufficiency Theorem} (Theorem~2)
 guarantees that well-typed architectures have computable, finite
 per-output error bounds under fixed-point compilation---a property that
 ill-typed architectures (standard MLPs with $\sigma(W\mathbf{x}+\mathbf{b})$)
-provably lack (Proposition~1).
+provably lack (Proposition~\ref{prop:mlp_negative}).
 
 The SVNN type system is distinguished by three properties:
 
@@ -225,14 +225,15 @@ The SVNN type system is distinguished by three properties:
     $d{=}128$). The Compilable Frontier is a mathematical boundary---not
     an implementation choice.
 
-    \item \textbf{Optimality (Theorem~\ref{thm:da-optimality}
+    \item \textbf{Optimality (Corollary~\ref{cor:da-optimality}
     $+$ Theorem~\ref{thm:galois} $+$ Theorem~\ref{thm:tightness}):}
     DA is the \textbf{Galois-optimal} abstract domain for $C^2$ univariate
     functions---the first Galois connection for neural network activations---
     and its bound $M_2 h^2 / 8$ is \textbf{semantically tight} (attained
     by $f^*(x) = M_2 x^2 / 2$ at every LUT midpoint, $1{,}000/1{,}000$
-    exact). Any tighter coefficient violates soundness on $62.4\%$ of
-    random $C^3$ instances.
+    exact), with the sharp-constant generalization to all orders
+    (Theorem~\ref{thm:sharp-lut}) attained exactly by an explicit
+    extremal family (E63).
 
     \item \textbf{Compositionality (Theorem~8).}
     The SVNN type system forms an \textbf{algebraic monoid} under
@@ -378,7 +379,7 @@ over PROFINET/OPC UA. An on-PLC time-domain subset is also compiled
          a NeuroPLC inference block into a certified PLC program preserves
          all pre-existing safety properties---the first such guarantee for
          neural-network-on-PLC deployment, directly addressing IEC~61508
-         independence requirements. The \textbf{WCET Theorem} (Theorem~10)
+         independence requirements. The \textbf{WCET Theorem} (Theorem~11)
          provides parameterized worst-case execution time bounds
           ($22.67$~ms for KAN $[28,16,4]$, $4.4\times$ scan-cycle margin).
     \item \textbf{System (Compiler):} \neuroplc, the first
@@ -435,16 +436,19 @@ over PROFINET/OPC UA. An on-PLC time-domain subset is also compiled
          sequential composition---forming an algebraic monoid---enabling
          modular certification where independently-certified subnetworks
          compose their guarantees without re-analysis.
-          \textbf{Theorem~9} proves DA is the \textit{tightest possible}
-         sound first-order abstract domain for $C^2$ univariate functions:
-         any bound tighter than DA's violates soundness on 62.4\% of
-         random $C^3$ instances (MATLAB symbolic verification).
+          \textbf{Theorem~9} ({\S}\ref{sec:da-optimality}) proves the
+         sharp $k$-th order LUT error bounds: the de~Boor constant
+         $M_2h^2/8$ is the $k=2$ instance of an exact all-orders family
+         $c_k = Q_k/k!$ ($c_3 = 1/(9\sqrt{3})$, $c_4 = 1/24$), attained
+         by an explicit extremal family at machine precision---DA is
+         minimax-optimal among affine design-time schemes
+         (Theorem~\ref{thm:sharp-lut}, E63).
           \textbf{Proposition~\ref{prop:operation-separation}} formalizes
          the \textbf{Operation Separation Principle}---the $C^2$-BV
          architecture family (B-spline, Fourier, Wavelet, RBF, Chebyshev)
          all admit SVNN guarantees; standard MLPs are structurally excluded.
     \item \textbf{Theory (Deployment Completeness):}
-          \textbf{Theorem~10} ({\S}\ref{sec:wcet}) provides the worst-case
+          \textbf{Theorem~11} ({\S}\ref{sec:wcet}) provides the worst-case
          execution time guarantee: for any SVNN network $N$ with $E$ edges
          and $N_{\text{LUT}}$ LUT points on Siemens S7-1200,
           $\text{WCET}(N) \leq E \cdot (C_{\text{LUT}} + C_{\text{matmul}})
@@ -479,7 +483,7 @@ Z3 verification preserved post-adaptation. FourierKAN and WaveletKAN
 achieve 100\% CWRU and 100\% XJTU-SY domain-shift accuracy (E62),
 with 512/512 Z3-equivalent verification preserved, confirming the
 $C^2$-BV family's cross-architecture fine-tuning stability. In total,
-74 experiments (E1--E68
+74 experiments (E1--E58 + E60--E68
 + V1--V7) spanning compression, generalization, correctness bounds,
 scalability, cross-dataset transfer, cross-architecture verification
 (FourierKAN E60, WaveletKAN E61), and domain-shift SVNN preservation
@@ -543,7 +547,7 @@ to LUT primitives across hardware platforms. But \textit{none} answer the
 question this paper asks: can the compilation itself be \textit{certified}?
 KANEL\'{E} and LUT-KAN validate the LUT paradigm empirically; we formalize
 \textit{why} it works (Theorem~2) and \textit{when} it fails (Theorem~5,
-Proposition~1). Corr\^ea demonstrates KAN-on-PLC feasibility but provides no
+Proposition~\ref{prop:mlp_negative}). Corr\^ea demonstrates KAN-on-PLC feasibility but provides no
 native SCL compilation, no correctness guarantee, and no compiler toolchain.
 \neuroplc is the first to provide all three.
 
@@ -1942,7 +1946,7 @@ operation types:
 
 \vspace{2pt}
 \noindent\textit{(a) MatMul:} $n = \text{MatMul}(W,b)$ with input $p$.
-By Lemma~1.1, the SCL MatMul is exact up to IEEE~754 rounding.
+By Lemma~\ref{lem:per_op} (MatMul), the SCL MatMul is exact up to IEEE~754 rounding.
 Therefore $\Delta_n = \Delta_p \cdot \|W\|_{1,\infty} + \delta_{\text{fp32}}$,
 where $\|W\|_{1,\infty} = \max_j \sum_i |W_{j,i}|$ is the maximum
 row-wise L1 norm of $W$. For the $[28,16,4]$ KAN,
@@ -1951,15 +1955,15 @@ $\|W^{(0)}\|_{1,\infty} \leq 0.32$ and $\|W^{(1)}\|_{1,\infty}
 
 \vspace{2pt}
 \noindent\textit{(b) BsplineLUT:} $n = \text{BsplineLUT}(G,T)$ with
-input $p$. By Lemma~1.2, the LUT introduces $\varepsilon_{\text{LUT}}$
-fresh error per activation. By Lemma~2, the input error $\Delta_p$ is
+input $p$. By Lemma~\ref{lem:per_op} (BsplineLUT), the LUT introduces $\varepsilon_{\text{LUT}}$
+fresh error per activation. By Lemma~\ref{lem:bspline_lipschitz}, the input error $\Delta_p$ is
 amplified by $L_B$. Hence $\Delta_n = \varepsilon_{\text{LUT}} + L_B
 \cdot \Delta_p$.
 
 \vspace{2pt}
 \noindent\textit{(c) StandardAct:} $n = \text{StandardAct}(\rho)$ with
 input $p$. ReLU is 1-Lipschitz; SiLU satisfies $\max_{x\in[-3,3]}|\text{SiLU}'(x)| \leq 1.1$, making both effectively non-expansive in the input domain
-$[-3,3]$. By Lemma~1.3, the SCL implementation is exact. Hence
+$[-3,3]$. By Lemma~\ref{lem:per_op} (StandardAct), the SCL implementation is exact. Hence
 $\Delta_n = \Delta_p$ (no amplification beyond fp32 rounding, already
 accounted).
 
@@ -1967,22 +1971,22 @@ accounted).
 \noindent\textit{(d) Add:} $n = \text{Add}$ with inputs $p$ (MatMul
 base path) and $q$ (BsplineLUT spline path). The KAN architecture
 ensures $p$ and $q$ have the same batch dimension, representing
-$\text{base}_j + \text{spline}_j$ per output neuron. By Lemma~1.4,
+$\text{base}_j + \text{spline}_j$ per output neuron. By Lemma~\ref{lem:per_op} (Add),
 $\Delta_n = \Delta_p + \Delta_q$. Since the base path (MatMul $\to$
 StandardAct(SiLU)) introduces only $\delta_{\text{fp32}}$, the
 dominant term is $\Delta_q$ from the BsplineLUT path.
 
 \vspace{2pt}
 \noindent\textit{(e) Softmax:} $n = \text{Softmax}$ with input $p$.
-By Lemma~1.5, the softmax Lipschitz constant is $\frac{1}{2}$ in $\ell_\infty$.
+By Lemma~\ref{lem:per_op} (Softmax), the softmax Lipschitz constant is $\frac{1}{2}$ in $\ell_\infty$.
 Hence $\Delta_n \leq \frac{1}{2} \cdot \Delta_p$. The softmax does not alter
-the argmax ordering: by Lemma~1.6, correctness is preserved as long as
+the argmax ordering: by Lemma~\ref{lem:per_op} (Argmax), correctness is preserved as long as
 the minimum inter-class margin exceeds $2\Delta_p$.
 
 \vspace{2pt}
 \noindent\textit{(f) Argmax:} $n = \text{Argmax}$ with input $p$. The
 argmax is invariant under the perturbation $\Delta_p$ whenever $\Delta_p$
-is less than half the minimum inter-class margin (Lemma~1.6). This is
+is less than half the minimum inter-class margin (Lemma~\ref{lem:per_op} (Argmax)). This is
 the \textit{output correctness criterion}: Theorem~1 guarantees semantic
 preservation at the logit level; Lemma~1.6 guarantees that this
 preserves classification decisions.
@@ -2890,11 +2894,11 @@ serving a distinct role in the verification chain:
    for the full forward pass on S7-1200, including DB reads/writes.
    It is a practical, data-sheet-based estimate, not a formal guarantee.
 
-    \item \textbf{Conservative WCET Upper Bound (Theorem~10): $22.67$~ms.}
+    \item \textbf{Conservative WCET Upper Bound (Theorem~11): $22.67$~ms.}
    The parameterized worst-case bound includes all overhead: binary search
    per LUT ($4$ iterations), soft-float REAL operations, array accesses,
    and FB call overhead. It is designed to be \textit{conservative}---the
-   actual execution time is typically $13.4$--$18$~ms, but Theorem~10's
+   actual execution time is typically $13.4$--$18$~ms, but Theorem~11's
    bound of $22.67$~ms provides a safe overestimate with $4.4\times$
    scan-cycle margin, suitable for IEC~61508 design-time certification.
 \end{enumerate}
@@ -4412,7 +4416,7 @@ and error-bounding machinery produce 512/512 Z3-verified components for KAN
 and 0/48 for an identically-sized MLP. This $14.0\times$ per-component gap
 in error propagation ($38\times$ end-to-end) is not an implementation
 artifact---it is a structural consequence of the SVNN conditions
-(Theorem~2, Proposition~1, Theorem~5).
+(Theorem~2, Proposition~\ref{prop:mlp_negative}, Theorem~5).
 
 Three architectural properties---each absent from MLPs---enable this gap.
 They are not additive advantages; they form a \textit{composite} where any
@@ -4491,10 +4495,13 @@ The result confirms the theory:
 The empirical depth-scaling ratio ($14.6\times$ for $2\to 3$ layers, or
 $\approx 7.3\times$ per added layer) is substantially below the $O(2^L)$
 worst-case for MLP-style wrapping effects, directly supporting Theorem~2's
-depth-uniform bound and Theorem~6's claim that deeper SVNN networks do not
-sacrifice verifiability. The 3-layer KAN's 99.60\% accuracy (vs.\ 2-layer's
-99.93\%) confirms that depth scaling is architecturally viable for industrial
-accuracy requirements.
+depth-uniform bound and Theorem~4's depth-scaling analysis. The 3-layer
+KAN's 99.60\% accuracy (vs.\ 2-layer's 99.93\%) confirms that depth
+scaling is architecturally viable for industrial accuracy requirements.
+(Note: the compile-aware generalization bound
+(Theorem~\ref{thm:generalization}) does not claim depth-monotonicity of
+the gap---its depth threshold is quantified in
+Corollary~\ref{cor:depth_threshold}.)
 
 \vspace{4pt}
 \noindent\textbf{CROWN Comparison: Why General-Purpose NN Verifiers Offer No
@@ -4911,7 +4918,7 @@ B-spline / KAN & \ding{55} & \ding{55} &
 Siemens SCL & Not validated & ABB-specific &
 \textbf{0e 0w TIA V21} \\
 Correctness & \ding{55} & \ding{55} &
-\textbf{Type theory + 16 Thm + DA + Z3} \\
+\textbf{Type theory + 17 Thm + DA + Z3} \\
 WCET / Safety & \ding{55} & \ding{55} &
 \textbf{WCET 22.67ms + Non-Interference (Thm~E)} \\
 IEC~61508 Aligned & \ding{55} & \ding{55} &
@@ -4919,7 +4926,7 @@ IEC~61508 Aligned & \ding{55} & \ding{55} &
 \bottomrule
 \end{tabular}
 \vspace{1pt}
-{\scriptsize NeuroPLC provides the only design-time correctness guarantee (18 theorems),
+{\scriptsize NeuroPLC provides the only design-time correctness guarantee (17 theorems),
 universal IEC~61131-3:2025 compliance (Lemma~\ref{lem:iec_universal}), and
 IEC~61508-aligned non-interference proof (Theorem~E).}
 \end{table*}
@@ -4951,7 +4958,7 @@ Year & 2026 & 2025 & 2025 & 2024 & 2026 \\
 Source format & Custom & Post-train & Training & Python & \textbf{PyTorch} \\
 PLC code gen & \xmark & \xmark & \xmark & \xmark & \textbf{S7 SCL} \\
 TIA validated & \xmark & \xmark & \xmark & Snap7$^{*}$ & \textbf{0e 0w} \\
-Formal cert. & \xmark & \xmark & \xmark & \xmark & \textbf{16 Thm+Z3} \\
+Formal cert. & \xmark & \xmark & \xmark & \xmark & \textbf{17 Thm+Z3} \\
 Architectures & KAN & KAN & KAN & KAN & \textbf{5 $C^2$-BV} \\
 Safety mon. & \xmark & \xmark & \xmark & \xmark & \textbf{Alg 3 (auto)} \\
 IEC univ. & \xmark & \xmark & \xmark & \xmark & \textbf{Lem~\ref{lem:iec_universal}} \\
@@ -4960,20 +4967,20 @@ Speedup & 2{,}700$\times$ & 7--25$\times$ & --- & Distrib. & Native OB1 \\
 \bottomrule
 \end{tabular}
 \vspace{2pt}
-{\scriptsize NeuroPLC is the only platform providing: formal certification (18 theorems),
+{\scriptsize NeuroPLC is the only platform providing: formal certification (17 theorems),
 universal IEC~61131-3 compliance, auto-generated safety monitor, non-interference proof
 for IEC~61508, and multi-architecture SVNN coverage (5 $C^2$-BV variants).}
 \end{table*}
 
 Five properties distinguish \neuroplc from prior KAN hardware deployment work:
-(1)~\textbf{type-theoretic foundation}---18 theorems providing the first formal
+(1)~\textbf{type-theoretic foundation}---17 theorems providing the first formal
 characterization of certifiable neural architectures;
 (2)~\textbf{universal IEC~61131-3 compliance}---Lemma~\ref{lem:iec_universal}
 extends certification to any IEC-compliant controller;
 (3)~\textbf{multi-architecture coverage}---5 $C^2$-BV families
 (B-spline, Fourier, Wavelet, Chebyshev, RBF-KAN) all verified
 (Proposition~\ref{prop:c2bv-family});
-(4)~\textbf{deployment safety}---WCET guarantee (Theorem~10) and
+(4)~\textbf{deployment safety}---WCET guarantee (Theorem~11) and
 non-interference proof (Theorem~E) directly addressing IEC~61508;
 (5)~\textbf{automated safety monitor}---Algorithm~3 generates a
 companion SCL function block ($\leq 5\%$ overhead).
@@ -5244,7 +5251,7 @@ frontier.
    block into a certified PLC program preserves all pre-existing safety
    properties---the first such guarantee for NN-on-PLC deployment.
 
-    \item \textbf{WCET (Theorem~10).} Parameterized worst-case execution time
+    \item \textbf{WCET (Theorem~11).} Parameterized worst-case execution time
    bound: $22.67$~ms for KAN $[28,16,4]$ on S7-1200 ($4.4\times$ scan-cycle
    margin).
 

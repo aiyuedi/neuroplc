@@ -36,11 +36,18 @@ properties:
 
 \begin{enumerate}
     \item \textbf{Regime 1 (SVNN): all three hold.} If every gate is
-    univariate, element-wise, $C^2$ on all of $\mathbb{R}$ with
-    design-time-computable global $M_k$, then (P1)+(P2)+(P3) hold with
-    the sharp constants of Theorem~\ref{thm:sharp-lut}. This is exactly
-    the SVNN condition (Conditions~1--2 of
-    Theorem~\ref{thm:svnn_conditions}).
+    univariate, element-wise, and $C^2$ on the validated domain with
+    design-time-computable $M_k$ (Condition~2 of
+    Theorem~\ref{thm:svnn_conditions}, stated on the validated input
+    domain $X$), and the Box-Continuation condition holds
+    (Lemma~\ref{lem:box_continuation}: per-layer reachable boxes stay
+    within the LUT table domain), then (P1)+(P2)+(P3) hold with the
+    sharp constants of Theorem~\ref{thm:sharp-lut}. This is the SVNN
+    condition with the domain-continuation refinement: gates with
+    domain-dependent curvature (e.g., $e^x$) satisfy Conditions~1--2
+    on a validated box but \emph{not} P3, since $M_k$ then depends on
+    the reachable set---they belong to Regime~4 unless per-layer
+    domains are certified.
 
     \item \textbf{Regime 2 (Lipschitz-only gates, e.g.\ ReLU): P1+P3 hold,
     P2 fails.} The minimax $N$-point approximation error of the $C^1$
@@ -52,32 +59,41 @@ properties:
     $C^2$ activations.
 
     \item \textbf{Regime 3 (multivariate gates, e.g.\ products,
-    softmax, normalization): P2/P3 fail and P1 degrades.}
+    softmax, normalization): linear LUT cost fails; tightness NP-hard.}
     Tensor-product LUTs cost $N^m$ per gate---exponential in the arity
     $m$ for unbounded-arity gates such as softmax or layer normalization
     (measured: storage $N^2$ for binary gates, $N^4$ for quaternary,
-    E66). Computing \emph{tight} propagation constants requires solving
+    E66). The per-dimension second-order rate \emph{survives}
+    (measured slopes $-2.11$, $-1.82$, E66), so the failure is not in
+    P2's rate but in P1's linear-cost requirement and in \emph{tight
+    propagation}: computing tight constants requires solving
     polynomial-optimization reachability---NP-hard even for arity-2
     product gates (the 3-SAT embedding of Theorem~\ref{thm:necessity},
     Eq.~\ref{eq:product_gate}).
 
     \item \textbf{Regime 4 (domain-dependent curvature, e.g.\ $e^x$,
-    $x \sin x$): P3 fails.} $M_k$ is finite on the reachable set but not
-    globally computable; closed-form tight certification would require
-    the reachable set itself---reachability, NP-hard. The polynomial-time
-    alternative (interval propagation on a global superset box) is sound
-    but exponentially loose in $L$ (classic interval explosion: constants
-    $\|W\|_\infty^L$).
+    $x \sin x$): P3 fails.} $M_k$ is finite on the reachable set but
+    depends on it; closed-form tight certification would require the
+    reachable set itself---reachability, NP-hard in general. The
+    polynomial-time alternative (interval propagation on a global
+    superset box) is sound but exponentially loose in $L$ (classic
+    interval explosion: constants $\|W\|_\infty^L$). The Box-Continuation
+    Lemma provides the certified escape: per-layer box propagation
+    \emph{is} polynomial for SVNN-structured nets and restores P3.
 
-    \item \textbf{Necessity (completeness).} Any family satisfying
-    (P1)+(P2)+(P3) must lie in Regime 1: (P2) forces $C^2$ gates
-    (minimax rate); (P3) forces globally computable $M_k$ (else
-    reachability, by Regime 4) and univariate gates (else NP-hard
-    tightness, by Regime 3); (P1)-with-linear-cost forces univariate
-    gates (else $N^m$). The SVNN condition is thus \emph{necessary and
-    sufficient} for the joint attainment of (rate, cost, tightness,
-    no-reachability), under the standard conjectures
-    $\mathrm{P} \neq \mathrm{NP}$ ($\exists\mathbb{R} \neq \mathrm{P}$).
+    \item \textbf{Necessity (completeness, conditional).} Under
+    $\mathrm{P} \neq \mathrm{NP}$ ($\exists\mathbb{R} \neq \mathrm{P}$),
+    any family satisfying (P1)+(P2)+(P3) must lie in Regime~1: (P2)
+    forces $C^2$ gates (minimax rate, Regime~2 excluded); (P3) forces
+    design-time-computable $M_k$ independent of the reachable set
+    (else Regime~4) and univariate gates (else NP-hard tightness,
+    Regime~3); (P1)-with-linear-cost forces univariate gates (else
+    $N^m$). We state this necessity direction as a \emph{conjecture
+    with strong evidence}---the three regime exclusions are each
+    supported by the corresponding hardness/rate results above, but a
+    fully formal necessity proof would require making the
+    ``design-time-computable'' notion a formal complexity class, which
+    we leave as an open problem.
 \end{enumerate}
 \end{theorem}
 

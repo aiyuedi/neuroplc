@@ -11,7 +11,7 @@ governs \emph{linear} interpolation of $C^2$ activations. We now generalize
 to LUTs of arbitrary interpolation order $k$ and establish the \emph{sharp
 constants}---the best possible coefficients for every order---together with
 an explicit extremal family attaining them. This upgrades the DA
-optimality claim (Theorem~\ref{thm:da-optimality}) from an empirical
+optimality claim (Corollary~\ref{cor:da-optimality}) from an empirical
 statement restricted to cubic polynomials to an exact, all-orders minimax
 optimality theorem.
 
@@ -22,8 +22,8 @@ Q_k \;=\; \max_{u \in [0, k-1]} \prod_{i=0}^{k-1} |u - i|,
 \label{eq:window_product}
 \end{equation}
 For $k=2$ (linear interpolation), $Q_2 = 1/4$; for $k=3$ (quadratic
-interpolation), $Q_3 = 1/(3\sqrt{3})$; for $k=4$, $Q_4 = 1$; for $k=5$,
-$Q_5 \approx 3.631$. The \emph{sharp constant} is
+interpolation), $Q_3 = 2/(3\sqrt{3}) \approx 0.3849$; for $k=4$,
+$Q_4 = 1$; for $k=5$, $Q_5 \approx 3.631$. The \emph{sharp constant} is
 $c_k = Q_k / k!$:
 \begin{equation}
 c_2 = \tfrac{1}{8}, \qquad
@@ -60,8 +60,14 @@ by the degree-$(k-1)$ polynomial through them. Then:
     namely the extremal family
     $\sigma^{*}(x) = (M_k/k!) \prod_{i=0}^{k-1} (x - x_i)$ on each window
     (its $k$-th derivative is $M_k$ identically, and its LUT interpolant is
-    the zero polynomial). Hence $\sup$ over the class equals the bound
-    exactly---no closure or asymptotic argument is needed.
+    the zero polynomial). Strictly: the extremal is defined on a single
+    window $[x_0, x_{k-1}]$ and extended to $[a,b]$ by a $C^k$ splice
+    keeping $\|\sigma^{*(k)}\|_\infty \leq M_k$; the supremum in
+    Eq.~\eqref{eq:sharp_exactness} is attained \emph{in the interior} of
+    the window (the argmax of $\prod_i |u-i|$ over $u \in (0, k-1)$), so
+    the window-boundary regularity does not affect the attained constant.
+    Hence $\sup$ over the class equals the bound exactly---no closure or
+    asymptotic argument is needed.
 
     \item \textbf{Minimax optimality of the abstract domain.} Among all
     sound affine (first-order) design-time schemes---any map from the
@@ -101,9 +107,12 @@ interpolation over the $C^2$ class. $\square$
 
 \vspace{2pt}
 \noindent\textbf{Remarks.}
-\textit{(i) The folklore formula $M_k h^k / 2^k$ is false for $k \geq 3$.}
-The sharp constants are $c_3 = 1/(9\sqrt{3}) \approx 0.0642 \neq 1/8$ and
-$c_4 = 1/24 \neq 1/16$; the coincidental agreement holds only for $k \leq 2$.
+\textit{(i) The folklore formula $M_k h^k / 2^k$ is false for all
+$k \geq 2$.} The sharp constants are $c_2 = 1/8 \neq 1/4$,
+$c_3 = 1/(9\sqrt{3}) \approx 0.0642 \neq 1/8$, and
+$c_4 = 1/24 \neq 1/16$; the folklore formula agrees with the sharp
+constant at no order $k \geq 2$ (it matches only the $k=1$ Lipschitz
+constant $1/2$).
 \textit{(ii) The extremal family is a degree-$k$ polynomial with a specific
 sign profile}---random cubic sampling (as in prior empirical claims) cannot
 approach the constant, which is exactly why sharpness requires the explicit
@@ -127,7 +136,7 @@ holds for $L=1$; for $L \geq 2$ the bound is sharp up to the composition
 cells only under injectivity of the intermediate maps).
 
 \vspace{2pt}
-\noindent\textbf{Connection to DA (Theorem~\ref{thm:da-optimality}).}
+\noindent\textbf{Connection to DA (Corollary~\ref{cor:da-optimality}).}
 Setting $k = 2$ in Theorem~\ref{thm:sharp-lut} yields the de~Boor bound
 with sharp constant $1/8$ and the extremal quadratic
 $\sigma^{*}(x) = (M_2/2)(x - x_0)(x - x_1)$, whose error attains
@@ -136,6 +145,7 @@ bound established in Theorem~\ref{thm:tightness} (King~C). The upgrade
 here is threefold: (i)~the optimality claim extends from quadratic
 functions (degree-$\leq 2$) to \emph{all} interpolation orders;
 (ii)~the extremal family is explicit and verified to machine precision
-($10{,}000$ random $C^k$ functions: soundness ratio $\leq 1$; extremal
+($10{,}000$ random test points per $k$ across 200 random $C^k$ functions:
+soundness ratio $\leq 1$; extremal
 ratio $= 1.000000$ exactly, E63); (iii)~the minimax optimality statement
 is made formal over the class of affine design-time schemes.
