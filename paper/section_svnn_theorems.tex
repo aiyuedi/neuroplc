@@ -266,17 +266,28 @@ compile time.
 \vspace{4pt}
 \begin{corollary}[Fixed-Depth Tradeoff]
 \label{cor:depth_threshold}
-For fixed $(n, h)$, the bound (Eq.~\ref{eq:compile_aware}) is
-\emph{non-monotone} in $L$ when $\gamma < 1$: the gap grows by a factor
-$\gamma \sqrt{(L+1)/L}$ and the bias by $\gamma (L+1)/L$ per added layer.
-Depth strictly helps only if the training-risk reduction beats the gap
-growth: $\Delta \hat{R} \geq (\gamma - 1)\, C\, \sqrt{L\, d/\gamma^{L-1}
-\cdot n}$, equivalently $n \geq n^{*}(\gamma, L, \Delta \hat{R}) =
-\Theta(\gamma^{2(L-1)} L d / (\Delta \hat{R})^2)$. The earlier claim that
-``deeper SVNN networks generalize strictly better'' (Corollary~1 of the
-previous version) is false: it ignored that the gap term amplifies with
-depth while the log-term is depth-independent; the corrected statement is
-a quantitative threshold, which is both true and more useful.
+For fixed $(n, h)$, the gap term of the bound (Eq.~\ref{eq:compile_aware})
+scales as $\gamma^{L-1}\sqrt{L}$ and the bias term as $\gamma^{L-1}$ in
+depth $L$. Two regimes follow.
+\textbf{Contractive regime ($\gamma < 1$):} both terms \emph{decay} with
+depth (per added layer the gap shrinks by a factor
+$\gamma\sqrt{(L+1)/L}$ and the bias by $\gamma (L+1)/L$), so adding a
+layer strictly helps as long as the training risk does not degrade:
+deeper SVNN networks generalize strictly better, and no sample-count
+threshold is required.
+\textbf{Non-contractive regime ($\gamma > 1$):} the bound is
+\emph{non-monotone} in $L$---the gap and bias grow per added layer---so
+depth helps only if the training-risk reduction beats the gap growth:
+$\Delta \hat{R} \geq C\, \gamma^{L-1}(\gamma-1)\, \sqrt{L\, d/n}$
+(logarithmic factor absorbed into $C$), equivalently
+$n \geq n^{*}(\gamma, L, \Delta \hat{R}) =
+\Theta(\gamma^{2(L-1)} L d / (\Delta \hat{R})^2)$ in this regime.
+The earlier claim that ``deeper SVNN networks generalize strictly
+better'' holds exactly in the contractive regime; for $\gamma>1$ the
+corrected statement is the quantitative threshold above. (The prior
+version stated the threshold as $(\gamma-1)C\sqrt{\cdot}$ with the
+non-monotonicity assigned to $\gamma<1$; that condition is vacuous
+there, since both factors are $<1$.)
 \end{corollary}
 
 \vspace{4pt}
@@ -346,8 +357,17 @@ contractivity, at the cost of reduced expressivity~\cite{golowich2018size}.
 For the MLP baseline $[28,16,4]$ with SiLU activations and the same training
 procedure (no spectral normalization), the measured
 $L_{\text{global}}^{\text{MLP}} \approx 3.8$, giving a Rademacher complexity
-term of $2 \cdot 3.8 \cdot 3 / \sqrt{10{,}971} \approx 0.217$---an order of
-magnitude larger than the KAN's $0.0019$.
+term of $2 \cdot 3.8 \cdot 3 / \sqrt{10{,}971} \approx 0.217$. The
+earlier comparison against the KAN's $0.0019$ gap term is retracted
+above: the corrected KAN worst-case gap term evaluates to $\approx 1.5$
+(dominated by $\gamma^{L-1} = 15.4$), which is \emph{larger} than the
+MLP's $0.217$. The two terms are not directly comparable---the MLP term
+uses the global Lipschitz constant, the KAN term includes the per-layer
+amplification $\gamma^{L-1}$---and the KAN's larger worst-case envelope
+is the price of the compilable structure. The relevant comparison is
+the \emph{deployed} risk: the KAN's measured generalization gap is
+$0.036\%$ (E68) with a design-time certificate covering its compiled
+form, whereas the MLP offers no comparable certificate.
 
 \vspace{4pt}
 \begin{remark}[The Six SVNN Theorems]
@@ -398,16 +418,32 @@ architecture for the SVNN framework:
 \end{itemize}
 \noindent\textbf{Propositions} (structural membership):
 \begin{itemize}
-    \item \textbf{Proposition~1} ({\S}\ref{sec:svnn-mlp}): Standard MLPs
-          \textit{do not} satisfy the SVNN tight-bound structure.
-    \item \textbf{Proposition~2} ({\S}\ref{sec:svnn-chebykan}): ChebyKAN
-          \textit{does} satisfy SVNN Conditions~1--2, 496/512 Z3-verifiable.
-    \item \textbf{Proposition~9} ({\S}\ref{sec:c2bv-family}): Operation
-          Separation Principle---the $C^2$-BV family (B-spline, Fourier,
-          Wavelet, RBF, Chebyshev) is universally SVNN-compliant.
-    \item \textbf{Propositions~3--8}: DA Segment-Exactness, ChebyKAN SVNN,
-          Fine-Tuning Stability, IR Minimality, Compiler Complexity,
-          and Optimization Pass Soundness (see respective sections).
+    \item \textbf{Proposition~\ref{prop:kan-svnn}} ({\S}\ref{sec:svnn-kan}):
+          KAN is \textit{structurally verifiable}---B-spline KAN
+          satisfies SVNN Conditions~1--2.
+    \item \textbf{Proposition~\ref{prop:mlp_negative}} ({\S}\ref{sec:svnn-mlp}):
+          Standard MLPs \textit{do not} satisfy the SVNN tight-bound
+          structure.
+    \item \textbf{Proposition~\ref{prop:chebykan-svnn}} ({\S}\ref{sec:svnn-chebykan}):
+          ChebyKAN \textit{does} satisfy SVNN Conditions~1--2, 496/512
+          Z3-verifiable.
+    \item \textbf{Proposition~\ref{prop:da-segment-exactness}} ({\S}\ref{sec:da-segment-exactness}):
+          DA achieves segment-exactness on affine B-spline segments.
+    \item \textbf{Proposition~\ref{prop:operation-separation}} ({\S}\ref{sec:c2bv-family}):
+          Operation Separation Principle.
+    \item \textbf{Proposition~\ref{prop:c2bv-family}} ({\S}\ref{sec:c2bv-family}):
+          the $C^2$-BV architecture family (B-spline, Fourier, Wavelet,
+          RBF, Chebyshev) is universally SVNN-compliant.
+    \item \textbf{Propositions~\ref{prop:hoist_sound}--\ref{prop:lutize_sound}} ({\S}\ref{sec:method}):
+          optimization pass soundness---HoistBinarySearch,
+          FuseMatMulAdd, LUTizeEXP.
+    \item \textbf{Proposition~\ref{prop:complexity}} ({\S}\ref{sec:method}):
+          Compiler Complexity.
+    \item \textbf{Proposition~\ref{prop:svnn-ft-stability}}:
+          Fine-Tuning Stability.
+    \item \textbf{Lemma~2} ({\S}\ref{sec:method}): IR Minimality---the
+          6-op IR set is necessary and sufficient for KAN under SVNN
+          Conditions~1--2 (a lemma, not a proposition).
 \end{itemize}
 \vspace{4pt}
 \noindent\textbf{King-Level Theorems A--E} (abstract interpretation + formal methods):

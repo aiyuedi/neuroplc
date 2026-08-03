@@ -3,7 +3,7 @@
 % Corrects the overstrong "MLPs admit no design-time bounds" claim.
 % ============================================================================
 
-\subsection{The Verifiability Trichotomy: Why SVNN Is the Unique Optimum}
+\subsection{The Verifiability Trichotomy: Why SVNN Is Conjecturally the Unique Optimum}
 \label{sec:trichotomy}
 
 Proposition~\ref{prop:mlp_negative} established that standard MLPs do not
@@ -16,7 +16,8 @@ hence \emph{satisfy} the SVNN curvature condition. What coupled
 architectures genuinely lack is the \emph{joint} attainment of second-order
 rate, linear LUT cost, closed-form sharp constants, and freedom from
 reachability computation. The correct boundary is a \emph{trichotomy}, and
-the SVNN condition is exactly the regime where all four properties coexist.
+the SVNN condition is the regime where all four properties coexist
+(sufficiency proven; the necessity direction is conjectural---item~5 below).
 
 \setcounter{theorem}{9}
 \begin{theorem}[The Verifiability Trichotomy]
@@ -84,7 +85,16 @@ properties:
     \item \textbf{Necessity (completeness, conditional).} Under
     $\mathrm{P} \neq \mathrm{NP}$ ($\exists\mathbb{R} \neq \mathrm{P}$),
     any family satisfying (P1)+(P2)+(P3) must lie in Regime~1: (P2)
-    forces $C^2$ gates (minimax rate, Regime~2 excluded); (P3) forces
+    excludes first-order-rate gates---for kinked (ReLU-type) activations
+    the kink cell forces interpolation error $\geq c\,M_1 h$ regardless
+    of $N$, so such classes are not rate-2 recoverable by any
+    design-time-computable affine (piecewise-linear) scheme, and
+    Regime~2 is excluded. Note that the precise rate-2 boundary is
+    bounded second variation (kink-free $C^1$, not necessarily $C^2$):
+    the honest claim is the exclusion of classes that are \emph{not}
+    rate-2 recoverable, with Condition~2 of
+    Theorem~\ref{thm:svnn_conditions} certifying the sufficient $C^2$
+    form with design-time-computable $M_k$. (P3) forces
     design-time-computable $M_k$ independent of the reachable set
     (else Regime~4) and univariate gates (else NP-hard tightness,
     Regime~3); (P1)-with-linear-cost forces univariate gates (else
@@ -110,10 +120,13 @@ even the LUT itself exponential ($N^m$). \textbf{(4)} For $e^x$-type
 gates, $M_k = e^b$ where $b = \sup$ of the reachable set---computing $b$
 is the reachability problem; the closed-form surrogate (global box from
 weight norms) has constants exploding in $L$. \textbf{(5)} Combine:
-(P2) $\Rightarrow$ $C^2$ (Regime 2 excluded), (P3) $\Rightarrow$ global
-computable $M_k$ and univariate (Regimes 3--4 excluded), (P1)
-$\Rightarrow$ linear-cost LUT (Regime 3's $N^m$ excluded). Hence Regime 1.
-$\square$
+(P2) $\Rightarrow$ rate-2 recoverability (Regime 2 excluded: the kink
+cell of ReLU-type gates forces first-order error $c M_1 h$; the
+certified sufficient form is $C^2$ with design-time-computable $M_k$,
+though bounded second variation already yields the rate), (P3)
+$\Rightarrow$ global computable $M_k$ and univariate (Regimes 3--4
+excluded), (P1) $\Rightarrow$ linear-cost LUT (Regime 3's $N^m$
+excluded). Hence Regime 1. $\square$
 
 \vspace{2pt}
 \noindent\textbf{Consequences.}
@@ -127,9 +140,12 @@ exactly which gate sets are certifiable at second order, which at first
 order, and which not at all---converting the SVNN condition from a
 sufficient criterion into the \emph{characterization} of the feasible
 design space. \textit{(iii) The unique-optimum reading.} SVNN is not
-``one verifiable family among many'': it is the unique regime where
-second-order rate, linear LUT cost, closed-form sharp constants, and
-reachability-freedom coexist. \textit{(iv) Empirical confirmation (E66).}
+``one verifiable family among many'': it is \emph{conjecturally} the
+unique regime where second-order rate, linear LUT cost, closed-form
+sharp constants, and reachability-freedom coexist---the necessity
+direction of the trichotomy is a conjecture with strong evidence, and
+turning it into a theorem (formalizing ``design-time-computable'') is
+an open problem. \textit{(iv) Empirical confirmation (E66).}
 Rate trichotomy measured: $\{-2.04, -2.06, -1.77\}$ for tanh/sin/
 B-spline (Regime 1), $-1.03$ for ReLU (Regime 2); tensor-LUT storage
 $N^m$ for arity $m$ (Regime 3); tanh constant ratio $0.974 \times

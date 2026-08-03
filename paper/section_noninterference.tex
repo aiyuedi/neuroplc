@@ -122,12 +122,19 @@ We analyze each operation type in the generated SCL:
 
     \item \textbf{Softmax}: $\text{softmax}(z)_i = \exp(z_i) /
     \sum_j \exp(z_j)$. The denominator is strictly positive
-    ($\exp(z_j) > 0$ for all finite $z_j$). The sum may overflow
-    for very large inputs, but the input domain clamping
-    ($[a,b] = [-3,3]^{d_{\text{in}}}$, producing $z_i$ well within
-    $[-20, 20]$) ensures $\exp(z_i) < 4.85 \times 10^8$, and the
+    ($\exp(z_j) > 0$ for all finite $z_j$). Overflow would require
+    the softmax inputs to be large in absolute value; the
+    Box-Continuation condition
+    (Lemma~\ref{lem:box_continuation}) keeps them within the
+    LUT-validated envelope of the compiled network. Even in the
+    measured out-of-domain range $[-23.9, +25.1]$ (E68, layer-1
+    activations), $\exp(25.1) \approx 8 \times 10^{10}$, and the
     sum of at most 4 such terms remains within IEEE~754 binary32
-    range ($< 3.4 \times 10^{38}$). No overflow occurs.
+    REAL range ($< 3.4 \times 10^{38}$), so no overflow occurs.
+    ``No NaN'' additionally requires the LUT grid to be strictly
+    increasing: a non-increasing grid would make the interpolation
+    fraction $t$ undefined (division by zero). Strictly increasing
+    grids are a generation-time invariant of the compiler.
 \end{enumerate}
 
 All operations are therefore safe within the validated input domain.
@@ -148,8 +155,11 @@ block for an SVNN network $N$. Then the composed program
 $P \parallel F_{\text{NeuroPLC}}$ (the original program with the
 inference block added as a separate FB instance) also satisfies
 $\varphi$, provided that $F_{\text{NeuroPLC}}$ is invoked once per
-scan cycle and its outputs are not used in $P$'s safety-critical
-decision paths without external validation.
+scan cycle, its outputs are not used in $P$'s safety-critical
+decision paths without external validation, and the timing premise
+$\text{WCET}(P) + \text{WCET}(N) \leq \text{ScanCycle}$ holds (the
+combined POU workload of $P$ and $F_{\text{NeuroPLC}}$ fits within
+the scan cycle).
 \end{kingthm}
 
 \vspace{2pt}
@@ -158,7 +168,7 @@ By structural induction on the composition of PLC programs.
 
 \begin{enumerate}[label=(\roman*)]
     \item \textbf{State Separation.}
-    Proposition~\ref{prop:memory_isolation} establishes that
+    Proposition~NC.1 establishes that
     $F_{\text{NeuroPLC}}$ writes only to its own local variables.
     The state space of $P \parallel F_{\text{NeuroPLC}}$ is the
     disjoint union $\text{State}_P \uplus \text{State}_F$, where
@@ -167,11 +177,15 @@ By structural induction on the composition of PLC programs.
     in $\text{State}_P$.
 
     \item \textbf{Temporal Separation.}
-    Proposition~\ref{prop:termination} guarantees that
+    Proposition~NC.2 guarantees that
     $F_{\text{NeuroPLC}}$ completes within $\text{WCET}(N)$ per
     invocation, and Theorem~\ref{thm:wcet} verifies that
     $\text{WCET}(N) < \text{ScanCycle}$ ($22.67$~ms $< 100$~ms).
-    The scan-cycle execution model of IEC~61131-3 ensures
+    The guarantee is premised on the timing budget
+    $\text{WCET}(P) + \text{WCET}(N) \leq \text{ScanCycle}$: under the
+    100~ms cycle with $N$ at $22.67$~ms, $77.33$~ms remain for $P$'s
+    POUs and the OS scheduler. The scan-cycle execution model of
+    IEC~61131-3 ensures
     sequential execution: $F_{\text{NeuroPLC}}$ runs to completion
     before the next program organization unit begins. No temporal
     interference---such as preemption or priority inversion---can
@@ -179,7 +193,7 @@ By structural induction on the composition of PLC programs.
     user programs.
 
     \item \textbf{Output Boundedness.}
-    Proposition~\ref{prop:numerical_safety} guarantees that all
+    Proposition~NC.3 guarantees that all
     outputs of $F_{\text{NeuroPLC}}$ are finite real numbers within
     computable bounds. Even if $P$ reads these outputs, it receives
     well-defined numerical values that cannot trigger arithmetic
@@ -225,9 +239,12 @@ By structural induction on the composition of PLC programs.
 
     By induction over both cases, all execution traces preserve
     $\varphi$. The scan-cycle overrun case (watchdog reset) cannot
-    occur by (ii): $\text{WCET}(N) = 22.67$~ms $< 100$~ms scan
-    cycle, leaving $77.33$~ms for $P$'s POUs and the OS scheduler.
-    $\square$
+    occur by (ii) under the timing premise
+    $\text{WCET}(P) + \text{WCET}(N) \leq \text{ScanCycle}$---satisfied
+    here with $\text{WCET}(N) = 22.67$~ms $< 100$~ms scan cycle,
+    leaving $77.33$~ms for $P$'s POUs and the OS scheduler. If the
+    premise is violated, the watchdog reset dominates and the
+    guarantee is vacated. $\square$
 \end{enumerate}
 
 \vspace{4pt}

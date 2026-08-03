@@ -144,16 +144,18 @@ constants $c_k = Q_k/k!$ and an extremal family attaining them
 \emph{exactly}---upgrading the DA optimality claim from an empirical
 statement on random cubics to an exact minimax-optimality theorem with a
 certificate. Second, the \textbf{verifiability trichotomy}
-(Theorem~\ref{thm:trichotomy}): the SVNN condition is the \emph{unique}
-regime where second-order rate, linear LUT cost, closed-form sharp
-constants, and freedom from reachability computation coexist---ReLU
+(Theorem~\ref{thm:trichotomy}): the SVNN condition is \emph{conjecturally}
+the unique regime where second-order rate, linear LUT cost, closed-form
+sharp constants, and freedom from reachability computation
+coexist---ReLU
 architectures admit only first-order bounds, multivariate gates suffer
 $N^m$ LUT cost and NP-hard tightness, and domain-dependent curvature
 requires reachability. Third, \textbf{$\varepsilon$-separation}
 (Theorem~\ref{thm:necessity}): the LUT-verification decision problem is
 polynomial for SVNN (self-contained 3-SAT reduction showing NP-hardness
 for coupled architectures), and SVNN uniquely attains (polynomial time,
-zero slack). Fourth, the \textbf{compile-aware generalization bound}
+zero slack; the completeness of this boundary is the trichotomy
+necessity conjecture). Fourth, the \textbf{compile-aware generalization bound}
 (Theorem~\ref{thm:generalization}): the deployed (compiled) risk
 decomposes into a generalization gap $O(\gamma^{L-1}/\sqrt{n})$ and a
 LUT bias $O(\gamma^{L-1}c_kM_kh^k)$, yielding the
@@ -256,8 +258,10 @@ boundaries and quantitative laws} of certifiable compilation:
     \item \textbf{The verifiability trichotomy
     (Theorem~\ref{thm:trichotomy}).}
     The SVNN condition is not one sufficient criterion among many: it is
-    the \emph{unique} regime where second-order rate, linear LUT cost,
-    closed-form sharp constants, and reachability-freedom coexist.
+    \emph{conjecturally} the unique regime where second-order rate,
+    linear LUT cost, closed-form sharp constants, and reachability-freedom
+    coexist (the necessity direction of the theorem is a conjecture with
+    strong evidence).
     ReLU admits only first-order bounds; multivariate gates (products,
     softmax) suffer $N^m$ LUT cost and NP-hard tightness; domain-dependent
     curvature ($e^x$) requires reachability.
@@ -267,7 +271,8 @@ boundaries and quantitative laws} of certifiable compilation:
     The LUT-verification \emph{decision problem} is polynomial for SVNN
     and NP-hard for coupled architectures (self-contained 3-SAT reduction
     via product gates); SVNN uniquely attains (polynomial time, zero
-    slack) simultaneously.
+    slack) simultaneously (completeness of this boundary is the
+    trichotomy necessity conjecture).
 
     \item \textbf{Compile-aware generalization
     (Theorem~\ref{thm:generalization}).}
@@ -285,8 +290,9 @@ prove \textbf{Type Soundness} (Theorem~\ref{thm:ir-soundness}): compiler correct
 compile to SCL with bounded semantic deviation. For industrial deployment,
 we prove a \textbf{Non-Interference Theorem} (Theorem~\ref{thm:noninterference}): inserting a
 NeuroPLC inference block into a certified PLC program preserves all
-pre-existing safety properties, directly addressing IEC~61508
-independence requirements---the first such guarantee for
+pre-existing safety properties under the timing premise
+$\text{WCET}(P) + \text{WCET}(N) \leq$ scan cycle, directly addressing
+IEC~61508 independence requirements---the first such guarantee for
 neural-network-on-PLC deployment. An IEC~61131-3 REAL arithmetic
 semantics (Lemma~\ref{lem:iec_universal}) extends the SVNN guarantee
 to any IEC-compliant controller worldwide---replacing per-platform
@@ -378,9 +384,10 @@ over PROFINET/OPC UA. An on-PLC time-domain subset is also compiled
     \item \textbf{Theory (Deployment Safety):} The
           \textbf{Non-Interference Theorem} (Theorem~\ref{thm:noninterference}) proves that inserting
          a NeuroPLC inference block into a certified PLC program preserves
-         all pre-existing safety properties---the first such guarantee for
-         neural-network-on-PLC deployment, directly addressing IEC~61508
-         independence requirements. The \textbf{WCET Theorem} (Theorem~11)
+         all pre-existing safety properties under the timing premise
+         $\text{WCET}(P) + \text{WCET}(N) \leq$ scan cycle---the first such
+         guarantee for neural-network-on-PLC deployment, directly addressing
+         IEC~61508 independence requirements. The \textbf{WCET Theorem} (Theorem~11)
          provides parameterized worst-case execution time bounds
           ($22.67$~ms for KAN $[28,16,4]$, $4.4\times$ scan-cycle margin).
     \item \textbf{System (Compiler):} \neuroplc, the first
@@ -407,7 +414,9 @@ over PROFINET/OPC UA. An on-PLC time-domain subset is also compiled
          problem} is polynomial for SVNN (with sharp constants,
          Theorem~\ref{thm:sharp-lut}) and NP-hard for coupled architectures
          (self-contained 3-SAT reduction via product gates), and SVNN
-         uniquely attains the Pareto point (polynomial time, zero slack).
+         uniquely attains the Pareto point (polynomial time, zero slack;
+         completeness of the boundary is the trichotomy necessity
+         conjecture).
          Condition~3 yields a depth-improving
           \textbf{generalization bound} $\Delta_{\text{gen}} \leq O(\gamma^L/\sqrt{n})$
           (Theorem~6, {\S}\ref{sec:svnn-generalization}). The framework is
@@ -2756,25 +2765,26 @@ Loop iterations           & 212  & 62 \\
 Total operations (static) & 2,699 & 6,221 \\
 \midrule
 \textbf{Dynamic timing (S7-1200)} & & \\
-~~KAN (Table~\ref{tab:instr_timing}) & \textbf{13.4~ms} & --- \\
-~~MLP (est.\ $2.7\times$ dynamic ops) & --- & $\sim$58~ms \\
+~~KAN (Table~\ref{tab:instr_timing}) & \textbf{3.2~ms} & --- \\
+~~MLP (est.\ $2.7\times$ dynamic ops) & --- & $\sim$8.6~ms \\
 \textbf{Dynamic timing (S7-1500)} & & \\
-~~Estimated ($\sim$100$\times$ faster FPU) & $\sim$0.21~ms & $\sim$0.58~ms \\
+~~Estimated ($\sim$100$\times$ faster FPU) & $\sim$0.03~ms & $\sim$0.09~ms \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-KAN $[28,16,4]$ achieves 13.4~ms on S7-1200---feasible for supervisory 1~Hz
-diagnosis (one inference per 47 scan cycles, leaving $>$95\% of cycles for
-control logic). On S7-1500 ($\sim$100$\times$ faster FPU), inference completes
-in $\sim$0.21~ms within a single scan cycle. The dominant S7-1200 cost is DB
-array access (37.4\%), followed by REAL addition (29.3\%) and multiplication
-(16.6\%). All estimates use Siemens-specified instruction timing for S7-1200
-CPU~1211C V4.7~\cite{siemens_s7_1200_2022}; physical hardware may differ.
+KAN $[28,16,4]$ achieves 3.2~ms on S7-1200---comfortably within the
+default 100~ms scan cycle (one inference every $\sim$31 scan cycles), leaving
+$>$96\% of cycles for control logic. On S7-1500 ($\sim$100$\times$ faster FPU),
+inference completes in $\sim$0.03~ms within a single scan cycle. The dominant
+S7-1200 cost is MatMul accumulation (REAL ADD: 42.8\%, REAL MUL: 29.1\%),
+followed by DB array access (16.8\%). All estimates use the Siemens
+instruction timings for S7-1200 CPU~1211C V4.7~\cite{siemens_s7_1200_2022};
+physical hardware may differ.
 
 
 \vspace{2pt}
-\noindent\textit{Scope note.} Table~\ref{tab:instr_timing} includes DB memory-access overhead (59.7\% of estimated time), making it a \emph{full-pipeline upper-bound estimate}. The Z3 WCET below measures only the arithmetic computation (no DB access timing), providing a formal \emph{compute-only lower bound} of 2.86~ms. The two analyses are complementary: the static table bounds total wall-clock time (suitable for scan-cycle feasibility), while Z3 formally certifies the arithmetic computation for safety arguments.
+\noindent\textit{Scope note.} Table~\ref{tab:instr_timing} (3.2~ms) estimates the full forward pass including DB memory-access overhead (16.8\% of estimated time); the Z3 kernel WCET of Table~\ref{tab:wcet} (2.86~ms) formally certifies the arithmetic core; and the conservative parameterized bound of Theorem~\ref{thm:wcet} (22.67~ms) covers the full pipeline for scan-cycle feasibility. All instruction timings use the same Siemens base (S7-1200 System Manual, 05/2024, Appendix A; \texttt{wcet.py}).
 
 \subsubsection{Z3-Verified Worst-Case Execution Time (WCET)}
 \label{sec:z3_wcet}
@@ -2821,9 +2831,13 @@ Argmax             & $4{\rightarrow}1$ & 0.2 & 0 & $\checkmark$ \\
 \end{tabular}
 \end{table}
 
-The Z3 WCET (2,862\,$\mu$s) is 30\% tighter than static FLOPs-based
-estimates (Table~\ref{tab:wcet} summarizes the breakdown), since Z3
-models actual SCL instruction sequences. Because the S7-1200 executes
+The Z3-verified kernel WCET (2,862\,$\mu$s) is roughly an order of
+magnitude below the conservative full-pipeline bound of
+Theorem~\ref{thm:wcet} (22.67~ms), which additionally accounts for
+binary-search loop bodies, branch and DB-access costs, and FB call
+overhead that the kernel model omits; the Theorem~\ref{thm:wcet} bound
+is the deployment-relevant certificate for scan-cycle feasibility
+(Table~\ref{tab:wcet} summarizes the kernel breakdown). Because the S7-1200 executes
 strictly sequentially, per-node bounds compose trivially: $T_{\text{total}}
 = \sum \text{WCET}_{\text{node}} = 2,862\,\mu\text{s}$. This structural
 additivity, combined with the four-tier
@@ -2919,15 +2933,23 @@ and $C_{\text{overhead}} \approx 100$~$\mu$s (FB call overhead).
 \vspace{2pt}
 \noindent\textit{Proof.}
 Each B-spline activation in SCL evaluates a piecewise-linear interpolant:
-binary-search the grid index $k$ ($4$ REAL comparisons, $4 \times 1.5$
+binary-search the grid index $k$ ($4$ REAL comparisons, $4 \times 0.30$
 $\mu$s), compute $t = (x - \text{grid}[k]) / (\text{grid}[k+1] -
 \text{grid}[k])$ ($3$ REAL SUB, $1$ REAL DIV), and interpolate
 $y = \text{LUT}[k] + t \cdot (\text{LUT}[k+1] - \text{LUT}[k])$
 ($2$ REAL SUB, $1$ REAL MUL, $1$ REAL ADD, $4$ array accesses).
-S7-1200 instruction timings: REAL MUL 3.5~$\mu$s, REAL ADD 1.8~$\mu$s,
-REAL DIV 8.0~$\mu$s, array access 2.0~$\mu$s, REAL CMP 1.5~$\mu$s.
-Summing per-edge: $36.7$~$\mu$s. The MatMul per edge contributes
-$7.2$~$\mu$s (REAL MUL + REAL ADD per weight). All branches are
+S7-1200 instruction timings (Siemens S7-1200 System Manual, 05/2024,
+Appendix A; the values used by the Z3-WCET analysis, \texttt{wcet.py}):
+REAL ADD 0.50~$\mu$s, REAL MUL 0.60~$\mu$s, REAL DIV 1.20~$\mu$s,
+REAL CMP 0.30~$\mu$s, array index 0.10~$\mu$s.
+The Z3 analysis's per-edge LUT cost of $36.7$~$\mu$s
+(\texttt{wcet\_analysis.json}) counts the complete generated-SCL
+instruction stream per edge---binary-search loop iterations, scalar
+loads, branches, and assignments---in addition to the arithmetic
+operations listed above (which alone sum to $6.4$~$\mu$s).
+The MatMul per edge contributes
+$7.2$~$\mu$s (per-weight multiply-accumulate plus load and loop overhead
+in the same Z3 accounting). All branches are
 sequential on S7-1200 (single-scan execution model), so per-node
 bounds compose additively. The parameterized form
 Eq.~\ref{eq:wcet_general} enables the compiler to report WCET
@@ -2951,26 +2973,28 @@ times are lower due to early-exit in the LUT binary search.
 \vspace{4pt}
 \noindent\textbf{WCET across three analysis levels.}
 The paper reports execution-time numbers at three granularities, each
-serving a distinct role in the verification chain:
+serving a distinct role in the verification chain. All instruction
+timings use the same Siemens base (S7-1200 System Manual, 05/2024,
+Appendix A; \texttt{wcet.py}):
 
 \begin{enumerate}[label=(\roman*)]
     \item \textbf{Z3-Verified LUT Kernel WCET: $2.86$~ms}
     ({\S}\ref{sec:z3_wcet}, V6). This is the formal, Z3-certified
    worst-case time for the pure-computation path (B-spline LUT
-   interpolation + matrix multiply), modeled as abstract operations
-   rather than concrete SCL instructions. It provides the strongest
+   interpolation + matrix multiply), modeled instruction-by-instruction
+   on the Siemens timing base. It provides the strongest
    formal evidence but excludes DB variable access and FB call overhead.
 
-    \item \textbf{Instruction-Level Estimate: $13.4$~ms}
-    (Table~\ref{tab:cycle_count}). This estimate counts SCL instructions
-   for the full forward pass on S7-1200, including DB reads/writes.
-   It is a practical, data-sheet-based estimate, not a formal guarantee.
+    \item \textbf{Instruction-Level Estimate: $3.2$~ms}
+    (Table~\ref{tab:instr_timing}). This estimate counts SCL instructions
+   for the full forward pass on S7-1200, including DB reads/writes, on
+   the same Siemens timing base. It is a practical, data-sheet-based
+   estimate, not a formal guarantee; it corroborates the Z3 kernel WCET.
 
     \item \textbf{Conservative WCET Upper Bound (Theorem~11): $22.67$~ms.}
    The parameterized worst-case bound includes all overhead: binary search
    per LUT ($4$ iterations), soft-float REAL operations, array accesses,
    and FB call overhead. It is designed to be \textit{conservative}---the
-   actual execution time is typically $13.4$--$18$~ms, but Theorem~11's
    bound of $22.67$~ms provides a safe overestimate with $4.4\times$
    scan-cycle margin, suitable for IEC~61508 design-time certification.
 \end{enumerate}
@@ -3378,19 +3402,21 @@ and formal guarantees.%
 \noindent\textbf{Inference Time --- Instruction-Level Analysis.} We replace the
 coarse FLOPs$\times$3~$\mu$s estimate with a precise instruction-level analysis
 of the generated SCL code (Table~\ref{tab:instr_timing}). Each instruction
-type is counted and multiplied by Siemens-specified execution times for the
-S7-1200 CPU~1211C V4.7~\cite{siemens_s7_1200_2022}. The dominant cost is DB
-array access (37.4\%, 1.5~$\mu$s/read), followed by MatMul accumulation
-(REAL ADD: 29.3\%, REAL MUL: 16.6\%), and software EXP evaluation (13.5\%,
-$\sim$60~$\mu$s/call via Taylor series---the S7-1200 has no hardware FPU).
-The total estimated inference time is \textbf{13.4~ms} per forward pass (using modern S7-1200 V4.7
-instruction timings). While this exceeds
-a typical S7-1200 scan cycle (1--10~ms), bearing fault diagnosis is a
-supervisory function---inference at 1~Hz (every $\sim$47 scan cycles) provides
-effective real-time diagnostics. On the S7-1500 ($\sim$100$\times$ faster
+type is counted and multiplied by the Siemens instruction timings used
+throughout the WCET analysis (S7-1200 System Manual, 05/2024, Appendix A;
+\texttt{wcet.py}). The dominant cost is MatMul accumulation
+(REAL ADD: 42.8\%, REAL MUL: 29.1\%), followed by DB
+array access (16.8\%, 0.10~$\mu$s/index) and REAL division (5.2\%); library
+EXP evaluation contributes 3.0\% (2.0~$\mu$s/call---the S7-1200 has no
+hardware FPU). The total estimated inference time is \textbf{3.2~ms} per
+forward pass, corroborating the Z3-verified kernel WCET of 2.86~ms
+(Table~\ref{tab:wcet}); the conservative full-pipeline bound of
+Theorem~\ref{thm:wcet} (22.67~ms) remains the deployment-relevant
+certificate for scan-cycle feasibility. On the S7-1500 ($\sim$100$\times$ faster
 for floating-point operations), the same inference completes in
-$\sim$0.2~ms---within a single scan cycle. The EXP$\to$LUT strength reduction
-pass ($\S$\ref{sec:method}) would eliminate the 13.5\% EXP cost, reducing inference to $\sim$10.5~ms.
+$\sim$0.03~ms---well within a single scan cycle. The EXP$\to$LUT strength
+reduction pass ($\S$\ref{sec:method}) would eliminate the 3.0\% EXP cost,
+reducing inference to $\sim$3.1~ms.
 
 \begin{table}[t]
 \centering
@@ -3401,22 +3427,24 @@ pass ($\S$\ref{sec:method}) would eliminate the 13.5\% EXP cost, reducing infere
 \toprule
 \textbf{Operation} & \textbf{Count} & \textbf{Time ($\mu$s)} & \textbf{Pct.} \\
 \midrule
-DB array access      & 5,322 & 7,983 & 59.7\% \\
-MatMul (REAL ADD)    & 2,716 & 1,358 & 10.2\% \\
-MatMul (REAL MUL)    & 1,539 &   923 &  6.9\% \\
-EXP (software)       & 48    & 2,880 & 13.5\% \\
-REAL DIV             & 138   &   166 &  1.2\%  \\
-REAL comparisons     & 99    &    30 &  0.2\%  \\
-INT arithmetic       & 414   & 17    & 0.1\%  \\
-Loop overhead        & 28    & 14    & 0.1\%  \\
+DB array access      & 5,322 & 532 & 16.8\% \\
+MatMul (REAL ADD)    & 2,716 & 1,358 & 42.8\% \\
+MatMul (REAL MUL)    & 1,539 & 923 & 29.1\% \\
+EXP (library call)   & 48    & 96  &  3.0\% \\
+REAL DIV             & 138   & 166 &  5.2\% \\
+REAL comparisons     & 99    & 30  &  0.9\% \\
+INT arithmetic       & 414   & 62  &  2.0\% \\
+Loop overhead        & 28    & 6   &  0.2\% \\
 \midrule
-\textbf{Total}       & ---   & \textbf{13,371} & \textbf{100\%} \\
+\textbf{Total}       & ---   & \textbf{3,173} & \textbf{100\%} \\
 \bottomrule
 \end{tabular}
 \vspace{1pt}
-{\scriptsize Timing per Siemens S7-1200 V4.7 manual: REAL ops
-ADD 0.50~$\mu$s, MUL 0.60~$\mu$s, DIV 1.20~$\mu$s; EXP 60~$\mu$s (Taylor); DB access
-1.5~$\mu$s; INT 0.04~$\mu$s; loop overhead 0.5~$\mu$s/iter.}
+{\scriptsize Timing per Siemens S7-1200 System Manual (05/2024, Appendix A),
+the same base used by the Z3-WCET analysis (\texttt{wcet.py}): REAL ADD
+0.50~$\mu$s, REAL MUL 0.60~$\mu$s, REAL DIV 1.20~$\mu$s, REAL CMP
+0.30~$\mu$s, array index 0.10~$\mu$s, INT arithmetic 0.15~$\mu$s, EXP
+2.0~$\mu$s, loop overhead 0.20~$\mu$s/iter.}
 \end{table}
 
 \noindent\textbf{E6: Classification Consistency \& Error Propagation.}
@@ -4713,6 +4741,20 @@ four independent tiers, each with a distinct role and verification scope:
          (the templates and bounds were individually sound; the emitter
          was not). After the fix, Tier~4 passes: 3{,}000 in-distribution
          samples, 100\% agreement, max logit error 0.47 (E67).
+
+         \textit{Chronology of the fix.} The scale-factor regression
+         predates the July experiments and was fixed on 2026-08-03; the
+         SCL bundle shipped with this paper was regenerated after the
+         fix (results/scl\_output, 2026-08-03), and all reported
+         quantities that exercise emitted-SCL arithmetic reflect the
+         post-fix emitter: E67 was rerun post-fix (2026-08-03: 3{,}357
+         samples, 100\% agreement, maxAE 0.47) and E68 was validated on
+         the post-fix bundle; the certificate bundle corresponds to the
+         released checkpoint. The worst-case LUT sweeps (E21, E53) and
+         per-function Z3 verifiability (E58) measure the LUT tables and
+         template proofs rather than the emitter's arithmetic and are
+         unaffected by the regression; where an SCL artifact is
+         involved, the 2026-08-03 regeneration is authoritative.
 \end{enumerate}
 
 \vspace{4pt}
@@ -5357,16 +5399,22 @@ frontier.
    certificate, not an empirical observation.
 
     \item \textbf{Verifiability Trichotomy (Theorem~\ref{thm:trichotomy}).}
-   The SVNN condition is the \emph{unique} regime where second-order
-   rate, linear LUT cost, closed-form sharp constants, and
+   The SVNN condition is \emph{conjecturally} the unique regime where
+   second-order rate, linear LUT cost, closed-form sharp constants, and
    reachability-freedom coexist; ReLU admits only first-order bounds,
    multivariate gates suffer $N^m$ cost and NP-hard tightness, and
-   domain-dependent curvature requires reachability.
+   domain-dependent curvature requires reachability. The necessity
+   direction---that no other regime attains all four properties---is
+   stated as a conjecture with strong evidence; establishing it
+   formally (formalizing ``design-time-computable'' as a complexity
+   class) is an open problem that the regime exclusions of the theorem
+   delimit.
 
     \item \textbf{$\varepsilon$-Separation (Theorem~\ref{thm:necessity}).}
    The LUT-verification decision problem is polynomial for SVNN and
    NP-hard for coupled architectures (self-contained 3-SAT reduction);
-   SVNN uniquely attains (polynomial time, zero slack).
+   SVNN uniquely attains (polynomial time, zero slack) (completeness
+   of this boundary is the trichotomy necessity conjecture).
 
     \item \textbf{Compile-Aware Generalization
    (Theorem~\ref{thm:generalization}).} The deployed risk decomposes as
@@ -5398,7 +5446,8 @@ frontier.
 
     \item \textbf{Non-Interference (Theorem~E).} Inserting a NeuroPLC inference
    block into a certified PLC program preserves all pre-existing safety
-   properties---the first such guarantee for NN-on-PLC deployment.
+   properties under the timing premise $\text{WCET}(P) + \text{WCET}(N)
+   \leq$ scan cycle---the first such guarantee for NN-on-PLC deployment.
 
     \item \textbf{WCET (Theorem~11).} Parameterized worst-case execution time
    bound: $22.67$~ms for KAN $[28,16,4]$ on S7-1200 ($4.4\times$ scan-cycle
