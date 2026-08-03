@@ -1988,7 +1988,7 @@ the minimum inter-class margin exceeds $2\Delta_p$.
 argmax is invariant under the perturbation $\Delta_p$ whenever $\Delta_p$
 is less than half the minimum inter-class margin (Lemma~\ref{lem:per_op} (Argmax)). This is
 the \textit{output correctness criterion}: Theorem~1 guarantees semantic
-preservation at the logit level; Lemma~1.6 guarantees that this
+preservation at the logit level; Lemma~\ref{lem:per_op}(vi) guarantees that this
 preserves classification decisions.
 
 \vspace{4pt}
@@ -2032,7 +2032,7 @@ For the trained KAN $[28,16,4]$, the measured $L_{\text{net}} \approx
 19.6$ (DA bound), yielding $\Delta_{\text{logit}} \leq 0.00406 \times
 19.6 = 0.079$ at 15 LUT points. The minimum inter-class margin among
 correctly classified test samples is $1.35 > 2 \cdot 0.079 = 0.158$ (E6),
-satisfying Lemma~1.6 and guaranteeing classification correctness.
+satisfying Lemma~\ref{lem:per_op}(vi) and guaranteeing classification correctness.
 \end{theorem}
 
 \begin{remark}[Probabilistic Tightening via Sign-Balance Concentration]
@@ -4007,7 +4007,7 @@ misclassifications the test set missed.}
 \vspace{2pt}
 {\scriptsize Safety factor = $(m/2)/\Delta_{\text{DA}}$ with $m=1.35$ (E6).
 Safety $<1$ means the certified error exceeds half the inter-class margin---the
-Lemma~1.6 threshold for guaranteed classification preservation.
+Lemma~\ref{lem:per_op}(vi) threshold for guaranteed classification preservation.
 Blind spot: $N \leq 7$ ($N \leq 5$ confirmed by adversarial search).
 All adversarial flips occur strictly inside $[-3,3]^{28}$.}
 \end{table}
@@ -4031,7 +4031,7 @@ consequences. An engineer who evaluates only test-set accuracy would conclude
 that \textit{any} LUT density is safe---the accuracy never drops. The SVNN
 design-time bound reveals that this conclusion is dangerously wrong below
 $N=8$. The compiler's \texttt{auto\_bspline} pass enforces a minimum safety
-factor of $2.0\times$ (twice the Lemma~1.6 threshold) as a hard deployment
+factor of $2.0\times$ (twice the Lemma~\ref{lem:per_op}(vi) threshold) as a hard deployment
 gate, preventing the blind-spot regime from ever reaching production.
 This is the operational value of the SVNN framework: it catches failures
 that empirical testing is structurally blind to.
