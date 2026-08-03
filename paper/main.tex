@@ -162,6 +162,23 @@ LUT bias $O(\gamma^{L-1}c_kM_kh^k)$, yielding the
 \emph{resolution-matching law} $N^{*} \asymp n^{1/(2k)}$---the deployed
 LUT memory should scale as the $2k$-th root of the sample count.
 
+The four results are not an assemblage of independent bounds: they are
+the expansion of a single unifying quantity, the \textbf{verifiable
+deployment capacity} $C(B,V)$ ({\S}\ref{sec:capacity})---the best
+certifiable deployment error under a storage budget $B$ and a
+certificate-verification budget $V$. A universal packing line bounds
+every scheme; three verification strata (closed-form / kinked /
+structure-optimal) place every architecture; and a
+\textbf{certificate proof system} $\text{CP}$---following the
+proof-carrying-code and validated-numerics tradition (Gappa,
+Sollya, LeanCert)---formalizes the verification budget as proof length
+under perfect deterministic soundness. Within this framework the sharp
+constants reappear as the capacity limit of the interpolation code, the
+trichotomy reappears as three points in the $(V_B, \varepsilon)$ plane,
+and the necessity direction receives a theorem-level
+information-theoretic form; an architecture-as-code law decides between
+table and spectral codes from the smoothness of the target.
+
 We instantiate this theory in \neuroplc, the first verified
 PyTorch-to-IEC~61131-3 compiler, with four-tier verification: Z3
 template proofs, 512/512 per-function certificates, a machine-checkable
@@ -287,6 +304,21 @@ boundaries and quantitative laws} of certifiable compilation:
     $N^{*} \asymp n^{1/(2k)}$: deployed LUT memory should scale as the
     $2k$-th root of the sample count---a directly actionable compiler
     rule no existing PAC bound states.
+
+    \item \textbf{Verifiable deployment capacity
+    (Theorem~\ref{thm:capacity-stratification}, {\S}\ref{sec:capacity}).}
+    The four results above are unified as the expansion of a single
+    quantity: the capacity $C(B, V)$ of certifiable deployment under a
+    storage budget $B$ and a certificate-verification budget $V$. A
+    universal packing line (metric entropy) bounds every scheme; three
+    verification strata---closed-form (certificate-free),
+    kinked (rate-degraded), and structure-optimal
+    (verification-exponential)---place every architecture class; and a
+    certificate proof system (following Gappa/Sollya/LeanCert and PCC)
+    formalizes $V$ as proof length under perfect deterministic
+    soundness, yielding a theorem-level information-theoretic necessity
+    within the calculus. An architecture-as-code law (table vs.\
+    spectral codes) follows from the smoothness of the target.
 \end{enumerate}
 
 We give the NeuroPLC IR a \textbf{formal operational semantics} and
@@ -5437,6 +5469,17 @@ frontier.
 \noindent\textbf{Theoretical contributions:}
 
 \begin{enumerate}[label=\arabic*.]
+    \item \textbf{Verifiable Deployment Capacity
+    (Theorem~\ref{thm:capacity-stratification}).} The unifying
+    framework: a universal packing line bounds every certified
+    deployment scheme; three verification strata place every
+    architecture; a certificate proof system formalizes the
+    verification budget under perfect deterministic soundness;
+    theorem-level information-theoretic necessity within the calculus;
+    an architecture-as-code selection law. The sharp constants, minimax
+    rates, separation, and trichotomy of the items below are its
+    expansion ({\S}\ref{sec:capacity}).
+
     \item \textbf{Sharp k-th Order LUT Bounds (Theorem~\ref{thm:sharp-lut}).}
    The de~Boor constant $M_2h^2/8$ is the $k=2$ instance of an exact
    all-orders family $c_k = Q_k/k!$, attained by explicit extremal

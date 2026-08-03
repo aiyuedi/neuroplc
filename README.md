@@ -2,7 +2,7 @@
 
 > **A Type Theory of Certifiable Neural Architectures: Sharp LUT Bounds, Complexity Separation, and Compile-Aware Generalization, with an Industrial PLC Instantiation** — IEEE TNNLS submission (theory-first).
 
-**状态：84 页 0e0w 0 undefined refs ｜ 16 定理 ｜ 27 commits 双推（Gitee+GitHub）** ｜ 2026-08-03 更新
+**状态：87 页 0e0w 0 undefined refs ｜ 19 定理 ｜ 2026-08-04 更新**（P3：可认证部署容量理论 Thm 17-19 加入）
 
 Author: 刘甫悦 (板板) + Claude
 

@@ -13,7 +13,7 @@
 
 **一句话**：第一个证明"哪些神经网络架构天生可认证、以什么锐常数、什么复杂度、什么泛化保证"的类型理论框架。
 
-**当前状态**：**85页，0e0w，P0 硬修 + P1 四定理完成（2026-08-03，20 commits：671e7b7 → bf39b74，已双推）**
+**当前状态**：**87页，0e0w，0 undefined refs，19 定理（Thm 17-19 = 可认证部署容量理论，2026-08-04 P3 重组完成）**
 
 ---
 
@@ -83,6 +83,7 @@
 | `paper/section_lut_sharp.tex` | **Thm 9p**（锐常数）+ **Thm 13**（T-I 最优 LUT） |
 | `paper/section_trichotomy.tex` | **Thm 10p**（三分法）+ **Thm 16**（T-III necessity 第一格） |
 | `paper/section_svnn_theorems.tex` | **Thm 5p/6p** + **Thm 14**（T-II minimax 率）+ **Thm 15**（T-IV Besov 率）+ Box延续 |
+| `paper/section_capacity.tex` | **容量理论（P3 新增，2026-08-04）**：Thm 17 分层（universal packing 线 + 三层 + CP 内 necessity）、Thm 18 权衡（常数购买/类适配免费/HLZ 例外）、Thm 19 架构选择律 + CP 证明系统 + related work 边界 |
 | `paper/section_svnn_chebykan.tex` | ChebyKAN（Prop 3） |
 | `paper/references.bib` | 91条（已清理） |
 | `code/neuroplc/frontend.py` | scale折叠修复点（L234-264） |
@@ -108,6 +109,9 @@ python theory/verify_compile_aware_minimax.py   # T-II（Thm 14）
 python theory/verify_besov_pac.py               # T-IV（Thm 15）
 python theory/verify_necessity_first.py         # T-III（Thm 16）
 python theory/verify_da_bounds_recomputed.py    # 界值重算
+python theory/verify_capacity.py                # 容量 packing 线常数匹配（KT 极值 1.000000 / 排序 c_*<c_fix<c_k）
+python theory/verify_stratification.py          # 三层分离（kink -1.11 vs C2 -2.05 / 验证成本解耦 vs 超线性）
+python theory/verify_decision_law.py            # 架构选择律相变（exp_slope=-ρ 精确匹配 / W1 vs 解析类）
 python -m neuroplc.differential_test         # Tier 4（需模型）
 python generate.py                           # 重新生成SCL
 cd paper && xelatex main && bibtex main && xelatex main && xelatex main  # 编译
@@ -118,11 +122,12 @@ cd paper && xelatex main && bibtex main && xelatex main && xelatex main  # 编�
 ## 4. 剩余待办（下一步优先）
 
 ### 投稿前（高优先）
-1. **REVIEWER-FAQ更新**：✅ **v3 完成（20问）**，含 Thm 13-16 防御 + 新 Q19/Q20
-2. **`review-paper`深度审稿**：✅ 已跑两轮（7-Agent 初审 + 复跑验证修复）；投稿前需**最终全量一轮**
+0. **P3 容量理论重组（2026-08-04 完成）**：Thm 17-19 + CP 证明系统 + 三验证脚本全 PASS；**87 页 0e0w**；设计文档 `docs/CAPACITY_DESIGN.md` v4（含三条红线）；容量章节 related work 以 Gappa/Sollya/LeanCert/PCC 为起点（红线①）
+1. **REVIEWER-FAQ更新**：🔴 **v4 待**（容量理论防御：Thm 17-19 + CP 定位 + 验证侧/逼近侧领域划分 + Gappa/SNARK 撞名防御）
+2. **`review-paper`深度审稿**：✅ 已跑两轮（7-Agent 初审 + 复跑验证修复）；**P3 重组后需最终全量一轮**
 3. **E63-E68实验脚本归档确认**：✅ E67 已修复+JSON 落盘；E63-E66/E68 全 PASS
-4. **P0 剩余**：C11（加宽 LUT 实验）、C12（编译器边界声明）、M2（文献补引：MRW 1976/Tsybakov/Nye 2025/Kratsios 2025/CompCert/Giacobbe）、M26（iFA 跨厂商实验）、M6（硬编码→\ref）、M8-M11/M23-M25、图重生成（fig02/04/05/09/fig1_overview）
-5. **投稿材料**：cover letter ✅ 草稿；author bio、图清单 待
+4. **P0 剩余**：C11（加宽 LUT 实验）、C12（编译器边界声明）、M2 剩余（MRW 1976/CompCert/Nye 2025——容量新引用已补 15 条）、M26（iFA 跨厂商实验）、图重生成（fig02/04/05/09/fig1_overview）
+5. **投稿材料**：cover letter ✅ 草稿（容量理论加入后需更新）；author bio、图清单 待
 
 ### 理论深化（中优先）
 5. **Thm 10p necessity 从 conjecture 升级为正式证明**（三分法的necessity方向——现在是强证据）
@@ -158,4 +163,4 @@ cd paper && xelatex main && bibtex main && xelatex main && xelatex main  # 编�
 - 数据：`data/processed/features_X.npy`（CWRU 28-D特征，13714样本）
 - Git：origin=Gitee, github=GitHub（双推工作流，见 [[gitee-github-push-workflow]]）
 
-*最后更新：2026-08-03 深夜 | 板板 + Claude | 84页 0e0w | 27 commits 双推 | 投稿材料齐备*
+*最后更新：2026-08-04 | 板板 + Claude | 87页 0e0w | 19 定理（P3 容量理论）| 投稿材料待更新（FAQ v4/cover letter）*

@@ -1,10 +1,10 @@
 {
   "theorem": "Thm10p_verifiability_trichotomy",
   "claim": "R1: C^2 activations (tanh/sin/B-spline) LUT error ~ N^-2; R2: Lipschitz-only (ReLU) LUT error ~ N^-1; R3: multivariate gates keep ~N^-2 per dimension but cost N^m per m-ary tensor-product LUT.",
-  "generated": "2026-08-03T18:26:22",
-  "python": "3.11.15",
-  "numpy": "2.4.6",
-  "scipy": "1.17.1",
+  "generated": "2026-08-04T01:55:33",
+  "python": "3.14.3",
+  "numpy": "2.4.4",
+  "scipy": "1.18.0",
   "method": {
     "domain": [
       -3.0,

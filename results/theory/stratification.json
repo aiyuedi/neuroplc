@@ -1,0 +1,61 @@
+{
+  "date": "2026-08-04",
+  "script": "verify_stratification.py",
+  "theorem": "three-layer (V_B, epsilon) separation (v4)",
+  "layer2_kink": {
+    "note": "smooth tent |x-c| (sharp corner): no second-order bound",
+    "tent_errors": [
+      0.03455214323058229,
+      0.016495000765151504,
+      0.0080304854321679,
+      0.003390242308488191
+    ],
+    "slope_tent": -1.1086414461986893,
+    "c2_reference_slope": -2.049825627926431,
+    "rate_degradation_confirmed": true
+  },
+  "verification_cost": {
+    "layer1_closed_form": [
+      {
+        "ops": 24,
+        "wall_s": 4.239999907440506e-05,
+        "N_dependence": "none (B-decoupled)"
+      },
+      {
+        "ops": 24,
+        "wall_s": 1.4600000213249587e-05,
+        "N_dependence": "none (B-decoupled)"
+      },
+      {
+        "ops": 24,
+        "wall_s": 1.4600000213249587e-05,
+        "N_dependence": "none (B-decoupled)"
+      },
+      {
+        "ops": 24,
+        "wall_s": 1.4400000509340316e-05,
+        "N_dependence": "none (B-decoupled)"
+      }
+    ],
+    "layer3_node_search": [
+      {
+        "model_ops": 18234720,
+        "note": "coordinate-descent surrogate"
+      },
+      {
+        "model_ops": 91173600,
+        "note": "coordinate-descent surrogate"
+      },
+      {
+        "model_ops": 403768800,
+        "note": "coordinate-descent surrogate"
+      },
+      {
+        "model_ops": 1695828960,
+        "note": "coordinate-descent surrogate"
+      }
+    ],
+    "note": "layer-1 check O(L*d), B-independent; layer-3 surrogate super-linear in N (structure optimality is paid in V)"
+  },
+  "verdict": "PASS"
+}
