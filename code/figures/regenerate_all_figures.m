@@ -107,16 +107,16 @@ close(fig);
 %% ═══════════════════════════════════════════════════════════
 fprintf('[3/11] Sharp Lower Bound\n');
 
-% FIXME: 0.182 stale --- trained KAN non-contractive (gamma=[15.4,5.3], E68);
-% figure needs regeneration with honest values before submission
-dvals=[4 8 16 32 64 128 256]; gamma=0.182; mlpA=sqrt(dvals); kanA=gamma*ones(size(dvals)); ratio=mlpA./kanA;
+% Trained KAN is NON-contractive (gamma=[15.4,5.3], E68); layer-1 marker
+% gamma=5.3 shown for reference only.
+dvals=[4 8 16 32 64 128 256]; gamma=5.3; mlpA=sqrt(dvals); kanA=gamma*ones(size(dvals)); ratio=mlpA./kanA;
 
 fig=figure('Units','inches','Position',[1 1 W2 HSTD],'Color','w','Visible','off');
 tl=tiledlayout(1,2,'TileSpacing','compact','Padding','compact');
 
 ax=nexttile(1);
 loglog(dvals,mlpA,'o-','Color',C.verm,'MarkerSize',6,'MarkerFaceColor',C.verm,'LineWidth',1.4,'DisplayName','MLP: $\|W\|_{1,\infty}=\sqrt{d}$'); hold on;
-loglog(dvals,kanA,'s--','Color',C.blue,'MarkerSize',6,'MarkerFaceColor',C.blue,'LineWidth',1.4,'DisplayName',sprintf('KAN: $\\gamma=%.3f$',gamma));
+loglog(dvals,kanA,'s--','Color',C.blue,'MarkerSize',6,'MarkerFaceColor',C.blue,'LineWidth',1.4,'DisplayName',sprintf('KAN: $\\gamma=%.1f$ (non-contractive, E68)',gamma));
 set(ax,'XTick',dvals,'XTickLabel',string(dvals),'Box','off','FontSize',7.5);
 xlabel('Width $d$','Interpreter','latex','FontSize',9); ylabel('Per-layer amplification','FontSize',9);
 title('(a) Amplification Factor','FontSize',9,'FontWeight','bold');
@@ -129,7 +129,7 @@ for i=1:7, bh.CData(i,:)=C.blue*(1-grad(i))+C.verm*grad(i); end
 set(ax,'XTickLabel',string(dvals),'Box','off','FontSize',7.5,'YScale','log');
 xlabel('Width $d$','Interpreter','latex','FontSize',9); ylabel('Per-layer gap (x)','FontSize',9);
 title('(b) MLP/KAN Ratio $=\sqrt{d}/\gamma$','Interpreter','latex','FontSize',9,'FontWeight','bold');
-for i=1:7, text(i,ratio(i)*1.06,sprintf('%.0fx',ratio(i)),'HorizontalAlign','center','FontSize',6.8,'FontWeight','bold'); end; grid on;
+for i=1:7, text(i,ratio(i)*1.06,sprintf('%.1fx',ratio(i)),'HorizontalAlign','center','FontSize',6.8,'FontWeight','bold'); end; grid on;
 
 exportgraphics(fig,fullfile(output_dir,'fig_sharp_lower_bound.pdf'),'ContentType','vector');
 exportgraphics(fig,fullfile(output_dir,'fig_sharp_lower_bound.png'),'Resolution',300);
@@ -140,7 +140,7 @@ close(fig);
 %% ═══════════════════════════════════════════════════════════
 fprintf('[4/11] DA vs IA\n');
 
-N=[8 10 12 15 18 20]; DAb=[0.419 0.305 0.212 0.079 0.055 0.044]; IAb=[0.922 0.671 0.466 0.172 0.121 0.097];
+N=[8 10 12 15 18 20]; DAb=[2.637 1.595 1.068 0.659 0.447 0.358]; IAb=[5.519 3.339 2.235 1.380 0.936 0.749];
 lbl={'N=8','10','12','15','18','20'};
 
 fig=figure('Units','inches','Position',[1 1 W2 HSTD],'Color','w','Visible','off');
@@ -227,7 +227,7 @@ close(fig);
 fprintf('[6/11] WCET Breakdown\n');
 
 comps={'LUT L0','LUT L1','MatMul','Softmax','Overhead'};
-tus=[16442 2349 3702 109 72]; tot=sum(tus); pcts=tus/tot*100;
+tus=[2778 397 604 16 66]; tot=sum(tus); pcts=tus/tot*100;
 clrWC={C.blue,C.sky,C.green,C.orange,C.purple};
 
 fig=figure('Units','inches','Position',[1 1 W2 HSTD],'Color','w','Visible','off');
@@ -367,19 +367,19 @@ close(fig);
 fprintf('[11/11] Safety Monitor\n');
 
 names_mon={'Inference','Monitor','Combined'};
-times_mon=[22673 66 22739];
+times_mon=[3861 66 3927];
 colors_mon=[C.blue; C.green; C.orange];
 
 fig=figure('Units','inches','Position',[1 1 W1*0.95 HSTD*0.85],'Color','w','Visible','off');
 b=bar(1:3,times_mon/1000,'FaceColor','flat','EdgeColor','none','BarWidth',0.5);
 for i=1:3, b.CData(i,:)=colors_mon(i,:); end
 for i=1:3
-    text(i,times_mon(i)/1000+0.3,sprintf('%.2f ms\n(%.1f%%)',times_mon(i)/1000,times_mon(i)/22739*100),'HorizontalAlign','center','FontSize',7.5,'FontWeight','bold');
+    text(i,times_mon(i)/1000+0.3,sprintf('%.2f ms\n(%.1f%%)',times_mon(i)/1000,times_mon(i)/times_mon(3)*100),'HorizontalAlign','center','FontSize',7.5,'FontWeight','bold');
 end
 set(gca,'XTickLabel',names_mon,'Box','off','FontSize',8);
 ylabel('WCET (ms)','FontSize',9);
-title(sprintf('Safety Monitor Overhead\n+66 us (+0.3%%)'),'FontSize',9,'FontWeight','bold');
-ylim([0 25]); grid on;
+title(sprintf('Safety Monitor Overhead\n+66 us (+1.7%%)'),'FontSize',9,'FontWeight','bold');
+ylim([0 5]); grid on;
 
 exportgraphics(fig,fullfile(output_dir,'fig_safety_monitor.pdf'),'ContentType','vector');
 exportgraphics(fig,fullfile(output_dir,'fig_safety_monitor.png'),'Resolution',300);

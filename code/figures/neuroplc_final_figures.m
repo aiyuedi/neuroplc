@@ -249,7 +249,7 @@ end
 
 function fig09_wcet(S, outA, outB)
 comp={'LUT L0','LUT L1','MatMul','Softmax','Overhead'};
-us=[16442 2349 3702 109 72]; total=sum(us)/1000;
+us=[2778 397 604 16 66]; total=sum(us)/1000;
 cols=[S.da;S.green;S.ia;S.purple;S.gray]; pcts=us/sum(us)*100;
 fig=figure('Units','inches','Position',[1 1 S.W2 S.H]); tl=tiledlayout(1,2,'Padding','compact');
 ax=nexttile; hp=pie(us);
@@ -332,13 +332,13 @@ edup(fig,'fig14_cross_domain',outA,outB);
 end
 
 function fig15_monitor(S, outA, outB)
-nm={'Inference','Monitor','Combined'}; tm=[22673 66 22739]; C=[S.da; S.green; S.ia];
+nm={'Inference','Monitor','Combined'}; tm=[3861 66 3927]; C=[S.da; S.green; S.ia];
 fig=figure('Units','inches','Position',[1 1 S.W1*1.05 S.H*.85]); ax=axes; hold on;
 b=bar(1:3,tm/1000,'FaceColor','flat','EdgeColor','none','BarWidth',0.5); b.CData=C;
 for i=1:3, dlabel(ax,i,tm(i)/1000+0.5,sprintf('%.2f ms (%.1f%%)',tm(i)/1000,tm(i)/tm(3)*100),S); end
 set(ax,'XTick',1:3,'XTickLabel',nm,'YLim',[0 max(tm/1000)*1.2]);
 ylabel('WCET (ms)','FontSize',S.fsA);
-title('Safety Monitor Overhead: +66 us (+0.3%)','FontSize',S.fsP+1,'FontWeight','bold');
+title('Safety Monitor Overhead: +66 us (+1.7%)','FontSize',S.fsP+1,'FontWeight','bold');
 prep(ax,S);
 edup(fig,'fig15_safety_monitor',outA,outB);
 end

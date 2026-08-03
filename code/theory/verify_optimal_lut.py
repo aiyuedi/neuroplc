@@ -5,8 +5,8 @@ Two-level optimality theorem for LUT compilation of a B-spline KAN:
   (a) CROSS-FUNCTION allocation: with total budget N over F functions,
       the minimax-optimal per-function node count is n_i ~ N * M2_i^{1/2}
       / sum_j M2_j^{1/2}, giving
-          e* = (b-a)^2 / (8 (sum_i M2_i^{-1/2})^2)
-      vs uniform e = max_i M2_i (b-a)^2 / (8 N^2).
+          e* = (b-a)^2 (sum_i sqrt(M2_i))^2 / (8 N^2)
+      vs uniform e = max_i M2_i (b-a)^2 F^2 / (8 N^2).
   (b) WITHIN-FUNCTION grid: minimax segment error M2(seg) Delta^2/8 is
       balanced by node density rho(x) ~ sqrt(M2(x)), i.e. sqrt(|phi''(x)|).
       The previous curvature density |y''|/(1+y'^2)^{3/2} is measurably
@@ -83,10 +83,11 @@ def main():
     N = len(m2)
     b_a = X1 - X0
 
-    # (a) cross-function allocation
-    inv_sqrt = float(np.sum(1.0 / np.sqrt(np.maximum(m2, 1e-9))))
-    e_star = (b_a ** 2) / (8 * inv_sqrt ** 2)
-    e_uniform = float(m2.max()) * (b_a ** 2) / (8 * N ** 2)
+    # (a) cross-function allocation (corrected 2026-08-03 re-review:
+    # e* = (b-a)^2 (sum sqrt(M2))^2 / (8 N^2); uniform has the F^2 factor)
+    sum_sqrt = float(np.sum(np.sqrt(m2)))
+    e_star = (b_a ** 2) / (8 * N ** 2) * sum_sqrt ** 2
+    e_uniform = float(m2.max()) * (b_a ** 2) * N ** 2 / (8 * N ** 2)
 
     # (b) within-function grid on the worst activation
     wm, wd, wf, xs = worst_function(sd)

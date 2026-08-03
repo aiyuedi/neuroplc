@@ -89,7 +89,7 @@ fig = figure('Units','inches','Position',[1 1 S.W2 2.65]);
 ax = axes(fig); axis(ax, [0 10 0 5]); axis off; hold on;
 cols = [S.sky; S.green; S.ia; S.purple; S.red];
 titles = {'Feature Extraction','Teacher CNN','VRM-KD Distillation','NeuroPLC Compiler','TIA V21 Validation'};
-lines = {{'1024-pt windows','28-D features'}, {'1D-CNN + attention','99.93% accuracy'}, {'KAN [28,16,4]','7.9x compression'}, {'Typed IR + DA','SCL FB/DB'}, {'0 errors/warnings','22.67 ms WCET'}};
+lines = {{'1024-pt windows','28-D features'}, {'1D-CNN + attention','99.93% accuracy'}, {'KAN [28,16,4]','7.9x compression'}, {'Typed IR + DA','SCL FB/DB'}, {'0 errors/warnings','3.86 ms WCET'}};
 for i=1:5
     x = 0.55 + (i-1)*1.9;
     rectangle('Position',[x 1.25 1.45 2.65], 'Curvature',0.08, 'FaceColor',cols(i,:)*0.12+0.88, 'EdgeColor',cols(i,:), 'LineWidth',1.4);
@@ -194,15 +194,15 @@ xlim([0 mx]); ylim([0 mx]); axis square; xlabel('Theoretical bound M_2h^2/8 (abs
 end
 
 function fig_sharp_bound(S,outDir)
-d=[4 8 16 32 64 128 256]; g=.182; m=sqrt(d); k=g*ones(size(d)); r=m./k;
+d=[4 8 16 32 64 128 256]; g=5.3; m=sqrt(d); k=g*ones(size(d)); r=m./k;
 fig=figure('Units','inches','Position',[1 1 S.W2 S.H]); tiledlayout(1,2,'Padding','compact');
 ax=nexttile; loglog(d,m,'s-','Color',S.ia,'LineWidth',S.lw,'MarkerFaceColor',S.ia); hold on; loglog(d,k,'o--','Color',S.da,'LineWidth',S.lw,'MarkerFaceColor',S.da); prep(ax,S); xlabel('Hidden width d (log_{10})','FontSize',S.fsAxis); ylabel('Per-layer amplification (log_{10})','FontSize',S.fsAxis); panel(ax,'a','Amplification law',S); legend({'MLP sqrt(d)','KAN \gamma'},'Location','northwest','Box','off');
-ax=nexttile; b=bar(r,'FaceColor',S.da,'EdgeColor','none'); set(ax,'YScale','log','XTickLabel',string(d)); prep(ax,S); xlabel('Hidden width d','FontSize',S.fsAxis); ylabel('MLP/KAN gap (x, log_{10})','FontSize',S.fsAxis); panel(ax,'b','Certification gap',S); for i=1:numel(r), boxed_label(ax,i,r(i)*1.08,sprintf('%.0fx',r(i)),S); end
+ax=nexttile; b=bar(r,'FaceColor',S.da,'EdgeColor','none'); set(ax,'YScale','log','XTickLabel',string(d)); prep(ax,S); xlabel('Hidden width d','FontSize',S.fsAxis); ylabel('MLP/KAN gap (x, log_{10})','FontSize',S.fsAxis); panel(ax,'b','Certification gap',S); for i=1:numel(r), boxed_label(ax,i,r(i)*1.08,sprintf('%.1fx',r(i)),S); end
 export_all(fig,outDir,'fig04_sharp_bound');
 end
 
 function fig_da_vs_ia(S,outDir)
-N=[8 10 12 15 18 20]; DA=[.419 .305 .212 .079 .055 .044]; IA=[.922 .671 .466 .172 .121 .097];
+N=[8 10 12 15 18 20]; DA=[2.637 1.595 1.068 0.659 0.447 0.358]; IA=[5.519 3.339 2.235 1.380 0.936 0.749];
 fig=figure('Units','inches','Position',[1 1 S.W2 S.H]); tiledlayout(1,2,'Padding','compact');
 ax=nexttile; semilogy(N,DA,'o-','Color',S.da,'LineWidth',S.lw,'MarkerFaceColor',S.da); hold on; semilogy(N,IA,'s--','Color',S.ia,'LineWidth',S.lw,'MarkerFaceColor',S.ia); prep(ax,S); xlabel('LUT points N','FontSize',S.fsAxis); ylabel('Error bound (log_{10}, absolute)','FontSize',S.fsAxis); panel(ax,'a','Bound vs resolution',S); legend({'DA','IA'},'Location','northeast','Box','off');
 ax=nexttile; b=bar([DA;IA]','grouped'); b(1).FaceColor=S.da; b(2).FaceColor=S.ia; prep(ax,S); set(ax,'XTickLabel',string(N)); xlabel('LUT points N','FontSize',S.fsAxis); ylabel('Error bound (absolute)','FontSize',S.fsAxis); panel(ax,'b','DA tightening',S); legend({'DA','IA'},'Box','off');
@@ -235,7 +235,7 @@ export_all(fig,outDir,'fig08_segment_bounds');
 end
 
 function fig_wcet(S,outDir)
-comp={'LUT L0','LUT L1','MatMul','Softmax','Overhead'}; us=[16442 2349 3702 109 72]; ms=us/1000; total=sum(ms); cols=[S.da; S.green; S.ia; S.purple; S.gray];
+comp={'LUT L0','LUT L1','MatMul','Softmax','Overhead'}; us=[2778 397 604 16 66]; ms=us/1000; total=sum(ms); cols=[S.da; S.green; S.ia; S.purple; S.gray];
 fig=figure('Units','inches','Position',[1 1 S.W2 S.H]); tiledlayout(1,2,'Padding','compact');
 ax=nexttile; p=pie(us); for i=1:5, p(2*i-1).FaceColor=cols(i,:); p(2*i-1).EdgeColor='w'; p(2*i).String=sprintf('%s %.1f%%',comp{i},us(i)/sum(us)*100); p(2*i).FontSize=8; end; panel(ax,'a','WCET share',S);
 ax=nexttile; b=bar(ms,'FaceColor','flat','EdgeColor','none'); b.CData=cols; hold on; yline(total,'--','Color',S.red,'LineWidth',1.4); boxed_label(ax,4.6,total,sprintf('total %.2f ms',total),S,'Color',S.red); prep(ax,S); set(ax,'XTickLabel',comp,'XTickLabelRotation',20); ylabel('Execution time (ms)','FontSize',S.fsAxis); panel(ax,'b','Component time',S); for i=1:5, boxed_label(ax,i,ms(i)+0.3,sprintf('%.2f',ms(i)),S); end

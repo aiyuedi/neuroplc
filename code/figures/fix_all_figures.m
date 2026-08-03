@@ -224,9 +224,9 @@ close(fig);
 fprintf('[ 3/13] Sharp Lower Bound\n');
 
 dvals = [4 8 16 32 64 128 256];
-% FIXME: 0.182 stale --- trained KAN non-contractive (gamma=[15.4,5.3], E68);
-% figure needs regeneration with honest values before submission
-gamma_val = 0.182;
+% Trained KAN is NON-contractive (gamma=[15.4,5.3], E68); layer-1 marker
+% gamma=5.3 shown for reference only.
+gamma_val = 5.3;
 mlpA = sqrt(dvals);
 kanA = gamma_val * ones(size(dvals));
 ratio = mlpA ./ kanA;
@@ -242,7 +242,7 @@ loglog(dvals, mlpA, 's-', 'Color',C.verm, 'MarkerSize',7,...
 hold on;
 loglog(dvals, kanA, 'o--', 'Color',C.blue, 'MarkerSize',7,...
     'MarkerFaceColor',C.blue, 'LineWidth',1.5,...
-    'DisplayName',sprintf('KAN: $\\gamma = %.3f$',gamma_val));
+    'DisplayName',sprintf('KAN: $\\gamma = %.1f$ (non-contractive, E68)',gamma_val));
 set(ax, 'XTick',dvals, 'XTickLabel',string(dvals), 'Box','off', 'FontSize',FS_TICK);
 xlabel('Hidden Dimension $d$', 'Interpreter','latex', 'FontSize',FS_AXLABEL);
 ylabel('Per-Layer Amplification Factor', 'FontSize',FS_AXLABEL);
@@ -264,7 +264,7 @@ xlabel('Hidden Dimension $d$', 'Interpreter','latex', 'FontSize',FS_AXLABEL);
 ylabel('Per-Layer Gap $\\sqrt{d}/\\gamma$ ({\\times})', 'Interpreter','latex', 'FontSize',FS_AXLABEL);
 title('(b) MLP/KAN Certification Gap', 'FontSize',FS_TITLE, 'FontWeight','bold');
 for i=1:7
-    text(i, ratio(i)*1.08, sprintf('%.0f{\\times}',ratio(i)),...
+    text(i, ratio(i)*1.08, sprintf('%.1f{\\times}',ratio(i)),...
         'HorizontalAlign','center','FontSize',FS_DATA,'FontWeight','bold');
 end
 mark_log(ax, 0.03, 0.06);
@@ -281,8 +281,8 @@ close(fig);
 fprintf('[ 4/13] DA vs IA Comparison\n');
 
 N_vals = [8 10 12 15 18 20];
-DA_bound = [0.419 0.305 0.212 0.079 0.055 0.044];
-IA_bound = [0.922 0.671 0.466 0.172 0.121 0.097];
+DA_bound = [2.637 1.595 1.068 0.659 0.447 0.358];
+IA_bound = [5.519 3.339 2.235 1.380 0.936 0.749];
 lbl_N = {'8','10','12','15','18','20'};
 tightening_pct = (1 - DA_bound./IA_bound) * 100;
 
@@ -420,7 +420,7 @@ close(fig);
 fprintf('[ 6/13] WCET Breakdown\n');
 
 comps   = {'LUT L0','LUT L1','MatMul','Softmax','Overhead'};
-tus     = [16442 2349 3702 109 72];
+tus     = [2778 397 604 16 66];
 tot     = sum(tus);
 pcts    = tus/tot*100;
 % More distinct colors: avoid similar blues for L0/L1
@@ -846,7 +846,7 @@ close(fig);
 fprintf('[13/13] Safety Monitor Overhead\n');
 
 names_mon = {'Inference','Safety Monitor','Combined'};
-times_mon = [22673 66 22739];
+times_mon = [3861 66 3927];
 colors_mon = [C.blue; C.green; C.orange];
 
 fig = figure('Units','inches','Position',[1 1 W2*0.5 H_STD*0.9],'Color','w','Visible','off');
@@ -854,14 +854,14 @@ b = bar(1:3, times_mon/1000, 'FaceColor','flat', 'EdgeColor','none', 'BarWidth',
 for i = 1:3, b.CData(i,:) = colors_mon(i,:); end
 for i = 1:3
     text(i, times_mon(i)/1000+0.4,...
-        sprintf('%.2f ms\n(%.1f%%)', times_mon(i)/1000, times_mon(i)/22739*100),...
+        sprintf('%.2f ms\n(%.1f%%)', times_mon(i)/1000, times_mon(i)/times_mon(3)*100),...
         'HorizontalAlign','center', 'FontSize',7.5, 'FontWeight','bold');
 end
 set(gca, 'XTick',1:3, 'XTickLabel',names_mon, 'Box','off', 'FontSize',FS_TICK+0.5);
 ylabel('WCET (ms)', 'FontSize',FS_AXLABEL);
-title(sprintf('Safety Monitor Overhead: +66 {\\mu}s (+0.3%%)'),...
+title(sprintf('Safety Monitor Overhead: +66 {\\mu}s (+1.7%%)'),...
     'FontSize',FS_TITLE+0.5, 'FontWeight','bold');
-ylim([0 25]);
+ylim([0 5]);
 grid on;
 
 exportgraphics(fig, fullfile(output_dir,'fig_safety_monitor.pdf'), 'ContentType','vector');

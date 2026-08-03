@@ -166,7 +166,7 @@ M_2 h^2/8$ (sharpness of the Regime-1 constant).
 \subsection{Necessity, First Lattice}
 \label{sec:necessity-first}
 
-\setcounter{theorem}{16}
+\setcounter{theorem}{15}
 \begin{theorem}[Necessity in the Affine-Certificate Class]
 \label{thm:necessity_first}
 Let $\mathcal{C}$ be the class of design-time-computable affine
@@ -185,14 +185,18 @@ finite certificate in $\mathcal{C}$, by definition of the envelope);
 $\mathcal{A}$ (the self-contained 3-SAT reduction of
 Theorem~\ref{thm:necessity} uses only product and affine primitives, so
 any class containing them inherits hardness);
-\emph{(iii) sharp rate forces optimal allocation:} any certificate
-achieving the minimax rate must implement the T-I optimal allocation
-(Theorem~\ref{thm:optimal_lut}), since the deviation gap of any other
-allocation is explicit and positive.
+\emph{(iii) sharp minimax \emph{constant} forces optimal allocation:}
+the uniform allocation attains the same \emph{rate} $N^{-2k}$; only
+the sharp minimax \emph{constant} $e^{*}(N)$ of
+Theorem~\ref{thm:optimal_lut} is attained by the unique balanced
+allocation (T-I), since any other allocation has an explicit positive
+gap.
 Hence, in $\mathcal{C}$, $(P1)+(P2)$ imply SVNN Conditions~1--2---the
 first lattice of the trichotomy necessity---while Condition~3
-(contractivity) is \emph{not} necessary (Theorem~\ref{thm:compile_aware_minimax}
-holds for $\gamma \geq 1$).
+(contractivity) is \emph{not} necessary: the compile-aware
+decomposition (Theorem~\ref{thm:generalization}) and the minimax rate
+(Theorem~\ref{thm:compile_aware_minimax}) hold without contractivity
+(E68, $\gamma = [15.4, 5.3] > 1$).
 \end{theorem}
 
 \vspace{2pt}

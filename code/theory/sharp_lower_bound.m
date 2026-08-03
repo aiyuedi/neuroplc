@@ -67,10 +67,9 @@ for di = 1:length(d_vals)
     % For all-ones: max_j sum_i |W_{j,i}| = max_j sum_i 1/sqrt(d) = d/sqrt(d) = sqrt(d)
     mlp_amp_theory = sqrt(d);
 
-    % FIXME: 0.182 stale --- trained KAN non-contractive (gamma=[15.4,5.3], E68);
-    % figure needs regeneration with honest values before submission
-    % KAN contractivity bound (d-independent)
-    kan_amp = 0.182;  % measured γ from trained KAN [28,16,4], E9
+    % Trained KAN is NON-contractive (gamma=[15.4,5.3], E68); the layer-1
+    % amplification 5.3 is used as the honest d-independent reference.
+    kan_amp = 5.3;  % layer-1 amplification of trained KAN [28,16,4] (E68)
 
     ratio = mlp_amp_theory / kan_amp;
 
@@ -79,11 +78,9 @@ end
 
 fprintf('  %-8s %-16s %-16s %s\n', 'd', '||W||_{1,∞} (=√d)', 'KAN γ', 'Ratio');
 fprintf('  %-8s %-16s %-16s %s\n', '---', '--------------', '-----', '-----');
-% FIXME: 0.182 stale --- trained KAN non-contractive (gamma=[15.4,5.3], E68);
-% figure needs regeneration with honest values before submission
 for di = 1:length(d_vals)
     fprintf('  %-8d %-16.4f              %-16.4f %.1fx\n', ...
-        d_vals(di), results(di,2), 0.182, results(di,3));
+        d_vals(di), results(di,2), kan_amp, results(di,3));
 end
 
 %% Part 3: Multi-Layer Extension
@@ -97,9 +94,9 @@ for li = 1:length(L_vals)
     for di = 1:length(d_vals)
         d = d_vals(di);
         mlp_total = (sqrt(d))^L;  % product of per-layer amplifications
-        % FIXME: 0.182 stale --- trained KAN non-contractive (gamma=[15.4,5.3],
-        % E68); figure needs regeneration with honest values before submission
-        kan_total = 0.182^L;        % contractivity shrinks exponentially
+        % Trained KAN is non-contractive: gamma=5.3 (>1), so amplification
+        % GROWS with depth rather than shrinking.
+        kan_total = 5.3^L;
         ratio_L = mlp_total / kan_total;
 
         if di <= 4  % only print first 4 for brevity
@@ -152,12 +149,13 @@ fprintf('  After L layers:\n\n');
 
 fprintf('    R^{(L)}_{MLP/KAN}(d) = (sqrt(d) / gamma)^L  ≥  d^{L/2}\n\n');
 
-% FIXME: 0.182 stale --- trained KAN non-contractive (gamma=[15.4,5.3], E68);
-% figure needs regeneration with honest values before submission
-fprintf('  For a KAN [28,16,4] with measured gamma = 0.182 vs. MLP [28,32,16,4]:\n');
-fprintf('    Per-layer: R = sqrt(32) / 0.182 = 5.657 / 0.182 = 31.1x\n');
-fprintf('    L=2: R^{(2)} = (sqrt(32)/0.182)^2 = 31.1^2 = 967x\n');
-fprintf('    L=3: R^{(3)} = (sqrt(16)/0.182)^3 = 22.0^3 = 10,632x\n\n');
+fprintf('  For a KAN [28,16,4] with measured layer-1 gamma = 5.3\n');
+fprintf('  (NON-contractive, E68) vs. MLP [28,32,16,4]:\n');
+fprintf('    Per-layer: R = sqrt(32) / 5.3 = 5.657 / 5.3 = 1.1x\n');
+fprintf('    L=2: R^{(2)} = (sqrt(32)/5.3)^2 = 1.1^2 = 1.1x\n');
+fprintf('    L=3: R^{(3)} = (sqrt(16)/5.3)^3 = 0.75^3 = 0.4x\n\n');
+fprintf('  Without contractivity the sqrt(d) amplification gap essentially\n');
+fprintf('  disappears: the trained KAN does NOT shrink worst-case error.\n\n');
 
 fprintf('  This bound is SHARP: the all-ones construction achieves the √d\n');
 fprintf('  amplification factor EXACTLY, and it is independent of:\n');

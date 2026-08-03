@@ -7,9 +7,9 @@
     "p90": 2.0365234579270397
   },
   "cross_function": {
-    "e_star_optimal": 1.961684271685954e-05,
-    "e_uniform": 5.8615067726051906e-05,
-    "improvement_x": 2.9879970274561893
+    "e_star_optimal": 5.593109295949063,
+    "e_uniform": 15.36558831397815,
+    "improvement_x": 2.7472354822579685
   },
   "within_function_worst": {
     "uniform": 0.07839585874478643,

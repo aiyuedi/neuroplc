@@ -154,7 +154,7 @@ is made formal over the class of affine design-time schemes.
 \subsection{Curvature-Aware Optimal LUT Allocation and Grids}
 \label{sec:optimal-lut}
 
-\setcounter{theorem}{13}
+\setcounter{theorem}{12}
 \begin{theorem}[Two-Level Optimality of Curvature-Aware LUTs]
 \label{thm:optimal_lut}
 Let $\{\phi_i\}_{i=1}^{F}$ be the $F$ B-spline activation functions of a
@@ -167,13 +167,14 @@ $\sum_i n_i = N$ is attained at
 \begin{equation}
 n_i^{*} \;=\; N \cdot \frac{(M_2^{(i)})^{1/2}}{\sum_j (M_2^{(j)})^{1/2}},
 \qquad
-e^{*}_{\text{cross}} \;=\; \frac{(b-a)^2}{8 \bigl(\sum_i
-(M_2^{(i)})^{-1/2}\bigr)^{2}},
+e^{*}_{\text{cross}} \;=\; \frac{(b-a)^2}{8N^{2}}
+\Bigl(\sum_i (M_2^{(i)})^{1/2}\Bigr)^{2},
 \label{eq:optimal_cross}
 \end{equation}
-which improves on the uniform allocation by the factor
-$\max_i M_2^{(i)} \cdot \bigl(\sum_j (M_2^{(j)})^{-1/2}\bigr)^{2}/N^{2}$
-(for the released checkpoint: $2.99\times$, E-T1).
+which improves on the uniform allocation (error
+$\max_i M_2^{(i)}(b-a)^2 F^2/(8N^2)$) by the factor
+$F^{2} \cdot \max_i M_2^{(i)} / \bigl(\sum_j (M_2^{(j)})^{1/2}\bigr)^{2}$
+(for the released checkpoint: $2.75\times$, E-T1).
 \emph{(b) Within-function grid.} For a single function with per-point
 curvature profile $M_2(x) = |\phi''(x)|$, the minimax segment error
 $\max_x M_2(x)\,\Delta(x)^2/8$ over all $N$-node grids is attained by
@@ -226,7 +227,7 @@ The compiler's curvature-aware LUT pass
 $|\phi''|/(1+\phi'^2)^{3/2}$; Theorem~\ref{thm:optimal_lut} shows the
 minimax density is $\sqrt{|\phi''|}$ and the old density is worse than
 uniform on real activations. The pass has been corrected
-(\texttt{verify\_optimal\_lut.py}, E-T1: cross-function $2.99\times$,
+(\texttt{verify\_optimal\_lut.py}, E-T1: cross-function $2.75\times$,
 within-function $3.32\times$ improvement; results in
 \texttt{results/theory/ti\_optimal\_lut.json}). This converts the
 adaptive-LUT engineering heuristic (E15) into a provably optimal

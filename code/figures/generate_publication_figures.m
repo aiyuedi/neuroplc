@@ -151,9 +151,9 @@ fprintf('[3/6] Sharp Lower Bound\n');
 
 d_vals=[4,8,16,32,64,128,256];
 mlp_amp=sqrt(d_vals);
-% FIXME: 0.182 stale --- trained KAN non-contractive (gamma=[15.4,5.3], E68);
-% figure needs regeneration with honest values before submission
-gamma=0.182;
+% Trained KAN is NON-contractive (gamma=[15.4,5.3], E68); layer-1 marker
+% gamma=5.3 shown for reference only.
+gamma=5.3;
 kan_amp=gamma*ones(size(d_vals));
 ratio=mlp_amp./kan_amp;
 
@@ -165,7 +165,7 @@ loglog(d_vals,mlp_amp,'o-','Color',C_vermilion,'MarkerSize',6,...
     'MarkerFaceColor',C_vermilion,'LineWidth',1.5,'DisplayName','MLP: $\|W\|_{1,\infty}=\sqrt{d}$');
 hold on;
 loglog(d_vals,kan_amp,'s--','Color',C_blue,'MarkerSize',6,...
-    'MarkerFaceColor',C_blue,'LineWidth',1.5,'DisplayName',sprintf('KAN: $\\gamma=%.3f$ (const)',gamma));
+    'MarkerFaceColor',C_blue,'LineWidth',1.5,'DisplayName',sprintf('KAN: $\\gamma=%.1f$ (non-contractive, E68)',gamma));
 set(ax1,'XTick',d_vals,'XTickLabel',{'4','8','16','32','64','128','256'},...
     'FontSize',8,'Box','off');
 xlabel('Layer width $d$','Interpreter','latex','FontSize',9);
@@ -186,7 +186,7 @@ ylabel('Per-layer gap (×)','FontSize',9);
 title('(b) MLP/KAN ratio $=\sqrt{d}/\gamma$','Interpreter','latex',...
     'FontSize',9,'FontWeight','bold');
 for i=1:7
-    text(i, ratio(i)*1.05, sprintf('%.0f×',ratio(i)), ...
+    text(i, ratio(i)*1.05, sprintf('%.1f×',ratio(i)), ...
         'HorizontalAlign','center','FontSize',7,'FontWeight','bold');
 end
 grid on;
@@ -202,8 +202,8 @@ fprintf('   ✓ fig_sharp_lower_bound\n');
 fprintf('[4/6] DA vs IA Comparison\n');
 
 N_lut=[8,10,12,15,18,20];
-DA_b=[0.419,0.305,0.212,0.079,0.055,0.044];
-IA_b=[0.922,0.671,0.466,0.172,0.121,0.097];
+DA_b=[2.637,1.595,1.068,0.659,0.447,0.358];
+IA_b=[5.519,3.339,2.235,1.380,0.936,0.749];
 labels={'N=8','N=10','N=12','N=15','N=18','N=20'};
 
 fig=figure('Units','inches','Position',[1 1 COL2 2.6],'Color','w');
@@ -239,7 +239,7 @@ for i=1:length(N_lut)
 end
 set(ax2,'XTickLabel',labels,'XTickLabelRotation',30,'Box','off','FontSize',8);
 ylabel('Error Bound','FontSize',9);
-title({'(b) DA vs. IA: $2.2\times$ tightening'},'Interpreter','latex',...
+title({'(b) DA vs. IA: $2.1\times$ tightening'},'Interpreter','latex',...
     'FontSize',9,'FontWeight','bold');
 legend({'DA','IA'},'Location','northeast','FontSize',8,'Box','off');
 text(0.97,0.92,'(blue %: DA reduction vs IA)','Units','normalized',...
@@ -327,7 +327,7 @@ fprintf('   ✓ fig_c2bv_basis_functions\n');
 fprintf('[6/6] WCET Breakdown\n');
 
 components={'LUT Layer 0','LUT Layer 1','MatMul L0+L1','Softmax','Overhead'};
-times_us=[16442, 2349, 3702, 109, 72];
+times_us=[2778, 397, 604, 16, 66];
 total=sum(times_us);
 pcts=times_us/total*100;
 colors6=[C_blue; C_skyblue; C_green; C_orange; C_purple];
@@ -360,7 +360,7 @@ hold on;
 yline(total/1000,'--','Color',C_vermilion,'LineWidth',1.3,...
     'Label',sprintf('Total %.1f ms',total/1000),'LabelHorizontalAlignment','right',...
     'LabelVerticalAlignment','bottom','FontSize',7.5);
-yline(22.67,':', 'Color',[0.5 0.5 0.5],'LineWidth',0.8);
+yline(3.86,':', 'Color',[0.5 0.5 0.5],'LineWidth',0.8);
 set(ax_bar,'XTickLabel',{'LUT\nL0','LUT\nL1','Mat-\nMul','Soft-\nmax','Over-\nhead'},...
     'FontSize',8,'Box','off');
 ylabel('Time (ms)','FontSize',9);

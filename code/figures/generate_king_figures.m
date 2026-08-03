@@ -125,9 +125,9 @@ fprintf('[3/4] Sharp Lower Bound Plot\n');
 
 d_vals = [4, 8, 16, 32, 64, 128, 256];
 mlp_amp = sqrt(d_vals);  % all-ones construction
-% FIXME: 0.182 stale --- trained KAN non-contractive (gamma=[15.4,5.3], E68);
-% figure needs regeneration with honest values before submission
-kan_amp = 0.182 * ones(size(d_vals));  % measured γ
+% Trained KAN is NON-contractive (gamma=[15.4,5.3], E68); layer-1 marker
+% gamma=5.3 shown for reference only.
+kan_amp = 5.3 * ones(size(d_vals));  % layer-1 amplification (E68)
 ratio = mlp_amp ./ kan_amp;
 
 fig = figure('Position', [100, 100, 900, 400]);
@@ -137,7 +137,7 @@ loglog(d_vals, mlp_amp, 'ro-', 'LineWidth', 2, 'MarkerSize', 10, ...
     'MarkerFaceColor', 'r', 'DisplayName', 'MLP: ||W||_{1,\infty} = \surd d');
 hold on;
 loglog(d_vals, kan_amp, 'bs-', 'LineWidth', 2, 'MarkerSize', 10, ...
-    'MarkerFaceColor', 'b', 'DisplayName', 'KAN: \gamma = 0.182 (d-independent)');
+    'MarkerFaceColor', 'b', 'DisplayName', 'KAN: \gamma = 5.3 (non-contractive, E68)');
 xlabel('Network Width d', 'FontSize', 12);
 ylabel('Per-Layer Error Amplification', 'FontSize', 12);
 title('Error Amplification: MLP vs KAN', 'FontSize', 13);
@@ -154,7 +154,7 @@ title('Per-Layer Gap: \surd d / \gamma', 'FontSize', 13);
 grid on;
 xticks(d_vals);
 for i = 1:length(d_vals)
-    text(d_vals(i), ratio(i)*1.1, sprintf('%.0f×', ratio(i)), ...
+    text(d_vals(i), ratio(i)*1.1, sprintf('%.1f×', ratio(i)), ...
         'HorizontalAlign', 'center', 'FontSize', 9, 'FontWeight', 'bold');
 end
 
@@ -171,9 +171,9 @@ fprintf('[4/4] DA vs IA Comparison Plot\n');
 
 % Data from actual experiments
 N_lut_vals = [8, 10, 12, 15, 18, 20];
-DA_bounds = [0.419, 0.305, 0.212, 0.079, 0.055, 0.044];   % E9 DA values
-IA_bounds = [0.922, 0.671, 0.466, 0.172, 0.121, 0.097];   % E9 IA values
-ratio_vals = [2.20, 2.20, 2.20, 2.20, 2.20, 2.20];  % stable 2.2× ratio
+DA_bounds = [2.637, 1.595, 1.068, 0.659, 0.447, 0.358];   % recomputed 2026-08-03
+IA_bounds = [5.519, 3.339, 2.235, 1.380, 0.936, 0.749];   % recomputed 2026-08-03
+ratio_vals = [2.09, 2.09, 2.09, 2.09, 2.09, 2.09];  % stable 2.09× ratio
 
 fig = figure('Position', [100, 100, 900, 400]);
 

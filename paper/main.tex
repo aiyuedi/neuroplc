@@ -468,8 +468,8 @@ over PROFINET/OPC UA. An on-PLC time-domain subset is also compiled
          and $N_{\text{LUT}}$ LUT points on Siemens S7-1200,
           $\text{WCET}(N) \leq E \cdot (C_{\text{LUT}} + C_{\text{matmul}})
           + C_{\text{softmax}}$. For KAN $[28,16,4]$ with $N_{\text{LUT}}=15$:
-          $\text{WCET} = 3.86$~ms ($4.4\times$ margin within 100~ms scan
-         cycle, $22.7\%$ utilization).
+          $\text{WCET} = 3.86$~ms ($25.9\times$ margin within 100~ms scan
+         cycle, $3.9\%$ utilization).
     \item \textbf{Algorithm (Safety Monitor):} \textbf{Algorithm~3}
           ({\S}\ref{sec:safety-monitor})---the compiler automatically
          generates a companion SCL safety monitor implementing domain
@@ -2928,32 +2928,32 @@ no hardware FPU), the worst-case execution time is bounded by:
 + C_{\text{overhead}}
 \label{eq:wcet_general}
 \end{equation}
-where $C_{\text{LUT}}(N_{\text{LUT}}) = 36.7$~$\mu$s per edge for
+where $C_{\text{LUT}}(N_{\text{LUT}}) = 6.2$~$\mu$s per edge for
 $N_{\text{LUT}}=15$ (binary search + linear interpolation on REAL array),
-$C_{\text{MAC}} = 7.2$~$\mu$s per edge (REAL multiply-accumulate),
-$C_{\text{softmax}} = 109.4$~$\mu$s (4-class softmax with soft-float EXP),
-and $C_{\text{overhead}} \approx 100$~$\mu$s (FB call overhead).
+$C_{\text{MAC}} = 1.2$~$\mu$s per edge (REAL multiply-accumulate),
+$C_{\text{softmax}} \approx 66$~$\mu$s (4-class softmax with soft-float EXP),
+and $C_{\text{overhead}} \approx 0.4$~$\mu$s (residual FB overhead).
 \end{theorem}
 
 \vspace{2pt}
 \noindent\textit{Proof.}
 Each B-spline activation in SCL evaluates a piecewise-linear interpolant:
-binary-search the grid index $k$ ($4$ REAL comparisons, $4 \times 0.30$
-$\mu$s), compute $t = (x - \text{grid}[k]) / (\text{grid}[k+1] -
-\text{grid}[k])$ ($3$ REAL SUB, $1$ REAL DIV), and interpolate
+binary-search the grid index $k$ ($4$ REAL comparisons), compute
+$t = (x - \text{grid}[k]) / (\text{grid}[k+1] - \text{grid}[k])$
+($3$ REAL SUB, $1$ REAL DIV), and interpolate
 $y = \text{LUT}[k] + t \cdot (\text{LUT}[k+1] - \text{LUT}[k])$
 ($2$ REAL SUB, $1$ REAL MUL, $1$ REAL ADD, $4$ array accesses).
 S7-1200 instruction timings (Siemens S7-1200 System Manual, 05/2024,
 Appendix A; the values used by the Z3-WCET analysis, \texttt{wcet.py}):
 REAL ADD 0.50~$\mu$s, REAL MUL 0.60~$\mu$s, REAL DIV 1.20~$\mu$s,
 REAL CMP 0.30~$\mu$s, array index 0.10~$\mu$s.
-The Z3 analysis's per-edge LUT cost of $36.7$~$\mu$s
-(\texttt{wcet\_analysis.json}) counts the complete generated-SCL
-instruction stream per edge---binary-search loop iterations, scalar
-loads, branches, and assignments---in addition to the arithmetic
-operations listed above (which alone sum to $6.4$~$\mu$s).
+The Z3 analysis's per-edge LUT cost of $6.2$~$\mu$s
+(\texttt{wcet\_analysis.json}, regenerated 2026-08-03 on this timing
+base) counts the complete generated-SCL instruction stream per
+edge---binary-search loop iterations, scalar loads, branches, and
+assignments---in addition to the arithmetic operations listed above.
 The MatMul per edge contributes
-$7.2$~$\mu$s (per-weight multiply-accumulate plus load and loop overhead
+$1.2$~$\mu$s (per-weight multiply-accumulate plus load and loop overhead
 in the same Z3 accounting). All branches are
 sequential on S7-1200 (single-scan execution model), so per-node
 bounds compose additively. The parameterized form
@@ -2964,14 +2964,14 @@ at design time for any SVNN architecture. $\square$
 \noindent\textbf{For KAN $[28,16,4]$ with $N_{\text{LUT}}=15$:}
 \begin{align*}
 E &= 28 \cdot 16 + 16 \cdot 4 = 512 \text{ edges}, \\
-\text{WCET} &= 512 \cdot (36.7 + 7.2) + 109.4 + 100 \\
-            &= 22{,}473.8 + 109.4 + 100
-             = 22{,}683~\mu\text{s} \approx 22.7~\text{ms}.
+\text{WCET} &= 512 \cdot (6.2 + 1.2) + 66 + 0.4 \\
+            &= 3{,}788.8 + 66.4
+             = 3{,}855.2~\mu\text{s} \approx 3.86~\text{ms}.
 \end{align*}
 
-The S7-1200 default scan cycle is 100~ms. The WCET of 22.7~ms
-consumes only 22.7\% of the scan cycle, leaving 77.3~ms (77.3\%)
-for application logic—a $\mathbf{4.4\times}$ safety margin.
+The S7-1200 default scan cycle is 100~ms. The WCET of 3.86~ms
+consumes only 3.9\% of the scan cycle, leaving 96.1~ms (96.1\%)
+for application logic—a $\mathbf{25.9\times}$ safety margin.
 Note that this is a \textit{worst-case} bound; typical execution
 times are lower due to early-exit in the LUT binary search.
 
@@ -3086,7 +3086,7 @@ The generated safety monitor satisfies three formal properties:
    triggers; the domain\_violation flag stays FALSE.
     \item \textbf{Overhead:} The monitor adds $\leq 5\%$ SCL code
     ($\sim 217$ lines vs.~$\sim 3{,}800$ lines for the inference FB).
-   Execution time $\approx 66$~$\mu$s ($< 0.3\%$ of 22.7~ms WCET),
+   Execution time $\approx 66$~$\mu$s ($< 1.8\%$ of 3.86~ms WCET),
    dominated by $d_{\text{in}} + d_{\text{out}}$ REAL comparisons per
    scan cycle.
 \end{enumerate}
@@ -4139,22 +4139,27 @@ misclassifications the test set missed.}
 \textbf{$N$} & \textbf{Test Acc.} & \textbf{DA $\Delta$} &
 \textbf{Safety} & \textbf{Blind Spot?} & \textbf{Adv.\ Flips} \\
 \midrule
-4  & 99.93\% & 2.93  & 0.23$\times$ & \textbf{YES} & 225/20,000 \\
-5  & 99.93\% & 1.65  & 0.41$\times$ & \textbf{YES} & 122/20,000 \\
-6  & 99.93\% & 1.05  & 0.64$\times$ & \textbf{YES} & 80/20,000 \\
-7  & 99.93\% & 0.73  & 0.92$\times$ & \textbf{YES} & 75/20,000 \\
-8  & 99.93\% & 0.54  & 1.25$\times$ & No & 64/20,000 \\
-10 & 99.93\% & 0.33  & 2.07$\times$ & No & 54/20,000 \\
-12 & 99.93\% & 0.22  & 3.10$\times$ & No & 43/20,000 \\
-15 & 99.93\% & 0.13  & 5.02$\times$ & No & 37/20,000 \\
+4  & 99.93\% & 14.36 & 0.05$\times$ & \textbf{YES} & 225/20,000 \\
+5  & 99.93\% & 8.08  & 0.08$\times$ & \textbf{YES} & 122/20,000 \\
+6  & 99.93\% & 5.17  & 0.13$\times$ & \textbf{YES} & 80/20,000 \\
+7  & 99.93\% & 3.59  & 0.19$\times$ & \textbf{YES} & 75/20,000 \\
+8  & 99.93\% & 2.64  & 0.26$\times$ & \textbf{YES} & 64/20,000 \\
+10 & 99.93\% & 1.60  & 0.42$\times$ & \textbf{YES} & 54/20,000 \\
+12 & 99.93\% & 1.07  & 0.63$\times$ & \textbf{YES} & 43/20,000 \\
+15 & 99.93\% & 0.66  & 1.02$\times$ & No$^{\dag}$ & 37/20,000 \\
 \bottomrule
 \end{tabular}
 \vspace{2pt}
-{\scriptsize Safety factor = $(m/2)/\Delta_{\text{DA}}$ with $m=1.35$ (E6).
+{\scriptsize Safety factor = $(m/2)/\Delta_{\text{DA}}$ with $m=1.35$ (E6)
+and the DA amplification recomputed from the released checkpoint
+($L_{\text{net}}^{\text{DA}} = 162.2$, 2026-08-03;
+\texttt{verify\_da\_bounds\_recomputed.py}).
 Safety $<1$ means the certified error exceeds half the inter-class margin---the
 Lemma~\ref{lem:per_op}(vi) threshold for guaranteed classification preservation.
-Blind spot: $N \leq 7$ ($N \leq 5$ confirmed by adversarial search).
-All adversarial flips occur strictly inside $[-3,3]^{28}$.}
+Blind spot: the certified safety factor remains below $1$ through
+$N = 12$; $^{\dag}$at $N = 15$ (the deployment default) it closes only
+marginally ($1.02\times$). The adversarial-flip counts (measured, not
+certified) are unchanged; all flips occur strictly inside $[-3,3]^{28}$.}
 \end{table}
 
 \vspace{2pt}
@@ -4163,13 +4168,17 @@ The blind spot exists because the test set of 2,743 samples is too sparse to
 cover the input region where LUT approximation error is maximal---specifically,
 the small fraction of $[-3,3]^{28}$ where multiple input features simultaneously
 activate B-spline functions near their curvature maxima ($|\phi''(x)| \approx
-M_2^{\max}$). At $N=4$, the per-activation LUT error bound is 0.15 (using the
-analytical $M_2 \leq 0.3$); propagating this through the KAN's weight matrices
-yields a worst-case logit perturbation of 2.93, which exceeds the certification
-threshold of 0.675. An adversarial search confirms this is not merely a loose
-bound: 225 of 20,000 random in-domain inputs cause actual misclassification.
-At $N=15$ (the S7-1200 deployment default), the safety factor reaches
-5.02$\times$, and the blind spot closes.
+M_2^{\max}$). At $N=4$, the per-activation LUT error bound
+($M_2^{\text{char}}$-calibrated) propagates through the recomputed KAN
+amplification to a worst-case logit perturbation of 14.4, far above the
+certification threshold of 0.675. An adversarial search confirms this is not
+merely a loose bound: 225 of 20,000 random in-domain inputs cause actual
+misclassification. Critically, the certified safety factor remains below $1$
+through $N = 12$ and closes only marginally at $N=15$ ($1.02\times$): with the
+released checkpoint, the certification margin of the deployment default is
+thin---empirical accuracy alone (99.93\%) is a severe under-estimator of the
+certified blind spot, and contractive training (spectral normalization) is the
+recipe that restores a comfortable margin.
 
 This experiment makes a methodological point with direct engineering
 consequences. An engineer who evaluates only test-set accuracy would conclude

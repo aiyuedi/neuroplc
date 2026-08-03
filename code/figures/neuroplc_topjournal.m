@@ -42,18 +42,18 @@ function f03(S,dir),N=15;h=6/(N-1);n=180;tb=zeros(n,1);ae=zeros(n,1);for i=1:n,a
 fig=figure('Units','inches','Position',[1 1 S.W1*1.05 S.H*.88]);ax=axes;hold on;scatter(tb,ae,S.ms,S.bl,'filled','MarkerFaceAlpha',.30,'MarkerEdgeColor','none');plot([0 mx],[0 mx],'--','Color',S.or,'LineWidth',1.4);scatter(tb(ix),ae(ix),48,S.re,'o','LineWidth',1.2);rr(ax,tb(ix)+mx*.12,ae(ix),sprintf('dev %.1e',abs(ae(ix)-tb(ix))),S,'Color',S.re);xlim([0 mx]);ylim([0 mx]);axis square;xlabel('Bound M_2h^2/8','FontSize',S.a);ylabel('Measured max LUT error','FontSize',S.a);pp(ax,S);legend({'Quadratics','y=x','Outlier'},'Location','nw','Box','off','FontSize',S.l);e(fig,'fig03_da_tightness',dir);end
 
 % ---- f04 SHARP BOUND ----
-% FIXME: 0.182 stale --- trained KAN non-contractive (gamma=[15.4,5.3], E68);
-% figure needs regeneration with honest values before submission
-function f04(S,dir),d=[4 8 16 32 64 128 256];g=.182;m=sqrt(d);k=g*ones(size(d));r=m./k;
+% Trained KAN is NON-contractive (gamma=[15.4,5.3], E68); layer-1 marker
+% gamma=5.3 shown for reference only.
+function f04(S,dir),d=[4 8 16 32 64 128 256];g=5.3;m=sqrt(d);k=g*ones(size(d));r=m./k;
 fig=figure('Units','inches','Position',[1 1 S.W2 S.H]);tl=tiledlayout(1,2,'Padding','compact');
-ax=nexttile;loglog(d,m,'s-','Color',S.or,'LineWidth',S.lw,'MarkerSize',6,'MarkerFaceColor',S.or);hold on;loglog(d,k,'o--','Color',S.bl,'LineWidth',S.lw,'MarkerSize',6,'MarkerFaceColor',S.bl);set(ax,'XTick',d,'XTickLabel',string(d));pp(ax,S);xlabel('Width d','FontSize',S.a);ylabel('Amplification (log)','FontSize',S.a);qq(ax,'a','MLP vs KAN amplification',S);legend('MLP sqrt(d)','KAN gamma=0.182','Location','nw','Box','off','FontSize',S.l);
-ax=nexttile;bar(r,'FaceColor',S.bl,'EdgeColor','none','BarWidth',.55);set(ax,'YScale','log','XTickLabel',string(d));pp(ax,S);xlabel('Width d','FontSize',S.a);ylabel('MLP/KAN gap (log)','FontSize',S.a);qq(ax,'b','Certification gap',S);for i=1:numel(r),rr(ax,i,r(i)*1.10,sprintf('%.0fx',r(i)),S);end;e(fig,'fig04_sharp_bound',dir);end
+ax=nexttile;loglog(d,m,'s-','Color',S.or,'LineWidth',S.lw,'MarkerSize',6,'MarkerFaceColor',S.or);hold on;loglog(d,k,'o--','Color',S.bl,'LineWidth',S.lw,'MarkerSize',6,'MarkerFaceColor',S.bl);set(ax,'XTick',d,'XTickLabel',string(d));pp(ax,S);xlabel('Width d','FontSize',S.a);ylabel('Amplification (log)','FontSize',S.a);qq(ax,'a','MLP vs KAN amplification',S);legend('MLP sqrt(d)','KAN gamma=5.3 (E68)','Location','nw','Box','off','FontSize',S.l);
+ax=nexttile;bar(r,'FaceColor',S.bl,'EdgeColor','none','BarWidth',.55);set(ax,'YScale','log','XTickLabel',string(d));pp(ax,S);xlabel('Width d','FontSize',S.a);ylabel('MLP/KAN gap (log)','FontSize',S.a);qq(ax,'b','Certification gap',S);for i=1:numel(r),rr(ax,i,r(i)*1.10,sprintf('%.1fx',r(i)),S);end;e(fig,'fig04_sharp_bound',dir);end
 
 % ---- f05 DA VS IA ----
-function f05(S,dir),N=[8 10 12 15 18 20];DA=[.419 .305 .212 .079 .055 .044];IA=[.922 .671 .466 .172 .121 .097];ratio=IA./DA;
+function f05(S,dir),N=[8 10 12 15 18 20];DA=[2.637 1.595 1.068 0.659 0.447 0.358];IA=[5.519 3.339 2.235 1.380 0.936 0.749];ratio=IA./DA;
 fig=figure('Units','inches','Position',[1 1 S.W2 S.H]);tl=tiledlayout(1,2,'Padding','compact','TileSpacing','compact');
-ax=nexttile;h1=semilogy(N,DA,'o-','Color',S.bl,'LineWidth',S.lw,'MarkerSize',6,'MarkerFaceColor',S.bl);hold on;h2=semilogy(N,IA,'s--','Color',S.or,'LineWidth',S.lw,'MarkerSize',6,'MarkerFaceColor',S.or);set(ax,'XTick',N,'YTick',[1e-1 2e-1 5e-1 1],'YLim',[0.03 1.2]);pp(ax,S);xlabel('LUT points N','FontSize',S.a);ylabel('Error bound','FontSize',S.a);qq(ax,'a','DA vs IA bound',S);legend([h1 h2],'DA','IA','Location','ne','Box','off','FontSize',S.l);
-ax=nexttile;b=bar([DA;IA]','grouped','BarWidth',.6);b(1).FaceColor=S.bl;b(2).FaceColor=S.or;b(1).EdgeColor='none';b(2).EdgeColor='none';set(ax,'XTickLabel',string(N),'YLim',[0 1.05]);pp(ax,S);xlabel('LUT points N','FontSize',S.a);ylabel('Error bound','FontSize',S.a);qq(ax,'b',sprintf('%.1fx avg tightening',mean(ratio)),S);legend('DA','IA','Box','off','FontSize',S.l);e(fig,'fig05_da_vs_ia',dir);end
+ax=nexttile;h1=semilogy(N,DA,'o-','Color',S.bl,'LineWidth',S.lw,'MarkerSize',6,'MarkerFaceColor',S.bl);hold on;h2=semilogy(N,IA,'s--','Color',S.or,'LineWidth',S.lw,'MarkerSize',6,'MarkerFaceColor',S.or);set(ax,'XTick',N,'YLim',[0.2 10]);pp(ax,S);xlabel('LUT points N','FontSize',S.a);ylabel('Error bound','FontSize',S.a);qq(ax,'a','DA vs IA bound',S);legend([h1 h2],'DA','IA','Location','ne','Box','off','FontSize',S.l);
+ax=nexttile;b=bar([DA;IA]','grouped','BarWidth',.6);b(1).FaceColor=S.bl;b(2).FaceColor=S.or;b(1).EdgeColor='none';b(2).EdgeColor='none';set(ax,'XTickLabel',string(N),'YLim',[0 6]);pp(ax,S);xlabel('LUT points N','FontSize',S.a);ylabel('Error bound','FontSize',S.a);qq(ax,'b',sprintf('%.1fx avg tightening',mean(ratio)),S);legend('DA','IA','Box','off','FontSize',S.l);e(fig,'fig05_da_vs_ia',dir);end
 
 % ---- f06 ADAPTIVE LUT ----
 function f06(S,dir),N=10:5:50;U=[.00982 .00406 .00220 .00145 .00102 .00076 .00059 .00047 .00038];A=[.00294 .00115 .00061 .00040 .00028 .00021 .00016 .00013 .00010];
@@ -75,7 +75,7 @@ ax=nexttile;b=bar([E;G]','grouped','BarWidth',.6);b(1).FaceColor=S.bl;b(2).FaceC
 ax=nexttile;plot(N,T,'ko-','LineWidth',1.6,'MarkerSize',7,'MarkerFaceColor',S.bl);hold on;plot(N,C1,'s--','Color',S.gr,'LineWidth',1.3,'MarkerSize',6);plot(N,C2,'^:','Color',S.re,'LineWidth',1.3,'MarkerSize',6);ylabel('Factor / %','FontSize',S.a);pp(ax,S);set(ax,'XTickLabel',string(N));xlabel('N','FontSize',S.a);qq(ax,'c','Tightening + coverage',S);legend('Tighten','<0.5x','<0.2x','Box','off','Location','se','FontSize',S.l);e(fig,'fig08_segment_bounds',dir);end
 
 % ---- f09 WCET ----
-function f09(S,dir),c={'LUT L0','LUT L1','MatMul','Softmax','OH'};us=[16442 2349 3702 109 72];tot=sum(us)/1000;cls=[S.bl;S.gr;S.or;S.re;S.ga];pct=us/sum(us)*100;
+function f09(S,dir),c={'LUT L0','LUT L1','MatMul','Softmax','OH'};us=[2778 397 604 16 66];tot=sum(us)/1000;cls=[S.bl;S.gr;S.or;S.re;S.ga];pct=us/sum(us)*100;
 fig=figure('Units','inches','Position',[1 1 S.W2 S.H]);tl=tiledlayout(1,2,'Padding','compact');
 ax=nexttile;hp=pie(us);for i=1:5,hp(2*i-1).FaceColor=cls(i,:);hp(2*i-1).EdgeColor='w';hp(2*i).String=sprintf('%s %.1f%%',c{i},pct(i));hp(2*i).FontSize=7;hp(2*i).FontWeight='bold';end;qq(ax,'a','WCET composition',S);
 ax=nexttile;hold on;b=bar(1:5,us/1000,'FaceColor','flat','EdgeColor','none','BarWidth',.55);b.CData=cls;yline(tot,'--','Color',S.re,'LineWidth',1.2);rr(ax,4.6,tot,sprintf('Total %.2f ms',tot),S,'Color',S.re);for i=1:5,rr(ax,i,us(i)/1000+max(us/1000)*.035,sprintf('%.2f',us(i)/1000),S);end;set(ax,'XTick',1:5,'XTickLabel',c,'XTickLabelRotation',18);ylabel('Time (ms)','FontSize',S.a);qq(ax,'b',sprintf('WCET=%.2fms',tot),S);pp(ax,S);e(fig,'fig09_wcet_breakdown',dir);end
@@ -113,8 +113,8 @@ fig=figure('Units','inches','Position',[1 1 S.W2 S.H]);tl=tiledlayout(1,3,'Paddi
 for p=1:3,ax=nexttile;b=bar(D{p},'FaceColor','flat','EdgeColor','none','BarWidth',.55);hold on;b.CData=C;set(ax,'XTick',1:5,'XTickLabel',a,'XTickLabelRotation',35,'FontSize',7,'YLim',[0 112]);pp(ax,S);ylabel(tlbl{p},'FontSize',S.a);qq(ax,char('a'+p-1),tlbl{p},S);for i=1:5,if D{p}(i)==0,rr(ax,i,3,'0',S,'Color',S.re);else,rr(ax,i,D{p}(i)+2,sprintf('%.1f',D{p}(i)),S);end,end,end;e(fig,'fig14_cross_domain',dir);end
 
 % ---- f15 MONITOR ----
-function f15(S,dir),nm={'Infer','Monitor','Total'};tm=[22673 66 22739];C=[S.bl;S.gr;S.or];
-fig=figure('Units','inches','Position',[1 1 S.W1*1.05 S.H*.78]);ax=axes;hold on;b=bar(1:3,tm/1000,'FaceColor','flat','EdgeColor','none','BarWidth',.5);b.CData=C;for i=1:3,rr(ax,i,tm(i)/1000+max(tm/1000)*.035,sprintf('%.2fms (%.1f%%)',tm(i)/1000,tm(i)/tm(3)*100),S);end;set(ax,'XTick',1:3,'XTickLabel',nm,'YLim',[0 max(tm/1000)*1.18]);ylabel('WCET (ms)','FontSize',S.a);title('Safety Monitor: +66 us (+0.3%)','FontSize',10,'FontWeight','bold');pp(ax,S);e(fig,'fig15_safety_monitor',dir);end
+function f15(S,dir),nm={'Infer','Monitor','Total'};tm=[3861 66 3927];C=[S.bl;S.gr;S.or];
+fig=figure('Units','inches','Position',[1 1 S.W1*1.05 S.H*.78]);ax=axes;hold on;b=bar(1:3,tm/1000,'FaceColor','flat','EdgeColor','none','BarWidth',.5);b.CData=C;for i=1:3,rr(ax,i,tm(i)/1000+max(tm/1000)*.035,sprintf('%.2fms (%.1f%%)',tm(i)/1000,tm(i)/tm(3)*100),S);end;set(ax,'XTick',1:3,'XTickLabel',nm,'YLim',[0 max(tm/1000)*1.18]);ylabel('WCET (ms)','FontSize',S.a);title('Safety Monitor: +66 us (+1.7%)','FontSize',10,'FontWeight','bold');pp(ax,S);e(fig,'fig15_safety_monitor',dir);end
 
 % ---- f16 SCL CODE ----
 function f16(S,dir),fig=figure('Units','inches','Position',[1 1 S.W2 2.8]);ax=axes;axis(ax,[0 10 0 10]);axis off;hold on;

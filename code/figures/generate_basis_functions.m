@@ -128,7 +128,7 @@ fprintf('[DONE] fig_c2bv_basis_functions.pdf generated\n');
 fig2 = figure('Position', [100, 100, 700, 450]);
 
 categories = {'LUT L0\n(448 edges)', 'LUT L1\n(64 edges)', 'MatMul\nL0+L1', 'Softmax', 'Overhead'};
-times_us = [16442, 2349, 3702, 109, 72];  % From Theorem 10 analysis
+times_us = [2778, 397, 604, 16, 66];  % From wcet_analysis.json (2026-08-03)
 total = sum(times_us);
 
 b = bar(1:5, times_us);

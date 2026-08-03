@@ -476,7 +476,7 @@ follows from the strongest condition (T6).
 \subsection{Compile-Aware Minimax Deployment Rate}
 \label{sec:compile-aware-minimax}
 
-\setcounter{theorem}{14}
+\setcounter{theorem}{13}
 \begin{theorem}[LUT Compilation Does Not Cost the Minimax Rate]
 \label{thm:compile_aware_minimax}
 Let $F_k = \{f : \|f^{(k)}\|_\infty \leq M_k\}$ be a $k$-smooth target
@@ -489,20 +489,28 @@ Then, with $e^{*}(N)$ the T-I recovery constant
 (Theorem~\ref{thm:optimal_lut}):
 \begin{equation}
 R_{\text{dep}}(n,N) \;\asymp\;
-\max\Bigl\{\, n^{-\frac{2k}{2k+1}},\; e^{*}(N)
-\asymp \frac{\bigl(\int \sqrt{M_2}\bigr)^2}{N^{2k}} \Bigr\}.
+\max\Bigl\{\, n^{-\frac{2k}{2k+1}},\; e^{*}(N) \asymp N^{-2k} \Bigr\},
 \label{eq:minimax_deploy}
 \end{equation}
+where $e^{*}(N)$ is the squared-$L^2$ discretization bias of an
+$N$-node order-$k$ LUT (rate $N^{-2k}$; the $L^\infty$ constant is the
+T-I recovery constant of Theorem~\ref{thm:optimal_lut}, and the
+$L^2$-to-$L^\infty$ conversion absorbs a domain factor).
 Consequently:
 \emph{(i) Sample--budget scissors:} for $N \leq N^{*}(n) \asymp
-n^{1/(2k)}$ the risk is $\asymp N^{-2k}$ and \emph{independent of $n$}---
-budget-starved samples are wasted. \emph{(ii) Discrete compilation is
-free:} for $N \geq N^{*}(n)$ the risk is $\asymp
+n^{1/(2k+1)}$ the risk is $\asymp N^{-2k}$ and \emph{independent of
+$n$}---budget-starved samples are wasted. \emph{(ii) Discrete
+compilation is free:} for $N \geq N^{*}(n)$ the risk is $\asymp
 n^{-2k/(2k+1)}$---the classical minimax rate---so LUT compilation with
 adequate budget does not degrade statistical optimality.
-\emph{(iii) Optimal budget curve:} $N^{*}(n) \asymp n^{1/(2k)}$
-balances the estimation and discretization terms (resolution-matching
-law, Corollary~\ref{cor:resolution_matching}).
+\emph{(iii) Optimal budget curve:} $N^{*}(n) \asymp n^{1/(2k+1)}$
+balances the squared-$L^2$ estimation and discretization terms. (The
+heuristic curve $N^{*} \asymp n^{1/(2k)}$ of
+Corollary~\ref{cor:resolution_matching} balances the \emph{Rademacher}
+gap term $n^{-1/2}$ against $N^{-k}$; the minimax curve here uses the
+faster classical estimation rate $n^{-2k/(2k+1)}$, so it is a
+different---and tighter---balance. Both are stated; the empirical
+support E-T2 tracks the minimax curve.)
 \end{theorem}
 
 \vspace{2pt}
@@ -521,23 +529,24 @@ $\square$
 
 \vspace{2pt}
 \noindent\textbf{Relation to classical bandwidth selection.}
-The curve $N^{*}(n) \asymp n^{1/(2k)}$ coincides with the classical
-optimal-bandwidth law of nonparametric estimation
-($h^{*} \asymp n^{-1/(2k)}$)~\cite{tsybakov2009introduction,gkk2002};
-the contribution here is not the curve but its \emph{two consequences
-under compiler constraints}: the scissors regime (a budget dimension
-classical theory does not have) and the free-discretization statement
-(quantized-storage kernels do not lose the minimax rate). Both are
-verified numerically (E-T2, 2026-08-03: the $N{=}4$ row is flat in $n$
-to within $0.3\%$; the $N{=}256$ row decays $269\times$ over
-$n \in [200, 51200]$, matching $n^{-4/5}$;
+The curve $N^{*}(n) \asymp n^{1/(2k+1)}$ is exactly the classical
+optimal-bandwidth law of nonparametric estimation for squared-$L^2$
+risk ($h^{*} \asymp n^{-1/(2k+1)}$)~\cite{tsybakov2009introduction,
+gkk2002}; the contribution here is not the curve but its \emph{two
+consequences under compiler constraints}: the scissors regime (a
+budget dimension classical theory does not have) and the
+free-discretization statement (quantized-storage kernels do not lose
+the minimax rate). Both are verified numerically (E-T2, 2026-08-03:
+the $N{=}4$ row is flat in $n$ to within $0.3\%$; the $N{=}256$ row
+decays $269\times$ over $n \in [200, 51200]$, consistent with the
+$n^{-4/5}$ rate up to the finite-range factor;
 \texttt{verify\_compile\_aware\_minimax.py}).
 
 \vspace{4pt}
 \subsection{Smoothness-Adaptive Compile-Aware Rates}
 \label{sec:besov-pac}
 
-\setcounter{theorem}{15}
+\setcounter{theorem}{14}
 \begin{theorem}[Smoothness-Adaptive Deployment Rate]
 \label{thm:besov_pac}
 Let $f$ belong to a smooth class of index $s$ (e.g., Fourier coefficients
@@ -556,13 +565,13 @@ smoothness, not the interpolation order), and for $s > k$ it saturates
 at the order-$k$ rate $N^{-2k}$ of Theorem~\ref{thm:sharp-lut}.
 Consequences:
 \emph{(i) Smooth data compiles cheaply:} the optimal budget curve
-$N^{*}(n) \asymp n^{1/(2(2s+1))}$ has an exponent \emph{decreasing} in
-$s$---smoother targets need proportionally slower budget growth.
-\emph{(ii) Dimension-free bias:} $e_s(N)$ is independent of the input
-dimension $d$ (each activation is a single-variable LUT), so the
-compilation term does not suffer the curse of dimensionality.
-\emph{(iii)} The scissors and free-discretization regimes of
-Theorem~\ref{thm:compile_aware_minimax} hold for every $s$.
+$N^{*}(n) \asymp n^{1/(2s+1)}$ ($s \leq k$) has an exponent
+\emph{decreasing} in $s$---smoother targets need proportionally slower
+budget growth. \emph{(ii) Dimension-free bias:} $e_s(N)$ is
+independent of the input dimension $d$ (each activation is a
+single-variable LUT), so the compilation term does not suffer the curse
+of dimensionality. \emph{(iii)} The scissors and free-discretization
+regimes of Theorem~\ref{thm:compile_aware_minimax} hold for every $s$.
 \end{theorem}
 
 \vspace{2pt}
@@ -570,12 +579,12 @@ Theorem~\ref{thm:compile_aware_minimax} hold for every $s$.
 The estimation term is the classical smooth-class rate
 (Theorem~2 of \cite{kratsios2025reskan} gives the KAN-side optimal
 approximation and sample-complexity bounds for Besov classes). For the
-bias: with coefficients $a_k \sim k^{-(s+1/2)}$, the LUT error is
-dominated by the highest surviving frequency $k \sim N$, whose
-$M_2$ is $k^2 |a_k|^2$; summing the tail gives
-$e_s(N) \sim \sum_{k > N} k^2 k^{-2s-1} \sim N^{2-2s}$ for $s<1$ and
-$N^{-2s}$-type decay for $s \geq 1$ (cut off by the interpolation order
-$k$ when $s \geq k$). Balancing the two terms yields the budget curve.
+bias: by Parseval, the squared-$L^2$ error of any order-$k$ LUT is at
+least the tail energy $\sum_{k > N} |a_k|^2 \sim N^{-2s}$ (the
+truncation of the smooth class at frequency $N$), and this dominates
+for $s \leq k$; for $s > k$ the interpolation order caps the rate at
+$N^{-2k}$ (the sharp constants of Theorem~\ref{thm:sharp-lut}).
+Balancing $n^{-2s/(2s+1)} = N^{-2s}$ gives $N^{*} = n^{1/(2s+1)}$.
 $\square$
 
 \vspace{2pt}

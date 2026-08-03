@@ -408,9 +408,9 @@ close(fig);
 fprintf('[ 4/15] Sharp Lower Bound\n');
 
 d_vals = [4 8 16 32 64 128 256];
-% FIXME: 0.182 stale --- trained KAN non-contractive (gamma=[15.4,5.3], E68);
-% figure needs regeneration with honest values before submission
-gamma_kan = 0.182;
+% Trained KAN is NON-contractive (gamma=[15.4,5.3], E68); layer-1 marker
+% gamma=5.3 shown for reference only.
+gamma_kan = 5.3;
 mlp_amplification = sqrt(d_vals);
 kan_amplification = gamma_kan * ones(size(d_vals));
 gap_ratio = mlp_amplification ./ kan_amplification;
@@ -426,7 +426,7 @@ loglog(d_vals, mlp_amplification, 's-', 'Color', C.orange, 'LineWidth', LW_MAIN,
        'DisplayName', 'MLP: $\|W\|_{1,\infty} = \sqrt{d}$');
 loglog(d_vals, kan_amplification, 'o--', 'Color', C.blue, 'LineWidth', LW_MAIN, ...
        'MarkerSize', MS_LINE, 'MarkerFaceColor', C.blue, ...
-       'DisplayName', sprintf('KAN: $\\gamma = %.3f$', gamma_kan));
+       'DisplayName', sprintf('KAN: $\\gamma = %.1f$ (non-contractive, E68)', gamma_kan));
 set(ax, 'XTick', d_vals, 'XTickLabel', string(d_vals), 'FontSize', FS_TICK);
 xlabel('Hidden Dimension $d$', 'Interpreter', 'latex', 'FontSize', FS_AXIS);
 ylabel('Per-Layer Amplification Factor', 'FontSize', FS_AXIS);
@@ -444,7 +444,7 @@ for i = 1:7
     b.CData(i,:) = C.blue*(1-grad(i)) + C.orange*grad(i);
 end
 for i = 1:7
-    text(i, gap_ratio(i)*1.08, sprintf('%.0f{\\times}', gap_ratio(i)), ...
+    text(i, gap_ratio(i)*1.08, sprintf('%.1f{\\times}', gap_ratio(i)), ...
         'HorizontalAlign', 'center', 'FontSize', FS_DATA, 'FontWeight', 'bold', ...
         'FontName', 'Helvetica');
 end
@@ -466,8 +466,8 @@ close(fig);
 fprintf('[ 5/15] DA vs IA\n');
 
 N_lut = [8 10 12 15 18 20];
-DA_bounds = [0.419 0.305 0.212 0.079 0.055 0.044];
-IA_bounds = [0.922 0.671 0.466 0.172 0.121 0.097];
+DA_bounds = [2.637 1.595 1.068 0.659 0.447 0.358];
+IA_bounds = [5.519 3.339 2.235 1.380 0.936 0.749];
 lbl_N = {'8','10','12','15','18','20'};
 tighten_pct = round((1 - DA_bounds./IA_bounds) * 100);
 
@@ -726,13 +726,13 @@ close(fig);
 
 %% ═══════════════════════════════════════════════════════════
 %% FIG 9: WCET Breakdown — Pie + Bar
-%% FIXES: External leader for 0.3%, matching colors pie↔bar,
-%%        total 22.67ms dashed line
+%% FIXES: External leader for small slices, matching colors pie↔bar,
+%%        total 3.86ms dashed line
 %% ═══════════════════════════════════════════════════════════
 fprintf('[ 9/15] WCET Breakdown\n');
 
 w_comps = {'LUT L0','LUT L1','MatMul','Softmax','Overhead'};
-w_times = [16442 2349 3702 109 72];
+w_times = [2778 397 604 16 66];
 w_total = sum(w_times);
 w_pcts = w_times / w_total * 100;
 w_colors = {C_wcet.lut_l0, C_wcet.lut_l1, C_wcet.matmul, ...
@@ -1089,7 +1089,7 @@ close(fig);
 fprintf('[15/15] Safety Monitor\n');
 
 mon_names = {'Inference','Safety Monitor','Combined'};
-mon_times = [22673 66 22739];
+mon_times = [3861 66 3927];
 mon_clr = [C.blue; C.green; C.orange];
 
 fig = figure('Units', 'inches', 'Position', [1 1 W_SINGLE*1.1 H_STD*0.85], ...
@@ -1106,9 +1106,9 @@ for i = 1:3
 end
 set(gca, 'XTick', 1:3, 'XTickLabel', mon_names, 'FontSize', FS_TICK+1);
 ylabel('WCET (ms)', 'FontSize', FS_AXIS);
-title('Safety Monitor Overhead: +66 \mus (+0.3%)', ...
+title('Safety Monitor Overhead: +66 \mus (+1.7%)', ...
       'FontSize', FS_TITLE+1, 'FontWeight', 'bold', 'FontName', 'Helvetica');
-ylim([0 25]);
+ylim([0 5]);
 apply_style(gca);
 
 export_figure(fig, 'fig15_safety_monitor', output_dir);
