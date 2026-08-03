@@ -1,0 +1,28 @@
+{
+  "date": "2026-08-03",
+  "theorem": "T-III necessity first lattice",
+  "single_kink_refutation": {
+    "|x|, 4 nodes at +-eps": {
+      "1.0": 1.0,
+      "0.1": 0.1,
+      "0.01": 0.01,
+      "0.001": 0.001
+    },
+    "per-function error arbitrarily small (known kink)": true
+  },
+  "class_width": {
+    "minimax over shifted-kink class, uniform N-point grid": {
+      "8": 0.4285244043789465,
+      "32": 0.09676495797870045,
+      "128": 0.0236132967091254
+    },
+    "slope_approx": 1.05,
+    "C1-class width ~ 1/N": true
+  },
+  "certificate_exclusion": {
+    "sup|f''| of |x| (numeric)": 33333.33333286824,
+    "unbounded (Dirac)": true,
+    "no finite DA certificate": true
+  },
+  "verdict": "PASS"
+}

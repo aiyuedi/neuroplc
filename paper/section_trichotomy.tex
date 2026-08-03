@@ -52,12 +52,14 @@ properties:
 
     \item \textbf{Regime 2 (Lipschitz-only gates, e.g.\ ReLU): P1+P3 hold,
     P2 fails.} The minimax $N$-point approximation error of the $C^1$
-    (Lipschitz) class is $\Theta(1/N)$ (classical width result); the
-    kink cell forces error $\geq c \cdot M_1 \cdot h$, so the rate is at
-    most $h$---first-order. ReLU-MLPs therefore \emph{do} admit closed-form
-    first-order bounds (correcting the overstrong dichotomy), but not
-    second-order ones. Measured: slope $-1.034$ (E66), vs $-2.04$ for
-    $C^2$ activations.
+    (Lipschitz) class is $\Theta(1/N)$ (classical width result, and
+    tight: a tent function with kink at an arbitrary location forces
+    $\geq c \cdot M_1 \cdot (b-a)/N$ on any $N$-point grid, since no
+    grid can cluster nodes at every possible kink location), so the
+    best attainable rate is first-order. ReLU-MLPs therefore \emph{do}
+    admit closed-form first-order bounds (correcting the overstrong
+    dichotomy), but not second-order ones. Measured: slope $-1.034$
+    (E66), vs $-2.04$ for $C^2$ activations.
 
     \item \textbf{Regime 3 (multivariate gates, e.g.\ products,
     softmax, normalization): linear LUT cost fails; tightness NP-hard.}
@@ -84,15 +86,21 @@ properties:
 
     \item \textbf{Necessity (completeness, conditional).} Under
     $\mathrm{P} \neq \mathrm{NP}$ ($\exists\mathbb{R} \neq \mathrm{P}$),
-    any family satisfying (P1)+(P2)+(P3) must lie in Regime~1: (P2)
-    excludes first-order-rate gates---for kinked (ReLU-type) activations
-    the kink cell forces interpolation error $\geq c\,M_1 h$ regardless
-    of $N$, so such classes are not rate-2 recoverable by any
-    design-time-computable affine (piecewise-linear) scheme, and
-    Regime~2 is excluded. Note that the precise rate-2 boundary is
-    bounded second variation (kink-free $C^1$, not necessarily $C^2$):
-    the honest claim is the exclusion of classes that are \emph{not}
-    rate-2 recoverable, with Condition~2 of
+    any family satisfying (P1)+(P2)+(P3) must lie in Regime~1. The
+    exclusion mechanism for kinked (ReLU-type) activations is
+    \emph{certificate existence}, not rate: a kinked gate has
+    $\sup_x |\varphi''(x)| = \infty$ (a Dirac measure in the
+    distributional sense), so no finite DA certificate $(c,R)$ exists
+    in the abstract domain of Theorem~\ref{thm:galois}---the
+    $M_2(\varphi)$ term of the envelope is unbounded---and Regime~2 is
+    excluded \emph{by definition} of design-time-computable affine
+    certificates. (Note that a naive rate argument would fail: with
+    nodes clustered at the kink, the interpolation error of $|x|$ can
+    be made arbitrarily small, so kink classes are rate-2 recoverable
+    in the pointwise sense---what they lack is the certificate.) The
+    precise boundary is bounded second variation (kink-free $C^1$, not
+    necessarily $C^2$): the honest claim is the exclusion of classes
+    without finite certificates, with Condition~2 of
     Theorem~\ref{thm:svnn_conditions} certifying the sufficient $C^2$
     form with design-time-computable $M_k$. (P3) forces
     design-time-computable $M_k$ independent of the reachable set
@@ -110,20 +118,23 @@ properties:
 \vspace{2pt}
 \noindent\textit{Proof sketch.}
 \textbf{(1)} Theorem~\ref{thm:sharp-lut} + linear propagation.
-\textbf{(2)} Lower bound on the $C^1$ width: for any $N$-point piecewise
-scheme, a tent function of slope $M_1$ forces error
-$\geq c M_1 (b-a)/N$ (the kink-cell argument suffices). Empirically
-(E66): slope $-1.034$ for ReLU vs $-2.04$ for tanh on $[-3,3]$, $R^2 >
-0.999$. \textbf{(3)} The product-gate hardness is the self-contained
+\textbf{(2)} Regime-2 exclusion: kinked gates (ReLU, $|x|$, tents) have
+$\sup|\varphi''| = \infty$, so no finite DA certificate exists (see the
+necessity item above); a naive width argument fails because
+kink-clustered non-uniform grids make the interpolation error of $|x|$
+arbitrarily small. Empirically (E66): slope $-1.034$ for ReLU vs
+$-2.04$ for tanh on $[-3,3]$, $R^2 > 0.999$---the rate separation holds
+for uniform grids and reflects the certificate structure. \textbf{(3)} The product-gate hardness is the self-contained
 reduction of Theorem~\ref{thm:necessity}; unbounded-arity gates make
 even the LUT itself exponential ($N^m$). \textbf{(4)} For $e^x$-type
 gates, $M_k = e^b$ where $b = \sup$ of the reachable set---computing $b$
 is the reachability problem; the closed-form surrogate (global box from
 weight norms) has constants exploding in $L$. \textbf{(5)} Combine:
-(P2) $\Rightarrow$ rate-2 recoverability (Regime 2 excluded: the kink
-cell of ReLU-type gates forces first-order error $c M_1 h$; the
-certified sufficient form is $C^2$ with design-time-computable $M_k$,
-though bounded second variation already yields the rate), (P3)
+(P2) $\Rightarrow$ rate-2 recoverability (Regime 2 excluded: the $C^1$
+class has minimax width $\Theta(1/N)$---first-order---and kinked gates
+admit no finite DA certificate; the certified sufficient form is $C^2$
+with design-time-computable $M_k$, though bounded second variation
+already yields the rate), (P3)
 $\Rightarrow$ global computable $M_k$ and univariate (Regimes 3--4
 excluded), (P1) $\Rightarrow$ linear-cost LUT (Regime 3's $N^m$
 excluded). Hence Regime 1. $\square$
@@ -150,3 +161,60 @@ Rate trichotomy measured: $\{-2.04, -2.06, -1.77\}$ for tanh/sin/
 B-spline (Regime 1), $-1.03$ for ReLU (Regime 2); tensor-LUT storage
 $N^m$ for arity $m$ (Regime 3); tanh constant ratio $0.974 \times
 M_2 h^2/8$ (sharpness of the Regime-1 constant).
+
+\vspace{4pt}
+\subsection{Necessity, First Lattice}
+\label{sec:necessity-first}
+
+\setcounter{theorem}{16}
+\begin{theorem}[Necessity in the Affine-Certificate Class]
+\label{thm:necessity_first}
+Let $\mathcal{C}$ be the class of design-time-computable affine
+certificates: pairs $(c, R)$ in the DA abstract domain of
+Theorem~\ref{thm:galois}, where $R$ is computed from a finite
+$M_2(\varphi) < \infty$ at compile time. Let $\mathcal{A}$ be an
+architecture class admitting $(P1)$ polynomial-time
+$\varepsilon$-verification and $(P2)$ minimax-rate LUT recovery.
+Then:
+\emph{(i) gates are essentially $C^2$:} every gate of $\mathcal{A}$
+has $\sup|\varphi''| < \infty$ (a kinked gate---ReLU, $|x|$, tents---
+has an unbounded distributional second derivative and admits \emph{no}
+finite certificate in $\mathcal{C}$, by definition of the envelope);
+\emph{(ii) gates are univariate and uncoupled:} a product-coupled gate
+(single-node bilinear term) makes $\varepsilon$-Verify NP-hard on
+$\mathcal{A}$ (the self-contained 3-SAT reduction of
+Theorem~\ref{thm:necessity} uses only product and affine primitives, so
+any class containing them inherits hardness);
+\emph{(iii) sharp rate forces optimal allocation:} any certificate
+achieving the minimax rate must implement the T-I optimal allocation
+(Theorem~\ref{thm:optimal_lut}), since the deviation gap of any other
+allocation is explicit and positive.
+Hence, in $\mathcal{C}$, $(P1)+(P2)$ imply SVNN Conditions~1--2---the
+first lattice of the trichotomy necessity---while Condition~3
+(contractivity) is \emph{not} necessary (Theorem~\ref{thm:compile_aware_minimax}
+holds for $\gamma \geq 1$).
+\end{theorem}
+
+\vspace{2pt}
+\noindent\textit{Proof sketch.}
+(i)~By the envelope definition (Theorem~\ref{thm:galois}), a finite
+certificate requires finite $M_2$; kinked gates have $M_2 = \infty$
+(Dirac second derivative). (ii)~The reduction of
+Theorem~\ref{thm:necessity} constructs $F(x) = \sum_j \prod_{i \in
+C_j}(1 - \ell_{ij}(x))$ from affine literals and product gates only;
+any architecture class able to express it inherits
+$\varepsilon = 0$-hardness, and gap-preserving variants inherit
+hardness for every fixed $\varepsilon_0$ (ETH). (iii)~T-I gives
+$e^{*}(N)$ as the unique minimizer over allocations; any other
+allocation has error strictly larger (positive gap in
+Theorem~\ref{thm:optimal_lut}). $\square$
+
+\vspace{2pt}
+\noindent\textbf{Honest scope.} This is the first lattice of the
+necessity direction---it formalizes the ``design-time-computable''
+notion as the affine-certificate class $\mathcal{C}$ and proves the
+three exclusions inside it. The residual gap to full necessity is
+making $\mathcal{C}$ itself a formal complexity class (e.g., allowing
+more expressive certificate schemes), which we leave as an open
+problem---consistent with the conjecture status stated in
+Section~\ref{sec:trichotomy} for the general case.
