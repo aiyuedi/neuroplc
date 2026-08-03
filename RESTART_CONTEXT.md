@@ -13,7 +13,7 @@
 
 **一句话**：第一个证明"哪些神经网络架构天生可认证、以什么锐常数、什么复杂度、什么泛化保证"的类型理论框架。
 
-**当前状态**：**81页，0 errors, 0 warnings, 0 undefined refs，TNNLS定位重组完成**
+**当前状态**：**83页，0 errors, 0 warnings, 0 undefined refs，P0 硬修完成（2026-08-03 深度审稿后 10 commits）**
 
 ---
 
@@ -47,7 +47,21 @@
 
 ---
 
-## 3. 关键文件索引
+## 2.5 2026-08-03 P0 硬修（7-Agent 深度审稿 → 10 commits，已双推）
+
+**背景**：新窗口按本文件接手后，先跑 7-Agent 深度审稿（`PRE_SUBMISSION_REVIEW_2026-08-03.md`），再按 `FINAL_PLAN.md` 执行 P0。
+
+**核心发现链**（审稿没挖到的深层问题）：
+1. **E67 不可复现** → 三层修复：broadcast bug + 真实测试特征 + **模拟器语义 bug**（np.interp 钳位 vs SCL 外推）→ 3357 样本 100% 一致 maxAE 0.47
+2. **γ=0.182 是陈旧手写断言**（无代码支撑，因子全无法重现）→ 实测 L_B=2.21/‖W_eff‖=12.36/6.52，γ=[15.4,5.3] 正确
+3. **界值全部重算**（`code/theory/verify_da_bounds_recomputed.py`）：Δ_IA 0.172→**1.38**（证书失效）、Δ_DA 0.079→**0.66**（8.5×→**1.0×** 边缘）、M₂^max 版 5.9 → "契约性训练是部署必需"有了数据支撑
+4. **WCET 22.67ms 用旧时序** → 重跑 3.86ms（三层聚类 2.86/3.2/3.86，故事更强）
+
+**其他**：Galois 连接修复（α 加一阶项+Coq 同步）、Lemma 1.6→\ref、SiLU″ 修正（sup=0.5）、0.182 全清除、43 处数字同步（MLP 38×→4.6×）、necessity 全篇 conjecture 标注、WCET 时序统一、MNIST 列补入（E42 98.59%）、Tankman 删除、fixed-point 措辞等。
+
+**待重生成图**（FIXME 已标）：fig02/fig04/fig05/fig09 + fig1_overview（数值已变，图内数据旧）。
+
+
 
 | 文件 | 用途 |
 |------|------|
@@ -84,10 +98,11 @@ cd paper && xelatex main && bibtex main && xelatex main && xelatex main  # 编�
 ## 4. 剩余待办（下一步优先）
 
 ### 投稿前（高优先）
-1. **REVIEWER-FAQ更新**：✅ 已完成（2026-08-03 v2：18问，Q13–Q18 覆盖锐常数/三分法/ε-分离/编译感知PAC/Tier 4/热切换+IEC后端；另修复 Lemma 编号链重复——原两个 Lemma 3，现唯一 1–7；修复 tab:summary 超高 warning，82→81页）
-2. **`review-paper`深度审稿**：最后一道保险（6-Agent），验证0 CRITICAL
-3. **E63-E68实验脚本归档确认**：确保每个实验编号有对应脚本+JSON（E63=verify_sharp_constants, E64=verify_lemma3_bennett, E65=verify_thm5_eps_separation, E66=verify_trichotomy_thm10p, E67=differential_test, E68=e59_thm6p_compile_aware）
-4. **投稿材料**：cover letter、author bio、图清单（TNNLS要求）
+1. **REVIEWER-FAQ更新**：✅ v2 完成（18问）+ 2026-08-03 数字同步
+2. **`review-paper`深度审稿**：✅ 已跑（7-Agent，PRE_SUBMISSION_REVIEW_2026-08-03.md）；P0 修复后需**复跑一轮**验证 0 CRITICAL
+3. **E63-E68实验脚本归档确认**：✅ E67 已修复+JSON 落盘；E63-E66/E68 全 PASS
+4. **P0 剩余**：C11（加宽 LUT 实验）、C12（编译器边界声明）、M2（文献补引：MRW 1976/Tsybakov/Nye 2025/Kratsios 2025/CompCert/Giacobbe）、M26（iFA 跨厂商实验）、M6（硬编码→\ref）、M8-M11/M23-M25、图重生成（fig02/04/05/09/fig1_overview）
+5. **投稿材料**：cover letter、author bio、图清单（TNNLS要求）
 
 ### 理论深化（中优先）
 5. **Thm 10p necessity 从 conjecture 升级为正式证明**（三分法的necessity方向——现在是强证据）

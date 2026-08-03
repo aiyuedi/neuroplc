@@ -9,7 +9,7 @@
 |---|----|------|------|------|
 | C1 | Theorem B Galois 连接不健全（f(x)=x 反例；Coq lemma 不可证） | A3#3, A4#1 | ✅ | 2026-08-03：α 加一阶项、γ 改右伴随加权包络、α∘γ=id 降级为 tightness、Coq 同步；编译 0w |
 | C2 | Lemma 6/Thm 1 界 vs 实测 14.17/≈17；Box-Continuation 未声明 | A3#1, A2#1, A4#2 | 🔄 | **界值重算完成（verify_da_bounds_recomputed.py）：Δ_IA=1.38（不满足）、Δ_DA=0.66（1.0× 边缘）、M2max 版 5.9；Thm1 补 Box-Continuation 前提 + Lemma 6 重构（0.131 被 0.66 覆盖、14.17 归位域外）；剩余引述处数字同步 agent 进行中** |
-| C3 | 三分法 necessity 标注仅 1 处；"unique" 到处断言 | A3#2#5 | ⬜ | 全篇一致化 + C² 证据修正 |
+| C3 | 三分法 necessity 标注仅 1 处；"unique" 到处断言 | A3#2#5 | ✅ | 全篇 conjecture 标注 + kink-cell 证据 + 开放问题贡献（cb3815e） |
 | C4 | γ 双重断言（0.182 vs [15.4,5.3]） | A3#4, A2#4 | 🔄 | **调查裁决：0.182 是陈旧手写断言（无代码支撑，因子全无法重现）；[15.4,5.3] 实测正确**。修复批次已发（删 0.182 声称、L_B 实测 2.21、FT-Stability 重算、E55/E56 弱化、MATLAB 图 FIXME） |
 | C5 | E52 vs E9/Thm1 数值冲突；reconciliation 表不全 | A2#2#3, A4#3 | 🔄 | 对账表重建完成（真实值 + Seg-DA/compositional 标 † 待重算）；E52 0.13 待归位 |
 | C6 | "Lemma 1.6" 硬编码×4 不存在 | A2#5, A4#1 | ⬜ | → \ref{lem:per_op}(vi) |
@@ -20,8 +20,8 @@
 | C11 | 部署证书缺口（47% 出域） | A6 Req#4, A3 | ⬜ | 加宽 LUT 重验证 或 精确声明 |
 | C12 | "verified compiler" 边界未定义 | A6 Req#5 | ⬜ | 明确形式验证 vs 差分测试边界 |
 | C13 | SiLU″ 公式错误 + 三个衍生声称全错 | A4#10, A3#13 | ✅ | sup=0.5（x=0），ε_SiLU=0.00157 与实测一致 | σ(1−σ)[2+x(1−2σ)], sup=0.5 |
-| C14 | WCET 三套指令时序（7× 差异） | A3#12, A4#14 | ⬜ | 统一时序表 |
-| C15 | Fixed-Depth Tradeoff 自相矛盾 | A3#7, A4#5 | ⬜ | γ<1 时 gap/bias 缩小 |
+| C14 | WCET 三套指令时序（7× 差异） | A3#12, A4#14 | ✅ | 统一为 wcet.py 口径（05/2024 手册）；wcet_analysis.py 重跑 22.67→3.86ms（25.9×/3.9%）；三层聚类 2.86/3.2/3.86（ec40cc2） |
+| C15 | Fixed-Depth Tradeoff 自相矛盾 | A3#7, A4#5 | ✅ | 两区间推论：γ<1 衰减深度总帮助 / γ>1 阈值条件（cb3815e） |
 | C16 | Thm 4 数值实例化错（0.86 vs 2.4） | A4#8 | ✅ | 陈旧实例化已删除并标 %TODO（γ 批次），无错数残留 |
 | C17 | 分辨率匹配律过度声称（经典律未引；非 minimizer） | A6, A4#7 | ⬜ | P1 定理 II（T-II）消化 |
 
@@ -47,7 +47,7 @@
 | M16 | 非干扰证明补 WCET(P) 前提 | ⬜ |
 | M17 | NC.3 溢界修正（[−23.9,25.1]）| ⬜ |
 | M18 | RBF-KAN/MNIST 声称删除或改计划中；"physical hardware" 修正 | ✅ | MNIST 补列（E42 98.59%）；RBF 移除；toolchain 措辞 |
-| M19 | E56 "14.6×"→15.3×；"confirms depth-uniform" 修正 | 🔄 | γ 批次已改（depth-dependent 表述）；15.3× 待确认 |
+| M19 | E56 "14.6×"→15.3×；"confirms depth-uniform" 修正 | ✅ | γ 批次已改（depth-dependent 表述）+ C15 两区间（cb3815e） |
 | M20 | MLP 对比复用已撤回 0.0019 | ⬜ |
 | M21 | 15 个 "first/unique" 优先权断言 → 验证或降级 | ⬜ |
 | M22 | 实验-修复时间线声明（哪些实验 pre-fix）| ⬜ |
