@@ -25,6 +25,7 @@
 | 13 | fig11_tsne_features.pdf | fig:tsne_features | Feature embeddings (t-SNE) No-KD vs KD | ✓ |
 | 14 | fig12_cross_validation.pdf | fig:cross_validation | Cross-validation results | ✓ |
 | 15 | fig16_scl_code.pdf | fig:scl_snippet | Generated SCL excerpt (FB_Inference) | ✓ |
+| 16 | fig17_capacity_plane.pdf | fig:capacity_plane | (V_B, ε) capacity plane: three strata + packing line + verification cost (E-T4/E-T5) | ✓ (added 08-04) |
 
 ## Orphan files in figures/final/ (not included in the manuscript)
 

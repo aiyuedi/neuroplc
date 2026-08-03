@@ -268,6 +268,27 @@ $V_{\text{gen}}$), and the open direction is the absoluteness of the
 stratum boundary.
 
 \vspace{4pt}
+\noindent\textbf{Bit parameterization and the local-vs-global code gap.}
+In the bit parameterization ($B = wN$ bits), the entropy bound of
+Theorem~\ref{thm:capacity-stratification}(1) is exponential: the
+$\varepsilon$-entropy of $\mathcal{F}_k$ (1-D) is
+$\Theta((M_k/\varepsilon)^{1/k})$, so any codebook of $2^B$ functions
+satisfies $\varepsilon \geq c'\, M_k^{1/k}\, 2^{-B/k}$ (the exponent is
+$-B/k$). The local codes of stratum~1---LUT tables and spectral
+truncations---achieve only the polynomial rate $\varepsilon \asymp
+c_k M_k (B/w)^{-k}$ in bits, because each cell carries $w$ bits of
+\emph{local} information (a table entry or a coefficient). The gap
+between the exponential information-theoretic bound and the polynomial
+local-code rate is the coding-theoretic form of the verification
+spectrum: closing it requires non-local codebooks whose certificate
+verification is not closed-form---the stratum-3 mechanism in the bit
+dimension. This is the deployment analogue of the random-code
+(existence) vs.\ structured-code (constructible and checkable)
+distinction of coding theory; we state it as a remark rather than a
+theorem because the non-local-code construction is existence-based and
+its verification cost is not closed-form.
+
+\vspace{4pt}
 \begin{theorem}[Verification-Complexity Tradeoff and Constant Purchase]
 \label{thm:capacity-tradeoff}
 In the setting of Theorem~\ref{thm:capacity-stratification}:
@@ -370,13 +391,31 @@ trichotomy (Theorem~\ref{thm:trichotomy},
 Theorem~\ref{thm:necessity_first}) as the coordinatized necessity.
 Theorem~\ref{thm:capacity-tradeoff} gives the verification-complexity
 axis, and Theorem~\ref{thm:capacity-decision} the
-architecture-selection consequence. The classical approximation theory
+architecture-selection consequence.
+Figure~\ref{fig:capacity_plane} shows the stratum structure on the
+$(V_B, \varepsilon)$ plane: the three error laws (stratum-1 slope
+$-2$, stratum-2 slope $-1$, stratum-3 free-node surrogate) above the
+packing line, and the verification-cost divergence (flat closed-form
+check vs.\ super-linear structural search). The classical approximation theory
 (metric entropy, width constants, rate-distortion, the
 spectral-vs-algebraic dichotomy) appears only as \emph{inputs}---the
 framework's contribution is the verification side, not the
 approximation side. The $\text{CP}$-relative necessity
 (Theorem~\ref{thm:capacity-stratification}, item 5) is the one theorem
 the framework alone yields.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{figures/final/fig17_capacity_plane}
+    \caption{The verifiable-deployment-capacity plane. (a) Worst-case
+    deployment error vs.\ storage budget: stratum-1 LUT (slope $-2$),
+    stratum-2 kinked (slope $-1$), stratum-3 free-node surrogate, and
+    the packing line $c_k M_k N^{-2}$. (b) Verification cost vs.\
+    storage: the stratum-1 closed-form check is flat in $N$ (measured
+    wall time), while the stratum-3 structural search grows
+    super-linearly (modeled operation count). Data: $E$-$T4$/$E$-$T5$.}
+    \label{fig:capacity_plane}
+\end{figure}
 
 \vspace{4pt}
 \subsubsection{Related Work and Boundaries}

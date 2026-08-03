@@ -442,8 +442,9 @@ over PROFINET/OPC UA. An on-PLC time-domain subset is also compiled
          weight-matrix sign structure ({\S}\ref{sec:da});
           (ii)~\textbf{Segment-Aware de~Boor Bounds}, exploiting the
          piecewise-linear structure of cubic B-spline second derivatives
-         for $6.0\times$ per-segment tightening (composing with DA for a
-         combined safety factor of $\sim 11.9\times$); and
+         for substantial per-segment tightening (composing with DA for
+         an improved combined safety factor; absolute values pending
+         recomputation on the released checkpoint); and
           (iii)~\textbf{Adaptive Mixed-Precision LUT Allocation}, a greedy
          max-heap algorithm reducing worst-case LUT error by $71.6\%$ at
          equal storage, with \textbf{Theorem~3} proving its minimax optimality
@@ -1696,9 +1697,11 @@ per-segment $\varepsilon$ across all output dimensions sharing input $i$
 further tightening on top of DA's $2.1\times$ improvement over IA
 (up to $3.1\times$ vs.\ the $\sqrt{d}$ random-weights baseline, {\S}\ref{sec:da}).
 The combined bound---sign-structural affine arithmetic with segment-aware LUT error---
-achieves a safety factor of approximately $11.9\times$ (Seg-DA, E16)
-at $N=15$ LUT points, providing the strongest formal guarantee for compiled
-KAN inference to date; plain DA alone certifies this checkpoint with a
+achieves a substantially higher safety factor (Seg-DA, E16; the
+pre-recomputation $11.9\times$ figure is withdrawn pending
+recomputation) at $N=15$ LUT points, providing the strongest formal
+guarantee for compiled KAN inference to date; plain DA alone certifies
+this checkpoint with a
 thin $1.0\times$ factor at the $M_2^{\text{char}}$ calibration.
 % TODO: Seg-DA absolute values (0.056, 11.9x) pending recomputation
 % against the released checkpoint (2026-08-03).
@@ -4344,7 +4347,7 @@ E12& XJTU-SY Cross-Dataset & Zero-shot / FT 100ep & 29.8\% $\to$ 91.7\% (+61.9 p
 E13& Feature Ablation      & Time/Freq/DE    & Freq 99.93\%; All 99.96\% \\
 E14& Adversarial Robustness& Noise $\sigma$=0--0.2 & 0\% degradation \\
 E15& Adaptive LUT Allocation & Greedy vs Uniform  & 71.6\% $\downarrow$ worst $\varepsilon$ \\
-E16& Segment-Aware DA       & Seg-DA vs DA       & 6.0$\times$ tightening, safety $\sim$11.9$\times$ \\
+E16& Segment-Aware DA       & Seg-DA vs DA       & Substantial tightening (abs.\ values pending recompute) \\
 E17& RTNNIgen Comparison   & 7-dim.\ comparison  & Correctness model, 2,610$\times$ speedup \\
 E18& Paderborn Cross-Dataset& Zero-shot / FT     & 25.0\% $\to$ 79.4\%; Cohen's $d$ domain shift \\
 E19& Method Boundary        & 3 degradation cond. & DA$\to$IA, Adaptive$\to$Uniform, OOM boundary \\
@@ -4352,7 +4355,7 @@ E20& Motor Load Regression   & RMSE                & 0.011; zero code change \\
 E52& Verification Blind Spot & $N{=}4{\to}15$ safety scan & Acc.\ 99.93\% but safety $<$1 at $N{\le}7$; 225 flips \\
 E54& ChebyKAN Z3 Verif.     & Per-func.\ Z3 NRA   & \textbf{496/512 (96.9\%)}, Prop.~\ref{prop:chebykan-svnn} \\
 E55& XJTU-SY FT + SCL       & 100-ep FT + S7-1200 & \textbf{91.7\%}, 512/512 Z3, 0e 0w SCL \\
-E56& Deep KAN ($L{=}3$)       & [28,16,8,4] 120ep & \textbf{99.60\%}, 608/608 Z3, DA 15.3$\times$ linear \\
+E56& Deep KAN ($L{=}3$)       & [28,16,8,4] 120ep & \textbf{99.60\%}, 608/608 Z3, DA 1.90, sub-exp. depth \\
 E57& CROWN vs.\ NeuroPLC     & KAN[28,16,4] DA/IBP & \textbf{DA substantially tighter}, CROWN=IBP for KAN \\
 E60& FourierKAN SVNN           & [28,16,4] $K{=}6$, CWRU & \textbf{100\% acc}, 512/512 Z3, 2185-line SCL \\
 E61& WaveletKAN SVNN           & [28,16,4] $S{=}8$, M2-reg & \textbf{100\% acc}, 512/512 Z3, 2185-line SCL \\
@@ -4702,12 +4705,16 @@ The result is consistent with the depth-dependent (non-convergent) form:
     \item \textbf{Z3 per-function verification:} 608/608 (100\%) B-spline
          functions pass Z3 verification — identical coverage to the 2-layer
          baseline (512/512), with no degradation at increased depth.
-    \item \textbf{DA error bound:} $\Delta_{\text{DA}}^{(L=3)} = 0.98$, a
-          $1.5\times$ increase from the recomputed
-          $\Delta_{\text{DA}}^{(L=2)} = 0.66$ (2026-08-03) —
-         consistent with near-linear growth across the additional layer, not the
-         exponential blowup that would occur for non-SVNN architectures
-          (where $O(2^L)$ growth is expected from wrapping effects).
+    \item \textbf{DA error bound:} the 3-layer DA chain measures
+          $1.90$ (E56 rerun, 2026-08-04)---below the worst-case
+          amplification envelope $\gamma^{L-1} = 5.3$ that would apply
+          under full per-layer amplification, consistent with
+          \emph{sub-exponential} depth scaling, not the exponential
+          blowup expected for non-SVNN architectures (where $O(2^L)$
+          growth arises from wrapping effects). (Absolute comparison
+          with the 2-layer value across calibrations is pending
+          unification; the sub-exponential claim uses the worst-case
+          envelope as the reference.)
 % TODO: 0.064 is a stale-weights DA value; recompute the 3-layer DA chain on
 % the released checkpoint (the 3-layer model is e56_3layer_kan_deep_verify.py;
 % recomputed DA at N=15 on the 2-layer model is 0.66, so 0.98/0.064 = 15.3x
