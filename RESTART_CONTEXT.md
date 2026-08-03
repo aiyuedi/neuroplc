@@ -70,7 +70,8 @@
 | **T-III** Thm 16 | section_trichotomy.tex §sec:necessity-first | necessity 第一格（affine 证书类）：kink 无证书 + 乘积耦合 NP-hard + 锐率⟹最优分配 | verify_necessity_first.py PASS；**修正 trichotomy kink 率论证真实错误**（单函数任意小 vs 类宽度 slope -1.05） |
 | **T-IV** Thm 15 | section_svnn_theorems.tex §sec:besov-pac | Besov 光滑度自适应率：bias 超收敛 N^{-2min(s,k)}、预算指数随 s 减小 | verify_besov_pac.py PASS（N=32 衰减 1.4×/6.5×/9.1× 随 s） |
 
-**进行中**：审稿复跑（0 CRITICAL 验证）+ 图重生成（fig02/04/05/09，agent 批次）。
+**复跑审稿（2026-08-03 晚）**：✅ 完成——抓出 7 个真实缺陷全修（Thm13 闭合解/Thm14-15 指数/Thm16(iii)/编号 off-by-one/WCET 推导/E52 重算）+ 7 Minor（SiLU 公式/E57 8.3×/ETH 标注等）；84 页 0e0w。
+**图重生成**：✅ 完成（12 .m 更新 + 56 图文件，MATLAB 验证）。
 **剩余**：投稿材料（cover letter/bio/图清单）、REVIEWER-FAQ v3（新定理）、C11（加宽 LUT 实验，可 P3）。
 
 ## 3. 关键文件索引
