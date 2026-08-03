@@ -1,33 +1,42 @@
-# NeuroPLC Figure List (TNNLS submission, 2026-08-04)
+# NeuroPLC Figure List (TNNLS submission, v2 — 2026-08-04)
 
-> TNNLS requires figures uploaded as separate files with captions. All figures in `paper/figures/`.
-> 87-page manuscript: fig1–fig13 + tables (figures counted from `\begin{figure}` in main.tex and section files).
+> v2 rewrite after pre-submission review (A5): the previous version listed 24 entries
+> (16 pointed at tables/algorithms); the manuscript contains **15 figure environments**.
+> All figure PDFs were regenerated 2026-08-03 22:31-22:32 (post-recomputation batch);
+> FIXME/TODO comments in the .tex sources are residuals and are being cleared.
+> All 15 figures are now referenced in the main text (references added 2026-08-04).
 
-| # | File | Caption (abridged) | Source |
-|---|------|--------------------|--------|
-| fig1 | fig1_overview.png | NeuroPLC end-to-end pipeline (28-D feature extraction → certified compilation → PLC) | main.tex:804 |
-| fig2 | fig2_compiler_arch.png | Compiler architecture: four-stage IR-based pipeline | main.tex:821 |
-| fig3 | fig3_lut_ablation.png | IR design ablation: removing BsplineLUT → 47.4× node explosion | main.tex:887 |
-| fig4 | fig4_bspline_lut.png | B-spline evaluation via LUT (SCL: FC2) | main.tex:972 |
-| fig5 | fig5_curvature_lut.png | Uniform vs curvature-aware adaptive B-spline LUT | main.tex:1020 |
-| fig6 | fig6_sign_structure.png | Sign structure of trained KAN weights (DA tightening analysis) | main.tex:1390 |
-| fig7 | fig7_ratio_scaling.png | DA/IA tightening ratio scaling law (105 random KAN architectures) | main.tex:1569 |
-| fig8 | fig8_da_ia_validation.png | DA/IA tightening ratio ∝ √d: empirical validation | main.tex:1604 |
-| fig9 | fig9_da_bound.png | DA vs IA bound comparison with LUT resolution | main.tex:1634 |
-| fig10 | fig10_seg_aware.png | Segment-aware bound comparison across LUT resolutions | main.tex:1697 |
-| fig11 | fig11_greedy_density.png | Greedy adaptive LUT density allocation | main.tex:1731 |
-| fig12 | fig12_scl_excerpt.png | Generated SCL excerpt (FB_Inference) | main.tex:2609 |
-| fig13 | fig13_compilation_matrix.png | Multi-target compilation matrix in TIA Portal V21 | main.tex:2633 |
-| fig14 | fig14_block_sizes.png | TIA Portal V21 measured block sizes | main.tex:2670 |
-| fig15 | fig15_cross_project.png | Cross-project TIA Portal V21 compilation coverage | main.tex:2702 |
-| fig16 | fig16_wcet.png | Z3-verified WCET for KAN [28,16,4] | main.tex:2843 |
-| fig17 | fig17_wcet_breakdown.png | WCET breakdown: KAN [28,16,4] on S7-1200 | main.tex:3061 |
-| fig18 | fig18_confusion.png | Confusion matrices (Teacher 1D-CNN / student KAN) | main.tex:3297 |
-| fig19 | fig19_tsne.png | Feature embeddings (t-SNE): No-KD vs KD | main.tex:3363 |
-| fig20 | fig20_instr_time.png | Instruction-level inference time | main.tex:3462 |
-| fig21 | fig21_width_scaling.png | Scalability: width scaling | main.tex:3520 |
-| fig22 | fig22_depth_scaling.png | Scalability: depth scaling | main.tex:3542 |
-| fig23 | fig23_grid_resolution.png | Scalability: grid resolution | main.tex:3563 |
-| fig24 | fig24_z3_translation.png | Z3 SMT translation validation per node | main.tex:3611 |
+## Figure environments (15)
 
-**Note (2026-08-04)**: fig02/fig04/fig05/fig09/fig1_overview carry FIXME tags (numbers changed after the P0 recomputation; regeneration pending). Verify figure numbers against the PDF before submission.
+| # | File (figures/final/) | Label | Caption (abridged) | Referenced |
+|---|----------------------|-------|--------------------|-----------|
+| 1 | fig1_overview.pdf | fig:overview | End-to-end pipeline (28-D features → certified compilation → PLC) | ✓ main.tex |
+| 2 | fig2_compiler_arch.pdf | fig:compiler | Compiler architecture: four-stage IR pipeline | ✓ |
+| 3 | fig01_c2bv_basis.pdf | fig:c2bv_basis_functions | C²-BV architecture family: activation basis functions | ✓ |
+| 4 | fig02_verification.pdf | fig:c2bv_verification | Per-family verification results | ✓ (added 08-04) |
+| 5 | fig03_da_tightness.pdf | fig:da_tightness | DA tightness: numerical attainment (Thm C) | ✓ (added 08-04) |
+| 6 | fig04_sharp_bound.pdf | fig:sharp_lower_bound | Sharp lower-bound construction (Thm A) | ✓ (added 08-04) |
+| 7 | fig05_da_vs_ia.pdf | fig:da_vs_ia | DA vs IA bound comparison across resolutions | ✓ (added 08-04) |
+| 8 | fig06_adaptive_lut.pdf | fig:bspline_adaptive | Uniform vs curvature-aware adaptive B-spline LUT | ✓ |
+| 9 | fig07_da_scaling.pdf | fig:da_ratio_dist | DA/IA tightening ratio ∝ √d (105 architectures) | ✓ |
+| 10 | fig08_segment_bounds.pdf | fig:segment_bounds | Segment-aware bounds across LUT resolutions | ✓ |
+| 11 | fig09_wcet_breakdown.pdf | fig:wcet_breakdown | WCET breakdown KAN [28,16,4] on S7-1200 | ✓ (added 08-04) |
+| 12 | fig10_confusion_matrices.pdf | fig:confusion_matrices | Confusion matrices (teacher CNN / student KAN) | ✓ |
+| 13 | fig11_tsne_features.pdf | fig:tsne_features | Feature embeddings (t-SNE) No-KD vs KD | ✓ |
+| 14 | fig12_cross_validation.pdf | fig:cross_validation | Cross-validation results | ✓ |
+| 15 | fig16_scl_code.pdf | fig:scl_snippet | Generated SCL excerpt (FB_Inference) | ✓ |
+
+## Orphan files in figures/final/ (not included in the manuscript)
+
+- fig13_model_comparison.pdf — orphan (no \includegraphics; delete before packaging)
+- fig14_cross_domain.pdf — orphan
+- fig15_safety_monitor.pdf — orphan
+
+## Notes
+
+- All figure captions use IEEE sentence-case style; figures are in `paper/figures/final/`.
+- Figure content (WCET 3.86 ms, safety ~1.0×, γ honest values) is from the
+  2026-08-03 22:31+ regeneration batch; fig1_overview no longer contains 22.67 ms.
+- The capacity section (Thm 17-19) has no figures yet; the (V_B, ε) plane figure
+  is a suggested addition before final submission (A5/A6).
+- Delete the 3 orphan files and re-verify the figure count (15) when packaging.

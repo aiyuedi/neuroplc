@@ -4,6 +4,16 @@
 %
 % Inserted after section_trichotomy (end of the SVNN theory block).
 % New theorems start at 17 (setcounter{theorem}{16}) to preserve 1-16.
+%
+% v2 (2026-08-04, pre-submission review fixes):
+%  - node parameterization N (storage cells), bit mapping B = w*N explicit
+%  - stratum-1 constant = c_k (affine-class minimax, Thm 9'(3)); c_* (width)
+%    moved to stratum 3; "c_fix via projection" claim withdrawn (A4)
+%  - CP-relative necessity: premise-computability assumption explicit;
+%    tightness qualifier on step (iv); Condition 1 not claimed (A4)
+%  - class-level reduction downgraded to conjecture (A6/A3/A4, red line 3)
+%  - PCP sentence removed; V = proof length is a modeling convention (A3/A4)
+%  - C(N,V) formally defined and used; Regime 4 placed (A2/A4/A6)
 % ============================================================================
 
 \subsection{Verifiable Deployment Capacity: A Unifying Framework}
@@ -15,11 +25,11 @@ properties of certified compilation: sharp interpolation constants
 minimax deployment rates (Theorem~\ref{thm:compile_aware_minimax},
 Theorem~\ref{thm:besov_pac}), complexity separation
 (Theorem~\ref{thm:necessity}), and the verifiability trichotomy
-(Theorem~\ref{thm:trichotomy}). We now show that these results are not an
-assemblage of independent bounds but the \emph{expansion of a single
-unifying quantity}: the \textbf{verifiable deployment capacity}
-$C(B, V)$---the best certifiable deployment error achievable under a
-storage budget of $B$ bits and a certificate-verification budget $V$.
+(Theorem~\ref{thm:trichotomy}). We now show that these results are the
+\emph{expansion of a single unifying quantity}: the \textbf{verifiable
+deployment capacity} $C(N, V)$---the best certifiable deployment error
+achievable under a storage budget of $N$ cells and a
+certificate-verification budget $V$ (bits of proof read at deployment).
 
 The capacity viewpoint answers the question that individual theorems
 leave implicit: \emph{what cannot be certified, no matter how clever the
@@ -30,9 +40,10 @@ law} (the deployed representation is a code, and architectures are code
 families). Within this framework, the sharp constants of
 Theorem~\ref{thm:sharp-lut} reappear as the \emph{capacity limit of the
 interpolation code}, the trichotomy of Theorem~\ref{thm:trichotomy}
-reappears as \emph{three points in the $(V_B, \varepsilon)$ plane}, and
-the necessity direction receives a theorem-level information-theoretic
-form (within the certificate calculus; the absolute form remains open).
+reappears as \emph{four regimes mapped onto three points in the
+$(V_B, \varepsilon)$ plane}, and the necessity direction receives a
+theorem-level information-theoretic form within the certificate
+calculus (the absolute form remains open).
 
 \subsubsection{Certificate Proof Systems and Verification Budgets}
 \label{sec:cp-system}
@@ -40,51 +51,66 @@ form (within the certificate calculus; the absolute form remains open).
 We formalize \emph{certified deployment} following the proof-carrying-code
 architecture~\cite{necula1998pcc,rinard1999credible,pnueli1998translation},
 and the certificate calculus of validated numerics (Gappa~\cite{daumas2009gappa},
-Sollya~\cite{chevillard2010sollya}, LeanCert)---the \emph{components} of
-the framework are classical; the \emph{capacity/stratification theory} we
-build on them is not (see also
+Sollya~\cite{chevillard2010sollya}, LeanCert~\cite{radisic2025leancert})---the
+\emph{components} of the framework are classical; the
+\emph{capacity/stratification theory} we build on them is not (see also
 \S\ref{sec:capacity-related}).
 
 \begin{definition}[Deployment scheme]
 \label{def:deployment-scheme}
 A \textbf{deployment scheme} for a target class $\mathcal{F}$ under a
-storage budget $B$ is a triple $S = (\text{Comp}, D, \text{Vf})$:
-$\text{Comp}\colon \hat f \mapsto r \in \{0,1\}^B$ compiles a trained
-model $\hat f$ to a $B$-bit representation; $D(r)$ decodes it to a
-deployed function $\tilde f$; $\text{Vf}$ is a deterministic verifier
-that, given $(r, \pi)$ with a certificate proof term $\pi$, checks
+storage budget of $N$ cells is a triple $S = (\text{Comp}, D, \text{Vf})$:
+$\text{Comp}\colon \hat f \mapsto r \in \{0,1\}^{wN}$ compiles a trained
+model $\hat f$ to a representation of $N$ cells of $w$ bits each
+($B = wN$ bits total; $w$ is the word width, absorbed into constants
+throughout); $D(r)$ decodes it to a deployed function $\tilde f$;
+$\text{Vf}$ is a deterministic verifier that, given $(r, \pi)$ with a
+certificate proof term $\pi$, checks
 $\|\hat f - \tilde f\|_\infty \leq \varepsilon$. \textbf{Soundness}:
 $\text{Vf}(r, \pi) = \text{accept} \Rightarrow \|\hat f - \tilde f\|_\infty
 \leq \varepsilon$; \textbf{completeness}: the compiler can generate $\pi$
 (build-time cost $V_{\text{gen}}$, recorded separately).
 \end{definition}
 
-The verifier is \emph{deterministic} and \emph{perfectly sound}: on a PLC
-there is no randomness source and no interactive protocol, and
-$\text{PCP}[0, \text{poly}(n)] = \text{NP}$ implies that a perfectly sound
-deterministic verifier must read the whole proof term
-($V \geq |\pi|$)~\cite{arora2009barak}---the verification budget is
-therefore the proof-term length, and certificates that cannot be checked
-without re-running a search are exponential in that budget. This is the
-precise sense in which ``verification must be cheaper than
-re-computation'' is \emph{forced} on PLCs rather than assumed.
+The verifier is \emph{deterministic} and \emph{perfectly sound}---on a
+PLC there is no randomness source and no interactive protocol. The
+verification budget is the proof-term length read at deployment:
+$V = |\pi|$ in bits. This is a \emph{modeling convention} of the
+calculus (Definition~\ref{def:cp}) rather than a derived theorem: a
+verifier may in principle accept while reading a subset of a structured
+proof, but any certificate not re-checkable from its text would delegate
+soundness to an unverifiable external claim, which is precisely the
+deployment configuration we exclude. (Under $\mathrm{P} \neq \mathrm{NP}$,
+no polynomial-time deterministic perfectly-sound verifier can certify the
+NP-hard class-level decisions of stratum~3 from a constant-size sample
+of a proof---the verification cost of such certificates is
+unavoidable, Theorem~\ref{thm:capacity-stratification}, item 4.)
 
-\begin{definition}[Certificate proof system $\text{CP}$]
+\begin{definition}[Certificate proof system $\text{CP}$ and capacity]
 \label{def:cp}
 A \textbf{certificate proof system} $\text{CP}$ is a proof calculus for
 deployment bounds. Proof terms are derivations $\pi = (r_1, \dots, r_m)$
 of a bound $\beta$, each step $r_j$ an instance of one of the rules:
-(i)~arithmetic ($\beta$ = arithmetic expression over parameters);
+(i)~arithmetic ($\beta$ = arithmetic expression over cell values);
 (ii)~interpolation remainder (the sharp constants of
 Theorem~\ref{thm:sharp-lut}: $e \leq c_k M_k h^k$);
 (iii)~compositional propagation (the additive structure of
 Eq.~\eqref{eq:sharp_compositional}); (iv)~spectral tail bounds
 ($e \leq C e^{-\rho N}$); (v)~comparison ($\beta \leq \varepsilon$).
-A verifier checks each step in $O(1)$ arithmetic; the verification budget
-is $V = m$ (steps). The \textbf{closure lemma} states that
-$V = O(1)$ and soundness force $\pi$ to be an instance of finitely many
-rules---any proof term requiring a replay of a search/enumeration has
-$V$ at least the search size.
+The verification budget is $V = |\pi|$ (proof-term length in bits,
+steps \emph{and} referenced parameters). The \textbf{closure axiom} of
+the calculus: any proof term requiring a replay of a search or
+enumeration has $V$ at least the search size. This is a modeling
+assertion about terms outside $\text{CP}$ (an architectural premise of
+the stratum structure, not a derived lemma).
+The \textbf{verifiable deployment capacity} is
+\begin{equation}
+C(N, V) \;=\; \inf_{S:\, V(S) \leq V} \;
+\sup_{f \in \mathcal{F}} \; \varepsilon_S(f),
+\label{eq:capacity-def}
+\end{equation}
+the infimum over deployment schemes of verification budget at most $V$
+of the worst-case certified deployment error over the class.
 \end{definition}
 
 Verification cost separates into two dimensions: $V_B(B)$ (growth with
@@ -99,72 +125,106 @@ PSPACE-hard~\cite{hlz2021quantized}).
 \begin{theorem}[Stratification of Verifiable Deployment Capacity]
 \label{thm:capacity-stratification}
 Let $\mathcal{F}_k = \{f : \|f^{(k)}\|_\infty \leq M_k\}$ on a compact
-domain, storage budget $B$ bits, and a deterministic perfectly sound
-verifier (Definition~\ref{def:deployment-scheme}). Then:
+interval $\Omega \subset \mathbb{R}$ (the univariate-activation setting;
+the $d$-dimensional extension replaces the rate $N^{-k}$ by
+$N^{-k/d}$ in the entropy bound), storage budget $N$ cells of $w$ bits,
+and a deterministic perfectly sound verifier
+(Definition~\ref{def:deployment-scheme}). Then:
 
 \begin{enumerate}
     \item \textbf{Universal packing line.} For \emph{every} deployment
     scheme and \emph{every} verification budget,
     \begin{equation}
-    \varepsilon \;\geq\; c_{*}\, M_k\, B^{-k},
+    \varepsilon \;\geq\; c_{\mathrm{ent}}\, M_k\, N^{-k},
     \label{eq:packing-line}
     \end{equation}
-    where $c_*$ is the metric-entropy/width constant of
-    $\mathcal{F}_k$ (Kolmogorov--Tikhomirov~\cite{kolmogorov1959entropy};
-    Bronshtein width constants)---no certificate can certify an error
-    below the packing bound, regardless of the proof system.
+    where $c_{\mathrm{ent}}$ is the metric-entropy constant of
+    $\mathcal{F}_k$ (Kolmogorov--Tikhomirov~\cite{kolmogorov1959entropy}):
+    the $\varepsilon$-entropy of $\mathcal{F}_k$ is
+    $\Theta((M_k/\varepsilon)^{1/k})$, so $N$ cells separate at most
+    $2^{wN}$ functions and the line follows---no certificate can
+    establish an error below the packing bound, regardless of the proof
+    system. (The entropy constant and the $n$-width constant are
+    distinct numbers; the line uses the former.)
 
     \item \textbf{Stratum 1 (closed-form family, certificate-free).}
     Schemes whose bound is a closed-form expression of the architecture
-    parameters---verification cost $V_B = O(1)$ (decoupled from $B$) and
+    parameters---verification cost $V_B = O(1)$ (decoupled from $N$) and
     $V_{\text{arch}} = \text{poly}(L,d)$---achieve
     \begin{equation}
-    \varepsilon \;\leq\; c_{\text{fix}}\, M_k\, B^{-k},
+    \varepsilon \;\leq\; c_k\, M_k\, N^{-k},
     \label{eq:stratum1}
     \end{equation}
-    with the fixed-structure width constant $c_{\text{fix}} \leq c_k$
-    (uniform-node projection), $c_k = Q_k/k!$ being the sharp
-    \emph{interpolation} constant of Theorem~\ref{thm:sharp-lut},
-    attained exactly on the extremal family (E63; E-T5). The
-    curvature-aware allocation of Theorem~\ref{thm:optimal_lut}
-    attains $c_{\text{fix}}$ at the per-function level.
+    with the sharp \emph{interpolation} constant $c_k = Q_k/k!$ of
+    Theorem~\ref{thm:sharp-lut}. This constant is the \emph{capacity
+    limit of the affine certificate class}: among all sound affine
+    (data-linear) design-time schemes, the LUT achieves the minimax
+    constant (Theorem~\ref{thm:sharp-lut}, item 3; classical optimal
+    recovery: from exact node data, interpolation is the optimal
+    affine recovery operator, so \emph{no} affine scheme---least-squares
+    projection included---attains a sup-norm constant below $c_k$).
+    The curvature-aware allocation of Theorem~\ref{thm:optimal_lut}
+    attains $c_k$ at the per-function level ($E$-$T4$). Note that
+    spectral-tail bounds (rule (iv)) are also closed-form:
+    $V_B = O(1)$; on $\mathcal{F}_k$ they give the same rate $N^{-k}$
+    (polynomial coefficient decay), so the stratum-1 rate is robust to
+    the code family.
 
     \item \textbf{Stratum 2 (kinked gates).} Gates with unbounded second
     derivative (ReLU, $|x|$, tents) admit no second-order certificate;
     the class width degrades to first order,
-    $\varepsilon \geq c\, M_1\, B^{-1}$ (measured slope $-1.034$,
-    E66; $-1.11$ on smooth tents, E-T5)---rate loss, not just constant
+    $\varepsilon \geq c\, M_1\, N^{-1}$ (measured slope $-1.034$, E66;
+    $-1.11$ on smooth tents, $E$-$T5$)---rate loss, not just constant
     loss.
 
     \item \textbf{Stratum 3 (structure-optimal / coupled gates).} The
-    class-optimal constant $c_* < c_{\text{fix}}$ (free-node splines,
-    data-dependent grids) requires \emph{structural optimality}: the
-    certificate must verify node/structure optimality over all
-    configurations---class-level bound generation is NP-hard by the
-    product-gate reduction of Theorem~\ref{thm:necessity}
-    (conditional on $\mathrm{P} \neq \mathrm{NP}$; ETH for exponential
-    time), and bit-exact verification is PSPACE-hard
-    \cite{hlz2021quantized}. Hence $V_{\text{gen}}$ or $V_B$ is
-    exponential in the class-level stratum.
+    class-optimal \emph{width} constant $c_* < c_k$ (free-node splines,
+    data-dependent grids; the width of $\mathcal{F}_k$ is attained only
+    by non-affine, structure-optimal approximants~\cite{pinkus1985width})
+    requires \emph{structural optimality}: certifying that a given
+    structure achieves the class-optimal constant requires deciding
+    class-level optimality over all configurations. \emph{Conjecturally}
+    this is exponential: the product-gate reduction of
+    Theorem~\ref{thm:necessity} shows $\varepsilon$-verification of
+    coupled networks is NP-hard, and we conjecture that class-level
+    structure-optimality certification inherits the hardness (the
+    connecting reduction is left as an open problem; the instance-level
+    problem---fixed node set, one function---has a closed-form bound and
+    is cheap). Bit-exact verification is PSPACE-hard
+    \cite{hlz2021quantized}; hence, conditionally on the conjecture,
+    $V_{\text{gen}}$ or $V_B$ is exponential in the class-level stratum.
 
     \item \textbf{Necessity within $\text{CP}$ (information-theoretic
-    form).} Within the certificate calculus (Definition~\ref{def:cp}),
-    a scheme with $V_B$ decoupled from $B$ that achieves the class-level
-    minimax constant must have closed-form propagation (SVNN structure,
-    Regime~1 of Theorem~\ref{thm:trichotomy}). Proof: (i)~$V_B$ decoupled
-    $\Rightarrow$ the bound is an $O(1)$-rule expression of architecture
-    arrays (closure lemma); (ii)~pointwise soundness injects the
-    $k$-th-order quantity: the KT extremal family $\{f_M\}$ forces
-    $\beta(f_M) \geq c_* M B^{-k}$, so $\beta$ explicitly depends on
-    $M_k$; (iii)~$M_k$ computable from $O(1)$ blocks $\Rightarrow$
-    per-gate design-time-computable curvature (Condition~2 of
-    Theorem~\ref{thm:svnn_conditions}); (iv)~non-closed-form
-    (reachability-based) propagation makes bound generation NP-hard
-    (Theorem~\ref{thm:necessity}), contradicting $V_{\text{arch}} =
-    \text{poly}$. The absolute necessity (over all possible proof
-    systems, i.e., the trichotomy conjecture with
-    ``design-time-computable'' as a formal complexity class) remains an
-    open problem; the $\text{CP}$-relative form above is a theorem.
+    form).} Within the certificate calculus
+    (Definition~\ref{def:cp}), under the \textbf{premise-computability
+    assumption}---the values of rule premises (curvatures $M_k$, spectral
+    tails) are computable in $O(1)$ from the architecture parameters at
+    build time and checkable in $O(1)$ at deployment---a scheme with
+    $V_B$ decoupled from $N$ and $V_{\text{arch}} = \text{poly}(L,d)$
+    that achieves the class-level minimax constant $c_k$ must have
+    closed-form propagation in the curvature dimension (SVNN Condition~2,
+    design-time-computable $M_k$). Proof: (i)~$V_B$ decoupled
+    $\Rightarrow$ the bound is an $O(1)$-rule expression over cell
+    values (closure axiom); (ii)~pointwise soundness injects the
+    $k$-th-order quantity: the extremal family of
+    Theorem~\ref{thm:sharp-lut}, scaled to $M_k = M$, forces
+    $\beta(f_M) \geq c_k\, M\, N^{-k} \geq c_{\mathrm{ent}}\, M\,
+    N^{-k}$ (the interpolation extremal error dominates the packing
+    line), so $\beta$ explicitly depends on $M_k$; (iii)~$M_k$
+    $O(1)$-computable by the premise-computability assumption
+    $\Rightarrow$ per-gate design-time-computable curvature (Condition~2);
+    (iv)~\emph{tight} class-level bound generation at the constant
+    $c_k$ via exact reachability is NP-hard (Theorem~\ref{thm:necessity},
+    tight $\varepsilon$-verification; interval propagation is
+    closed-form and polynomial but not tight at the sharp constant), so
+    a polynomial-cost certificate at the sharp constant must be
+    closed-form, not reachability-based, contradicting
+    $V_{\text{arch}} = \text{poly}$ otherwise. The argument establishes
+    Condition~2 (curvature side); the univariate-gate structure
+    (Condition~1) is not derived from it---the CP-relative necessity is
+    therefore \emph{partial}, and the absolute form (over all proof
+    systems) remains the open problem stated in
+    Theorem~\ref{thm:trichotomy}, item 5.
     \end{enumerate}
 \end{theorem}
 
@@ -172,116 +232,151 @@ verifier (Definition~\ref{def:deployment-scheme}). Then:
 \noindent\textit{Proof sketch.}
 (1)~Metric entropy: the $\varepsilon$-entropy of $\mathcal{F}_k$ is
 $\Theta((M_k/\varepsilon)^{1/k})$~\cite{kolmogorov1959entropy}; a
-$B$-bit codebook separates at most $2^B$ functions, giving the line.
-(2)~Closed-form bounds: uniform-node $k$-order interpolation gives the
-sharp constant $c_k$ (Theorem~\ref{thm:sharp-lut}); least-squares
-projection onto uniform-node piecewise polynomials gives
-$c_{\text{fix}} < c_k$ (classical width comparison); both are $O(1)$
-proof terms under rules (ii)/(iii). (3)~Kinked gates: the $C^1$ class
-has width $\Theta(1/N)$ (tent functions), first-order rate.
-(4)~Structure optimality: free-node class-level optimality requires
-searching node configurations; the reduction of
-Theorem~\ref{thm:necessity} embeds 3-SAT into class-level bound
-generation. (5)~The four-step necessity argument above. $\square$
+$wN$-bit codebook separates at most $2^{wN}$ functions, giving the line
+with $w$ absorbed into $c_{\mathrm{ent}}$. (2)~Closed-form bounds:
+uniform-node $k$-order interpolation gives the sharp constant $c_k$
+(Theorem~\ref{thm:sharp-lut}); optimal-recovery theory shows no affine
+scheme beats it from exact node data (Theorem~\ref{thm:sharp-lut}, item
+3); both are $O(1)$ proof terms under rules (ii)/(iii).
+(3)~Kinked gates: the $C^1$ class has width $\Theta(1/N)$ (tent
+functions), first-order rate. (4)~Structure optimality: free-node
+class-level optimality requires searching node configurations; the
+reduction of Theorem~\ref{thm:necessity} hardens tight
+$\varepsilon$-verification of coupled networks, and we conjecture the
+transfer to class-level structure-optimality certification (open
+problem; the instance-level bound is closed-form and cheap).
+(5)~The four-step necessity argument above, under the
+premise-computability assumption. $\square$
 
 \vspace{2pt}
 \noindent\textbf{Capacity coordinates of the trichotomy.}
 The three properties $(P1)(P2)(P3)$ of the trichotomy
 (Theorem~\ref{thm:trichotomy}) map to points in the $(V_B, \varepsilon)$
-plane: SVNN sits at $(O(1), c_{\text{fix}} B^{-k})$ (stratum 1), kinked
-gates at $(O(1), B^{-1})$ (stratum 2, rate loss), coupled gates at
-$(2^{\Omega(B)}, c_* B^{-k})$ (stratum 3, constant reachable but
-verification exponential). The trichotomy's necessity conjecture is thus
-\textit{coordinatized}: its three regime exclusions are the three strata
-of the capacity theorem, and the open direction is the absoluteness of
-the stratum boundary.
+plane: SVNN sits at $(O(1), c_k M_k N^{-k})$ (stratum 1), kinked gates
+at $(O(1), M_1 N^{-1})$ (stratum 2, rate loss), coupled gates at
+$(2^{\Omega(B)}, c_* M_k N^{-k})$ (stratum 3, constant reachable only
+conjecturally, verification exponential). Regime~4 of the trichotomy
+(domain-dependent curvature, $e^x$-type) falls \emph{inside stratum 1's
+form but with stratum-3-cost certificates}: the closed-form curvature
+$M_k$ is computable only after reachability analysis, so the
+build-time cost $V_{\text{gen}}$ rises to the stratum-3 regime while the
+deployment-time check stays $O(1)$---the capacity coordinates of
+Regime~4 are $(O(1), c_k M_k N^{-k})$ with $V_{\text{gen}} = 2^{\Omega}$.
+The trichotomy's necessity conjecture is thus \textit{coordinatized}:
+its regime exclusions are the three strata (with Regime~4 placed by
+$V_{\text{gen}}$), and the open direction is the absoluteness of the
+stratum boundary.
 
 \vspace{4pt}
 \begin{theorem}[Verification-Complexity Tradeoff and Constant Purchase]
 \label{thm:capacity-tradeoff}
 In the setting of Theorem~\ref{thm:capacity-stratification}:
 \emph{(i) Constant purchase.} On $\mathcal{F}_k$ the stratum-1 capacity
-constant is $c_{\text{fix}}$ and the class-optimal constant is
-$c_* < c_{\text{fix}}$; the gap is \emph{paid in verification cost}:
-reaching $c_*$ requires structural optimality, whose class-level
-verification is exponential (Theorem~\ref{thm:capacity-stratification},
-item 4)---a closed-form certificate at constant $c_*$ would decide the
-NP-hard class-level problem.
+constant is $c_k$ (interpolation, affine-class minimax) and the
+class-optimal width constant is $c_* < c_k$
+\cite{pinkus1985width}; the gap is \emph{paid in structural
+optimality}: reaching $c_*$ requires non-affine, structure-optimal
+approximation, whose class-level certification is conjecturally
+exponential (Theorem~\ref{thm:capacity-stratification}, item 4)---a
+closed-form certificate at constant $c_*$ would decide the conjectured
+NP-hard class-level problem. (The instance-level bound---fixed node
+set, one function---is closed-form and cheap, consistent with SOS
+certificates verifying polynomial optimality at the instance level.)
 \emph{(ii) Class-adaptation is free on analytic classes.} On analytic
 classes $A_\rho$ (spectral coefficients $e^{-\rho n}$), the spectral
 code (Fourier/Chebyshev truncation) achieves
 $\varepsilon \asymp e^{-c\rho N}$ with $V_B$ decoupled (spectral tail
 bounds are closed-form, rule (iv)); the exponential benefit is
-\emph{available at zero verification cost}---the rate-distortion law of
-analytic sources~\cite{shannon1959coding} is not gated by $V$. On
-$\mathcal{F}_k$ the spectral code is \emph{not} exponential (coefficients
-decay polynomially), so the exponential benefit is exclusive to analytic
-classes. \emph{(iii) Deployment-time verification is infeasible in
-stratum 3.} Bit-exact verification is PSPACE-hard~\cite{hlz2021quantized},
-so certificates must be generated at build time and only \emph{checked}
-at deployment (the proof-carrying-code split~\cite{necula1998pcc});
-this is the quantitative form of the GHL observation that real-valued
-verification conclusions do not transfer to quantized deployment
+\emph{available at constant ($O(1)$) verification cost}---the
+rate-distortion law of analytic sources~\cite{shannon1959coding} and
+the classical spectral-vs-algebraic dichotomy
+\cite{trefethen2013approximation,boyd2001chebyshev} are not gated by
+$V$. On $\mathcal{F}_k$ the spectral code is \emph{not} exponential
+(coefficients decay polynomially), so the exponential benefit is
+exclusive to analytic classes. \emph{(iii) Deployment-time verification
+is infeasible in stratum 3.} Bit-exact verification is
+PSPACE-hard~\cite{hlz2021quantized}, so certificates must be generated
+at build time and only \emph{checked} at deployment (the
+proof-carrying-code split~\cite{necula1998pcc}); this is the
+quantitative form of the observation that real-valued verification
+conclusions do not transfer to quantized deployment
 networks~\cite{giacobbe2020bits}.
 \end{theorem}
 
 \vspace{2pt}
 \noindent\textit{Proof sketch.}
 (i)~Any closed-form certificate at constant $c_*$ yields a
-polynomial-time certificate for class-level node optimality, which is
-NP-hard (Theorem~\ref{thm:capacity-stratification}, item 4); the
-instance-level bound (fixed node set) is closed-form and cheap---the
-exponential statement is \emph{class-level only}. (ii)~Parseval tail
-bounds on analytic coefficients; the classical rate-distortion
-reference~\cite{shannon1959coding}; $V_B$ decoupling follows from rule
-(iv) being an $O(1)$ proof term. (iii)~PSPACE-hardness transfers:
-bit-exact checking cannot run within poly verification. $\square$
+polynomial-time certificate for class-level structural optimality,
+which is conjecturally NP-hard (Theorem~\ref{thm:capacity-stratification},
+item 4); the instance-level bound is closed-form and cheap---the
+exponential statement is \emph{class-level only and conjectural}.
+(ii)~Parseval tail bounds on analytic coefficients; the classical
+rate-distortion reference~\cite{shannon1959coding} and the
+spectral-vs-algebraic dichotomy~\cite{trefethen2013approximation};
+$V_B$ decoupling follows from rule (iv) being an $O(1)$ proof term.
+(iii)~PSPACE-hardness transfers: bit-exact checking cannot run within
+poly verification. $\square$
 
 \vspace{4pt}
 \begin{theorem}[Architecture-as-Code Selection Law]
 \label{thm:capacity-decision}
-Fix a storage budget $B$ and a smoothness class (analytic $\rho$, or
-Sobolev $s$). The optimal code family minimizes the deployment error
-subject to the stratum constraints of
-Theorem~\ref{thm:capacity-stratification}: on $\mathcal{F}_k$ the table
-code (LUT) is stratum-1 optimal within the interpolation class
-(Theorem~\ref{thm:optimal_lut}) and competitive with the spectral code
-at low smoothness; on $A_\rho$ the spectral code strictly dominates the
-non-adaptive table code for all budgets (error ratio
-$\leq 0.01$ measured at $N = 64$, E-T5), with the crossover governed by
-the smoothness threshold $\rho^{*}$ where the spectral tail rate
-exceeds the interpolation rate. On low-smoothness classes ($s \leq 1$)
-the two codes are within a constant factor (measured ratio $0.74$,
-E-T5).
+Fix a storage budget $N$ cells and a smoothness class (analytic $\rho$,
+or Sobolev $s$). Compare the two stratum-1 codes by their
+\emph{certified} error laws: the table code certifies
+$\varepsilon_{\mathrm{table}} \leq c_k M_k N^{-k}$ (rule (ii),
+Theorem~\ref{thm:sharp-lut}); the spectral code certifies
+$\varepsilon_{\mathrm{spectral}} \leq C e^{-c\rho N}$ on $A_\rho$
+(rule (iv); on $\mathcal{F}_k$ it certifies the same rate $N^{-k}$).
+On $A_\rho$ the spectral code \emph{eventually} strictly dominates the
+non-adaptive table code (the exponential law beats the polynomial law
+for all sufficiently large $N$; it also dominates at all measured
+budgets---error ratio $0.0032$ at $N = 64$, $E$-$T6$---and the
+certified comparison is the relevant one, since the table code's
+\emph{actual} error on analytic functions is also exponential by
+Bernstein-type convergence, but its \emph{certified} bound via rule
+(ii) is only polynomial). The crossover solves
+$c_k M_k N^{-k} = C e^{-c\rho N}$ (Lambert-$W$-type threshold
+$\rho^{*}(N)$; the cell count $N$ counts table entries on one side and
+spectral coefficients on the other, so $N$ is proportional up to the
+bits-per-coefficient factor absorbed into $C$). On low-smoothness
+classes ($s \leq 1$) the two codes are within a constant factor
+(measured ratio $0.74$, $E$-$T6$).
 \end{theorem}
 
 \vspace{2pt}
 \noindent\textit{Proof sketch.}
-Immediate from the two codes' error laws:
-$\varepsilon_{\text{table}} \asymp c_k M_k B^{-k}$ (interpolation,
-Theorem~\ref{thm:sharp-lut}) and $\varepsilon_{\text{spectral}} \asymp
-e^{-c\rho B}$ on $A_\rho$ (tail bound, rule (iv)); the crossover
-solves $c_k M_k B^{-k} = e^{-c\rho B}$. The measured phase transition
-(E-T5, \texttt{verify\_decision\_law.py}): exponential slope matches
-$-\rho$ to $2\%$; ratio $0.0032$ (analytic) vs.\ $0.74$ ($W^1$). $\square$
+Immediate from the two certified error laws and the crossover
+equation; the qualitative threshold $\rho^{*}(N)$ follows from the
+Lambert-$W$ solution. The measured phase transition ($E$-$T6$,
+\texttt{verify\_decision\_law.py}): exponential slope matches $-\rho$
+to within $2.5\%$; ratio $0.0032$ (analytic) vs.\ $0.74$ ($W^1$).
+$\square$
 
 \vspace{4pt}
 \noindent\textbf{Unification.}
 The framework reorganizes the paper's theorems into a pyramid:
-Theorem~\ref{thm:capacity-stratification} is the apex; its proof uses
-the sharp constants (Theorem~\ref{thm:sharp-lut}) as the stratum-1
-capacity limit, the minimax rates (Theorem~\ref{thm:compile_aware_minimax},
+Theorem~\ref{thm:capacity-stratification} is the apex, stated as the
+evaluation of the capacity function
+(Eq.~\eqref{eq:capacity-def}): $C(N, O(1)) \asymp c_k M_k N^{-k}$
+(stratum 1), $C(N, O(1)) \asymp M_1 N^{-1}$ on the kinked class
+(stratum 2), and $C(N, 2^{\Omega}) \leq c_* M_k N^{-k}$ conjecturally
+(stratum 3). Its proof uses the sharp constants
+(Theorem~\ref{thm:sharp-lut}) as the stratum-1 capacity limit, the
+minimax rates (Theorem~\ref{thm:compile_aware_minimax},
 Theorem~\ref{thm:besov_pac}) as the statistical coordinates
-($n$-dimension) of the capacity surface, the
-$\varepsilon$-separation (Theorem~\ref{thm:necessity}) as the stratum-3
-mechanism, and the trichotomy (Theorem~\ref{thm:trichotomy},
+($n$-dimension) of the capacity surface, the $\varepsilon$-separation
+(Theorem~\ref{thm:necessity}) as the stratum-3 mechanism, and the
+trichotomy (Theorem~\ref{thm:trichotomy},
 Theorem~\ref{thm:necessity_first}) as the coordinatized necessity.
 Theorem~\ref{thm:capacity-tradeoff} gives the verification-complexity
-axis, and Theorem~\ref{thm:capacity-decision} the architecture-selection
-consequence. The classical approximation theory (metric entropy, width
-constants, rate-distortion) appears only as \emph{inputs}---the
-framework's contribution is the verification side, not the approximation
-side.
+axis, and Theorem~\ref{thm:capacity-decision} the
+architecture-selection consequence. The classical approximation theory
+(metric entropy, width constants, rate-distortion, the
+spectral-vs-algebraic dichotomy) appears only as \emph{inputs}---the
+framework's contribution is the verification side, not the
+approximation side. The $\text{CP}$-relative necessity
+(Theorem~\ref{thm:capacity-stratification}, item 5) is the one theorem
+the framework alone yields.
 
 \vspace{4pt}
 \subsubsection{Related Work and Boundaries}
@@ -289,47 +384,65 @@ side.
 
 The \emph{components} of this framework have substantial precedent, and
 we state the boundary precisely. \textbf{Certificate calculi}: Gappa
-\cite{daumas2009gappa}, Sollya~\cite{chevillard2010sollya} and LeanCert
-generate machine-checkable certificates for floating-point and function
-bounds with absolute soundness---the certificate-proof-system structure
-of Definition~\ref{def:cp} follows them; the difference is that they
+\cite{daumas2009gappa}, Sollya~\cite{chevillard2010sollya} and
+LeanCert~\cite{radisic2025leancert} generate machine-checkable
+certificates for floating-point and function bounds with absolute
+soundness---the certificate-proof-system structure of
+Definition~\ref{def:cp} follows them; the difference is that they
 certify \emph{single-function} instance bounds, while the capacity
 framework certifies \emph{class-level} bounds coupled to the packing
-line, and adds the capacity/stratification theory (no such theory exists
-in validated numerics). \textbf{Proof-carrying architectures}: PCC
-\cite{necula1998pcc}, proof-carrying authorization, credible
-compilation~\cite{rinard1999credible} and translation
+line, and adds the capacity/stratification theory (no such theory
+exists in validated numerics). \textbf{Interval verification}:
+verified computing (Rump~\cite{rump1999interval},
+Neumaier~\cite{neumaier1990interval}) embeds verification \emph{inside}
+computation (Krawczyk/interval-Newton); our build-heavy/check-light
+split is the proof-carrying-code architecture, not the verified-computing
+doctrine, and the two are complementary (interval methods certify the
+individual arithmetic; CP certifies the class-level bound).
+\textbf{Proof-carrying architectures}: PCC~\cite{necula1998pcc},
+credible compilation~\cite{rinard1999credible} and translation
 validation~\cite{pnueli1998translation} establish the
 generate-heavy/check-light split; the capacity framework formalizes
-the split as the $V_B$ dimension, which those lines do not. \textbf{Succinct verification}: SNARGs
-\cite{kalai2023snargs} and delegation~\cite{goldwasser2008gkr} achieve
-verifier cost decoupled from computation size; the difference is
-object and soundness---they verify computation in $\mathbb{F}_p$
-circuits under computational/statistical soundness, while
+the split as the $V_B$ dimension, which those lines do not.
+\textbf{Succinct verification}: SNARGs~\cite{kalai2023snargs} and
+delegation~\cite{goldwasser2008gkr} achieve verifier cost decoupled
+from computation size; the difference is object and soundness---they
+verify computation in $\mathbb{F}_p$ circuits under
+computational/statistical soundness, while
 Definition~\ref{def:deployment-scheme} verifies real-valued class-level
-semantic bounds under perfect deterministic soundness (forced by the
-$\text{PCP}[0,\text{poly}] = \text{NP}$ argument above). \textbf{Resource
-monotonicity}: quantitative monitoring
-\cite{henzinger2021monitor} shows resource-precision monotonicity for
-online properties; the constant-purchase theorem concerns offline
-class-level proof lengths. \textbf{Verification hardness}: the NP-complete
-ReLU line~\cite{katz2017reluplex} and PSPACE-hard quantized line
-\cite{hlz2021quantized} are the stratum-3 mechanism; we add the capacity
-reading. \textbf{Certificate complexity}: the classical
-theory~\cite{buss2002capron} separates certificate size from sequential
-query cost for pointwise functionals; our necessity statement concerns
-class-level sup-norm bounds with closed-form propagation, a disjoint
-setting (the exponential-separation phenomenon does not transfer).
-\textbf{Approximation side}: metric entropy~\cite{kolmogorov1959entropy},
-width constants (Bronshtein), quantized minimax estimation
-\cite{zhu2018quantized} and quantized network approximation
-(OSB, in preparation) govern the \emph{rates} used as inputs; the
-capacity framework does not claim new approximation results. \textbf{SOS
-certificates} (Kaltofen--Li--Yang--Zhi line) certify polynomial
-optimality efficiently at the instance level; the exponential statement in
-Theorem~\ref{thm:capacity-tradeoff}(i) is class-level only, which is
-consistent with instance-level cheapness. (Numerical corroboration: E-T5, three
-scripts \texttt{verify\_capacity.py}, \texttt{verify\_stratification.py},
+semantic bounds under perfect deterministic soundness.
+\textbf{Information-based complexity}
+\cite{traub1988information}: the $\varepsilon$-complexity theory is
+the direct ancestor of the packing line (item 1) and the
+$c_{\mathrm{ent}}$ vs.\ $c_*$ comparison; we add the verification-budget
+dimension, which IBC does not carry. \textbf{Resource monotonicity}:
+quantitative monitoring~\cite{henzinger2021monitor} shows
+resource-precision monotonicity for online properties; the
+constant-purchase theorem concerns offline class-level proof lengths.
+\textbf{Verification hardness}: the NP-complete ReLU
+line~\cite{katz2017reluplex} and PSPACE-hard quantized
+line~\cite{hlz2021quantized} are the stratum-3 mechanism; the
+Lipschitz-certificate line (Scaman--Virmaux~\cite{scaman2018lipschitz},
+Fazlyab et~al.~\cite{fazlyab2019lipschitz}) is the stratum-2 mechanism
+(first-order closed-form bounds, exact Lipschitz constants NP-hard);
+we add the capacity reading. \textbf{Certificate complexity}: the
+classical theory~\cite{buss2002capron} separates certificate size from
+sequential query cost for pointwise functionals; our necessity
+statement concerns class-level sup-norm bounds with closed-form
+propagation, a disjoint setting (the exponential-separation phenomenon
+does not transfer). \textbf{Approximation side}: metric
+entropy~\cite{kolmogorov1959entropy}, width
+constants~\cite{pinkus1985width}, the spectral-vs-algebraic
+dichotomy~\cite{trefethen2013approximation,boyd2001chebyshev},
+quantized minimax estimation~\cite{zhu2018quantized} and quantized
+network approximation (in preparation) govern the \emph{rates} used as
+inputs; the capacity framework does not claim new approximation
+results. \textbf{SOS certificates} certify polynomial optimality
+efficiently at the instance level; the exponential statement in
+Theorem~\ref{thm:capacity-tradeoff}(i) is class-level and conjectural
+only, which is consistent with instance-level cheapness. (Numerical
+corroboration: $E$-$T4$--$E$-$T6$, scripts
+\texttt{verify\_capacity.py}, \texttt{verify\_stratification.py},
 \texttt{verify\_decision\_law.py}; results in
 \texttt{results/theory/capacity\_packing.json},
 \texttt{stratification.json}, \texttt{decision\_law.json}.)

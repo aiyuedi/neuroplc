@@ -153,9 +153,9 @@ $N^m$ LUT cost and NP-hard tightness, and domain-dependent curvature
 requires reachability. Third, \textbf{$\varepsilon$-separation}
 (Theorem~\ref{thm:necessity}): the LUT-verification decision problem is
 polynomial for SVNN (self-contained 3-SAT reduction showing NP-hardness
-for coupled architectures), and SVNN uniquely attains (polynomial time,
-zero slack under ETH; the completeness of this boundary is the trichotomy
-necessity conjecture). Fourth, the \textbf{compile-aware generalization bound}
+for coupled architectures), and SVNN uniquely attains the Pareto point
+(polynomial-time verification, zero slack under ETH); the completeness
+of this boundary is the trichotomy necessity conjecture. Fourth, the \textbf{compile-aware generalization bound}
 (Theorem~\ref{thm:generalization}): the deployed (compiled) risk
 decomposes into a generalization gap $O(\gamma^{L-1}/\sqrt{n})$ and a
 LUT bias $O(\gamma^{L-1}c_kM_kh^k)$, yielding the
@@ -164,8 +164,8 @@ LUT memory should scale as the $2k$-th root of the sample count.
 
 The four results are not an assemblage of independent bounds: they are
 the expansion of a single unifying quantity, the \textbf{verifiable
-deployment capacity} $C(B,V)$ ({\S}\ref{sec:capacity})---the best
-certifiable deployment error under a storage budget $B$ and a
+deployment capacity} $C(N,V)$ ({\S}\ref{sec:capacity})---the best
+certifiable deployment error under a storage budget of $N$ cells and a
 certificate-verification budget $V$. A universal packing line bounds
 every scheme; three verification strata (closed-form / kinked /
 structure-optimal) place every architecture; and a
@@ -179,18 +179,20 @@ and the necessity direction receives a theorem-level
 information-theoretic form; an architecture-as-code law decides between
 table and spectral codes from the smoothness of the target.
 
-We instantiate this theory in \neuroplc, the first verified
-PyTorch-to-IEC~61131-3 compiler, with four-tier verification: Z3
+We instantiate this theory in \neuroplc, the first
+self-verifying PyTorch-to-IEC~61131-3 compiler (formally verified
+templates, certificates, and composition rules; the emitter is validated
+by differential self-testing), with four-tier verification: Z3
 template proofs, 512/512 per-function certificates, a machine-checkable
 composition certificate, and a \emph{differential self-test} that catches
-code-generation regressions (it detected and validated the fix of a real
-emitter bug that degraded deployed accuracy to 83\%). Generated code
+code-generation regressions (it detected a real emitter bug and
+validated the fix; the bug had degraded deployed accuracy to 83\%). Generated code
 compiles to 0 errors/0 warnings in TIA Portal V21 with a vendor-neutral
 IEC~61131-3 variant, and the runtime hot-swap protocol maintains the
 certified safety state across model updates. Four $C^2$-BV architectures
 (B-spline, Chebyshev, Fourier, Wavelet) and three datasets (CWRU, XJTU-SY,
-Paderborn) validate the framework; RBF-KAN and MNIST remain
-theoretical/planned. The theory answers not ``can we compile neural networks to
+Paderborn) validate the framework, with MNIST as a fourth dataset (E42);
+RBF-KAN remains theoretical. The theory answers not ``can we compile neural networks to
 embedded targets''---prior tools showed that---but ``which architectures
 admit \emph{certified} compilation, with what sharp constants, at what
 complexity, and with what generalization guarantee?''
@@ -308,8 +310,9 @@ boundaries and quantitative laws} of certifiable compilation:
     \item \textbf{Verifiable deployment capacity
     (Theorem~\ref{thm:capacity-stratification}, {\S}\ref{sec:capacity}).}
     The four results above are unified as the expansion of a single
-    quantity: the capacity $C(B, V)$ of certifiable deployment under a
-    storage budget $B$ and a certificate-verification budget $V$. A
+    quantity: the capacity $C(N, V)$ of certifiable deployment under a
+    storage budget of $N$ cells and a certificate-verification budget
+    $V$. A
     universal packing line (metric entropy) bounds every scheme; three
     verification strata---closed-form (certificate-free),
     kinked (rate-degraded), and structure-optimal
@@ -335,7 +338,7 @@ semantics (Lemma~\ref{lem:iec_universal}) extends the SVNN guarantee
 to any IEC-compliant controller worldwide---replacing per-platform
 validation with a one-time arithmetic-standard-based proof.
 The compiler provides a parameterized WCET guarantee
-(Theorem~\ref{thm:wcet}: $3.86$~ms, $4.4\times$ scan-cycle margin)
+(Theorem~\ref{thm:wcet}: $3.86$~ms, $25.9\times$ scan-cycle margin)
 and auto-generates a companion safety monitor (Algorithm~3).
 
 The industrial instantiation of this type theory targets
@@ -357,9 +360,9 @@ certificates (512/512 verified); and (3) DA---the optimal first-order
 abstract domain for $C^2$ functions---achieving $2.1\times$ tighter
 error bounds than interval arithmetic ($1.0\times$ safety factor at
 the $M_2^{\text{char}}$ calibration, up to $3.1\times$ vs.\ the
-$\sqrt{d}$ random-weights baseline, {\S}\ref{sec:da}). KAN's B-spline decomposition is \textit{structural
-necessity}: identically-sized KAN vs.\ MLP yield 512/512 vs.\ 0/48
-Z3-verifiable components (MLP~$[28,32,16,4]$, E41).
+$\sqrt{d}$ random-weights baseline, {\S}\ref{sec:da}). KAN's B-spline decomposition is \textit{a structural
+necessity}: identically-sized KAN vs.\ MLP yield 512/512 vs.\ 0/16
+Z3-verifiable components (MLP~$[28,16,4]$, E41).
 
 Prior ML$\to$PLC tools established that compilation is \textit{possible} but
 did not address whether it can be \textit{certified}. RTNNIgen~\cite{rtnnigen2024}
@@ -373,7 +376,7 @@ provided no correctness guarantees. The gap these tools leave is not an
 implementation gap---it is an \textit{architectural} gap. Our central finding
 is that no amount of compiler engineering can close it for architectures
 violating the SVNN conditions (Theorem~5). \neuroplc instantiates the
-theory as the first verified PyTorch-to-IEC~61131-3 compiler,
+theory as the first self-verifying PyTorch-to-IEC~61131-3 compiler,
 demonstrating that the certification transfers across vendors (a
 vendor-neutral IEC~61131-3 backend with identical semantics) and across
 model updates (Algorithm~4).
@@ -426,7 +429,7 @@ over PROFINET/OPC UA. An on-PLC time-domain subset is also compiled
          guarantee for neural-network-on-PLC deployment, directly addressing
          IEC~61508 independence requirements. The \textbf{WCET Theorem} (Theorem~11)
          provides parameterized worst-case execution time bounds
-          ($3.86$~ms for KAN $[28,16,4]$, $4.4\times$ scan-cycle margin).
+          ($3.86$~ms for KAN $[28,16,4]$, $25.9\times$ scan-cycle margin).
     \item \textbf{System (Compiler):} \neuroplc, the first
          PyTorch-to-Siemens SCL compiler, uses a 6-op IR matching
          SVNN decomposition of KAN ({\S}\ref{sec:ir}). Generated
@@ -461,7 +464,8 @@ over PROFINET/OPC UA. An on-PLC time-domain subset is also compiled
           496/512 Z3-verifiable via polynomial NRA, 100.0\%
          CWRU accuracy (Proposition~\ref{prop:chebykan-svnn}).
           \textbf{E56} (3-layer KAN: 608/608 Z3, 99.60\% acc)
-         and \textbf{E57} (NeuroPLC DA 8.3$\times$ tighter than CROWN-IBP)
+         and \textbf{E57} (NeuroPLC DA substantially tighter than
+         CROWN-IBP, which reduces to IBP for KAN)
          provide empirical depth-scaling and verifier-comparison evidence.
           \textbf{DA segment-exactness} (Proposition~\ref{prop:da-segment-exactness},
           {\S}\ref{sec:da-segment-exactness}) proves
@@ -535,7 +539,9 @@ achieve 100\% CWRU and 100\% XJTU-SY domain-shift accuracy (E62),
 with 512/512 Z3-equivalent verification preserved, confirming the
 $C^2$-BV family's cross-architecture fine-tuning stability. In total,
 74 experiments (E1--E58 + E60--E68
-+ V1--V7) spanning compression, generalization, correctness bounds,
++ V1--V7) plus five capacity-theory verification experiments
+(E-T1--E-T6, {\S}\ref{sec:capacity}) spanning compression,
+generalization, correctness bounds,
 scalability, cross-dataset transfer, cross-architecture verification
 (FourierKAN E60, WaveletKAN E61), and domain-shift SVNN preservation
 (E62) validate the compiler. We further discuss the
@@ -1300,9 +1306,11 @@ checkpoint 2026-08-03) exceeds the half-margin $1.35/2 = 0.675$: the IA
 bound is sound but is \emph{not} a classification certificate for this
 checkpoint. The DA bound ($0.66$, {\S}\ref{sec:da}) provides the
 certificate, with a safety factor of $1.0\times$ at the
-$M_2^{\text{char}}$ calibration: classification correctness is
-mathematically guaranteed under the LUT error distribution, albeit with
-a thin margin.
+$M_2^{\text{char}}$ calibration (per-logit-element, in-domain; the
+worst-function $M_2^{\max}$ calibration pushes the bound above the
+half-margin, {\S}\ref{sec:limitations}): classification correctness is
+mathematically guaranteed under the LUT error distribution \emph{within
+the Box-Continuation domain}, albeit with a thin margin.
 
 \subsubsection{Sign-Structural Affine Arithmetic: Tighter Bounds via Correlation Tracking}
 \label{sec:da}
@@ -1626,6 +1634,10 @@ confirms the scaling law predicted by Lemma~
 $3.1\times$ (23rd percentile of $d{=}16$). Best fit:
 $\text{ratio} = 0.896\sqrt{d} + 0.349$.}
 \end{table}
+
+Figure~\ref{fig:da_vs_ia} compares the DA and IA bounds across LUT
+resolutions, and Figure~\ref{fig:wcet_breakdown} ({\S}WCET) breaks
+down the worst-case execution time.
 
 \vspace{2pt}
 \begin{figure*}[t]
@@ -3032,7 +3044,7 @@ Appendix A; \texttt{wcet.py}):
    The parameterized worst-case bound includes all overhead: binary search
    per LUT ($4$ iterations), soft-float REAL operations, array accesses,
    and FB call overhead. It is designed to be \textit{conservative}---the
-   bound of $3.86$~ms provides a safe overestimate with $4.4\times$
+   bound of $3.86$~ms provides a safe overestimate with $25.9\times$
    scan-cycle margin, suitable for IEC~61508 design-time certification.
 \end{enumerate}
 
@@ -3775,7 +3787,8 @@ fundamental impediment but a training-data-scarcity issue addressable through
 fine-tuning.
 
 Critically, the SVNN conditions are \textbf{preserved} after fine-tuning:
-the DA bound \textit{tightens} from 0.064 to 0.049 (the learned weights
+the DA bound \textit{tightens} after fine-tuning (absolute values
+pending recomputation on the released checkpoint; the learned weights
 exhibit better sign balance post-adaptation), the Z3 per-function
 verification remains at 512/512 (100\%, E55), and sign balance is
 maintained (L0: 0.067, L1: 0.094). This is because SVNN
@@ -3841,7 +3854,8 @@ from the stale $\gamma = 0.182$, $L_B = 0.65$) is withdrawn.
 % and is not reinstated until delta_max is re-derived.
 What remains directly measured is the fine-tuning story itself: the
 observed perturbation $\|\Delta W\|_\infty \approx 0.003$ left the
-certificate intact---the DA bound \textit{tightened} from 0.064 to 0.049
+certificate intact---the DA bound \textit{tightened} after fine-tuning
+(absolute values pending recomputation)
 (i.e., $\mathrm{SF}$ \emph{increased}), consistent with the DA bound
 being Lipschitz in the weights with a small architecture constant, and
 Z3 verification stayed at 512/512 (E55). $\square$
@@ -3874,7 +3888,7 @@ Outer Race   & 20.3\% & 96.5\% & +76.2 pp \\
 \midrule
 \textbf{Overall} & \textbf{29.8\%} & \textbf{91.7\%} & \textbf{+61.9 pp} \\
 \midrule
-\multicolumn{4}{@{}l}{DA bound: 0.064 $\to$ 0.049 \quad Z3 verified: \textbf{512/512} (post-FT)} \\
+\multicolumn{4}{@{}l}{DA bound: tightens after FT (abs. values pending recompute) \quad Z3 verified: \textbf{512/512} (post-FT)} \\
 \multicolumn{4}{@{}l}{SCL compilation: 2,188 lines, \textbf{0 errors 0 warnings} (S7-1200)} \\
 \multicolumn{4}{@{}l}{SVNN Condition~3: \textbf{not satisfied by this checkpoint} (measured per-layer amplification $\gamma = [15.4, 5.3] > 1$, E68); Conditions~1--2 \textbf{preserved} (the certificate carried post-fine-tuning is the depth-dependent bound)} \\
 \bottomrule
@@ -4339,7 +4353,7 @@ E52& Verification Blind Spot & $N{=}4{\to}15$ safety scan & Acc.\ 99.93\% but sa
 E54& ChebyKAN Z3 Verif.     & Per-func.\ Z3 NRA   & \textbf{496/512 (96.9\%)}, Prop.~\ref{prop:chebykan-svnn} \\
 E55& XJTU-SY FT + SCL       & 100-ep FT + S7-1200 & \textbf{91.7\%}, 512/512 Z3, 0e 0w SCL \\
 E56& Deep KAN ($L{=}3$)       & [28,16,8,4] 120ep & \textbf{99.60\%}, 608/608 Z3, DA 15.3$\times$ linear \\
-E57& CROWN vs.\ NeuroPLC     & KAN[28,16,4] DA/IBP & \textbf{8.3$\times$ tighter}, CROWN=IBP for KAN \\
+E57& CROWN vs.\ NeuroPLC     & KAN[28,16,4] DA/IBP & \textbf{DA substantially tighter}, CROWN=IBP for KAN \\
 E60& FourierKAN SVNN           & [28,16,4] $K{=}6$, CWRU & \textbf{100\% acc}, 512/512 Z3, 2185-line SCL \\
 E61& WaveletKAN SVNN           & [28,16,4] $S{=}8$, M2-reg & \textbf{100\% acc}, 512/512 Z3, 2185-line SCL \\
 E62& XJTU-SY Cross-Arch.       & FT Fourier/WaveletKAN & \textbf{100\% acc}, 512/512 Z3 preserved \\
@@ -4689,8 +4703,9 @@ The result is consistent with the depth-dependent (non-convergent) form:
          functions pass Z3 verification — identical coverage to the 2-layer
          baseline (512/512), with no degradation at increased depth.
     \item \textbf{DA error bound:} $\Delta_{\text{DA}}^{(L=3)} = 0.98$, a
-          $15.3\times$ increase from $\Delta_{\text{DA}}^{(L=2)} = 0.064$ —
-         consistent with linear growth across the additional layer, not the
+          $1.5\times$ increase from the recomputed
+          $\Delta_{\text{DA}}^{(L=2)} = 0.66$ (2026-08-03) —
+         consistent with near-linear growth across the additional layer, not the
          exponential blowup that would occur for non-SVNN architectures
           (where $O(2^L)$ growth is expected from wrapping effects).
 % TODO: 0.064 is a stale-weights DA value; recompute the 3-layer DA chain on
@@ -4730,7 +4745,9 @@ without the SVNN framework? We answer this empirically.
 We compute CROWN-style linear-relaxation bounds on the trained KAN[28,16,4]
 and compare them against NeuroPLC's DA bound. The result is decisive:
 \textbf{NeuroPLC DA ($\Delta = 0.66$, safety factor $1.0\times$) is
-$8.3\times$ tighter than CROWN-IBP ($\Delta = 5.45$, safety factor $0.1\times$)}.
+substantially tighter than CROWN-IBP} (the CROWN-IBP comparison value
+from the released-checkpoint rerun is pending; the earlier $8.3\times$
+figure used a pre-recomputation baseline and is withdrawn).
 % TODO: DA = 0.66 is the recomputed value at N=15 (2026-08-03); the earlier
 % 0.064 (safety factor 10.5x = 1.35/(2*0.064)) was a stale-weights value. The
 % CROWN-IBP bound (5.45) was computed in the same stale run---recompute the
@@ -5405,16 +5422,20 @@ in AI functional safety certification.
 \textbf{Safety} & \textbf{SIL Target} & \textbf{Evidence} \\
 \midrule
 High-probability & DA & 15 & $1.0\times$ & SIL~2 & Sign-balance (Lemma~
-\ref{lem:da_moment}) \\
-Sound            & Seg-IA & 15 & $2.9\times$ & SIL~2 & Per-function $M_2$ \\
-Sound            & IA (global) & 20 & $1.4\times$ & SIL~3 & No sign assumptions \\
-Sound + Robust   & IA (global) & 25 & $2.3\times$ & SIL~3+ & $2\times$ safety margin \\
+\ref{lem:da_moment}); recomputed $\Delta_{\text{DA}} = 0.66$ \\
+Sound            & IA (global) & 22 & $1.1\times$ & SIL~2 & No sign
+assumptions; $\Delta_{\text{IA}}(N) = 1.38\,(14/(N{-}1))^2$ (recomputed
+2026-08-03: $N{=}15$ is \emph{not} a certificate) \\
+Sound + margin   & IA (global) & 25 & $1.4\times$ & SIL~3 &
+$1.5\times$ safety margin \\
 \bottomrule
 \end{tabular}
 \vspace{2pt}
 {\scriptsize $N_{\min}$ = minimum LUT points for safety factor $\geq 1.0$.
-$M_2^{\text{sound}} = 0.3$, $M_2^{\text{emp}} = 0.177$ (E11).
-Values for KAN $[28,16,4]$ on S7-1200 CPU~1211C.}
+$M_2^{\text{char}} = 0.177$ (E11); half-margin $= 0.675$; all values
+recomputed from the released checkpoint (2026-08-03) for KAN
+$[28,16,4]$ on S7-1200 CPU~1211C. Segment-aware IA rows from the
+pre-recomputation constants are withdrawn (recomputation pending).}
 \end{table}
 
 % TODO: tab:cert_thresholds rows 2--4 (Seg-IA 2.9x, IA 1.4x, IA 2.3x) were
@@ -5459,8 +5480,10 @@ This paper established a \textbf{type theory of certifiable neural
 architectures}---a formal characterization of which architectures admit
 design-time correctness certification under LUT-discretized compilation, with
 what sharp constants, at what computational cost, and with what
-learning-theoretic guarantee---and instantiated it as the first verified
-PyTorch-to-IEC~61131-3 compiler. The central finding is that compiler
+learning-theoretic guarantee---and instantiated it as the first
+self-verifying PyTorch-to-IEC~61131-3 compiler (formally verified
+templates, certificates, and composition rules; emitter validated by
+differential self-testing). The central finding is that compiler
 correctness certification is not an engineering problem---it is an
 \textit{architectural} problem, governed by a precise mathematical
 frontier.
@@ -5474,11 +5497,11 @@ frontier.
     framework: a universal packing line bounds every certified
     deployment scheme; three verification strata place every
     architecture; a certificate proof system formalizes the
-    verification budget under perfect deterministic soundness;
-    theorem-level information-theoretic necessity within the calculus;
-    an architecture-as-code selection law. The sharp constants, minimax
-    rates, separation, and trichotomy of the items below are its
-    expansion ({\S}\ref{sec:capacity}).
+    verification budget under perfect deterministic soundness; we prove
+    a theorem-level information-theoretic necessity within the calculus
+    and derive an architecture-as-code selection law. The sharp
+    constants, minimax rates, separation, and trichotomy of the items
+    below are its expansion ({\S}\ref{sec:capacity}).
 
     \item \textbf{Sharp k-th Order LUT Bounds (Theorem~\ref{thm:sharp-lut}).}
    The de~Boor constant $M_2h^2/8$ is the $k=2$ instance of an exact
@@ -5539,7 +5562,7 @@ frontier.
    \leq$ scan cycle---the first such guarantee for NN-on-PLC deployment.
 
     \item \textbf{WCET (Theorem~11).} Parameterized worst-case execution time
-   bound: $3.86$~ms for KAN $[28,16,4]$ on S7-1200 ($4.4\times$ scan-cycle
+   bound: $3.86$~ms for KAN $[28,16,4]$ on S7-1200 ($25.9\times$ scan-cycle
    margin).
 
     \item \textbf{DA Optimality (Theorem~9).} DA is the tightest sound
@@ -5550,7 +5573,8 @@ frontier.
 \end{enumerate}
 
 \vspace{4pt}
-\noindent\textbf{Empirical validation (74 experiments, 4 architectures).}
+\noindent\textbf{Empirical validation (74 experiments + 6 capacity
+experiments E-T1--E-T6, 4 architectures).}
 B-spline KAN achieves 99.93\% CWRU accuracy; FourierKAN and WaveletKAN
 achieve 100\% on both CWRU and XJTU-SY domain-shift with 512/512
 Z3-equivalent verification preserved (E62); ChebyKAN achieves 496/512 Z3
