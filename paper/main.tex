@@ -214,7 +214,12 @@ curvature bound). The \textbf{SVNN Sufficiency Theorem} (Theorem~2)
 guarantees that well-typed architectures have computable, finite
 per-output error bounds under LUT-discretized compilation---a property that
 ill-typed architectures (standard MLPs with $\sigma(W\mathbf{x}+\mathbf{b})$)
-provably lack (Proposition~\ref{prop:mlp_negative}).
+provably lack (Proposition~\ref{prop:mlp_negative}). The typing is
+\emph{numerical} (it certifies error bounds under discrete execution),
+complementary to categorical constructions that embed logical
+constraints into architecture~\cite{nye2025categorical}: there,
+well-typedness rules out logical violations; here, it rules out
+unbounded discretization error.
 
 The SVNN type system is distinguished by three properties:
 

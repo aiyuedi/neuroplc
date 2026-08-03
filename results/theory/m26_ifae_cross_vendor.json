@@ -1,0 +1,23 @@
+{
+  "experiment": "M26",
+  "name": "Cross-vendor compile validation: backend_iec ST on Inovance EVO810 (iFA)",
+  "date": "2026-08-03",
+  "vendor": "Inovance (汇川)",
+  "platform": "iFA Evolution V1.5.2.5, EVO810",
+  "source": "results/scl_output/kan_iec_inference.st (backend_iec.py, vendor-neutral IEC 61131-3 ST)",
+  "procedure": [
+    "1. plc_new_project(neuroplc_iec_test) -> EVO810 device",
+    "2. plc_new_pou: FUNCTION_BLOCK NeuroPLC_Inference imported (ImportObjectByText: 成功)",
+    "3. FUNCTION Caller : BOOL wrapper imported",
+    "4. plc_compile: FB + FUNCTION 0 syntax errors (sole error: task has no PROGRAM POU)",
+    "5. project_save"
+  ],
+  "result": {
+    "text_import": "PASS (成功)",
+    "fb_syntax_compile": "PASS (0 errors across all compile attempts for FB/FUNCTION bodies)",
+    "full_program_compile": "LIMITED - iFA requires PROGRAM-type POU in task; iFA program objects carry motion-control template vars (MC_Power etc.) requiring GUI library config; not an ST-semantics issue",
+    "simulation_download": "PENDING (GUI step: add PROGRAM in iFA IDE, configure motion library, then plc_sim_download)"
+  },
+  "significance": "backend_iec output (ARRAY/REAL/FOR/IF/EXP/softmax/SiLU structure) is accepted by a THIRD-PARTY IEC 61131-3 compiler (Inovance EVO810) - cross-vendor syntax validation, addressing the reviewer gap 'never compiled on any non-Siemens toolchain' (Agent 3, Generalization #2).",
+  "artifact": "D:\dev-tools\inovance\neuroplc_iec_test\neuroplc_iec_test.fasln"
+}

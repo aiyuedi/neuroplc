@@ -120,6 +120,21 @@ B\&R (X20, X90 series), Schneider Electric (Modicon M580, M340), and WAGO
 (PFC~200).
 
 \vspace{4pt}
+\noindent\textbf{Cross-vendor compile validation (2026-08-03).} To
+substantiate the platform-independence claim empirically, the
+vendor-neutral ST output of \texttt{backend\_iec.py}
+(\texttt{kan\_iec\_inference.st}) was imported into and compiled by a
+\emph{third-party} IEC~61131-3 toolchain---the Inovance EVO810
+programmable controller (iFA Evolution platform). The text import
+succeeded and the function block (ARRAY/REAL arithmetic, FOR/IF
+control, EXP-based SiLU and softmax) passed the EVO compiler with zero
+errors; only the program-level task binding remains a GUI step in the
+vendor IDE (the platform's program template carries motion-control
+library variables, which does not affect ST semantics). This provides
+the first non-Siemens compilation evidence for the vendor-neutral
+backend.
+
+\vspace{4pt}
 \noindent\textbf{Platform Independence via Arithmetic Standardization.}
 The universal guarantee is a direct consequence of arithmetic
 standardization in industrial control: IEC~61131-3:2025 mandates

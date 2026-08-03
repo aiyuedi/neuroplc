@@ -307,7 +307,11 @@ earlier $0.0019$ term had a wrong $\gamma$ exponent and $\rho$). The
 empirical generalization gap (training vs.\ test) is $0.036\%$
 (E68), far below the worst-case gap term---as expected, since the
 $n^{-1/2}$ rate is a worst-case envelope not achieved on a
-well-separated task (measured gap decays as $n^{-0.84}$). The
+well-separated task (measured gap decays as $n^{-0.84}$); the
+learning-theoretic picture is completed by the optimal Besov
+approximation rates of residual KANs~\cite{kratsios2025reskan}, which
+provide the matching statistical upper bound for the smoothness class
+that the compile-aware decomposition targets. The
 resolution-matching law (Corollary~\ref{cor:resolution_matching})
 predicts $N^{*} \asymp n^{1/4} \approx 10{,}971^{1/4} \approx 10.3$
 for $k=2$, matching the deployed $N = 15$ within $1.5\times$.

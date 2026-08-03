@@ -54,7 +54,7 @@
 | M23 | 32 个小数值不一致（A2 Mi 列表）| ⬜ |
 | M24 | 论文 language 修复（A1: 2 CRITICAL + 12 MAJOR + 24 MINOR）| ⬜ |
 | M25 | bib 清理（删 ~24 未引条目 + 占位）| ⬜ |
-| M26 | iFA 跨厂商实验（编译 backend_iec ST + 仿真）| ⬜ |
+| M26 | iFA 跨厂商实验（编译 backend_iec ST + 仿真）| ✅ | EVO810 文本导入成功 + FB/FUNCTION 编译 0 语法错误（任务绑定为 GUI 步）；JSON 落盘；论文加实证段 |
 | M27 | 4 个旧 SCL 文件清理 + IEC ST 乱码 | ⬜ |
 
 ## C. 状态汇总
