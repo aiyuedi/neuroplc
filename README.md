@@ -2,7 +2,7 @@
 
 > **A Type Theory of Certifiable Neural Architectures: Sharp LUT Bounds, Complexity Separation, and Compile-Aware Generalization, with an Industrial PLC Instantiation** — IEEE TNNLS submission (theory-first).
 
-**状态：87 页 0e0w 0 undefined refs ｜ 19 定理 ｜ 2026-08-04 更新**（P3：可认证部署容量理论 Thm 17-19 加入）
+**状态：89 页 0e0w 0 undefined refs ｜ 19 定理 ｜ 2026-08-04 更新**（P3 容量理论 Thm 17-19 + P4 审稿修复 + 优化轮：c_ent/c_* 常数识别、E-T9 软收缩 γ 11× 改善）
 
 Author: 刘甫悦 (板板) + Claude
 
@@ -45,6 +45,11 @@ python theory/verify_compile_aware_minimax.py       # T-II（剪刀差 1.003 平
 python theory/verify_besov_pac.py                   # T-IV（光滑度自适应）
 python theory/verify_necessity_first.py             # T-III（necessity 第一格）
 python theory/verify_da_bounds_recomputed.py        # 界值重算（0.66/1.38）
+python theory/verify_capacity.py                    # E-T4：packing 常数匹配
+python theory/verify_stratification.py              # E-T5：三层分离
+python theory/verify_decision_law.py                # E-T6：决策律相变
+python theory/verify_packing_constant.py            # E-T7：c_ent≈0.079
+python theory/verify_width_constant.py              # E-T8：c_*≲0.082
 python -m neuroplc.differential_test                # Tier 4（3,357 样本 100%）
 
 # 4. 双推

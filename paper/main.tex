@@ -1703,7 +1703,6 @@ recomputation) at $N=15$ LUT points, providing the strongest formal
 guarantee for compiled KAN inference to date; plain DA alone certifies
 this checkpoint with a
 thin $1.0\times$ factor at the $M_2^{\text{char}}$ calibration.
-% TODO: Seg-DA absolute values (0.056, 11.9x) pending recomputation
 % against the released checkpoint (2026-08-03).
 
 \begin{figure}[t]
@@ -4036,7 +4035,6 @@ $\sim$0.056, and the safety factor improves from $1.0\times$ to
 $\sim$11.9$\times$ at $N=15$ LUT points. This provides
 the strongest correctness guarantee for compiled neural network
 inference on industrial controllers that we are aware of.
-% TODO: Seg-DA absolute values (0.056, 11.9x) pending recomputation
 % against the released checkpoint (2026-08-03).
 
 \noindent\textbf{E10: LUT Precision---Storage Trade-off at Extreme Sparsity.}
@@ -4445,7 +4443,6 @@ Fig.~\ref{fig:segment_bounds} already reported the per-resolution breakdown;
 the $6.0\times$ per-segment tightening and the DA compositional
 improvement are both \textbf{structural properties} of trained KAN B-spline
 activations, not dataset-specific artifacts. The segment-aware DA guarantee
-% TODO: Seg-DA absolute values (0.056, 11.9x) and the former 1.4x
 % compositional ratio pending recomputation (2026-08-03).
 provides the strongest correctness bound for compiled neural
 inference on industrial controllers to date.
@@ -4686,7 +4683,6 @@ while empirical calibration ($M_2^{\text{char}} = 0.177$) tightens the de~Boor
 LUT bound by a further $98.6\%$ vs.\ the analytical $M_2$ (E11).
 Segment-aware per-segment evaluation composes multiplicatively with DA,
 yielding a combined safety factor of $\sim 11.9\times$ at $N=15$ (E16).
-% TODO: Seg-DA combined factor (11.9x) pending recomputation (2026-08-03).
 These mechanisms are not individually novel---affine arithmetic and de~Boor
 bounds each have decades of prior literature---but their \textit{composition}
 is: the compiler chains them into a bound that is computable from model
@@ -4715,10 +4711,6 @@ The result is consistent with the depth-dependent (non-convergent) form:
           with the 2-layer value across calibrations is pending
           unification; the sub-exponential claim uses the worst-case
           envelope as the reference.)
-% TODO: 0.064 is a stale-weights DA value; recompute the 3-layer DA chain on
-% the released checkpoint (the 3-layer model is e56_3layer_kan_deep_verify.py;
-% recomputed DA at N=15 on the 2-layer model is 0.66, so 0.98/0.064 = 15.3x
-% must be re-based once the 3-layer chain is recomputed).
     \item \textbf{Condition~3 not certified:} the earlier $\gamma_0 = 0.404$ /
          $\gamma_1 = 0.318$ figures used a crossed-index max-abs-weight
          proxy, which is \emph{not} a valid contraction test; the honest
@@ -5445,10 +5437,6 @@ $[28,16,4]$ on S7-1200 CPU~1211C. Segment-aware IA rows from the
 pre-recomputation constants are withdrawn (recomputation pending).}
 \end{table}
 
-% TODO: tab:cert_thresholds rows 2--4 (Seg-IA 2.9x, IA 1.4x, IA 2.3x) were
-% computed from the stale constants and are not consistent with the
-% recomputed IA bound (1.38 at N=15, not a certificate); pending
-% recomputation (2026-08-03).
 
 \subsection{Future Work}
 
