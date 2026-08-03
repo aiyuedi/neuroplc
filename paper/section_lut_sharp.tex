@@ -149,3 +149,85 @@ functions (degree-$\leq 2$) to \emph{all} interpolation orders;
 soundness ratio $\leq 1$; extremal
 ratio $= 1.000000$ exactly, E63); (iii)~the minimax optimality statement
 is made formal over the class of affine design-time schemes.
+
+\vspace{4pt}
+\subsection{Curvature-Aware Optimal LUT Allocation and Grids}
+\label{sec:optimal-lut}
+
+\setcounter{theorem}{13}
+\begin{theorem}[Two-Level Optimality of Curvature-Aware LUTs]
+\label{thm:optimal_lut}
+Let $\{\phi_i\}_{i=1}^{F}$ be the $F$ B-spline activation functions of a
+compiled KAN on $[a,b]$, with per-function curvature
+$M_2^{(i)} = \max_x |\phi_i''(x)|$ and a total LUT budget of $N$ nodes.
+\emph{(a) Cross-function allocation.} Under per-function uniform
+sub-grids, the minimax error
+$\min_{\{n_i\}}\; \max_i\; M_2^{(i)}(b-a)^2/(8 n_i^2)$ subject to
+$\sum_i n_i = N$ is attained at
+\begin{equation}
+n_i^{*} \;=\; N \cdot \frac{(M_2^{(i)})^{1/2}}{\sum_j (M_2^{(j)})^{1/2}},
+\qquad
+e^{*}_{\text{cross}} \;=\; \frac{(b-a)^2}{8 \bigl(\sum_i
+(M_2^{(i)})^{-1/2}\bigr)^{2}},
+\label{eq:optimal_cross}
+\end{equation}
+which improves on the uniform allocation by the factor
+$\max_i M_2^{(i)} \cdot \bigl(\sum_j (M_2^{(j)})^{-1/2}\bigr)^{2}/N^{2}$
+(for the released checkpoint: $2.99\times$, E-T1).
+\emph{(b) Within-function grid.} For a single function with per-point
+curvature profile $M_2(x) = |\phi''(x)|$, the minimax segment error
+$\max_x M_2(x)\,\Delta(x)^2/8$ over all $N$-node grids is attained by
+the density
+\begin{equation}
+\rho^{*}(x) \;\propto\; \sqrt{M_2(x)},
+\qquad
+e^{*}_{\text{within}} \;=\; \frac{1}{8N^{2}}\Bigl(\int_a^b
+\sqrt{M_2(x)}\,dx\Bigr)^{2},
+\label{eq:optimal_density}
+\end{equation}
+achievable by inverse-CDF sampling of $\sqrt{M_2(x)}$. On the worst
+activation of the released checkpoint this yields a $3.32\times$
+improvement over the uniform grid (E-T1); the previously used curvature
+density $|\phi''|/(1+\phi'^2)^{3/2}$ is measurably \emph{worse} than
+uniform ($2.10\times$), and is superseded here.
+\end{theorem}
+
+\vspace{2pt}
+\noindent\textit{Proof sketch.}
+(a)~The per-function error with $n_i$ nodes is
+$e_i = M_2^{(i)}(b-a)^2/(8 n_i^2)$ (sharp constant of
+Theorem~\ref{thm:sharp-lut} with $h = (b-a)/n_i$). Minimax balancing
+requires $e_i = e^{*}$ for all active $i$, i.e.
+$n_i \propto (M_2^{(i)})^{1/2}$; substituting into $\sum_i n_i = N$
+gives the closed form. (b)~For a grid with segment widths
+$\Delta_j$, the segment error is $M_2(\xi_j)\Delta_j^2/8$ for the
+segment maximum $M_2(\xi_j)$; minimax balancing sets
+$M_2(\xi_j)\Delta_j^2$ constant, so $\Delta_j \propto
+M_2(\xi_j)^{-1/2}$ and the local node density is
+$\rho \propto 1/\Delta \propto \sqrt{M_2(x)}$; the constant follows
+from $\int_a^b \rho(x)\,dx = N$. $\square$
+
+\vspace{2pt}
+\noindent\textbf{Relationship to optimal recovery.} In the
+Micchelli--Rivlin--Winograd framework~\cite{micchelli1977survey} the
+recovery of a single function from samples is solved by canonical-knot
+spline interpolation; the $k=2$ piecewise-linear case here recovers that
+constant (sharp $1/8$), while Theorem~\ref{thm:optimal_lut} extends the
+question in the two directions relevant to compilation: \emph{joint}
+recovery of a \emph{family} of functions under one storage budget
+(part~(a)) and \emph{per-point} curvature adaptation of the grid
+(part~(b)). Both directions are new relative to the classical theory,
+which fixes a single function and a single interpolation scheme.
+
+\vspace{2pt}
+\noindent\textbf{Engineering consequence (E-T1, 2026-08-03).}
+The compiler's curvature-aware LUT pass
+(\texttt{optimizer.py::adaptive\_bspline\_sampling}) used the density
+$|\phi''|/(1+\phi'^2)^{3/2}$; Theorem~\ref{thm:optimal_lut} shows the
+minimax density is $\sqrt{|\phi''|}$ and the old density is worse than
+uniform on real activations. The pass has been corrected
+(\texttt{verify\_optimal\_lut.py}, E-T1: cross-function $2.99\times$,
+within-function $3.32\times$ improvement; results in
+\texttt{results/theory/ti\_optimal\_lut.json}). This converts the
+adaptive-LUT engineering heuristic (E15) into a provably optimal
+allocation at both levels.

@@ -1,0 +1,22 @@
+{
+  "date": "2026-08-03",
+  "theorem": "T-I curvature-aware optimal LUT",
+  "m2": {
+    "max": 3.4145751808840337,
+    "mean": 1.2936109005171768,
+    "p90": 2.0365234579270397
+  },
+  "cross_function": {
+    "e_star_optimal": 1.961684271685954e-05,
+    "e_uniform": 5.8615067726051906e-05,
+    "improvement_x": 2.9879970274561893
+  },
+  "within_function_worst": {
+    "uniform": 0.07839585874478643,
+    "sqrt_M2_optimal": 0.023600627032305293,
+    "kappa_old_impl": 0.16454892598271492,
+    "sqrt_vs_uniform_x": 3.321770164728067,
+    "kappa_vs_uniform_x": 2.0989492125903646
+  },
+  "verdict": "PASS"
+}
