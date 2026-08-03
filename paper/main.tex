@@ -4762,6 +4762,24 @@ four independent tiers, each with a distinct role and verification scope:
          template proofs rather than the emitter's arithmetic and are
          unaffected by the regression; where an SCL artifact is
          involved, the 2026-08-03 regeneration is authoritative.
+
+        \textit{Formal verification boundary.} To be precise about what
+        ``verified compiler'' means: the \emph{formal} proofs cover
+        (i)~the IR-to-SCL code \emph{templates} (Tier~1, symbolic Z3
+        over all inputs), (ii)~the per-function LUT \emph{certificates}
+        (Tier~2) and (iii)~their \emph{composition} (Tier~3,
+        machine-checkable). The \emph{emitter}---the code generator that
+        instantiates templates with concrete weights, tables, and
+        addressing---is \emph{not} covered by a formal proof; it is
+        validated by the differential self-test (Tier~4), which is an
+        empirical guarantee over the emitted artifact (3{,}357 samples,
+        E67), not a proof. This boundary is standard in verified
+        compilation practice (CompCert-style certified generators are
+        the stronger alternative~\cite{leroy2009compcert}); we state it
+        explicitly so that ``the first verified PyTorch-to-IEC~61131-3
+        compiler'' is read as: templates, certificates, and composition
+        formally verified; the emitter validated by differential
+        self-testing.
 \end{enumerate}
 
 \vspace{4pt}
