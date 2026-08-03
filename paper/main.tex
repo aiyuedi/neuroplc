@@ -2822,7 +2822,7 @@ deployment, correctness also requires that the compiled code executes
 analysis for SVNN-compiled networks on Siemens S7-1200.
 
 \vspace{4pt}
-\setcounter{theorem}{9}
+\setcounter{theorem}{10}
 \begin{theorem}[SVNN Worst-Case Execution Time]
 \label{thm:wcet}
 Let $N$ be an SVNN network with $L$ layers, $E = \sum_{\ell=0}^{L-1}
@@ -4155,6 +4155,13 @@ E57& CROWN vs.\ NeuroPLC     & KAN[28,16,4] DA/IBP & \textbf{85$\times$ tighter}
 E60& FourierKAN SVNN           & [28,16,4] $K{=}6$, CWRU & \textbf{100\% acc}, 512/512 Z3, 2185-line SCL \\
 E61& WaveletKAN SVNN           & [28,16,4] $S{=}8$, M2-reg & \textbf{100\% acc}, 512/512 Z3, 2185-line SCL \\
 E62& XJTU-SY Cross-Arch.       & FT Fourier/WaveletKAN & \textbf{100\% acc}, 512/512 Z3 preserved \\
+E53& Sound In-Domain Worst-Case & Real LUT, in-domain search & IA-sound certifies $N{\ge}20$; high-prob.\ DA at all $N$ \\
+E63& Sharp k-th Order LUT Bounds & $k{=}2..5$, extremal family & \textbf{extremal ratio $=$ 1.000000}; soundness $\leq 1$ \\
+E64& Moment-Robust DA Ratio    & Bennett, 4 weight families & $R$: 4.6/9.5/18.8/37.7 at $d{=}16..1024$; outlier $\kappa{=}\sqrt{d}$: $R{=}1$ \\
+E65& $\varepsilon$-Separation   & 3-SAT product-gate encoding & 200/200 both directions; spline exact $5{\times}10^{-8}$ \\
+E66& Verifiability Trichotomy  & Rates: tanh/sin/B-spline/ReLU & slopes $-2.04/-2.06/-1.77/-1.03$; tensor LUT $N^m$ \\
+E67& Tier-4 Differential Test  & PyTorch vs SCL-sim (emitter) & 3{,}000 samples 100\% agree; maxAE 0.24; \textbf{caught scale regression} \\
+E68& Compile-Aware PAC         & Decomp.\ + resolution matching & bias slope 0.99 vs $h^2$; per-act.\ ratio 0.996--1.000; knee $N^{*}$ exp.\ 0.14 \\
 \midrule
 \multicolumn{4}{l}{\textit{Validation Experiments (V1--V7):}} \\
 V1 & Worst-Case Adversarial   & 5,000 inputs, 100 worst  & 100/100 preserved, VALIDATED \\
