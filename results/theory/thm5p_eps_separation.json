@@ -1,0 +1,51 @@
+{
+  "encoding": {
+    "claim": "product_gate_3SAT_encoding",
+    "rows": [],
+    "pass": true,
+    "n_trials": 200
+  },
+  "svnn_complexity": {
+    "claim": "svnn_O(Ld2N)",
+    "ratios": [
+      3.8687615525908825,
+      4.5886970173882515,
+      3.7097086078863484,
+      4.12449879711804
+    ],
+    "linear": true,
+    "pass": true
+  },
+  "spline_exactness": {
+    "claim": "spline_exact_reproduction",
+    "max_err": 5.1619993168827705e-08,
+    "exact": true,
+    "pass": true
+  },
+  "timing_separation": {
+    "claim": "timing_separation",
+    "rows": [
+      {
+        "n": 4,
+        "svnn_us": 0.0538899999980913,
+        "brute_us": 6.700000028558861,
+        "ratio": 124.32733399139293
+      },
+      {
+        "n": 6,
+        "svnn_us": 0.05352000000016233,
+        "brute_us": 34.29999998161293,
+        "ratio": 640.881912957939
+      },
+      {
+        "n": 8,
+        "svnn_us": 0.05406999999877371,
+        "brute_us": 309.2000000037842,
+        "ratio": 5718.513038853279
+      }
+    ],
+    "pass": true,
+    "growth_8vs4": 45.99562184168742
+  },
+  "pass": true
+}

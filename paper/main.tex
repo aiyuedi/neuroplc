@@ -347,10 +347,13 @@ over PROFINET/OPC UA. An on-PLC time-domain subset is also compiled
          equal storage, with \textbf{Theorem~3} proving its minimax optimality
          via an exchange argument ({\S}\ref{sec:adaptive-lut}).
     \item \textbf{Theory (Completeness):} Beyond sufficiency, we establish
-          \textbf{computational necessity} (Theorem~5,
-          {\S}\ref{sec:svnn-necessity}): violating Condition~1 makes tight
-         bound computation NP-hard, proving the SVNN conditions cannot be
-         relaxed. Condition~3 yields a depth-improving
+          \textbf{$\varepsilon$-separation} (Theorem~5,
+          {\S}\ref{sec:svnn-necessity}): the LUT-verification \emph{decision
+         problem} is polynomial for SVNN (with sharp constants,
+         Theorem~\ref{thm:sharp-lut}) and NP-hard for coupled architectures
+         (self-contained 3-SAT reduction via product gates), and SVNN
+         uniquely attains the Pareto point (polynomial time, zero slack).
+         Condition~3 yields a depth-improving
           \textbf{generalization bound} $\Delta_{\text{gen}} \leq O(\gamma^L/\sqrt{n})$
           (Theorem~6, {\S}\ref{sec:svnn-generalization}). The framework is
          extended to \textbf{ChebyKAN} (Chebyshev polynomial KANs):

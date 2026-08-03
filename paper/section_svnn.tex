@@ -372,11 +372,14 @@ certificate composes automatically---no end-to-end re-certification required.
 While Theorem~2 establishes sufficiency, the question of necessity is
 equally important: are these conditions arbitrarily chosen, or do they
 characterize a genuine structural boundary? Theorem~5
-({\S}\ref{sec:svnn-necessity}) provides the formal answer:
-violating Condition~1 makes tight bound computation NP-hard,
-establishing that the SVNN conditions are not an arbitrary restriction
-but the precise boundary at which polynomial-time compiler-computed
-correctness becomes achievable. We briefly summarize the three
+({\S}\ref{sec:svnn-necessity}) provides the formal answer in the
+$\varepsilon$-dimension: the LUT-verification \emph{decision problem}
+is polynomial for SVNN and NP-hard for coupled architectures (a
+self-contained 3-SAT reduction via product gates), and SVNN uniquely
+attains (polynomial time, zero slack) simultaneously. This establishes
+that the SVNN conditions are not an arbitrary restriction but the
+precise boundary at which polynomial-time, tight compiler-computed
+certification becomes achievable. We briefly summarize the three
 observations that motivate the formal proof.
 
 \vspace{2pt}
@@ -1150,6 +1153,9 @@ The $2.2\times$ end-to-end tightening (E9) is thus not an empirical
 coincidence but a \textit{theoretically predicted} lower bound on the
 improvement any first-order abstract domain can achieve over naive
 interval arithmetic on $C^2$ B-spline segments.
+
+% ===========================================================================
+\input{section_trichotomy}
 
 % ===========================================================================
 \subsection{The Operation Separation Principle and $C^2$-BV Architecture Family}

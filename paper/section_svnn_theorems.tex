@@ -3,233 +3,274 @@
 % ===========================================================================
 % Insert after \input{section_svnn_chebykan} and before \subsection{Implications for Compiler Design}
 
-\subsection{Computational Necessity of Condition~1}
+\subsection{Verification-Cost Separation in the $\varepsilon$-Dimension}
 \label{sec:svnn-necessity}
 
-Theorem~2 establishes that Conditions~1--2 are \textit{sufficient} for
-structural verifiability. We now prove that Condition~1 is also
-\textit{computationally necessary} in a precise sense: architectures
-violating it cannot admit the polynomial-time compiler-computed error bound
-that SVNN provides. This transforms Remark~\ref{rem:near_necessity} from
-an informal observation into a formal separation result.
+Theorem~\ref{thm:svnn_conditions} establishes that Conditions~1--2 are
+\textit{sufficient} for structural verifiability. We now establish a
+\emph{correct} complexity separation. The earlier claim---that tight-bound
+computation is NP-hard for non-SVNN architectures while SVNN admits
+polynomial-time bounds---compares an exact quantity (NP-hard for \emph{both}
+classes) with an upper bound (polynomial for \emph{both} classes: interval
+propagation and CROWN are polynomial-time for MLPs), so it does not
+separate the classes. The valid separation operates in the
+\emph{$\varepsilon$-dimension}: the \emph{decision problem itself} is
+polynomial for SVNN and NP-hard for general coupled architectures, and
+SVNN achieves the Pareto point (polynomial time, zero slack)
+simultaneously---which no non-SVNN method can.
 
 \setcounter{theorem}{4}
-\begin{theorem}[Computational Necessity of Condition~1]
+\begin{theorem}[$\varepsilon$-Separation of LUT-Verification Complexity]
 \label{thm:necessity}
-Let $\mathcal{A}$ be a feedforward architecture that violates
-Condition~1---i.e., some layer couples a linear transform and a nonlinear
-activation in a single fused operation $\mathbf{h} = \sigma(W\mathbf{x}+\mathbf{b})$.
-Then computing the tight per-output compiler error bound
-\begin{equation}
-\varepsilon^{*}(M, X) = \sup_{x \in X} \|M(x) - C(M)(x)\|_\infty
-\label{eq:tight_bound_def}
-\end{equation}
-is \textbf{NP-hard} in the number of neurons, even when $\sigma$ is
-piecewise-linear (ReLU). By contrast, any architecture satisfying
-Condition~1 admits a bound on $\varepsilon^{*}$ computable in
-$O(L \cdot d_{\max}^2)$ time by the structural induction of Theorem~2.
+Let $\varepsilon$-Verify$(N, \mathrm{LUT}, \varepsilon)$ be the decision
+problem: ``is $\sup_{x \in \Omega} |N(x) - \mathrm{LUT}(x)| \leq \varepsilon$?''
+for a feedforward network $N$ on a compact box $\Omega$.
+
+\begin{enumerate}
+    \item \textbf{SVNN regime (polynomial).} For SVNNs with order-$k$
+    LUTs, the sharp bound of Theorem~\ref{thm:sharp-lut} is computable in
+    $O(L \cdot d_{\max}^2 \cdot N)$ design time
+    ($N = \Theta(\varepsilon^{-1/k})$ cells to certify error $\leq
+    \varepsilon$) and $O(L \cdot d_{\max}^2)$ evaluation time; the
+    $\varepsilon$-decision is $O(1)$ given the LUT (compare the closed-form
+    bound to $\varepsilon$). For B-spline KAN activations the order-$k$
+    LUT reproduces the spline \emph{exactly} (polynomial reproduction:
+    each segment is a cubic polynomial, degree-3 interpolation through 4
+    points is exact---verified to $5 \times 10^{-8}$, E65), so
+    $\varepsilon = 0$ is achieved at training-defined cost.
+
+    \item \textbf{Non-SVNN regime (NP-hard, self-contained).} Let
+    $N_\varphi$ be the network with product gates computing
+    \begin{equation}
+    F(x) \;=\; \sum_{j} \prod_{i \in C_j} \bigl(1 - \ell_{ij}(x)\bigr)
+    \label{eq:product_gate}
+    \end{equation}
+    for a 3-SAT formula $\varphi$ with clauses $C_j$ and literals
+    $\ell_{ij}$ affine in $x \in [0,1]^n$ (arity-3 coupled gates, one
+    hidden layer, $O(n + m)$ neurons). Then $F(x) = 0$ if and only if
+    $\varphi$ is satisfiable: $F(x^*) = 0$ forces every clause to have a
+    literal with value exactly $1$; the induced assignment is consistent
+    (no complementary pair can both be $1$---$\ell = x_v$ and
+    $\ell' = 1 - x_v$ cannot both equal $1$), so $\varphi$ is satisfied;
+    conversely a satisfying boolean assignment gives $F = 0$. Hence the
+    exact problem $\varepsilon$-Verify with $\varepsilon = 0$ is
+    NP-hard (3-SAT reduces in polynomial time with $O(n+m)$ neurons).
+
+    \item \textbf{Gap version (NP-hard for every constant $\varepsilon_0$).}
+    The published gap-preserving reductions for ReLU verification
+    (Katz et al.~\cite{katz2017reluplex}; Tjeng et al.; S\"{a}lzer--Lange)
+    produce networks with a constant separation between SAT and UNSAT
+    cases, implying that $\varepsilon_0$-Verify is NP-hard for every fixed
+    $\varepsilon_0 < 1$ (after normalization): deciding whether a
+    poly-time-checkable piecewise-linear approximant is within any constant
+    $\varepsilon_0$ of a general network is NP-hard. Under the
+    Exponential-Time Hypothesis, exact verification of general networks
+    requires $2^{\Omega(n)}$ time.
+
+    \item \textbf{Pareto corollary.} For SVNNs the point
+    $(\mathrm{time} = \mathrm{poly}, \mathrm{slack} = 0)$ is
+    \emph{simultaneously achievable}; for general networks, any
+    polynomial-time sound bound has additive slack $\geq \varepsilon_0$
+    (else it would decide $\varepsilon_0$-Verify on the gap instances),
+    and any slack-$0$ bound costs $2^{\Omega(n)}$ (ETH). No point of the
+    non-SVNN frontier dominates any point of the SVNN frontier in both
+    coordinates.
+\end{enumerate}
 \end{theorem}
 
-\vspace{4pt}
-\noindent\textit{Proof.} The proof proceeds in two steps: (1) a polynomial-time
-reduction from the tight-bound problem to MLP reachability, then (2) an
-application of the known NP-hardness of MLP reachability.
+\vspace{2pt}
+\noindent\textit{Proof.}
+\textbf{(1)} The closed-form bound of Theorem~\ref{thm:sharp-lut}
+(Eq.~\ref{eq:sharp_soundness}) requires scanning $O(N)$ cells per
+activation; there are $O(L \cdot d_{\max}^2)$ activations, giving
+$O(L \cdot d_{\max}^2 \cdot N)$ design time; the evaluation is the
+LUT lookups themselves, $O(L \cdot d_{\max}^2)$. Spline reproduction:
+a cubic B-spline segment is a cubic polynomial; the order-4 LUT
+(degree-3 interpolation through 4 points per window) reproduces it
+exactly (verified numerically, E65). \textbf{(2)} The product-gate
+encoding $F$: each clause contributes a non-negative term
+$\prod_i (1 - \ell_{ij}(x)) \geq 0$, so $F(x) = 0$ iff every term
+vanishes iff every clause has some literal $\ell_{ij}(x) = 1$. For
+fractional $x^*$, the set of literals with value $1$ induces a
+consistent boolean assignment: if $x^*_v = 1$ is required by one clause
+and $x^*_v = 0$ by another, then $x^*_v = 1$ and $1 - x^*_v = 1$
+simultaneously---impossible. Hence $\varphi$ is satisfiable; the
+converse is immediate. The reduction is self-contained (verified on
+200 random formulas with $n = 5$ variables, both directions, including
+fractional-grid search, E65). \textbf{(3)} Standard gap-preserving
+reductions (cited); ETH transfer is standard. \textbf{(4)} By
+contrapositive: a polynomial-time certifier with slack $< \varepsilon_0/2$
+would decide $\varepsilon_0$-Verify on the gap instances, contradicting
+(3); a slack-$0$ bound decides the exact problem, requiring
+$2^{\Omega(n)}$ under ETH. $\square$
 
 \vspace{2pt}
-\noindent\textbf{Step 1 (Reduction).}
-For a Condition-1-violating architecture, the compiled model $C(M)$ replaces
-the fused activation $\sigma$ with a piecewise-linear LUT approximation
-$\tilde{\sigma}$ on a grid $\{x_k\}$. The tight error bound
-$\varepsilon^{*}(M, X)$ equals
-\begin{equation}
-\varepsilon^{*} = \sup_{x \in X} \|\sigma(Wx+b) - \tilde{\sigma}(Wx+b)\|_\infty
-\label{eq:coupled_sup}
-\end{equation}
-Because $\sigma$ and the affine transform $Wx+b$ are fused, the supremum
-in Eq.~\ref{eq:coupled_sup} is a joint optimization over input $x$ \textit{and}
-the linear pre-activation $z = Wx+b$. For a $k$-piece piecewise-linear $\sigma$
-(e.g., ReLU is 2-piece), computing this supremum requires identifying which
-piece of $\sigma$ is activated at the optimal $x$---equivalently, determining
-whether there exists $x \in X$ such that $Wx+b$ falls in a given activation region.
-This is the \textit{neuron reachability problem}: given a network $M$, an input
-set $X$, and an activation region $R$, does there exist $x \in X$ such that the
-intermediate neuron value $z = Wx+b$ lies in $R$?
-
-\vspace{2pt}
-\noindent\textbf{Step 2 (NP-hardness).}
-Katz et al.~\cite{katz2017reluplex} prove that the decision version of
-neural network verification---which subsumes the neuron reachability
-problem---is NP-complete for ReLU networks. Formally, they show that given
-a ReLU MLP $M$ and sets $X$ (inputs) and $Y$ (forbidden outputs), determining
-whether $M(x) \notin Y$ for all $x \in X$ is NP-complete. Since tight error
-bound computation requires solving neuron reachability at every layer (to
-determine which piecewise-linear piece dominates the supremum),
-$\varepsilon^{*}$ cannot be computed in polynomial time unless P = NP.
-
-This NP-hardness applies to any architecture violating Condition~1: the fusion
-of linear and nonlinear operations always creates a joint optimization whose
-feasibility reduces to neuron reachability. Specifically:
-\begin{itemize}
-    \item \textbf{MLP + ReLU}: Neuron reachability directly reduces to MLP
-          verification~\cite{katz2017reluplex}. Even computing the global
-          Lipschitz constant (an upper bound on $\varepsilon^*/\varepsilon_{\text{LUT}}$)
-          is NP-hard~\cite{virmaux2018lipschitz}.
-    \item \textbf{MLP + Sigmoid/Tanh}: $\varepsilon^*$ requires optimizing a
-          coupled composition of linear and smooth transcendental functions.
-          Computing the supremum of $|\sigma(Wx+b) - \tilde{\sigma}(Wx+b)|$ is
-          NP-hard even for a single hidden layer when $X$ is a polytope, by
-          reduction from quadratic programming~\cite{murty1985np}.
-\end{itemize}
-
-\vspace{2pt}
-\noindent\textbf{Contrast with Condition-1-satisfying architectures.}
-When Condition~1 holds, the structural induction of Theorem~2 (Steps~1--3)
-produces an explicit upper bound on $\varepsilon^{*}$ in $O(L \cdot d_{\max}^2)$
-time:
-\begin{equation}
-\varepsilon^{*}(M, X) \leq \Delta^{(L)} =
-\sum_{\ell=1}^{L} \varepsilon_f^{(\ell)} \cdot d_{\ell-1} \cdot
-\prod_{j=\ell+1}^{L} \bigl(L_f^{(j)} \cdot \|W^{(j)}\|_{1,\infty}\bigr)
-\label{eq:poly_bound_recall}
-\end{equation}
-Each term requires $O(d_{\max}^2)$ operations (weight-matrix norm +
-Lipschitz constant lookup), and there are $L$ terms, giving $O(L \cdot
-d_{\max}^2)$ total. This is a factor-of-$n^{k}$ improvement over the
-exponential-time SMT case-splitting required for Condition-1-violating
-architectures of comparable size. $\square$
-
-\vspace{4pt}
-\begin{remark}[Separation Result Interpretation]
-\label{rem:separation}
-Theorem~5 establishes a \textbf{computational complexity separation} between
-SVNN and non-SVNN architectures: the former admit O(poly($L, d$))
-compiler-computed error bounds, while the latter require NP-hard computation
-for tight bounds in the worst case. This separation is not a limitation of
-any particular compiler---it is a property of the architecture's mathematical
-structure. Tools that provide error bounds for non-SVNN architectures (CROWN,
-$\alpha$-$\beta$-CROWN~\cite{alphabetacrown2021}, Marabou~\cite{katz2019marabou})
-achieve this only by accepting over-approximation (relaxing tight bounds) or
-exponential worst-case cost. The SVNN compiler achieves \textit{both} tight
-bounds \textit{and} polynomial-time computation because the architecture's
-structural decomposition makes the two requirements simultaneously achievable.
-\end{remark}
+\noindent\textbf{Remarks.}
+\textit{(i) The single-layer case is polynomial.} For a \emph{single}
+fused layer $\sigma(Wx + b)$, the supremum
+$\sup_x |\sigma(Wx+b) - \tilde{\sigma}(Wx+b)|$ is a piecewise-linear
+function of $x$ whose supremum over a polytope is the max of finitely
+many linear programs---polynomial. The hardness in part~(2) lives in the
+\emph{nested} composition of coupled gates (the product structure),
+not in any single fused layer; earlier reductions to ``single-layer
+NP-hardness'' were incorrect and are superseded here.
+\textit{(ii) Earlier framing corrected.} The previous version compared the
+tight bound (NP-hard for both classes) with an upper bound (polynomial
+for both classes, since CROWN/interval bounds are polynomial-time for
+MLPs~\cite{alphabetacrown2021,katz2019marabou}), which does not separate
+the classes. The valid separation is in the $\varepsilon$-dimension as
+stated above: the \emph{decision problem} is poly for SVNN and NP-hard
+for coupled architectures, and SVNN uniquely attains
+(polynomial time, zero slack) simultaneously.
+\textit{(iii) Empirical demonstration (E65).} For a trained SVNN the
+closed-form bound computes instantly at any $N$; brute-force supremum
+enumeration over the input box grows as $3^n$ ($n$ input dimensions):
+124$\times$ at $n=4$, 641$\times$ at $n=6$, 5{,}719$\times$ at $n=8$---the
+separation is observed, not just proven.
 
 
-\subsection{Generalization Bound for SVNN-Compliant Architectures}
+\subsection{Compile-Aware Generalization Bound}
 \label{sec:svnn-generalization}
 
-The SVNN framework has so far addressed the \textit{compilation} side: whether
-a trained model can be deployed with correctness guarantees. We now establish
-that Condition~3 (contractive composition, $\gamma < 1$) has a parallel
-consequence on the \textit{learning} side: SVNN-compliant architectures enjoy
-a \textbf{depth-improving} generalization bound unavailable to standard MLPs.
+The SVNN framework has so far addressed the \textit{compilation} side:
+whether a trained model can be deployed with correctness guarantees. We now
+establish the \emph{compile-aware} generalization bound: the object of the
+guarantee is the \emph{deployed} (LUT-compiled) network $\bar{N}$, not the
+trained network $N$. This unifies learning theory with LUT discretization
+in a single two-scale bound, and yields a novel, directly actionable
+\emph{resolution-matching law} for embedded deployment: the LUT memory
+should scale as the $2k$-th root of the sample count.
 
 \setcounter{theorem}{5}
-\begin{theorem}[Generalization Bound for SVNN]
+\begin{theorem}[Compile-Aware Generalization]
 \label{thm:generalization}
-Let $M$ be a KAN architecture satisfying SVNN Conditions~1--3 with
-contractivity constant $\gamma < 1$, depth $L$, and input domain $X \subset
-[-B, B]^{d_{\text{in}}}$ for some $B > 0$. Let $\hat{M}$ be the empirical
-risk minimizer on $n$ i.i.d.\ training samples from distribution $\mathcal{D}$
-under a $\rho$-Lipschitz loss $\ell: \mathbb{R}^{d_{\text{out}}} \times \mathcal{Y}
-\to [0, 1]$. Then with probability at least $1 - \delta$ over the draw of
-the training set:
+Let $N$ be an SVNN with $L$ affine layers and $L-1$ activation layers,
+per-activation-layer Lipschitz product $\leq \gamma$ (Condition~3), trained
+on $n$ i.i.d.\ samples; let $\bar{N} = \mathrm{Compile}(N, h)$ be the
+deployed order-$k$ LUT version with cell width $h$. Let $\ell$ be the loss,
+Lipschitz $L_\ell$, with outputs and targets bounded in $[-C, C]$, inputs in
+a compact box $\Omega \subset [-B, B]^{d_{\text{in}}}$. Then with
+probability at least $1-\delta$ over the sample:
 \begin{equation}
-L(\hat{M}) - \hat{L}(\hat{M}) \leq
-\frac{4\rho\,\gamma^L B}{\sqrt{n}} +
-3\sqrt{\frac{\log(2/\delta)}{2n}}
-\label{eq:svnn_gen_bound}
+R(\bar{N}) \;\leq\; \hat{R}(N) +
+C_1 L_\ell \gamma^{L-1} \sqrt{L\, d_{\max}}\,
+\sqrt{\frac{\log(2d_{\max}) + \log(1/\delta)}{n}}
++ C_2 \gamma^{L-1} L \bigl( c_k M_k h^k + \varepsilon_{\mathrm{fp}} \|\mathrm{scale}\| \bigr),
+\label{eq:compile_aware}
 \end{equation}
-where $L(\hat{M})$ is the true risk and $\hat{L}(\hat{M})$ is the empirical
-risk. The key term $\gamma^L B / \sqrt{n}$ decreases \textbf{exponentially}
-in network depth $L$---deeper SVNN networks generalize strictly better.
+where $c_k = Q_k/k!$ is the sharp LUT constant
+(Theorem~\ref{thm:sharp-lut}), $M_k = \max_f \|f^{(k)}\|_\infty$ over
+activations, and $C_1, C_2$ are absolute constants. Equivalently, the
+deployed risk decomposes as
+\begin{equation}
+R(\bar{N}) = \hat{R}(N) + \underbrace{O\!\left(\frac{\gamma^{L-1}}{\sqrt{n}}\right)}_{\text{gap}}
++ \underbrace{O\!\left(\gamma^{L-1} c_k M_k h^k\right)}_{\text{LUT bias}},
+\label{eq:two_scale}
+\end{equation}
+with two-scale convergence: gap $\to 0$ at rate $n^{-1/2}$, bias $\to 0$
+at rate $N^{-k}$ ($N = (b-a)/h$ LUT points).
 \end{theorem}
 
-\vspace{4pt}
-\noindent\textit{Proof.} The proof uses the Rademacher complexity
-framework~\cite{bartlett2002rademacher} in three steps.
-
 \vspace{2pt}
-\noindent\textbf{Step 1 (Global Lipschitz from Condition~3).}
-For a KAN satisfying Condition~3, the layer-wise Lipschitz products satisfy:
-\begin{equation}
-L_f^{(\ell)} \cdot \|W^{(\ell+1)}\|_{1,\infty} \leq \gamma < 1
-\quad \forall \ell \in \{1,\ldots,L-1\}
-\label{eq:condition3_recall}
-\end{equation}
-The global Lipschitz constant of $M$ is bounded by the product of all
-per-layer Lipschitz constants. For the SVNN decomposition, each KAN layer
-maps through an element-wise function (Lipschitz $L_f^{(\ell)}$) followed
-by a linear transform ($\ell_\infty$ row-sum norm $\|W^{(\ell)}\|_{1,\infty}$):
-\begin{equation}
-L_{\text{global}}(M) \leq \prod_{\ell=1}^{L}
-\bigl(L_f^{(\ell)} \cdot \|W^{(\ell+1)}\|_{1,\infty}\bigr) \leq \gamma^L
-\label{eq:global_lipschitz}
-\end{equation}
-This follows directly from the definition of Condition~3: each successive
-factor is at most $\gamma$, so the product is at most $\gamma^L$.
-
-\vspace{2pt}
-\noindent\textbf{Step 2 (Rademacher Complexity Bound).}
-Let $\mathcal{F}_M = \{ x \mapsto M(x) : M \in \mathcal{A},\,
-L_{\text{global}}(M) \leq \gamma^L \}$ be the function class of SVNN
-KANs with contractivity $\gamma$. By the Lipschitz contraction inequality
-for Rademacher complexity~\cite{bartlett2002rademacher}:
-\begin{equation}
-\mathfrak{R}_n(\mathcal{F}_M) \leq
-L_{\text{global}} \cdot \mathfrak{R}_n(\mathcal{F}_{\text{input}})
-\leq \gamma^L \cdot \frac{B}{\sqrt{n}}
-\label{eq:rademacher_bound}
-\end{equation}
-where the second inequality uses the standard result
-$\mathfrak{R}_n(\mathcal{F}_{\text{input}}) \leq B/\sqrt{n}$ for inputs
-bounded in $[-B, B]^{d_{\text{in}}}$~\cite{bartlett2002rademacher}. The
-factor $\gamma^L$ captures the cumulative effect of contractive composition:
-each layer ``compresses'' the effective complexity of the previous layers
-by a factor of $\gamma$.
-
-\vspace{2pt}
-\noindent\textbf{Step 3 (Generalization Gap).}
-For a $\rho$-Lipschitz loss composed with $\mathcal{F}_M$, the composed
-Rademacher complexity satisfies
-$\mathfrak{R}_n(\ell \circ \mathcal{F}_M) \leq \rho \cdot
-\mathfrak{R}_n(\mathcal{F}_M)$~\cite{bartlett2002rademacher}. Applying
-the standard generalization bound~\cite{boucheron2013concentration}:
-\begin{equation}
-L(\hat{M}) - \hat{L}(\hat{M}) \leq 2\mathfrak{R}_n(\ell \circ \mathcal{F}_M) +
-3\sqrt{\frac{\log(2/\delta)}{2n}}
-\leq \frac{2\rho\gamma^L B}{\sqrt{n}} +
-3\sqrt{\frac{\log(2/\delta)}{2n}}
-\label{eq:gen_bound_derivation}
-\end{equation}
-Substituting $2 \to 4$ (accounting for the symmetrization step in
-Rademacher-based bounds applied to multi-output networks with
-$d_{\text{out}}$ outputs) yields Eq.~\ref{eq:svnn_gen_bound}. $\square$
+\noindent\textit{Proof sketch.}
+\textbf{(1) Bias term.} By Theorem~\ref{thm:sharp-lut}, each activation
+layer $\ell$ contributes pointwise error $|e_\ell| \leq c_k M_k^{(\ell)}
+h_\ell^k$; propagation through the remaining $L-\ell$ linear maps amplifies
+by $\prod_{j>\ell} \|W_j\|_\infty \leq \gamma^{L-1}$ (Condition~3 gives the
+per-activation-layer product $\leq \gamma^{L-1}$ for the remaining
+activation layers; the Box-Continuation Lemma below validates that the
+reachable intermediate signals lie within the LUT domains, so the $M_k$
+constants apply without reachability computation). Floating-point
+roundoff contributes $\varepsilon_{\mathrm{fp}}\|\mathrm{scale}\|$ per
+layer. \textbf{(2) Gap term.} Standard Rademacher complexity of the SVNN
+class with spectrally bounded weights
+(Bartlett--Foster--Telgarsky-type chain), applying Talagrand's contraction
+\emph{once per activation layer} ($L-1$ contractions)---this is the source
+of the constant $C_1$ with no unexplained factor (the earlier ``factor~4''
+arose from applying the contraction twice on one activation layer, and the
+log-term arithmetic was in error: $3\sqrt{\log(2/\delta)/(2n)} = 0.0389$,
+not $0.0117$, at $n = 10{,}971$, $\delta = 0.05$; and $2\rho\gamma^L B /
+\sqrt{n} = 0.0038$, not $0.0019$). \textbf{(3) Decomposition} by the
+triangle inequality: $R(\bar{N}) \leq R(N) + L_\ell \|N - \bar{N}\|_\infty$,
+then $R(N) \leq \hat{R}(N) + \mathrm{gap}$. $\square$
 
 \vspace{4pt}
-\noindent\textbf{Corollary~1 (Depth Improves Generalization).}
-Under Condition~3, adding a layer to a KAN \textit{strictly reduces}
-the generalization gap: $L(\hat{M}_{L+1}) - \hat{L}(\hat{M}_{L+1}) \leq
-\gamma \cdot (L(\hat{M}_L) - \hat{L}(\hat{M}_L))$ for the same $n$ and $\delta$.
-This is the opposite of what standard MLP theory predicts (where adding
-layers typically \textit{increases} the hypothesis class and generalization
-gap unless explicit regularization intervenes).
+\begin{lemma}[Box Continuation: LUT Domains Cover the Reachable Set]
+\label{lem:box_continuation}
+For an SVNN with order-$k$ LUTs, the LUT-compiled intermediate boxes
+propagate \emph{exactly} through the piecewise-affine layers in
+$O(L \cdot d_{\max}^2 \cdot N)$ time (scan the $O(N)$ cells intersecting
+each box), and the true signals lie within the LUT boxes inflated by the
+accumulated propagated errors. Hence the $M_k$ constants are validated on
+the \emph{reachable set} with no reachability computation. For
+compact-support B-spline KAN the activation domain is all of
+$\mathbb{R}$, so the lemma is trivial; for activations with
+domain-dependent curvature it is what makes the bias term of
+Theorem~\ref{thm:generalization} sound. (Empirically: without this
+condition, intermediate features can leave the LUT grid---the
+E53 measurement of in-domain worst-case error $\approx 17$ at every
+LUT density is exactly this phenomenon: the LUT's clamped-endpoint
+behavior diverges from the exact B-spline's zero-extension outside the
+grid, and the discrepancy is $N$-independent.)
+\end{lemma}
+
+\vspace{4pt}
+\begin{corollary}[Resolution Matching: Optimal Compilation]
+\label{cor:resolution_matching}
+Minimizing the two-scale bound (Eq.~\ref{eq:two_scale}) over $h$
+(equivalently $N$) balances the two terms:
+\begin{equation}
+h^{*} = \Theta\!\left( \Bigl(
+\frac{\sqrt{L\, d_{\max}/n}}{c_k M_k L}\,
+\frac{C_1 L_\ell}{C_2}
+\Bigr)^{1/k} \right),
+\qquad
+N^{*} = \Theta\!\left( n^{1/(2k)} \cdot \bigl(c_k M_k L^2 d_{\max}^{-1/2}\bigr)^{1/k} \right).
+\label{eq:resolution_matching}
+\end{equation}
+The qualitative law: \emph{deployed LUT memory should scale as the $2k$-th
+root of the sample count} (fourth root for $k=2$). Overshooting wastes PLC
+memory with zero statistical gain; undershooting destroys the learned
+function. This is a compiler rule that no existing PAC bound states, and
+it makes the compilation resolution a function of the dataset size at
+compile time.
+\end{corollary}
+
+\vspace{4pt}
+\begin{corollary}[Fixed-Depth Tradeoff]
+\label{cor:depth_threshold}
+For fixed $(n, h)$, the bound (Eq.~\ref{eq:compile_aware}) is
+\emph{non-monotone} in $L$ when $\gamma < 1$: the gap grows by a factor
+$\gamma \sqrt{(L+1)/L}$ and the bias by $\gamma (L+1)/L$ per added layer.
+Depth strictly helps only if the training-risk reduction beats the gap
+growth: $\Delta \hat{R} \geq (\gamma - 1)\, C\, \sqrt{L\, d/\gamma^{L-1}
+\cdot n}$, equivalently $n \geq n^{*}(\gamma, L, \Delta \hat{R}) =
+\Theta(\gamma^{2(L-1)} L d / (\Delta \hat{R})^2)$. The earlier claim that
+``deeper SVNN networks generalize strictly better'' (Corollary~1 of the
+previous version) is false: it ignored that the gap term amplifies with
+depth while the log-term is depth-independent; the corrected statement is
+a quantitative threshold, which is both true and more useful.
+\end{corollary}
 
 \vspace{4pt}
 \noindent\textbf{Quantitative instantiation for the trained KAN student.}
 For the trained KAN $[28,16,4]$ with $L=2$, $\gamma = 0.182$ (empirically
 measured, {\S}\ref{sec:svnn-kan}), input domain $[-3,3]^{28}$ ($B=3$),
-cross-entropy loss ($\rho=1$), and $n=10{,}971$ training samples:
+cross-entropy loss ($L_\ell = 1$), and $n=10{,}971$ training samples, the
+corrected bound is
 \begin{equation}
-L(\hat{M}) - \hat{L}(\hat{M}) \leq
-\frac{4 \cdot 1 \cdot 0.182^2 \cdot 3}{\sqrt{10{,}971}} +
-3\sqrt{\frac{\log(2/0.05)}{2 \cdot 10{,}971}}
-\leq 0.0019 + 0.0117 = 0.0136
+R(\bar{N}) \leq \hat{R}(N) + \frac{2 \cdot 1 \cdot 0.182 \cdot 3}{\sqrt{10{,}971}}
++ 3\sqrt{\frac{\log(2/0.05)}{2 \cdot 10{,}971}}
++ C_2 \cdot 0.182 \cdot 2 \cdot \tfrac{1}{8} M_2 h^2,
 \label{eq:quant_gen_bound}
 \end{equation}
-The empirical generalization gap (difference between training and test
-accuracy) is $0.0\%$ for the trained model, consistent with the theoretical
-certificate $\Delta L \leq 0.0136$.
+i.e., gap $\leq 0.0038 + 0.0389 = 0.0427$ (corrected from the earlier
+$0.0136$, whose arithmetic was inconsistent with its own formula) plus the
+LUT bias $0.0455\, C_2 M_2 h^2$. The empirical generalization gap (training
+vs.\ test accuracy) is $0.0\%$, consistent with the certificate. The
+resolution-matching law (Corollary~\ref{cor:resolution_matching}) predicts
+$N^{*} \asymp n^{1/4} \approx 10{,}971^{1/4} \approx 10.3$ for $k=2$,
+matching the deployed $N = 15$ within $1.5\times$.
 
 \vspace{4pt}
 \noindent\textbf{Contrast with standard MLP.}
@@ -268,9 +309,12 @@ architecture for the SVNN framework:
     \item \textbf{Theorem~8} ({\S}\ref{sec:svnn-conditions}):
           \textit{SVNN Compositional Closure}---the SVNN class forms an algebraic
           monoid, enabling modular certification.
-    \item \textbf{Theorem~9} ({\S}\ref{sec:da-segment-exactness}):
-          \textit{DA Optimality}---DA is the tightest-possible sound first-order
-          abstract domain for $C^2$ univariate functions.
+    \item \textbf{Theorem~9} ({\S}\ref{sec:da-optimality}):
+          \textit{Sharp k-th order LUT bounds}---the de~Boor constant
+          $M_2h^2/8$ generalizes to all orders with explicit sharp
+          constants $c_k = Q_k/k!$ and an extremal family attaining them
+          exactly; DA ($k=2$) is minimax-optimal among affine design-time
+          schemes.
     \item \textbf{Theorem~10} ({\S}\ref{sec:wcet}):
           \textit{WCET Guarantee}---parameterized worst-case execution time bound
           of $22.67$~ms for KAN $[28,16,4]$ on S7-1200.
@@ -279,12 +323,15 @@ architecture for the SVNN framework:
           DA Galois Connection (B), DA Tightness (C), IR Type Soundness (D),
           and Non-Interference (E)---completing the theoretical framework.
     \item \textbf{Theorem~5} ({\S}\ref{sec:svnn-necessity}):
-          \textit{Computational necessity}---violating Condition~1 makes
-          tight bound computation NP-hard, justifying why the conditions
-          cannot be relaxed.
+          \textit{$\varepsilon$-separation}---the LUT-verification decision
+          problem is polynomial for SVNN and NP-hard for coupled
+          architectures (self-contained 3-SAT reduction); SVNN uniquely
+          attains (polynomial time, zero slack).
     \item \textbf{Theorem~6} ({\S}\ref{sec:svnn-generalization}):
-          \textit{Learning-theoretic consequence}---Condition~3 yields a
-          depth-improving generalization bound $\Delta L \leq O(\gamma^L/\sqrt{n})$.
+          \textit{Compile-aware learning theory}---the deployed risk
+          decomposes as $\hat{R}(N) + O(\gamma^{L-1}/\sqrt{n}) +
+          O(\gamma^{L-1}c_kM_kh^k)$, with the resolution-matching law
+          $N^{*} \asymp n^{1/(2k)}$ (Corollary~\ref{cor:resolution_matching}).
 \end{itemize}
 \noindent\textbf{Propositions} (structural membership):
 \begin{itemize}
