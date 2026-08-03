@@ -13,7 +13,7 @@
 
 **一句话**：第一个证明"哪些神经网络架构天生可认证、以什么锐常数、什么复杂度、什么泛化保证"的类型理论框架。
 
-**当前状态**：**82页，0 errors, 0 warnings, 0 undefined refs，TNNLS定位重组完成**
+**当前状态**：**81页，0 errors, 0 warnings, 0 undefined refs，TNNLS定位重组完成**
 
 ---
 
@@ -51,7 +51,7 @@
 
 | 文件 | 用途 |
 |------|------|
-| `paper/main.tex` | 主文件（82页，0e0w） |
+| `paper/main.tex` | 主文件（81页，0e0w） |
 | `paper/section_svnn.tex` | SVNN理论（Thm 2/8 + Corollary 3 DA最优性） |
 | `paper/section_lut_sharp.tex` | **Thm 9p**（锐常数） |
 | `paper/section_trichotomy.tex` | **Thm 10p**（三分法） |
@@ -84,7 +84,7 @@ cd paper && xelatex main && bibtex main && xelatex main && xelatex main  # 编�
 ## 4. 剩余待办（下一步优先）
 
 ### 投稿前（高优先）
-1. **REVIEWER-FAQ更新**：现有FAQ是旧版（12问），需补充新定理的防御（锐常数、三分法、ε-分离、编译感知PAC、Tier 4、算法4、多后端）
+1. **REVIEWER-FAQ更新**：✅ 已完成（2026-08-03 v2：18问，Q13–Q18 覆盖锐常数/三分法/ε-分离/编译感知PAC/Tier 4/热切换+IEC后端；另修复 Lemma 编号链重复——原两个 Lemma 3，现唯一 1–7；修复 tab:summary 超高 warning，82→81页）
 2. **`review-paper`深度审稿**：最后一道保险（6-Agent），验证0 CRITICAL
 3. **E63-E68实验脚本归档确认**：确保每个实验编号有对应脚本+JSON（E63=verify_sharp_constants, E64=verify_lemma3_bennett, E65=verify_thm5_eps_separation, E66=verify_trichotomy_thm10p, E67=differential_test, E68=e59_thm6p_compile_aware）
 4. **投稿材料**：cover letter、author bio、图清单（TNNLS要求）
@@ -108,7 +108,7 @@ cd paper && xelatex main && bibtex main && xelatex main && xelatex main  # 编�
 1. 读本文件（你正在读）
 2. cd D:/neuroplc-paper && git log --oneline -15   # 确认在 6de2d0b
 3. 编译验证：cd paper && xelatex main && bibtex main && xelatex main && xelatex main
-   → 期望：82页，0 errors，0 undefined refs
+   → 期望：81页，0 errors，0 undefined refs
 4. 读 docs/AUDIT_2026-08-01.md 的状态更新段（修复后状态）
 5. 按「剩余待办」继续：先更新 REVIEWER-FAQ → 跑 review-paper 深度审稿
 ```
@@ -123,4 +123,4 @@ cd paper && xelatex main && bibtex main && xelatex main && xelatex main  # 编�
 - 数据：`data/processed/features_X.npy`（CWRU 28-D特征，13714样本）
 - Git：origin=Gitee, github=GitHub（双推工作流，见 [[gitee-github-push-workflow]]）
 
-*最后更新：2026-08-03 | 板板 + Claude | 82页 0e0w 投稿就绪状态*
+*最后更新：2026-08-03 | 板板 + Claude | 81页 0e0w 投稿就绪状态*

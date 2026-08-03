@@ -2163,7 +2163,7 @@ over-counts correlated cancellations and is reported only to bracket the
 empirical MaxAE (3.65).
 \end{remark}
 
-\setcounter{lemma}{1}
+\setcounter{lemma}{5}
 \begin{lemma}[Adversarial Lower Bound]
 There exists an input $\mathbf{x}^* \in [-3,3]^{28}$ such that the
 LUT-compiled KAN $[28,16,4]$ forward pass differs from PyTorch FP32
@@ -2354,7 +2354,7 @@ depth, and the deviation from this linear trend is
 $O(\sqrt{L \log(L/\delta)})$ with high probability. For the trained
 $[28,16,4]$ KAN ($L=2$, $\gamma \approx 0.18$, $d_{\max}=28$,
 $M_{\max}=1.59$, $h=0.43$): the expected bound is
-$\Delta \leq 0.71$ (consistent with Lemma~2) and the
+$\Delta \leq 0.71$ (consistent with Lemma~6) and the
 concentration term adds $\leq 0.15$ at $\delta=0.05$, yielding a
 total probabilistic bound of $\Delta \leq 0.86$ with 95\% confidence.
 
@@ -4047,10 +4047,10 @@ $M_2^{\text{analytic}} \leq 12.8$ (Eq.~\ref{eq:bspline_curve_bounds} in
 without any forward pass), tightening the de~Boor bound by 98.6\%
 ($\varepsilon_{\text{LUT}} \leq 0.00406$ at 15~points vs.\ 0.293 using
 $M_2^{\text{analytic}}$). The per-function distribution is heavy-tailed:
-mean $0.607$, maximum $1.586$ (Lemma~2, {\S}\ref{sec:compiler-correctness}),
+mean $0.607$, maximum $1.586$ (Lemma~6, {\S}\ref{sec:compiler-correctness}),
 with 11.5\% of functions exceeding $M_2 = 1.0$. The characteristic value
 $M_2^{\text{char}}$ calibrates the typical-case guarantee (Theorem~1); the
-adversarial worst-case uses $M_2^{\max}=1.586$ (Lemma~2). The analytical
+adversarial worst-case uses $M_2^{\max}=1.586$ (Lemma~6). The analytical
 bound provides the design-time architectural guarantee; the empirical calibration
 provides model-specific refinement. Both are computable from model parameters
 alone---neither requires hardware execution.
@@ -4121,7 +4121,9 @@ generalization of the 28-D feature space.}
 \caption{Results Summary: Core Experiments (E1--E20, E52--E68) and Validation Experiments (V1--V7)}
 \label{tab:summary}
 \scriptsize
-\begin{tabular}{@{}p{0.75cm}p{2.3cm}p{2.2cm}p{2.2cm}@{}}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{0.95}
+\begin{tabular}{@{}p{0.7cm}p{4.6cm}p{3.6cm}p{4.9cm}@{}}
 \toprule
 \textbf{Exp} & \textbf{Description} & \textbf{Metric} & \textbf{Result} \\
 \midrule
