@@ -578,8 +578,8 @@ via the derivative recurrence:
 \end{equation}
 where $B''_{c,3}$ is computed from the B-spline basis derivative
 recurrence~\cite{deBoor1978}. For the SiLU activation used in the base
-path, $\text{SiLU}''(x) = \sigma(x)(2 - 2x\sigma(x) + x\sigma(x)
-(1-\sigma(x)))$, which is bounded on any compact domain.
+path, $\text{SiLU}''(x) = \sigma(x)(1-\sigma(x))\bigl[2 + x(1-2\sigma(x))\bigr]$,
+which is bounded on any compact domain.
 
 \vspace{4pt}
 \noindent\textbf{Analytical $M_2$ and $L_B$ Upper Bounds.}
@@ -857,7 +857,7 @@ The SVNN framework's practical utility depends on the tightness of the
 arithmetic abstraction used for error propagation. Theorem~2 establishes
 that a finite bound exists; the \emph{quality} of that bound determines
 whether the safety factor $\gamma$ exceeds 1---the threshold for
-deployment certification. Doubleton Arithmetic (DA) provides a 2.2$\times$
+deployment certification. Doubleton Arithmetic (DA) provides a 2.1$\times$
 tighter bound than Interval Arithmetic (IA) in the end-to-end pipeline
 (E9, {\S}\ref{sec:experiments}). Here we explain \emph{why} this gap
 exists, by analyzing the behavior of DA and IA on a single B-spline
@@ -1033,7 +1033,8 @@ trivially. $\square$
 \vspace{4pt}
 \noindent\textbf{Empirical validation (E58).}
 On the trained KAN $[28,16,4]$ with $N=15$ LUT points ($h_{\text{LUT}}
-\approx 0.75$, domain $\approx [-3, 3]$ on Layer~0), all 512 B-spline
+\approx 0.43$---the LUT spacing $6/14$, not the B-spline knot spacing
+$6/8 = 0.75$---domain $\approx [-3, 3]$ on Layer~0), all 512 B-spline
 activations satisfy $M_2 \cdot h_{\text{LUT}}^2 / 8 \leq 0.040$ (maximum),
 with mean $0.017$ and 95th-percentile $C(3) = 0.030$ (measured from the
 checkpoint). The de~Boor guarantee therefore certifies all 512

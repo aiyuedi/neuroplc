@@ -114,7 +114,7 @@ axd=[];ayd=[];for i=1:numel(d),axd=[axd;repmat(x(i),15,1)];ayd=[ayd;mu(i)+sd(i)*
 fig=figure('Units','inches','Position',[1 1 S.W2 S.H]);tl=tiledlayout(1,2,'Padding','compact');
 ax=nexttile;scatter(axd,ayd,S.ms,S.da,'filled','MarkerFaceAlpha',.40,'MarkerEdgeColor','none');hold on;
 errorbar(x,mu,sd,'o-','Color',S.ia,'LineWidth',S.lw,'MarkerFaceColor',S.ia,'MarkerSize',7);
-pp=polyfit(x,mu,1);xx=linspace(min(x),max(x),80);plot(xx,polyval(pf,xx),'--','Color',S.gr,'LineWidth',1.6);
+pf=polyfit(x,mu,1);xx=linspace(min(x),max(x),80);plot(xx,polyval(pf,xx),'--','Color',S.gr,'LineWidth',1.6);
 pp(ax,S);xlabel('sqrt(d)','FontSize',S.a);ylabel('DA/IA ratio','FontSize',S.a);
 qq(ax,'a',sprintf('Scaling: r^2=%.3f',corr(x',mu')^2),S);legend('seed','mean','fit','Box','off','Location','nw','FontSize',S.l);
 ax=nexttile;b=bar([mu;x]','grouped');b(1).FaceColor=S.da;b(2).FaceColor=S.ia;pp(ax,S);
@@ -157,7 +157,7 @@ for p=1:2,ax=nexttile;M=T;if p==2,M=Sx;end;N=M./sum(M,2)*100;imagesc(N);colormap
 set(ax,'XTick',1:4,'XTickLabel',cls,'YTick',1:4,'YTickLabel',cls,'YDir','normal');xlabel('Predicted','FontSize',S.a);ylabel('True','FontSize',S.a);
 ac=sum(diag(M))/sum(M(:))*100;nm='Teacher';if p==2,nm='Student';end;qq(ax,char('a'+p-1),sprintf('%s %.2f%%',nm,ac),S);
 for i=1:4,for j=1:4,tc=[0 0 0];if N(i,j)>55,tc=[1 1 1];end;text(j,i,sprintf('%.1f\n%d',N(i,j),M(i,j)),'HorizontalAlignment','center','FontSize',8,'FontWeight','bold','Color',tc);end,end,end
-ax=nexttile;axis off;cb=colorbarr(ax,'west');cb.Position=[.915 .20 .016 .60];cb.Label.String='Recall (%)';cb.FontSize=8;colormap(ax,flipud(hot));clim([0 100]);
+ax=nexttile;axis off;cb=colorbar(ax,'west');cb.Position=[.915 .20 .016 .60];cb.Label.String='Recall (%)';cb.FontSize=8;colormap(ax,flipud(hot));clim([0 100]);
 e(fig,'fig10_confusion_matrices',oa,ob);end
 
 % ---- f11 TSNE ----
@@ -215,10 +215,7 @@ title('Safety Monitor: +66 us (+1.7%)','FontSize',10,'FontWeight','bold');pp(ax,
 function f16(S,oa,ob),fig=figure('Units','inches','Position',[1 1 S.W2 2.8]);ax=axes;axis(ax,[0 10 0 10]);axis off;hold on;
 rectangle('Position',[.2 .4 9.6 9.2],'FaceColor',[.985 .985 .985],'EdgeColor',[.65 .65 .65],'LineWidth',1);
 text(.4,9.2,'FB_Inference — SCL excerpt (B-spline LUT)','FontWeight','bold','FontSize',10,'FontName',S.f);
-cd={'FUNCTION_BLOCK FB_Inference','VAR_INPUT features:ARRAY[0..27]OF REAL;END_VAR','VAR_OUTPUT class_id:INT;confidence:REAL;END_VAR',
-'FOR i:=0 TO 27 DO','    lo:=0;','    FOR j:=1 TO 13 DO','        IF features[i]>=W_DB.g0[j] THEN lo:=j;END_IF;','    END_FOR;',
-'    t_val:=(features[i]-W_DB.g0[lo])/(W_DB.g0[lo+1]-W_DB.g0[lo]+1E-10);','    FOR o:=0 TO 15 DO',
-'        v3[o*28+i]:=W_DB.t1[base+lo]*(1-t_val)+W_DB.t1[base+lo+1]*t_val;','    END_FOR;','END_FOR;','END_FUNCTION_BLOCK'};
+cd={'FUNCTION_BLOCK FB_Inference','VAR_INPUT features:ARRAY[0..27]OF REAL;END_VAR','VAR_OUTPUT class_id:INT;confidence:REAL;END_VAR','FOR i:=0 TO 27 DO','    lo:=0;','    FOR j:=1 TO 13 DO','        IF features[i]>=W_DB.g0[j] THEN lo:=j;END_IF;','    END_FOR;','    t_val:=(features[i]-W_DB.g0[lo])/(W_DB.g0[lo+1]-W_DB.g0[lo]+1E-10);','    FOR o:=0 TO 15 DO','        v3[o*28+i]:=W_DB.t1[base+lo]*(1-t_val)+W_DB.t1[base+lo+1]*t_val;','    END_FOR;','END_FOR;','END_FUNCTION_BLOCK'};
 for i=1:numel(cd),clr=[.1 .1 .1];s=cd{i};if contains(s,{'FUNCTION','VAR','END','FOR','IF','THEN'}),clr=S.da;end
 text(.5,8.8-i*.6,s,'FontName','Consolas','FontSize',7.5,'Color',clr,'Interpreter','none');end
 text(.5,.6,'Syntax-highlighted SCL rendered as print-ready vector figure.','FontSize',7,'Color',S.ga);e(fig,'fig16_scl_code',oa,ob);end
