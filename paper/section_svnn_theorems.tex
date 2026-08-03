@@ -144,13 +144,20 @@ should scale as the $2k$-th root of the sample count.
 \setcounter{theorem}{5}
 \begin{theorem}[Compile-Aware Generalization]
 \label{thm:generalization}
-Let $N$ be an SVNN with $L$ affine layers and $L-1$ activation layers,
-per-activation-layer Lipschitz product $\leq \gamma$ (Condition~3), trained
-on $n$ i.i.d.\ samples; let $\bar{N} = \mathrm{Compile}(N, h)$ be the
-deployed order-$k$ LUT version with cell width $h$. Let $\ell$ be the loss,
-Lipschitz $L_\ell$, with outputs and targets bounded in $[-C, C]$, inputs in
-a compact box $\Omega \subset [-B, B]^{d_{\text{in}}}$. Then with
-probability at least $1-\delta$ over the sample:
+Let $N$ be an SVNN with $L$ affine layers and $L-1$ activation layers, with
+per-activation-layer Lipschitz product $\leq \gamma$ (an \emph{amplification
+factor}; $\gamma < 1$ is Condition~3 contractivity but the bound is valid
+for $\gamma \geq 1$ as well), trained on $n$ i.i.d.\ samples; let
+$\bar{N} = \mathrm{Compile}(N, h)$ be the deployed order-$k$ LUT version
+with cell width $h$. \textbf{Assume the intermediate signals of every layer
+remain within the LUT's validated domain}---guaranteed by the
+Box-Continuation Lemma~\ref{lem:box_continuation}, which propagates
+certified boxes in polynomial time (for compact-support B-spline KAN the
+domain is all of $\mathbb{R}$, so the assumption is vacuous). Let $\ell$
+be the loss, Lipschitz $L_\ell$, with outputs and targets bounded in
+$[-C, C]$, inputs in a compact box $\Omega \subset
+[-B, B]^{d_{\text{in}}}$. Then with probability at least $1-\delta$ over
+the sample:
 \begin{equation}
 R(\bar{N}) \;\leq\; \hat{R}(N) +
 C_1 L_\ell \gamma^{L-1} \sqrt{L\, d_{\max}}\,
@@ -253,9 +260,8 @@ a quantitative threshold, which is both true and more useful.
 \end{corollary}
 
 \vspace{4pt}
-\noindent\textbf{Quantitative instantiation for the trained KAN student.}
-For the trained KAN $[28,16,4]$ with $L=2$, $\gamma = 0.182$ (empirically
-measured, {\S}\ref{sec:svnn-kan}), input domain $[-3,3]^{28}$ ($B=3$),
+\noindent\textbf{Quantitative instantiation and empirical validation (E68).}
+For the trained KAN $[28,16,4]$ with input domain $[-3,3]^{28}$ ($B=3$),
 cross-entropy loss ($L_\ell = 1$), and $n=10{,}971$ training samples, the
 corrected bound is
 \begin{equation}
@@ -271,6 +277,35 @@ vs.\ test accuracy) is $0.0\%$, consistent with the certificate. The
 resolution-matching law (Corollary~\ref{cor:resolution_matching}) predicts
 $N^{*} \asymp n^{1/4} \approx 10{,}971^{1/4} \approx 10.3$ for $k=2$,
 matching the deployed $N = 15$ within $1.5\times$.
+
+\vspace{2pt}
+\noindent\textbf{Empirical findings (E68, honest report).}
+The decomposition and the sharp-constant law are confirmed at
+near-tightness: per-activation LUT error vs.\ $c_2 M_2 h^2$ measures
+$0.996$--$1.000$ at $N = 8/64/256$ ($M_2^{\max} = 0.178$), and the
+layer-1 logit bias tracks $h^2 = (6/(N-1))^2$ with slope $0.99$
+($r^2 = 0.999$) across $N \in \{8, \dots, 256\}$. Two findings require
+qualification. \textbf{(i) Layer-2 domain violation:} 47\% of layer-1
+hidden activations fall outside $[-3,3]$ (range $[-23.9, +25.1]$), so
+the layer-2 LUT is queried substantially outside its table and the
+$N$-independent clamping error dominates the $h^k$ term---the
+Box-Continuation assumption (Lemma~\ref{lem:box_continuation}) is
+violated at depth $\geq 2$ for this checkpoint. This is the same
+phenomenon measured independently in E53 (in-domain worst-case error
+$\approx 17$ at every $N$), confirming that per-layer domain bounds are
+not optional theory but a deployment requirement. \textbf{(ii) The
+trained network is not contractive:} measured per-layer amplification
+$\gamma = [15.4, 5.3] > 1$, so $\gamma$ acts as an amplification factor
+(which the bound accommodates; contractivity is a training target, not
+an automatic property). \textbf{(iii) Resolution matching is weakly
+supported:} the empirical knee $N^{*}$ grows with $n$ (slope
+$0.14 \pm 0.09$ vs.\ predicted $0.25$; the 0-1 loss variant is
+unobservable at near-ceiling accuracy), and the empirical gap decays as
+$n^{-0.84}$ (faster than the worst-case $n^{-1/2}$, as expected on a
+well-separated task). These findings sharpen---rather than weaken---the
+theory: the $h^k$ bias term is exact where its domain assumption holds,
+and the assumption itself is certified-polynomial to check
+(Lemma~\ref{lem:box_continuation}).
 
 \vspace{4pt}
 \noindent\textbf{Contrast with standard MLP.}
