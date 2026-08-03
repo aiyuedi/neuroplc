@@ -305,7 +305,7 @@ tighter for the KAN architecture specifically:
           Rather than using the global $\sup |f''|$, we compute
           per-segment $M_2^{(k)}$ bounds, tightening the LUT error
           estimate by $6.0\times$ on average for KAN B-splines.
-    \item \textbf{sign-structural affine arithmetic ({\S}\ref{sec:da}):}
+    \item \textbf{Sign-structural affine arithmetic ({\S}\ref{sec:da}):}
           Linear layers propagate error via DA rather than IA,
           exploiting weight-matrix sign structure for an additional
           $3.1\times$ tightening.
@@ -399,11 +399,12 @@ exponential-time SMT case-splitting.
 \noindent\textit{(b) Condition~2 separates $C^2$-bounded from transcendental.}
 The de~Boor LUT error bound ($\varepsilon = M_2 h^2/8$) requires $C^2$
 continuity. Activations without $C^2$ (ReLU: $f''$ undefined at 0) or with
-unbounded curvature (SiLU: $\sup |\text{SiLU}''| = \infty$ on $\mathbb{R}$)
+curvature computable only via numerical optimization (SiLU: $\sup_{\mathbb{R}}|\text{SiLU}''| = 0.5$)
 cannot use this bound. The $C^2$ requirement is nearly tight: it excludes
 exactly the activations whose LUT error cannot be bounded by a finite,
 parameter-computable constant. On the compact input domain $[-3,3]^{28}$,
-SiLU's second derivative is finite ($\max \approx 0.21$)---but the key
+SiLU's second derivative is finite ($\sup_{[-3,3]}|\text{SiLU}''| = 0.5$,
+attained at $x=0$)---but the key
 distinction is \textit{computability}: $M_2^{\text{B-spline}}$ is computable
 from the learned coefficients alone, whereas $\sup_{x\in[-3,3]}
 |\text{SiLU}''(x)|$ requires numerical optimization over a transcendental
@@ -422,7 +423,7 @@ boundary at which compiler-computed correctness becomes \textit{decidable}.
 \end{remark}
 
 \vspace{4pt}
-\noindent\textbf{Remark 2 (Relationship to Theorem~1).}
+\noindent\textbf{Remark (Relationship to Theorem~1).}
 Theorem~1 ({\S}\ref{sec:method}) is the \textit{concrete instantiation}
 of the SVNN framework for a specific architecture (2-layer KAN) and
 compiler (NeuroPLC). Theorem~2 provides the \textit{general principle}:
@@ -433,7 +434,7 @@ conditions; Theorem~2 shows \textit{why} this is possible and characterizes
 the broader class of architectures for which similar guarantees can be obtained.
 
 \vspace{4pt}
-\noindent\textbf{Remark 3 (Arithmetic Bounds vs.\ MILP-Based Verification).}
+\noindent\textbf{Remark (Arithmetic Bounds vs.\ MILP-Based Verification).}
 The SVNN arithmetic bound ($O(L \cdot M_{\max} \cdot h^2 \cdot d_{\max})$, Theorem~2)
 and the PWA abstraction + MILP approach of Schwartz
 et~al.~\cite{schwartz2026optimal} represent two complementary points on
@@ -470,7 +471,7 @@ time. All architectures violating either condition lie on the
 \textit{exterior}---they can be compiled and deployed, but correctness
 guarantees are limited to test-set validation. The Contractivity column
 (Condition~3) further distinguishes architectures whose error bounds are
-depth-\textit{uniform} ($\gamma < 1$, $O(L)$ growth) from those whose bounds
+depth-\textit{uniform} ($\gamma < 1$, depth-independent growth) from those whose bounds
 are merely depth-\textit{finite} (computable but potentially growing with $L$).
 
 \begin{table}[t]
@@ -500,10 +501,10 @@ CNN (Conv2d) & \xmark & \xmark & N/A & Exterior & N/A \\
 \parbox{\linewidth}{\scriptsize
 \cmark{} = condition satisfied; \xmark{} = condition violated; $\sim$ = depends on wavelet basis choice.\\
 $^{*}$Contractivity verified for the trained KAN student $[28,16,4]$ under VRM-KD distillation; polynomial-basis KANs admit structural Lipschitz bounds from coefficient magnitudes, giving $P(\text{KAN}) \leq 1$ as a design property.\\
-$^{\dag}$The B-spline KAN is the only architecture in this taxonomy for which all three conditions are simultaneously satisfied \textit{and} empirically validated on physical hardware (TIA Portal V21, S7-1200).\\
-$^{\ddag}$ChebyKAN: formally verified in Proposition~\ref{prop:chebykan-svnn} ({\S}\ref{sec:svnn-chebykan}); Z3 verifiability rate 496/512, 96.9\% (E54). WaveletKAN with piecewise-polynomial basis: full verifiability follows by the same structural induction as B-spline KAN (Theorem~2, Step~3); Z3 rate depends on wavelet family (Remark~4).\\
+$^{\dag}$The B-spline KAN is the only architecture in this taxonomy for which all three conditions are simultaneously satisfied \textit{and} empirically validated on the TIA Portal V21 engineering toolchain (S7-1200 target).\\
+$^{\ddag}$ChebyKAN: formally verified in Proposition~\ref{prop:chebykan-svnn} ({\S}\ref{sec:svnn-chebykan}); Z3 verifiability rate 496/512, 96.9\% (E54). WaveletKAN with piecewise-polynomial basis: full verifiability follows by the same structural induction as B-spline KAN (Theorem~2, Step~3); Z3 rate depends on wavelet family (see the Remark on Wavelet-KAN and Fourier-KAN).\\
 $^{\S}$ReLU is piecewise-linear ($C^0$); $f''$ is a Dirac delta at $x=0$, so the de~Boor $M_2 h^2/8$ bound does not apply. MILP-based verification (e.g., Reluplex) is possible but requires exponential case-splitting.\\
-$^{\P}$SiLU contains $\sigma(x)=1/(1+e^{-x})$; $e^{-x}$ is transcendental and undecidable in Z3's NRA theory. On compact domain $[-3,3]$, $\sup|\text{SiLU}''| \approx 0.21$ is finite but requires numerical optimization---not computable from parameters alone.\\
+$^{\P}$SiLU contains $\sigma(x)=1/(1+e^{-x})$; $e^{-x}$ is transcendental and undecidable in Z3's NRA theory. On compact domain $[-3,3]$, $\sup|\text{SiLU}''| = 0.5$ is finite but requires numerical optimization---not computable from parameters alone.\\
 $^{\sharp}$Confirmed empirically: MLP $[28,16,4]$ with SiLU, 0/16 components Z3-verifiable (E41).}
 \end{table}
 
@@ -651,8 +652,8 @@ Conditions~1 and~2 already establish that KAN is structurally verifiable
 (Theorem~2, Step~3): the finite-depth error bound of
 Eq.~\ref{eq:total_bound} exists and is computable from the control points
 alone. We now show that the trained KAN \emph{additionally} satisfies the
-contractivity refinement, which upgrades this guarantee to the depth-uniform
-$O(L)$ form of Eq.~\ref{eq:convergent_bound}.
+contractivity refinement, which upgrades this guarantee to the depth-uniform,
+depth-independent form of Eq.~\ref{eq:convergent_bound}.
 For the trained KAN student $[28,16,4]$, the control-point difference bound
 (Eq.~\ref{eq:bspline_diff_bounds}) yields $L_B^{\text{analytic}} \leq 1.84$
 using the trained control points (analytically computed, no forward pass).
@@ -767,7 +768,7 @@ This makes the guarantee vacuous for all but the shallowest MLPs.
 
 In contrast, the KAN error bound grows as $O(L \cdot M_{\max} \cdot
 h^2 \cdot d_{\max})$, which is independent of weight magnitudes (the linear layers
-are exact in DA) and decreases cubically with LUT resolution $h$.
+are exact in DA) and decreases quadratically with LUT resolution $h$.
 This architectural distinction---not implementation quality---is why
 \neuroplc provides guarantees for KAN that it cannot provide for MLP.
 $\square$

@@ -277,20 +277,23 @@ fundamental architectural property, not an artifact specific to one basis
 family. $\square$
 
 \vspace{4pt}
-\noindent\textbf{Remark 4 (Wavelet-KAN and Fourier-KAN).}
+\noindent\textbf{Remark (Wavelet-KAN and Fourier-KAN).}
 The proof technique of Proposition~\ref{prop:chebykan-svnn}---verifying
 Condition~1 via explicit decomposition and Condition~2 via analytical
 derivative bounds---extends naturally to other orthogonal polynomial and
 wavelet bases. Wavelet-KAN~\cite{bozorgasl2024chebykan}, which uses
-Daubechies or Haar wavelet basis functions, satisfies Condition~1 by the
+a Mexican-hat mother wavelet, satisfies Condition~1 by the
 same decomposition argument (element-wise wavelet evaluation + linear
-combination). Condition~2 holds if the wavelet basis is
-\textit{compactly-supported and piecewise-polynomial}---properties
-satisfied by Daubechies wavelets but not by all wavelet families (e.g.,
+combination). Condition~2 holds for the Mexican-hat basis, whose
+curvature constant $\sup_t |\psi''(t)| = 2.602$ is known analytically;
+this is not true of all wavelet families (e.g.,
 Morlet wavelets involve Gaussian terms and violate Condition~2).
-Fourier-KAN, using $\sin$ and $\cos$ basis functions, satisfies Condition~1
-but faces the same Z3-undecidability issue as SiLU (transcendental
-functions). Table~\ref{tab:svnn_taxonomy} marks Wavelet-KAN with
+Fourier-KAN, using $\sin$ and $\cos$ basis functions, satisfies Condition~1;
+direct Z3 reasoning over transcendental $\sin$/$\cos$ is undecidable, so
+E60 verifies the LUT-encoded evaluations instead, recovering 512/512
+Z3-equivalence (Table~\ref{tab:cross_domain}). The same encoding argument
+applies to the SiLU activations (Section~\ref{sec:ir-semantics}).
+Table~\ref{tab:svnn_taxonomy} marks Wavelet-KAN with
 ``$\sim$'' (depends on wavelet choice) to reflect this nuance: the SVNN
 conditions are \textit{basis-specific}, not universally applicable to all
 function approximation schemes.

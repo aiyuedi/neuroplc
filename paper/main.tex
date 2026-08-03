@@ -136,7 +136,7 @@
 \begin{abstract}
 We present a \textbf{type theory of certifiable neural architectures}:
 a formal characterization of which architectures admit design-time
-correctness certification under fixed-point (LUT) compilation, and why.
+correctness certification under LUT-discretized compilation, and why.
 Four results anchor the theory. First, the \textbf{sharp k-th order LUT
 bounds} (Theorem~\ref{thm:sharp-lut}): the classical de~Boor constant
 $M_2h^2/8$ generalizes to all interpolation orders with explicit sharp
@@ -168,9 +168,10 @@ code-generation regressions (it detected and validated the fix of a real
 emitter bug that degraded deployed accuracy to 83\%). Generated code
 compiles to 0 errors/0 warnings in TIA Portal V21 with a vendor-neutral
 IEC~61131-3 variant, and the runtime hot-swap protocol maintains the
-certified safety state across model updates. Five $C^2$-BV architectures
-(B-spline, Chebyshev, Fourier, Wavelet, RBF) and three datasets validate
-the framework. The theory answers not ``can we compile neural networks to
+certified safety state across model updates. Four $C^2$-BV architectures
+(B-spline, Chebyshev, Fourier, Wavelet) and three datasets (CWRU, XJTU-SY,
+Paderborn) validate the framework; RBF-KAN and MNIST remain
+theoretical/planned. The theory answers not ``can we compile neural networks to
 embedded targets''---prior tools showed that---but ``which architectures
 admit \emph{certified} compilation, with what sharp constants, at what
 complexity, and with what generalization guarantee?''
@@ -191,7 +192,7 @@ Kolmogorov-Arnold Networks, Type Theory.
 
 This paper introduces a \textbf{type theory for certifiable neural
 architectures}---a formal characterization of which architectures admit
-design-time correctness certification under fixed-point (LUT) compilation,
+design-time correctness certification under LUT-discretized compilation,
 with what sharp constants, at what computational cost, and with what
 learning-theoretic guarantee. The central insight is that the question
 ``can a neural network compiler provide design-time correctness
@@ -209,7 +210,7 @@ operations are never coupled in a single graph node) and $C^2$
 boundedness (Condition~2: every element-wise function has a computable
 curvature bound). The \textbf{SVNN Sufficiency Theorem} (Theorem~2)
 guarantees that well-typed architectures have computable, finite
-per-output error bounds under fixed-point compilation---a property that
+per-output error bounds under LUT-discretized compilation---a property that
 ill-typed architectures (standard MLPs with $\sigma(W\mathbf{x}+\mathbf{b})$)
 provably lack (Proposition~\ref{prop:mlp_negative}).
 
@@ -388,7 +389,7 @@ over PROFINET/OPC UA. An on-PLC time-domain subset is also compiled
          SCL compiles with \textbf{0e 0w} in TIA Portal V21
          on S7-1200 and S7-1500 ({\S}\ref{sec:tia}).
     \item \textbf{Algorithm (Verification \& Optimization):} Three novel
-         algorithms: (i)~\textbf{sign-structural affine arithmetic (DA)},
+         algorithms: (i)~\textbf{Sign-structural affine arithmetic (DA)},
          achieving a $2.2\times$ tighter error bound than interval arithmetic
           ($3.1\times$ vs.\ the $\sqrt{d}$ random-weights baseline) by preserving
          weight-matrix sign structure ({\S}\ref{sec:da});
@@ -563,8 +564,7 @@ PolyKAN~\cite{polykan2025} provide complementary robustness and compression.
 These are synergistic with \neuroplc: Schwartz et~al.'s MILP verification can
 be applied to the KAN compiled by \neuroplc for SIL~3+ certification, while
 \neuroplc's Level~2 arithmetic bounds provide fast, no-solver-required
-pre-certification for CI/CD integration. Tankman's Lipschitz result provides
-independent theoretical support for Condition~3 (contractivity).
+pre-certification for CI/CD integration.
 
 \paragraph{FPGA Deployment.} KANEL\'{E}~\cite{kanele2026} (ISFPGA 2026 Best Paper)
 maps KAN inference to LUT-based FPGA evaluation with 2,700$\times$ speedup over
@@ -729,7 +729,7 @@ safety-critical embedded ML target.% III. STRUCTURAL VERIFIABILITY OF NEURAL NET
 
 Producing certified PLC code from a PyTorch model requires more than
 translation---it requires a verifiable chain from floating-point weights to
-fixed-point SCL arithmetic. \neuroplc's pipeline is organized around this
+LUT-discretized SCL arithmetic. \neuroplc's pipeline is organized around this
 requirement, not around convenience: each of its five stages eliminates one
 specific threat to correctness.
 Stage~1 (28-D feature extraction) bounds the input domain to $[-3,3]^{28}$,
@@ -740,7 +740,7 @@ KAN student whose architecture satisfies SVNN conditions---this step is
 \textit{architecturally non-negotiable}: it produces the only model type
 that the compiler can certify. Stage~4 (IR-based compilation) is the
 compiler core. Stage~5 (TIA Portal V21 automated verification) provides
-hardware-level compilation evidence (0e 0w). The compiler operates
+engineering-toolchain compilation evidence (0e 0w). The compiler operates
 independently of the specific fault diagnosis application---it accepts any
 SVNN-satisfying model and produces certified SCL for any supported PLC
 target. Fig.~\ref{fig:overview} shows the pipeline.
@@ -1149,7 +1149,7 @@ per layer eliminated).
 Replacing analytical EXP/SiLU with $N$-point linear-interpolation LUTs
 introduces error bounded by $\varepsilon_{\text{SiLU}} \leq M_2^{\text{SiLU}}
 \Delta^2/8$ and $\varepsilon_{\text{EXP}} \leq M_2^{\text{EXP}} \Delta^2/8$,
-where $\Delta = 10/(N-1)$ is the grid spacing, $M_2^{\text{SiLU}} \approx 1.1$,
+where $\Delta = 10/(N-1)$ is the grid spacing, $M_2^{\text{SiLU}} = 0.5$,
 and $M_2^{\text{EXP}} = e^5 \approx 148.4$ on domain $[-5,5]$.
 Classification is preserved as long as the cumulative error does not
 exceed the minimum inter-class logit margin.
@@ -1161,9 +1161,9 @@ function $f$ on $[a,b]$ with uniform grid spacing $\Delta$ is:
 $\max_x |f(x) - \hat{f}_{\text{LUT}}(x)| \leq M_2 \Delta^2/8$, where
 $M_2 = \max_{x\in[a,b]} |f''(x)|$~\cite{atkinson1989numerical}.
 
-For SiLU on $[-5,5]$: $|\text{SiLU}''(x)| \leq 1.1$ (analytically,
-the maximum occurs near $x=0$). With $N=64$,
-$\Delta = 10/63 \approx 0.1587$, giving $\varepsilon_{\text{SiLU}} \leq 0.00346$.
+For SiLU on $[-5,5]$: $|\text{SiLU}''(x)| = 0.5$ (analytically,
+the maximum occurs at $x=0$). With $N=64$,
+$\Delta = 10/63 \approx 0.1587$, giving $\varepsilon_{\text{SiLU}} \leq 0.00157$.
 Empirical measurement at 2,000 test points yields $\max|\text{error}| = 0.00157$,
 consistent with the bound.
 
@@ -1904,7 +1904,7 @@ $L_{\text{net}}^{\text{IA}} = 42.2$,
 $\Delta_{\text{logit}}^{\text{IA}} \leq \mathbf{0.172}$,
 \textbf{IA safety factor $3.9\times$} (margin $1.35 / 2{\times}0.172$).
 
-\textbf{High-probability DA bound.} sign-structural affine arithmetic (Eq.~\ref{eq:da_bound})
+\textbf{High-probability DA bound.} Sign-structural affine arithmetic (Eq.~\ref{eq:da_bound})
 exploits the sign-balance of trained weight matrices, giving a tighter
 bound that holds with probability $\geq 1-\delta$ under the random-sign model
 of Lemma~
@@ -2130,7 +2130,7 @@ Three multiplicative factors explain the 46$\times$ relationship:
          KAN's soft feature selection through learned spline importance.
 \end{enumerate}
 
-The combined effect ($3\times \times 5\times \times 2\times \approx 30\times$,
+The combined effect ($3{\times}5{\times}2 \approx 30\times$,
 with multiplicative interaction producing the observed 46$\times$) explains
 the full gap. Critically, this analysis confirms that the DA bound is not
 \textit{incorrect}---it correctly bounds the per-element error for typical
@@ -2754,7 +2754,7 @@ estimates (Table~\ref{tab:wcet} summarizes the breakdown), since Z3
 models actual SCL instruction sequences. Because the S7-1200 executes
 strictly sequentially, per-node bounds compose trivially: $T_{\text{total}}
 = \sum \text{WCET}_{\text{node}} = 2,862\,\mu\text{s}$. This structural
-additivity, combined with the three-tier
+additivity, combined with the four-tier
 verification (Section~\ref{sec:compositional}), provides both timing and
 functional correctness evidence for IEC~61508 SIL~2 certification.
 
@@ -3833,7 +3833,7 @@ E6 empirical MaxAE & 15 & Per-sample max (not a bound)     & 3.65   & --- \\
 \textbf{DA bound} (0.079): high-probability under random-sign model (Lemma~
 \ref{lem:da_moment}), uses $|\sum W_{k,j}W_{j,i}|$.
 \textbf{Seg-DA} (0.056): DA with per-segment $M_2^{(k)}$ values (E16), additional $1.4\times$ tightening.
-\textbf{Compositional DA} (0.1196): network-level bound from three-tier certificate ({\S}\ref{sec:compositional}),
+\textbf{Compositional DA} (0.1196): network-level bound from the three-proof-tier certificate ({\S}\ref{sec:compositional}),
 uses per-function Z3-verified $\varepsilon=0.0036$ with DA propagation (ratio $2.1\times$ vs.\ IA 0.2473).
 \textbf{MaxAE} (3.65): empirical maximum absolute logit error across 2,743 test samples---not a certified bound.
 The IA and DA bounds certify classification correctness ($\Delta < \text{margin}/2 = 0.675$); the empirical
@@ -4240,7 +4240,7 @@ Fig.~\ref{fig:segment_bounds} already reported the per-resolution breakdown;
 the $6.0\times$ per-segment tightening and the $1.4\times$ DA compositional
 improvement are both \textbf{structural properties} of trained KAN B-spline
 activations, not dataset-specific artifacts. The segment-aware DA guarantee
-provides the strongest correctness guarantee bound for compiled neural
+provides the strongest correctness bound for compiled neural
 inference on industrial controllers to date.
 
 \noindent\textbf{E17: Compiler Comparison with RTNNIgen.}
@@ -4346,7 +4346,7 @@ $d \approx 0$ are nearly invariant---candidates for domain-robust feature
 selection in future sensor-agnostic deployments.}
 \end{table}
 
-The per-feature analysis reveals a actionable insight for deployment
+The per-feature analysis reveals an actionable insight for deployment
 engineering: features 9 and 7 (variance-like and energy-like statistics)
 are the primary carriers of domain shift, while features 6 and 15 are
 nearly domain-invariant. A domain-robust feature subset restricted to
@@ -4548,7 +4548,7 @@ suggests a different path: if each architectural component is independently
 verifiable, whole-program guarantees can be \textit{composed} from
 independently-verified pieces rather than proved at once. This observation---
 that KAN's decomposition maps directly to a compositional proof strategy---is
-what the three-tier verification system exploits.
+what the four-tier verification system exploits.
 (Table~\ref{tab:compositional} summarizes the full compositional results.)
 
 \vspace{4pt}
@@ -4683,7 +4683,7 @@ via the $\ell_1$ norm of the weight matrix), and
 
 \vspace{4pt}
 \noindent\textbf{Why This Matters.}
-The three-tier architecture achieves whole-program formal verification
+The four-tier architecture achieves whole-program formal verification
 without requiring a monolithic SMT query over the entire $3{,}800$-line
 SCL program---a query that would involve $>10^4$ nested ITE expressions
 and time out. Instead, it decomposes verification into:
@@ -4844,23 +4844,24 @@ polynomial basis) is included as an alternative SVNN-compliant
 architecture (Proposition~\ref{prop:chebykan-svnn}).}
 \label{tab:cross_domain}
 \footnotesize
-\begin{tabular}{@{}lccccc@{}}
+\begin{tabular}{@{}lcccccc@{}}
 \toprule
-\textbf{Metric} & \textbf{CWRU} & \textbf{XJTU-SY} & \textbf{ChebyKAN} & \textbf{FourierKAN} & \textbf{WaveletKAN} \\
- & \textbf{(Vib.)} & \textbf{(Nat.Wear)} & \textbf{(Poly.)} & \textbf{(E60)} & \textbf{(E61)} \\
+\textbf{Metric} & \textbf{MNIST} & \textbf{CWRU} & \textbf{XJTU-SY} & \textbf{ChebyKAN} & \textbf{FourierKAN} & \textbf{WaveletKAN} \\
+ & \textbf{(Image)} & \textbf{(Vib.)} & \textbf{(Nat.Wear)} & \textbf{(Poly.)} & \textbf{(E60)} & \textbf{(E61)} \\
 \midrule
- Accuracy & 0.9993 & 0.9172$^{*}$ & 1.0000 & \textbf{1.0000} & \textbf{1.0000} \\
- Training & KD (VRM) & FT 100ep & Scratch & FT 20ep$^{\S}$ & FT 20ep$^{\S}$ \\
+ Accuracy & 0.9859$^{\sharp}$ & 0.9993 & 0.9172$^{*}$ & 1.0000 & \textbf{1.0000} & \textbf{1.0000} \\
+ Training & Scratch & KD (VRM) & FT 100ep & Scratch & FT 20ep$^{\S}$ & FT 20ep$^{\S}$ \\
 \midrule
- Per-func.\ verified & 512/512 & 512/512 & 496/512 & \textbf{512/512} & \textbf{512/512} \\
- M$_2$ max & 1.586 & — & 5.4$\times$ M$_2$ & 2.298 & 1.781 \\
- Safety margin & 4.5$\times$ & — & 1.1$\times$ & \textbf{2.9$\times$} & \textbf{5.6$\times$} \\
- SVNN Cond.~3 & Yes & Yes & Yes & Yes & Yes \\
- SCL compiled & 0e 0w & 0e 0w & 0e 0w$^{\ddag}$ & \textbf{0e 0w} & \textbf{0e 0w} \\
+ Per-func.\ verified & 512/512 & 512/512 & 512/512 & 496/512 & \textbf{512/512} & \textbf{512/512} \\
+ M$_2$ max & — & 1.586 & — & 5.4$\times$ M$_2$ & 2.298 & 1.781 \\
+ Safety margin & — & 4.5$\times$ & — & 1.1$\times$ & \textbf{2.9$\times$} & \textbf{5.6$\times$} \\
+ SVNN Cond.~3 & Yes & Yes & Yes & Yes & Yes & Yes \\
+ SCL compiled & 0e 0w & 0e 0w & 0e 0w & 0e 0w$^{\ddag}$ & \textbf{0e 0w} & \textbf{0e 0w} \\
 \bottomrule
 \end{tabular}
 \vspace{2pt}
 {\scriptsize
+$^{\sharp}$MNIST digits 0--3, PCA(784$\to$28) + z-score, scratch training, 512/512 verified, DA~0.1199 (E42).
 $^{*}$Fine-tuned 100 epochs from CWRU checkpoint (E55).
 $^{\S}$Fine-tuned 20 epochs from CWRU pre-training with M2 regularization ($\lambda{=}0.01$, E60--E61).
 $^{\ddag}$ChebyKAN uses Markov-based global $M_2$ bounds, 5.4$\times$ looser than empirical (E54).
@@ -5100,7 +5101,7 @@ compiler reordering. Our guarantee is therefore a \textbf{design-time}
 correctness argument in the IEEE~754 abstract machine. Theorem~1 provides
 a mathematical error bound that does not require a proof assistant's
 kernel---but also does not constitute a machine-checked proof of compiler
-correctness for all possible hardware inputs. The three-tier composition
+correctness for all possible hardware inputs. The composition
 certificate (Tier~1--3) provides the strongest available \textit{software-level}
 evidence; hardware-level certification requires the physical PLC measurement
 described above.
@@ -5198,7 +5199,7 @@ containing neural inference blocks.
 
 This paper established a \textbf{type theory of certifiable neural
 architectures}---a formal characterization of which architectures admit
-design-time correctness certification under fixed-point compilation, with
+design-time correctness certification under LUT-discretized compilation, with
 what sharp constants, at what computational cost, and with what
 learning-theoretic guarantee---and instantiated it as the first verified
 PyTorch-to-IEC~61131-3 compiler. The central finding is that compiler
@@ -5272,7 +5273,7 @@ frontier.
 \end{enumerate}
 
 \vspace{4pt}
-\noindent\textbf{Empirical validation (74 experiments, 5 architectures).}
+\noindent\textbf{Empirical validation (74 experiments, 4 architectures).}
 B-spline KAN achieves 99.93\% CWRU accuracy; FourierKAN and WaveletKAN
 achieve 100\% on both CWRU and XJTU-SY domain-shift with 512/512
 Z3-equivalent verification preserved (E62); ChebyKAN achieves 496/512 Z3

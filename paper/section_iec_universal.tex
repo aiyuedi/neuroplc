@@ -6,8 +6,12 @@
 
 The SVNN certification thus far has been validated on Siemens S7-1200 and
 S7-1500 platforms via TIA Portal V21 ({\S}\ref{sec:tia}). We now establish
-that this certification extends to \textit{any} IEC~61131-3 compliant
-programmable controller---the entire installed base of industrial PLCs.
+that this certification extends to any programmable controller whose REAL
+arithmetic conforms to the IEC 60559 (IEEE~754-2019) operation semantics.
+Note that IEC~61131-3:2025 \S2.3.2 mandates the REAL \textit{format} (IEC
+60559 binary32); FMA contraction, subnormal flushing, and rounding modes
+are implementation-defined, so the guarantee is conditional on
+operation-level conformance.
 
 \subsubsection{IEC~61131-3 REAL Arithmetic Semantics}
 
@@ -61,8 +65,8 @@ store.
 \begin{lemma}[Universal IEC~61131-3 REAL Guarantee]
 \label{lem:iec_universal}
 Let $N$ be any SVNN network. Let $C(N)$ be the NeuroPLC-generated SCL
-program. Then for \textbf{any} programmable controller \texttt{PLC} compliant
-with IEC~61131-3:2025:
+program. Then for any programmable controller \texttt{PLC} whose REAL arithmetic
+conforms to the IEC 60559 (IEEE~754-2019) operation semantics:
 \begin{equation}
 \forall x \in \text{Domain}(X):\;
 \|\llbracket N \rrbracket_{\text{PyTorch}}(x) -
@@ -106,13 +110,14 @@ normative reference IEC 60559 $\equiv$ IEEE~754-2019, which is a
 \noindent\textbf{Industrial Significance.}
 Lemma~\ref{lem:iec_universal} transforms the scope of the SVNN guarantee
 from a compiler validation result (``verified on Siemens S7-1200/1500
-via TIA Portal V21'') to a \textbf{universal industrial certification}:
-``verified for any IEC~61131-3:2025 compliant controller.'' This includes
-controllers from Siemens (SIMATIC S7-1200, S7-1500, S7-300, S7-400,
-ET~200), Beckhoff (CX series, TwinCAT~3), ABB (AC500, AC~800M),
-Rockwell Automation (CompactLogix, ControlLogix with ST support),
-B\&R (X20, X90 series), Schneider Electric (Modicon M580, M340),
-and WAGO (PFC~200)---the entire industrial PLC ecosystem.
+via TIA Portal V21'') to a \textbf{conditional industrial certification}:
+``verified for any controller whose REAL arithmetic conforms to the
+IEC 60559 (IEEE~754-2019) operation semantics.'' This covers, conditionally
+on that conformance, controllers from Siemens (SIMATIC S7-1200, S7-1500,
+S7-300, S7-400, ET~200), Beckhoff (CX series, TwinCAT~3), ABB (AC500,
+AC~800M), Rockwell Automation (CompactLogix, ControlLogix with ST support),
+B\&R (X20, X90 series), Schneider Electric (Modicon M580, M340), and WAGO
+(PFC~200).
 
 \vspace{4pt}
 \noindent\textbf{Platform Independence via Arithmetic Standardization.}
