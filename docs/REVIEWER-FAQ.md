@@ -378,5 +378,39 @@ Positioned honestly, in two parts — what is classical, and what is new.
 | E-T1 | `code/theory/verify_optimal_lut.py` | Thm 13: cross-function 2.75×, within-function 3.32×; κ-density superseded (2.10× worse than uniform) |
 | E-T2 | `code/theory/verify_compile_aware_minimax.py` | Thm 14: scissors (N=4 flat to 0.3%), free discretization (269× decay); N\*≍n^{1/(2k+1)} |
 | E-T3 | `code/theory/verify_besov_pac.py` | Thm 15: N=32 decays 1.4×/6.5×/9.1× (s=1/2/4); N=8 flat (scissors) |
+| E-T4 | `code/theory/verify_capacity.py` | Thm 17: KT extremal ratio 1.000000; constant order c\*<c_fix<c_k (N16: 0.000288<0.000365<0.000558); slopes −2.11/−2.12 |
+| E-T5 | `code/theory/verify_stratification.py` + `verify_decision_law.py` | Thm 17/18/19: kink slope −1.11 vs C² −2.05; V_B decoupling (wall-time flat in N) vs superlinear search; exp_slope = −ρ exact (2%), W¹ ratio 0.74 vs analytic 0.0032 |
 
-*Updated: 2026-08-03 | NeuroPLC Pre-Submission Defense Document (TNNLS v3)*
+---
+
+## Q21: "The capacity C(B,V) is just rate-distortion / quantized minimax (Zhu–Lafferty, KT entropy) rewritten. What is new?"
+
+**Our Answer (domain split):**
+The approximation side is fully classical and we claim no part of it: the packing line ε ≥ c\*M_kB^{-k} is the Kolmogorov–Tikhomirov entropy bound, the exponential rate on analytic classes is Shannon's rate-distortion law, and quantized minimax estimation (Zhu–Lafferty) governs estimator-bit budgets. **Our contribution is exclusively the verification side** (Section III-S): the certificate must be checkable at deployment time, and this constraint is not present in any of those lines. The novel objects are (i) the certificate proof system CP with perfect deterministic soundness, (ii) the V_B-decoupling dimension (verification cost vs. storage budget), (iii) the three-stratum structure with theorem-level CP-relative necessity, and (iv) the constant-purchase tradeoff (c_fix vs. c\* paid in verification cost). The paper states this boundary explicitly in §Related Work and Boundaries.
+
+## Q22: "Verification cost decoupled from storage is succinctness (SNARKs/GKR/PCP) — you rediscovered it?"
+
+**Our Answer:**
+Three structural differences. (1) **Soundness regime**: SNARKs/GKR are computational/statistical with randomized verifiers; our verifier is deterministic with perfect soundness, which PCP[0,poly(n)]=NP forces to read the whole proof term (V ≥ |π|) — the decoupling mechanism is opposite. (2) **Object**: SNARKs verify computation in F_p circuits ("the prover computed output y from committed model M correctly"); we verify real-valued class-level semantic bounds ("the deployed representation is ε-close to the trained model on the function class") — zkML verifies the former, not the latter. (3) **Theory**: succinctness is a fact about proof systems; our contribution is the capacity function C(B,V), the stratification, and the necessity theorem — none exist in the succinct-verification literature. We cite Kalai et al. STOC'23 and GKR explicitly and position against them.
+
+## Q23: "The certificate proof system CP is Gappa (or LeanCert) with a different name."
+
+**Our Answer (component vs. theory):**
+CP follows the validated-numerics certificate architecture — we say so in Section III-S and cite Gappa, Sollya, and LeanCert as the lineage. Three differences. (1) **Object**: Gappa/Sollya certify single-function instance bounds (one floating-point expression, one enclosure); CP certifies class-level bounds coupled to the packing line (the bound is a function of the class, not a single instance). (2) **Theory**: they have no capacity function, no stratification, no verification-budget dimension. (3) **Necessity**: we prove that within CP, V_B-decoupled schemes achieving the class-level minimax constant must have closed-form propagation (Theorem 17(5)) — validated numerics has no such theorem. "Components are prior, the capacity/stratification theory is not" is the honest boundary we claim.
+
+## Q24: "Why is the necessity only 'within CP'? When will the absolute form be proved?"
+
+**Our Answer (honest positioning):**
+The absolute necessity — over all conceivable proof systems — is the trichotomy conjecture (Theorem 10, item 5): it requires formalizing "design-time-computable" as a complexity class and is P≠NP-adjacent. We do not claim it. What Theorem 17(5) proves is the CP-relative form: within the certificate calculus (whose rules are exactly the bound-generation rules the paper uses: arithmetic, interpolation remainder, compositional propagation, spectral tails), V_B-decoupling + class-level minimax ⟹ closed-form propagation (SVNN structure). This is the information-theoretic coordinate of the necessity direction — it upgrades the evidence from "conjecture + three regime exclusions" to "conjecture + one theorem-level form (CP-relative) + three exclusions". The residual open problem is stated in the conclusion. This is a contribution, not a gap: the trichotomy's P≠NP-level necessity is out of scope for any paper.
+
+## Q25: "Free-node splines reach c\* — and SOS certificates verify optimality in polynomial time. Why do you claim exponential verification for stratum 3?"
+
+**Our Answer (class-level vs. instance-level):**
+The exponential statement is **class-level only**: certifying that a given node set achieves the class-optimal constant for all f ∈ W^k simultaneously requires deciding class-level structural optimality — NP-hard by the product-gate reduction of Theorem 5 (conditional on P ≠ NP; ETH for the exponential time). The **instance-level** problem (a fixed node set, one function) has a closed-form error bound and is cheap — we say so explicitly, which is consistent with SOS certificates verifying polynomial optimality at the instance level (Kaltofen et al.). A referee reading "exponential" as applying to instance-level certificates would misread the theorem; the statement in Theorem 18(i) is class-level and the proof sketch says so.
+
+## Q26: "Theorem 17 (stratification) overlaps with Theorem 6/14 (compile-aware PAC/minimax). Why three theorems?"
+
+**Our Answer (two coordinates of one surface):**
+Theorem 6/14 govern the **sample dimension n** (statistical side: how many samples for a given resolution); Theorem 17 governs the **storage dimension B** (compilation side: how many bits for a given error) with the packing line, the three strata, and the CP-relative necessity. Together they form the two-coordinate capacity surface R(n, B); Theorem 17 adds what the statistical theorems cannot: (i) the universal packing line (no scheme, any verification cost, beats B^{-k}), (ii) the verification stratum structure (V_B decoupling — a dimension absent from learning theory), and (iii) the architecture-as-code law (Theorem 19) connecting smoothness to code choice. The minimax rates appear as the n-coordinate of the surface, not as duplicates.
+
+*Updated: 2026-08-04 | NeuroPLC Pre-Submission Defense Document (TNNLS v4: Thm 17–19 capacity defenses, Q21–Q26)*
