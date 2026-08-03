@@ -899,12 +899,12 @@ ratio compounds across $L$ layers. For a 2-layer KAN with $d_{\text{in}}=28$,
 $d_{\text{hid}}=16$, the compounding factor is approximately
 $(r_{\text{seg}})^{d_{\text{hid}} \times L} \approx (0.41)^{32} \approx
 2.2 \times 10^{-13}$ for IA, vs.\ DA's tighter per-segment bound
-yielding the observed $2.2\times$ end-to-end advantage (E9). This
+yielding the observed $2.1\times$ end-to-end advantage (E9). This
 explains \emph{why} a modest per-segment advantage ($2.4\times$) produces
 no further compounding: the inter-layer maps amplify DA and IA errors by
 the \emph{same} per-layer factor (measured amplification
 $\gamma = [15.4, 5.3]$ for the trained student, E68), which cancels in
-the end-to-end ratio, so the observed $2.2\times$ advantage tracks the
+the end-to-end ratio, so the observed $2.1\times$ advantage tracks the
 per-segment ratio rather than compounding with depth.
 \end{proposition}
 
@@ -936,14 +936,14 @@ radius, 5 radii $\times$ 3 degrees, $4{,}500$ total evaluations)
 confirms the scaling. For degree 3 at $r=0.2h$, the measured DA exponent
 is $2.185 \pm 0.196$ (6,600 data points, $R^2 > 0.99$ for power-law fit),
 confirming $O(r^2)$ behavior. The constant factor difference between DA
-and IA---the source of the $2.2\times$ end-to-end advantage---is
+and IA---the source of the $2.1\times$ end-to-end advantage---is
 explained by the DA linear-term exactness eliminating the lowest-order
 overestimation that IA incurs from monomial-wise interval evaluation.
 $\square$
 
 \vspace{4pt}
 \noindent\textbf{Why the DA advantage is bounded.}
-The $2.2\times$ end-to-end tightening (E9) is close to the per-segment
+The $2.1\times$ end-to-end tightening (E9) is close to the per-segment
 $2.4\times$ advantage because the inter-layer maps amplify DA and IA
 errors by the \emph{same} per-layer factor (measured amplification
 $\gamma = [15.4, 5.3]$ for the trained student, E68) before they reach
@@ -953,7 +953,8 @@ benefit from this propagation equally; the advantage of DA is limited
 to the \emph{input} side (Layer~0) where fresh LUT errors enter the
 pipeline. This bounded advantage is a feature, not a bug: DA's role is
 to provide a tighter initial bound that widens the safety margin from
-$5.6\times$ (IA, E9) to $17.0\times$ (DA, E9)---a 3.1$\times$ margin
+below $1\times$ (IA, E9; bound $1.38$ exceeds the half-margin) to
+$\sim 2.0\times$ (DA, E9; bound $0.66$)---a $2.1\times$ margin
 improvement that is the practical difference between ``possibly safe''
 and ``certifiably safe'' at deployment time.
 
@@ -972,8 +973,8 @@ The DA bound $|C_1| + |C_2| + |C_3|$ is compared against the naive
 interval-arithmetic bound $|a_1|r + |a_2| r^2 + |a_3| r^3$ on 500
 random cubic polynomials. The mean per-segment DA/IA overestimation
 ratio is $2.82$ (MATLAB numerical verification), consistent with the
-end-to-end $2.2\times$ advantage measured in E9. The reduction from
-$2.8\times$ (per-segment ideal) to $2.2\times$ (end-to-end observed)
+end-to-end $2.1\times$ advantage measured in E9. The reduction from
+$2.8\times$ (per-segment ideal) to $2.1\times$ (end-to-end observed)
 is explained by the inter-layer Lipschitz contraction: the $L_1$-norm
 of the second-layer weight matrix $W_1$ attenuates both DA and IA
 errors equally before they reach the classifier output, compressing
@@ -1156,7 +1157,7 @@ Theorem~\ref{thm:sharp-lut} resolves the question raised by
 Theorem~\ref{thm:svnn_conditions} Step~4: DA is not merely ``better''
 than IA---it is the \textit{best possible} among all sound first-order
 methods for the function class that KAN activations belong to.
-The $2.2\times$ end-to-end tightening (E9) is thus not an empirical
+The $2.1\times$ end-to-end tightening (E9) is thus not an empirical
 coincidence but a \textit{theoretically predicted} lower bound on the
 improvement any first-order abstract domain can achieve over naive
 interval arithmetic on $C^2$ B-spline segments.

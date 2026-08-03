@@ -311,10 +311,10 @@ contribution. Its 6-op IR has a formal syntax, operational semantics, and
 typing rules ({\S}\ref{sec:ir-semantics}). Three verification mechanisms
 compose: (1) one-time Z3 SMT template proofs; (2) compositional per-function
 certificates (512/512 verified); and (3) DA---the optimal first-order
-abstract domain for $C^2$ functions---achieving $2.2\times$ tighter
-error bounds than interval arithmetic ($8.5\times$ safety factor,
-up to $3.1\times$ vs.\ the $\sqrt{d}$ random-weights baseline,
-{\S}\ref{sec:da}). KAN's B-spline decomposition is \textit{structural
+abstract domain for $C^2$ functions---achieving $2.1\times$ tighter
+error bounds than interval arithmetic ($1.0\times$ safety factor at
+the $M_2^{\text{char}}$ calibration, up to $3.1\times$ vs.\ the
+$\sqrt{d}$ random-weights baseline, {\S}\ref{sec:da}). KAN's B-spline decomposition is \textit{structural
 necessity}: identically-sized KAN vs.\ MLP yield 512/512 vs.\ 0/48
 Z3-verifiable components (MLP~$[28,32,16,4]$, E41).
 
@@ -390,7 +390,7 @@ over PROFINET/OPC UA. An on-PLC time-domain subset is also compiled
          on S7-1200 and S7-1500 ({\S}\ref{sec:tia}).
     \item \textbf{Algorithm (Verification \& Optimization):} Three novel
          algorithms: (i)~\textbf{Sign-structural affine arithmetic (DA)},
-         achieving a $2.2\times$ tighter error bound than interval arithmetic
+         achieving a $2.1\times$ tighter error bound than interval arithmetic
           ($3.1\times$ vs.\ the $\sqrt{d}$ random-weights baseline) by preserving
          weight-matrix sign structure ({\S}\ref{sec:da});
           (ii)~\textbf{Segment-Aware de~Boor Bounds}, exploiting the
@@ -1185,8 +1185,10 @@ margin of $1.35$ (Eq.~\ref{eq:margin_guarantee}). The argmax is therefore
 preserved.
 
 The cumulative effect of all three LUT approximations (B-spline, SiLU, EXP)
-is bounded by Theorem~1 ($\Delta \leq 0.172$), and the safety factor of
-$3.9\times$ (margin/$(2\Delta)$) ensures classification correctness is maintained.
+is bounded by Theorem~1: the IA envelope is $\Delta \leq 1.38$ (sound, but
+exceeding the half-margin $0.675$), and the DA certificate $\Delta \leq 0.66$
+({\S}\ref{sec:da}, recomputed 2026-08-03) ensures classification
+correctness is maintained with a safety factor of $1.0\times$.
 \end{proof}
 
 \begin{table}[t]
@@ -1231,25 +1233,30 @@ Eq.~\eqref{eq:ia_l1} accounts for Lipschitz amplification ($L_B = 2.21$
 layer-0 / $2.05$ layer-1, measured over the trained student's 512
 B-spline activations, E68) at the inter-layer transition before layer 1's
 linear combination.
-% TODO: the IA/DA logit bounds (0.172/0.079) and safety factors (3.9x/8.5x)
-% stated in this section were computed with the stale constants
-% L_B = 0.65 and ||W||_{1,inf} = 0.32/0.28; they must be recomputed from
-% the current checkpoint (L_B = 2.21/2.05, ||W_eff||_{1,inf} = 12.36/6.52)
-% before submission. With measured $\|W^{(0)}\|_{1,\max} = 0.32$ and
+% FIXME(2026-08-03): the IA/DA bounds and safety factors stated in this
+% section were recomputed from the released checkpoint (L_B = 2.21/2.05,
+% ||W_eff||_{1,inf} = 12.36/6.52): DA 0.66 (safety 1.0x), IA 1.38 (exceeds
+% half-margin 0.675, not a certificate). The narrative below uses the
+% recomputed values. With measured $\|W^{(0)}\|_{1,\max} = 0.32$ and
 $\|W^{(1)}\|_{1,\max} = 0.28$, and the model-specific $M_2 = 0.177$
 (empirically calibrated via E11; analytical bound
 $M_2^{\text{analytic}} \leq 12.8$ from Eq.~\ref{eq:bspline_curve_bounds}),
 the worst-case logit perturbation at 15 LUT points is:
 
 \begin{equation}
-\Delta z_{\max} \leq 0.172 \ll \min\nolimits_{i \neq \hat{y}}
+\Delta z_{\max} \leq 1.38, \quad \min\nolimits_{i \neq \hat{y}}
 (\text{logit}_{\hat{y}} - \text{logit}_i)_{\text{correct}} = 1.35
 \label{eq:margin_guarantee}
 \end{equation}
 
-The safety factor is $1.35 / (2 \times 0.172) \approx 3.9\times$.
-Classification correctness is not merely empirically observed---it
-is mathematically guaranteed under the LUT error distribution.
+The interval-arithmetic envelope ($1.38$, recomputed from the released
+checkpoint 2026-08-03) exceeds the half-margin $1.35/2 = 0.675$: the IA
+bound is sound but is \emph{not} a classification certificate for this
+checkpoint. The DA bound ($0.66$, {\S}\ref{sec:da}) provides the
+certificate, with a safety factor of $1.0\times$ at the
+$M_2^{\text{char}}$ calibration: classification correctness is
+mathematically guaranteed under the LUT error distribution, albeit with
+a thin margin.
 
 \subsubsection{Sign-Structural Affine Arithmetic: Tighter Bounds via Correlation Tracking}
 \label{sec:da}
@@ -1292,9 +1299,11 @@ $\sum_i \bigl|\sum_j W^{(1)}_{k,j} W^{(0)}_{j,i}\bigr|$: positive
 and negative weight paths \textit{cancel} before the absolute value,
 whereas interval arithmetic applies the absolute value to each term
 individually. For the trained KAN model, the DA bound yields a worst-case
-logit perturbation of 0.079 vs.\ 0.172 for IA---a
-\textit{2.2$\times$ tightening}. The safety factor increases
-correspondingly from 3.9$\times$ to 8.5$\times$. This
+logit perturbation of 0.66 vs.\ 1.38 for IA---a
+\textit{2.1$\times$ tightening} (recomputed from the released checkpoint,
+2026-08-03). The IA envelope exceeds the half-margin $0.675$ and is not
+a certificate; the DA bound certifies classification with a safety
+factor of $1.0\times$ at the $M_2^{\text{char}}$ calibration. This
 represents a novel application of affine arithmetic
 to compiled neural network verification on industrial controllers.
 
@@ -1577,10 +1586,13 @@ $\text{ratio} = 0.896\sqrt{d} + 0.349$.}
     \centering
     \includegraphics[width=0.88\textwidth]{figures/final/fig05_da_vs_ia}
     \caption{\textbf{DA vs.\ IA Bound Comparison with LUT Resolution.}
-    Left: DA achieves $2.2\times$ tighter bounds than IA across all LUT resolutions
+    Left: DA achieves $2.1\times$ tighter bounds than IA across all LUT resolutions
     ($N=8$--$20$), decreasing $\propto 1/N^2$ (Theorem~\ref{thm:tightness}).
-    At $N{=}15$: DA $=0.079$, IA $=0.172$. Right: bar comparison.
+    At $N{=}15$: DA $=0.66$, IA $=1.38$ (recomputed from the released
+    checkpoint, 2026-08-03). Right: bar comparison.
     The gap follows from DA's Galois-optimality (Theorem~\ref{thm:galois}).}
+    % FIXME: fig05_da_vs_ia must be regenerated with the recomputed values
+    % (DA 0.66 / IA 1.38 at N=15) before submission.
     \label{fig:da_vs_ia}
 \end{figure*}
 
@@ -1623,12 +1635,15 @@ $\varepsilon_i$ values derived from the LUT segment containing feature
 dimension $i$. The per-input $\varepsilon_i$ is taken as the maximum
 per-segment $\varepsilon$ across all output dimensions sharing input $i$
 (conservative, maintaining soundness). This yields an additional
-$1.4\times$ tightening on top of DA's $2.2\times$ improvement over IA
+further tightening on top of DA's $2.1\times$ improvement over IA
 (up to $3.1\times$ vs.\ the $\sqrt{d}$ random-weights baseline, {\S}\ref{sec:da}).
 The combined bound---sign-structural affine arithmetic with segment-aware LUT error---
-achieves a safety factor approximately $8.5 \times 1.4 \approx 11.9\times$ (cf.\ 3.9$\times$ for IA alone)
+achieves a safety factor of approximately $11.9\times$ (Seg-DA, E16)
 at $N=15$ LUT points, providing the strongest formal guarantee for compiled
-KAN inference to date.
+KAN inference to date; plain DA alone certifies this checkpoint with a
+thin $1.0\times$ factor at the $M_2^{\text{char}}$ calibration.
+% TODO: Seg-DA absolute values (0.056, 11.9x) pending recomputation
+% against the released checkpoint (2026-08-03).
 
 \begin{figure}[t]
     \centering
@@ -1884,9 +1899,9 @@ derivative satisfies $\max_{x \in [a,b]} |\phi'(x)| \leq L_B$.
 \end{lemma}
 
 \noindent\textit{Proof.} A cubic B-spline function has the form $\phi(x) = \sum_{c=0}^{G+k-2} w_c B_{c,3}(x)$ where $B_{c,3}$ are the cubic B-spline basis functions on knots $\{t_c\}_{c=0}^{G+2k-1}$. The derivative $\phi'(x) = \sum_c w_c B'_{c,3}(x)$ where $B'_{c,3}(x) = 3(\frac{B_{c,2}(x)}{t_{c+3}-t_c} - \frac{B_{c+1,2}(x)}{t_{c+4}-t_{c+1}})$ by the standard B-spline derivative recurrence. Each $B_{c,2}(x)$ satisfies $0 \leq B_{c,2}(x) \leq 1$ and $\sum_c B_{c,2}(x) = 1$, forming a partition of unity. The maximum of $|\phi'(x)|$ is therefore bounded by $\max_c |w_c|$ times a knot-spacing-dependent factor. For the uniform knot vector used in the KAN (grid extends slightly beyond $[-3,3]$ with $G=8$ interior knots), the bound is evaluated empirically from the trained checkpoint---measured as $\max_{x \in [a,b]} |\phi'(x)|$ on a 1,000-point grid across all 512 activation functions: $L_B = 2.21$ (layer-0) / $2.05$ (layer-1), single maximum $2.21$ (E68).
-% TODO: the IA/DA logit bounds (0.172/0.079) and safety factors (3.9x/8.5x)
-% quoted in {\S}\ref{sec:da} and Theorem~1 were computed with the stale
-% L_B = 0.65 and must be recomputed from the current checkpoint.
+% FIXME(2026-08-03): the IA/DA logit bounds quoted in {\S}\ref{sec:da} and
+% Theorem~1 were recomputed from the released checkpoint: DA 0.66, IA 1.38
+% (safety factors 1.0x / <1; IA is not a certificate).
 Under LUT interpolation error $\delta_{\text{in}}$ in the input, the mean value theorem gives $|\phi(x+\delta_{\text{in}}) - \phi(x)| = |\phi'(\xi)| \cdot |\delta_{\text{in}}| \leq L_B \cdot |\delta_{\text{in}}|$ for some $\xi \in [x, x+\delta_{\text{in}}]$.
 
 \setcounter{theorem}{0}
@@ -1895,8 +1910,11 @@ Under LUT interpolation error $\delta_{\text{in}}$ in the input, the mean value 
 Let $\mathcal{G}$ be a valid IR graph compiled from a 2-layer feedforward KAN
 model $\mathcal{M}$ with architecture $[d_0, d_1, d_2]$, and let
 $X \subset \mathbb{R}^{d_0}$ be the validated input domain
-($X = [-3,3]^{28}$ for the CWRU case study). For all $x \in X$,
-two complementary bounds hold simultaneously.
+($X = [-3,3]^{28}$ for the CWRU case study). Assume the
+Box-Continuation condition (Lemma~\ref{lem:box_continuation}): the
+reachable intermediate signals remain within the LUT domains, verified
+in $O(L \cdot d_{\max}^2 \cdot N)$ time. For all $x \in X$ satisfying this condition, two complementary
+bounds hold simultaneously.
 
 \textbf{Sound worst-case bound.} Interval arithmetic, which applies no
 sign cancellation and treats each LUT approximation error as an independent
@@ -1917,9 +1935,12 @@ L_{\text{net}}^{\text{IA}} = L_B \cdot \max_{k} \sum_{i,j}
 \label{eq:l_net_ia}
 \end{equation}
 For the trained $[28,16,4]$ KAN at $N=15$:
-$L_{\text{net}}^{\text{IA}} = 42.2$,
-$\Delta_{\text{logit}}^{\text{IA}} \leq \mathbf{0.172}$,
-\textbf{IA safety factor $3.9\times$} (margin $1.35 / 2{\times}0.172$).
+$L_{\text{net}}^{\text{IA}} = 171.1$,
+$\Delta_{\text{logit}}^{\text{IA}} \leq \mathbf{1.38}$,
+which exceeds the half-margin $0.675$: the interval-arithmetic bound is
+sound but not a classification certificate for this checkpoint
+(recomputed from the released checkpoint, 2026-08-03;
+\texttt{verify\_da\_bounds\_recomputed.py}).
 
 \textbf{High-probability DA bound.} Sign-structural affine arithmetic (Eq.~\ref{eq:da_bound})
 exploits the sign-balance of trained weight matrices, giving a tighter
@@ -1932,13 +1953,20 @@ L_{\text{net}}^{\text{DA}} = L_B \cdot \max_{k} \sum_{i}
 + \max_{k} \bigl|\sum_{j} W^{(1)}_{k,j}\bigr|
 \label{eq:l_net}
 \end{equation}
-For the trained KAN: $L_{\text{net}}^{\text{DA}} \approx 19.6$,
-$\Delta_{\text{logit}}^{\text{DA}} \leq \mathbf{0.079}$,
-\textbf{DA safety factor $8.5\times$}. Both bounds certify classification
-correctness ($\Delta < \text{min-margin}/2 = 0.675$).
+For the trained KAN: $L_{\text{net}}^{\text{DA}} \approx 162.2$,
+$\Delta_{\text{logit}}^{\text{DA}} \leq \mathbf{0.66}$,
+\textbf{DA safety factor $1.0\times$} (margin $1.35 / 2{\times}0.66$). The DA
+bound certifies classification correctness ($0.66 <
+\text{min-margin}/2 = 0.675$) at the $M_2^{\text{char}}$ calibration,
+but the margin is thin: under the measured per-function LUT-error
+distribution ($\varepsilon$ mean $0.017$, max $0.041$, E58) the bound
+exceeds the half-margin. The classification guarantee of this
+checkpoint is therefore marginal, and contractive training (spectral
+normalization) is the deployment recipe that restores a comfortable
+margin (future work).
 
-The IA bound is the principal correctness certificate;
-the DA bound quantifies the typical operating margin.
+The DA bound is the effective correctness certificate;
+the IA bound is the conservative sound upper envelope.
 Together they supersede the single $L_{\text{net}}$ of the conservative interval-only formulation, which
 had conflated the DA cross-term (probabilistic) with the sound worst-case
 (interval) constant.
@@ -2046,9 +2074,9 @@ W^{(0)}_{j,i}\bigr| + \max_k \bigl|\sum_j W^{(1)}_{k,j}\bigr|
 \end{equation}
 
 For the trained KAN $[28,16,4]$, the measured $L_{\text{net}} \approx
-19.6$ (DA bound), yielding $\Delta_{\text{logit}} \leq 0.00406 \times
-19.6 = 0.079$ at 15 LUT points. The minimum inter-class margin among
-correctly classified test samples is $1.35 > 2 \cdot 0.079 = 0.158$ (E6),
+162.2$ (DA bound), yielding $\Delta_{\text{logit}} \leq 0.00406 \times
+162.2 = 0.66$ at 15 LUT points. The minimum inter-class margin among
+correctly classified test samples is $1.35 > 2 \cdot 0.66 = 1.32$ (E6),
 satisfying Lemma~\ref{lem:per_op}(vi) and guaranteeing classification correctness.
 \end{theorem}
 
@@ -2063,8 +2091,8 @@ $\Omega(\sqrt{d_1})$ times smaller than what Eq.~\eqref{eq:l_net}
 would suggest when using the interval-arithmetic form ($\sum_i \sum_j
 |W^{(1)}_{k,j}W^{(0)}_{j,i}|$). Concretely, for the trained
 $[28,16,4]$ KAN, the worst-case bound is $\Delta_{\text{logit}} \leq
-0.079$ (DA form), while the interval-arithmetic form would yield
-$0.172$. Lemma~\ref{lem:da_moment} guarantees that the DA/IA ratio
+0.66$ (DA form), while the interval-arithmetic form would yield
+$1.38$. Lemma~\ref{lem:da_moment} guarantees that the DA/IA ratio
 $R \geq \Omega(\sqrt{d_1})$ holds with high confidence across random
 KAN initializations (with a moment-ratio constant computable from the
 weight statistics), meaning the deployed safety margin is
@@ -2080,7 +2108,7 @@ lower bound.
 The error bounds in Theorem~1 are \textit{worst-case} bounds---they hold for
 all inputs but may be loose in practice. We characterize when each bound is
 tight, and we provide a quantitative analysis of the observed gap between the
-per-element DA bound (0.079) and the empirical worst-case logit perturbation
+per-element DA bound (0.66) and the empirical worst-case logit perturbation
 (MaxAE 3.65, E6).
 
 \vspace{2pt}
@@ -2108,12 +2136,18 @@ equality under specific conditions:
 \end{enumerate}
 
 \vspace{2pt}
-\noindent\textit{Why the per-element DA bound (0.079) is smaller than MaxAE (3.65).}
-The DA bound of 0.079 is a per-logit-element guarantee: for any single
-output dimension $k$, the perturbation $|\Delta z_k| \leq 0.079$. The empirical
-MaxAE of 3.65 is the maximum absolute perturbation across all logit
-dimensions and all test samples---a different and inherently larger quantity.
-Three multiplicative factors explain the 46$\times$ relationship:
+\noindent\textit{Why the per-element DA bound (0.66) is smaller than MaxAE (3.65).}
+The DA bound of 0.66 is a per-logit-element, \emph{in-domain} guarantee:
+for any single output dimension $k$ and any input whose intermediate
+signals remain inside the LUT grid, $|\Delta z_k| \leq 0.66$. The empirical
+MaxAE of 3.65, by contrast, is the maximum absolute perturbation across all
+logit dimensions and all test samples---including samples whose layer-1
+activations leave the $[-3,3]$ LUT grid (47\% of layer-1 signals at
+deployment, E68), where the LUT extrapolation diverges from the learned
+B-spline. The gap is therefore explained by input \emph{domain}, not by
+the aggregation method: the MaxAE samples lie outside the certificate's
+scope. Within the certified in-domain regime, three secondary effects
+further inflate the per-sample maximum over the per-dimension bound:
 
 \begin{enumerate}
     \item \textbf{Output-dimension aggregation ($\sim$3--5$\times$).}
@@ -2147,11 +2181,13 @@ Three multiplicative factors explain the 46$\times$ relationship:
          KAN's soft feature selection through learned spline importance.
 \end{enumerate}
 
-The combined effect ($3{\times}5{\times}2 \approx 30\times$,
-with multiplicative interaction producing the observed 46$\times$) explains
-the full gap. Critically, this analysis confirms that the DA bound is not
+The combined effect of these secondary factors is dwarfed by the domain
+effect: the empirical maximum is dominated by out-of-domain samples,
+where the LUT extrapolation diverges (47\% of layer-1 signals leave
+$[-3,3]$, E68) and the certificate no longer applies. Critically, this
+analysis confirms that the DA bound is not
 \textit{incorrect}---it correctly bounds the per-element error for typical
-inputs---but it is incomplete as an aggregate guarantee. We therefore
+in-domain inputs---but it is incomplete as an aggregate guarantee. We therefore
 introduce a refined correlation-aware aggregate bound:
 
 \begin{equation}
@@ -2171,10 +2207,13 @@ $W^{(1)}$ rather than cancelling. For the trained KAN $[28,16,4]$, the
 correlation-aware aggregate bound evaluates to $\sim$6.4 at $N=15$ LUT points,
 covering the empirical MaxAE 3.65 with a safety factor of $6.4/3.65 \approx
 1.75\times$---a realistic margin that reflects the genuine conservatism of the
-arithmetic bound approach without the implausible 46$\times$ theory--data gap.
+arithmetic bound approach without an implausible theory--data gap.
+% TODO: the correlation-aware aggregate bound (6.4) was computed with the
+% stale L_net = 19.6; recompute with the recomputed network constants
+% (2026-08-03).
 Classification correctness is preserved because the relevant guarantee is
-the \emph{per-element} DA bound ($\Delta_{\text{logit}} \leq 0.079$ per output
-dimension), which remains well below the minimum inter-class margin (1.35);
+the \emph{per-element} DA bound ($\Delta_{\text{logit}} \leq 0.66$ per output
+dimension), which remains below the minimum inter-class margin (1.35);
 the aggregate bound (6.4) is a sum-of-absolute-errors quantity that
 over-counts correlated cancellations and is reported only to bracket the
 empirical MaxAE (3.65).
@@ -2185,21 +2224,24 @@ empirical MaxAE (3.65).
 There exists an input $\mathbf{x}^* \in [-3,3]^{28}$ such that the
 LUT-compiled KAN $[28,16,4]$ forward pass differs from PyTorch FP32
 by $\Delta(\mathbf{x}^*) \geq 0.131$ in $\ell_\infty$ norm (measured
-via E21). This lower bound exceeds the Theorem~1 bound using the
-global $M_2 = 0.177$ ($\Delta \leq 0.079$), revealing that the
-global-$M_2$ approach---while sound for the \textit{average}
-B-spline function---underestimates the worst-case error.
+via E21). This lower bound is covered by the recomputed Theorem~1 DA
+bound ($\Delta \leq 0.66$ at the $M_2^{\text{char}}$ calibration),
+confirming that the per-function $M_2$ heavy tail is captured by the
+certificate only when the worst-function $M_2^{\max} = 1.586$ is used
+(bound $0.66 \to 5.9$); a single global $M_2 = 0.177$ applied to all
+512 functions---sound for the \textit{average} B-spline
+function---underestimates the worst case by design.
 
 \vspace{2pt}
 \noindent\textit{Root cause.} The per-function $M_2$ distribution
-across 512 B-spline activations is heavy-tailed: mean $0.607$, maximum
-$1.586$ (2.6$\times$ the mean), with 11.5\% of functions exceeding
+across 512 B-spline activations is heavy-tailed: mean $0.611$, maximum
+$1.592$ (2.6$\times$ the mean, E58), with 11\% of functions exceeding
 $M_2 = 1.0$. The worst function (L0, $\phi_{5,12}$) has
 $M_2 = 1.586$ at $x^* = +0.090$, yielding per-activation
 $\varepsilon_{\text{LUT}}^{\max} = 0.036$---9$\times$ larger than the
 $0.004$ used in Theorem~1. When this worst function is targeted by an
 adversarial input, the resulting logit perturbation reaches
-$\sim$0.13--0.71 depending on input alignment, exceeding the
+$\sim$0.13--5.9 depending on input alignment, exceeding the
 global-$M_2$ prediction.
 
 \vspace{2pt}
@@ -2208,9 +2250,9 @@ global-$M_2$ prediction.
 computing per-segment $M_2^{(k)}$ values for each of the $K$ LUT
 segments, rather than a single global $M_2$. Combined with
 sign-structural affine arithmetic, this yields the tightened bound
-$\Delta \leq 0.079$ for typical inputs (validated at the 99.7th
-percentile, E11) while the adversarial worst-case is bounded by
-$\Delta \leq 0.71$ using $M_2^{\max}$. The factor of 2.6$\times$
+$\Delta \leq 0.66$ for typical inputs at the $M_2^{\text{char}}$
+calibration while the adversarial worst-case is bounded by
+$\Delta \leq 5.9$ using $M_2^{\max}$. The factor of 2.6$\times$
 between mean-$M_2$ and max-$M_2$ across the 512-function ensemble
 quantifies the precision gained by the segment-aware approach.
 
@@ -2220,9 +2262,12 @@ quantifies the precision gained by the segment-aware approach.
 (dim~12, $M_2=1.586$) combined with the worst sign-alignment
 dimension (dim~24, 100\% sign coherence, zero DA cancellation)
 identifies inputs achieving $\ell_\infty$ logit error up to
-$14.17$. This demonstrates that the bound's tightness is input-dependent
-and that the segment-aware + DA framework correctly bounds even
-pathological cases when per-function $M_2$ values are used.
+$14.17$---outside the Box-Continuation domain: the search drives
+layer-1 activations past the $[-3,3]$ LUT grid (47\% out-of-domain at
+deployment, E68), where the LUT's extrapolation diverges from the
+exact B-spline. In-domain cases are bounded by the certificates above;
+out-of-domain cases are the deployment requirement addressed by
+per-layer widened LUTs (E68) and the safety monitor (Algorithm~3).
 \end{lemma}
 
 \setcounter{theorem}{3}
@@ -3390,7 +3435,7 @@ norms ($||\mathbf{W}_0|| \approx 7.5$, $||\mathbf{W}_1|| \approx 3.2$), the
 cumulative logit perturbation reaches MaxAE~3.65---a $\sim$500$\times$
 amplification of the per-activation error. The relevant quantity for
 classification correctness is the \emph{per-element} DA logit bound
-($\leq 0.079$ per output dimension), which remains below the observed minimum
+($\leq 0.66$ per output dimension), which remains below the observed minimum
 inter-class margin of 1.35 (median 14.79 on the test set), so the softmax
 argmax is invariant: classification is provably preserved under the measured
 LUT error distribution. (The aggregate MaxAE of 3.65 is a sum-of-magnitudes
@@ -3836,13 +3881,15 @@ model: classical interval arithmetic (IA, {\S}\ref{sec:da}) and the proposed
 \textbf{doubleton arithmetic (DA, {\S}\ref{sec:da})}. On the test set (2,743 samples,
 99.93\% accuracy), the minimum inter-class margin among correctly classified
 samples is 1.35. IA treats each LUT error as an independent interval,
-yielding a worst-case logit perturbation of 0.172 at 15~LUT points and a
-safety factor of 3.9$\times$. DA preserves the sign structure of weight
+yielding a worst-case logit perturbation of 1.38 at 15~LUT points
+(recomputed from the released checkpoint, 2026-08-03), which exceeds the
+half-margin $0.675$: the IA envelope is sound but is not a classification
+certificate for this checkpoint. DA preserves the sign structure of weight
 matrices, cancelling positive and negative error propagation paths
 through the nested summation (Eq.~\ref{eq:da_bound}), yielding a
-\textbf{2.2$\times$ tighter} worst-case logit perturbation (0.079
-vs.\ 0.172; margin 1.35, E6). The resulting DA safety factor of 8.5$\times$
-at 15~points provides a stronger guarantee.
+\textbf{2.1$\times$ tighter} worst-case logit perturbation (0.66
+vs.\ 1.38; margin 1.35, E6). The resulting DA safety factor of $1.0\times$
+at 15~points certifies classification with a thin margin.
 
 \vspace{4pt}
 \noindent\textbf{DA Bound Summary.}
@@ -3864,36 +3911,49 @@ per-element or network-level.
 \toprule
 \textbf{Source} & \textbf{$N$} & \textbf{Method} & \textbf{$\Delta_{\text{logit}}$} & \textbf{Safety} \\
 \midrule
-E9 / Theorem~1 IA  & 15 & Interval Arithmetic (worst-case) & 0.172 & $3.9\times$ \\
-E9 / Theorem~1 DA  & 15 & DA (high-probability)            & 0.079 & $8.5\times$ \\
-E9 / E16 Seg-DA    & 15 & DA $+$ Segment-Aware de~Boor     & 0.056 & $11.9\times$ \\
-E9 / E16 Seg-DA    & 20 & DA $+$ Segment-Aware de~Boor     & 0.0215 & $\sim31\times$ \\
-E40 compositional  & 15 & DA network-level (Tier~3)        & 0.1196 & $5.6\times$ \\
-E6 empirical MaxAE & 15 & Per-sample max (not a bound)     & 3.65   & --- \\
+Thm~1 IA (recomputed)     & 15 & Interval Arithmetic (worst-case)   & 1.38  & $<1$ \\
+Thm~1 DA (recomputed)     & 15 & DA, $M_2^{\text{char}}$ calibration & 0.66  & $1.0\times$ \\
+Thm~1 DA, $M_2^{\max}$    & 15 & DA, worst-function $M_2$           & 5.9   & $<1$ \\
+E9 / E16 Seg-DA$^{\dag}$  & 15 & DA $+$ Segment-Aware de~Boor      & 0.056 & $11.9\times$ \\
+E9 / E16 Seg-DA$^{\dag}$  & 20 & DA $+$ Segment-Aware de~Boor      & 0.0215 & $\sim31\times$ \\
+E40 compositional$^{\dag}$ & 15 & DA network-level (Tier~3)         & 0.1196 & $5.6\times$ \\
+E6 empirical MaxAE        & 15 & Per-sample max (not a bound)      & 3.65  & --- \\
 \bottomrule
 \end{tabular}
 \vspace{2pt}
-{\scriptsize \textbf{IA bound} (0.172): sound for all $x\in[-3,3]^{28}$, uses $\sum|W_{k,j}W_{j,i}|$.
-\textbf{DA bound} (0.079): high-probability under random-sign model (Lemma~
-\ref{lem:da_moment}), uses $|\sum W_{k,j}W_{j,i}|$.
-\textbf{Seg-DA} (0.056): DA with per-segment $M_2^{(k)}$ values (E16), additional $1.4\times$ tightening.
-\textbf{Compositional DA} (0.1196): network-level bound from the three-proof-tier certificate ({\S}\ref{sec:compositional}),
-uses per-function Z3-verified $\varepsilon=0.0036$ with DA propagation (ratio $2.1\times$ vs.\ IA 0.2473).
-\textbf{MaxAE} (3.65): empirical maximum absolute logit error across 2,743 test samples---not a certified bound.
-The IA and DA bounds certify classification correctness ($\Delta < \text{margin}/2 = 0.675$); the empirical
-MaxAE reflects worst-sample behavior without the aggregation-safe assumption of independent error signs.}
+{\scriptsize
+\textbf{IA bound} (1.38, recomputed): sound upper envelope for in-domain
+$x$, uses $\sum|W_{k,j}W_{j,i}|$; exceeds the half-margin $0.675$, so it
+is not a classification certificate for this checkpoint
+(\texttt{verify\_da\_bounds\_recomputed.py}, 2026-08-03).
+\textbf{DA bound} (0.66): high-probability under the random-sign model
+(Lemma~\ref{lem:da_moment}), uses $|\sum W_{k,j}W_{j,i}|$; certifies
+classification at the $M_2^{\text{char}}$ calibration with thin margin
+($1.0\times$).
+\textbf{DA, $M_2^{\max}$} (5.9): worst-function $M_2=1.586$ replaces the
+characteristic value---conservative, exceeds the half-margin.
+$^{\dag}$\textbf{Seg-DA} (0.056) and \textbf{compositional DA} (0.1196):
+values from the earlier weight set; recomputation against the released
+checkpoint is pending (segmented $M_2^{(k)}$ machinery, E16/E40).
+\textbf{MaxAE} (3.65): empirical maximum absolute logit error across
+2,743 test samples---includes out-of-domain activations (E68), not a
+certified bound. In-domain certified values are the recomputed rows
+above; the empirical MaxAE reflects worst-sample behavior without the
+aggregation-safe assumption of independent error signs.}
 \end{table}
 
 
 \textbf{Segment-Aware Composition.} We further evaluate the Segment-Aware
 de Boor Bound ({\S}\ref{sec:da}, Eq.~\ref{eq:segment_bound}) composed with DA.
 By replacing the global $\varepsilon_{\text{LUT}}$ with per-input-segment
-$\varepsilon_i$ values, the DA bound tightens by an additional
-$1.4\times$: the worst-case logit perturbation decreases from 0.079 to
-$\sim$0.056, and the safety factor improves from 8.5$\times$ to
+$\varepsilon_i$ values, the DA bound tightens further: the worst-case
+logit perturbation decreases from 0.66 to
+$\sim$0.056, and the safety factor improves from $1.0\times$ to
 $\sim$11.9$\times$ at $N=15$ LUT points. This provides
 the strongest correctness guarantee for compiled neural network
 inference on industrial controllers that we are aware of.
+% TODO: Seg-DA absolute values (0.056, 11.9x) pending recomputation
+% against the released checkpoint (2026-08-03).
 
 \noindent\textbf{E10: LUT Precision---Storage Trade-off at Extreme Sparsity.}
 We push the LUT density to extreme sparsity to identify the \textit{fracture
@@ -3938,9 +3998,12 @@ with zero degradation, and the LUT-FP32 classification gap is identically
 zero. This indicates that the model's decision boundaries have sufficient
 margin to absorb perturbations of this magnitude on z-score-normalized
 features---consistent with the correctness verification results (E9, E11) which
-show a safety factor of 8.5$\times$ at 15 LUT points (empirical refinement;
+show a DA safety factor of $1.0\times$ at 15 LUT points at the
+$M_2^{\text{char}}$ calibration (empirical refinement;
 analytical bound: $>$14$\times$ using the B-spline derivative bound
-$M_2^{\text{analytic}} \leq 12.8$, Eq.~\ref{eq:bspline_curve_bounds}). Extending to
+$M_2^{\text{analytic}} \leq 12.8$, Eq.~\ref{eq:bspline_curve_bounds}).
+% TODO: the analytical ``>14x'' bound was derived from the stale
+% constants and needs re-derivation from the recomputed bounds (2026-08-03). Extending to
 higher noise levels ($\sigma > 0.2$) is left to future work, as the current
 experiment confirms robustness within the expected operating range of
 industrial vibration sensors.
@@ -3966,9 +4029,11 @@ by LUT error. On that worst-100 subset (max per-element error 0.77, min
 inter-class margin 0.21), \textbf{all 100 preserve correct classification}
 (Table~\ref{tab:adversarial_safety}). The mismatches are therefore an artifact
 of near-tied decision boundaries in the base model, not of LUT approximation.
-This empirically validates Theorem~1's core claim: the minimum inter-class
-margin (1.35) exceeds any LUT-induced logit perturbation, and the safety
-factor of $\sim$8.5$\times$ is not a theoretical artifact---it is an
+This empirically validates Theorem~1's core claim: the recomputed DA bound
+($\Delta_{\text{logit}} \leq 0.66$ at $N{=}15$) keeps the certified logit
+perturbation below the minimum inter-class margin ($2 \times 0.66 = 1.32 <
+1.35$), and the resulting safety factor of $\sim$1.0$\times$ at the
+$M_2^{\text{char}}$ calibration is not a theoretical artifact---it is an
 \textit{operational guarantee} confirmed under worst-case input conditions.
 
 \begin{table}[t]
@@ -4000,8 +4065,9 @@ Total mismatches & 10 \\
 \bottomrule
 \end{tabular}
 \vspace{2pt}
-{\scriptsize Theorem~1 bound: $\Delta_{\text{logit}} \leq 0.079$ (DA, $N{=}15$).
-Safety factor: 8.5$\times$. The 10 full-set mismatches occur only at near-tied
+{\scriptsize Theorem~1 bound: $\Delta_{\text{logit}} \leq 0.66$ (DA, $N{=}15$,
+$M_2^{\text{char}}$ calibration).
+Safety factor: $1.0\times$. The 10 full-set mismatches occur only at near-tied
 decision boundaries (FP32 margin $\leq 0.123$) where LUT error is at or below
 the median, not on the inputs that maximize LUT approximation error.}
 \end{table}
@@ -4202,6 +4268,7 @@ E60& FourierKAN SVNN           & [28,16,4] $K{=}6$, CWRU & \textbf{100\% acc}, 5
 E61& WaveletKAN SVNN           & [28,16,4] $S{=}8$, M2-reg & \textbf{100\% acc}, 512/512 Z3, 2185-line SCL \\
 E62& XJTU-SY Cross-Arch.       & FT Fourier/WaveletKAN & \textbf{100\% acc}, 512/512 Z3 preserved \\
 E53& Sound In-Domain Worst-Case & Real LUT, in-domain search & IA-sound certifies $N{\ge}20$; high-prob.\ DA at all $N$ \\
+% TODO: E53 thresholds computed from stale constants; pending recomputation (2026-08-03)
 E63& Sharp k-th Order LUT Bounds & $k{=}2..5$, extremal family & \textbf{extremal ratio $=$ 1.000000}; soundness $\leq 1$ \\
 E64& Moment-Robust DA Ratio    & Bennett, 4 weight families & $R$: 4.6/9.5/18.8/37.7 at $d{=}16..1024$; outlier $\kappa{=}\sqrt{d}$: $R{=}1$ \\
 E65& $\varepsilon$-Separation   & 3-SAT product-gate encoding & 200/200 both directions; spline exact $5{\times}10^{-8}$ \\
@@ -4213,7 +4280,8 @@ E68& Compile-Aware PAC         & Decomp.\ + resolution matching & bias slope 0.9
 V1 & Worst-Case Adversarial   & 5,000 inputs, 100 worst  & 100/100 preserved, VALIDATED \\
 V2 & LLM vs NeuroPLC           & SCL code generation   & LLM: 6 defects, no weights; NeuroPLC: 0e 0w \\
 V3 & DA $\sqrt{d}$ Scaling Law & 105 architectures, 7 dims & Pearson $r{=}0.987$, slope 0.896 \\
-V4 & MLP Verification Gap      & KAN $[28,16,4]$ vs.\ MLP $[28,32,16,4]$ & 512/512 vs.\ 0/48; $14.0\times$ worse (per-comp.) \\
+V4 & MLP Verification Gap      & KAN $[28,16,4]$ vs.\ MLP $[28,32,16,4]$ & 512/512 vs.\ 0/48; $4.6\times$ worse (E2E) \\
+% TODO: per-component (14.0x) ratio pending recomputation (2026-08-03)
 V5 & ONNX vs NeuroPLC IR    & Node count/code    & Export fails; $\geq$8,393 vs.\ 11 nodes \\
 V6 & Z3-Verified WCET        & S7-1200 CPU 1211C   & Total $\leq$2.86\,ms, 2.9\% of cycle \\
 V7 & Verification Blind Spot   & $N{=}4{\to}15$ sweep & Acc.\ 99.93\% but safety $<$1 at $N{\le}7$; 225 flips \\
@@ -4277,13 +4345,15 @@ than the global $\varepsilon$ (mean $0.00069$ vs.\ $0.00412$). Notably,
 $96.7\%$ of all LUT segments have $\varepsilon_j < 0.5\varepsilon_{\text{global}}$,
 and $67.6\%$ have $\varepsilon_j < 0.2\varepsilon_{\text{global}}$.
 When composed with DA, replacing the global $\varepsilon$ with per-input-segment
-$\varepsilon_i$ values tightens the DA error bound by an additional
-$1.4\times$---the safety factor improves from $8.5\times$ (uniform DA)
+$\varepsilon_i$ values tightens the DA error bound further---the safety factor
+improves from $1.0\times$ (uniform DA, $M_2^{\text{char}}$ calibration)
 to $\sim 11.9\times$ (segment-aware DA) at $N=15$.
 Fig.~\ref{fig:segment_bounds} already reported the per-resolution breakdown;
-the $6.0\times$ per-segment tightening and the $1.4\times$ DA compositional
+the $6.0\times$ per-segment tightening and the DA compositional
 improvement are both \textbf{structural properties} of trained KAN B-spline
 activations, not dataset-specific artifacts. The segment-aware DA guarantee
+% TODO: Seg-DA absolute values (0.056, 11.9x) and the former 1.4x
+% compositional ratio pending recomputation (2026-08-03).
 provides the strongest correctness bound for compiled neural
 inference on industrial controllers to date.
 
@@ -4466,10 +4536,14 @@ finding contradicts this assumption: \textit{whether} a network admits
 design-time correctness certification depends on its \textit{architecture},
 not on the sophistication of the compiler. The same compiler, LUT mechanism,
 and error-bounding machinery produce 512/512 Z3-verified components for KAN
-and 0/48 for an identically-sized MLP. This $14.0\times$ per-component gap
-in error propagation ($38\times$ end-to-end) is not an implementation
+and 0/48 for an identically-sized MLP. This $4.6\times$ end-to-end gap
+in error propagation (recomputed from $\Delta_{\text{DA}} = 0.66$,
+2026-08-03) is not an implementation
 artifact---it is a structural consequence of the SVNN conditions
 (Theorem~2, Proposition~\ref{prop:mlp_negative}, Theorem~5).
+% TODO: the previous ``14.0x per-component / 38x end-to-end'' gap was
+% computed from the stale DA bound 0.079; per-component ratio pending
+% recomputation (2026-08-03).
 
 Three architectural properties---each absent from MLPs---enable this gap.
 They are not additive advantages; they form a \textit{composite} where any
@@ -4514,11 +4588,12 @@ verification.
 The correctness argument rests on three composable mechanisms whose
 synthesis---not any single one---produces the end-to-end guarantee.
 Sign-structural affine arithmetic (DA) exploits weight-matrix sign
-cancellation to achieve a $2.2\times$ tighter bound than interval arithmetic,
+cancellation to achieve a $2.1\times$ tighter bound than interval arithmetic,
 while empirical calibration ($M_2^{\text{char}} = 0.177$) tightens the de~Boor
 LUT bound by a further $98.6\%$ vs.\ the analytical $M_2$ (E11).
 Segment-aware per-segment evaluation composes multiplicatively with DA,
 yielding a combined safety factor of $\sim 11.9\times$ at $N=15$ (E16).
+% TODO: Seg-DA combined factor (11.9x) pending recomputation (2026-08-03).
 These mechanisms are not individually novel---affine arithmetic and de~Boor
 bounds each have decades of prior literature---but their \textit{composition}
 is: the compiler chains them into a bound that is computable from model
@@ -4724,6 +4799,9 @@ via the $\ell_1$ norm of the weight matrix), and
  IA network bound $\Delta_{\text{IA}}$       & $0.2473$ \\
  DA network bound $\Delta_{\text{DA}}$       & $0.1196$ \\
  DA/IA tightening ratio                      & $2.1\times$ \\
+% TODO: compositional (Tier-3) bounds 0.2473/0.1196 are from the earlier
+% weight set; recomputation against the released checkpoint pending
+% (2026-08-03, cf. Table tab:da_bounds_summary dagger note).
 \midrule
  Certificate valid                           & Yes \\
  Classification preserved                    & Yes \\
@@ -4767,19 +4845,23 @@ tolerance---quantifies the gap.
 \vspace{4pt}
 \noindent\textbf{End-to-End Verification Results.}
 KAN $[28,16,4]$ achieves \textbf{512/512} (100\%) per-function B-spline
-Z3-verifiability, with DA error bound $\Delta_{\text{DA}} = 0.079$ (model-specific,
-see Table~\ref{tab:da_bounds_summary}), IA bound $\Delta_{\text{IA}} = 0.172$,
-and DA/IA tightening of \textbf{2.2$\times$} (end-to-end).
+Z3-verifiability, with DA error bound $\Delta_{\text{DA}} = 0.66$ (model-specific,
+see Table~\ref{tab:da_bounds_summary}), IA bound $\Delta_{\text{IA}} = 1.38$,
+and DA/IA tightening of \textbf{2.1$\times$} (end-to-end).
 The end-to-end compositional certificate is \textbf{VALID}. In contrast,
 MLP $[28,32,16,4]$ with ReLU activations achieves \textbf{0/48} (0\%)
 component-level Z3-verifiability because ReLU+MatMul entanglement in each
 layer prevents decomposition into independent univariate error sources.
 Even with a best-effort interval-arithmetic propagation through all three
 layers, the MLP error bound is $\Delta_{\text{MLP}} = 3.04$---a
-\textbf{14.0$\times$ worse} per-component error propagation than KAN's DA bound
-(38$\times$ end-to-end, using KAN's network-level $\Delta_{\text{DA}}{=}0.079$) and
-\textbf{17.7$\times$ worse} than KAN's IA bound, for the
-same per-component error magnitude $\varepsilon = 0.0041$. Notably,
+\textbf{4.6$\times$ worse} error propagation than KAN's DA bound
+(end-to-end, using KAN's network-level $\Delta_{\text{DA}}{=}0.66$;
+recomputed 2026-08-03) and
+\textbf{2.2$\times$ worse} than KAN's IA bound ($\Delta_{\text{IA}} = 1.38$),
+for the same per-component error magnitude $\varepsilon = 0.0041$.
+% TODO: the former per-component (14.0x) and E2E (38x) ratios were computed
+% from the stale DA bound 0.079; E2E recomputed as 3.04/0.66 = 4.6x,
+% per-component ratio pending (2026-08-03). Notably,
 the MLP \textbf{cannot} produce a compositional end-to-end certificate:
 SVNN Condition~1 is violated (MatMul+ReLU mixed in each layer), Condition~2
 is violated (ReLU $\notin C^2$ breaks the de~Boor per-function LUT bound),
@@ -4825,8 +4907,9 @@ decidable fragment (0/16 verifiable); ReLU is piecewise-linear (16/16
 per-neuron) but the coupled MatMul+ReLU structure prevents compositional
 error accounting---$\text{ReLU}'\in\{0,1\}$ introduces data-dependent
 Lipschitz constants that break sign-structure preservation, defeating DA
-tightening. The MLP error bound is $14.0\times$ worse than KAN's DA bound
-per-component ($38\times$ end-to-end using the network-level DA) for identical architecture dimensions.
+tightening. The MLP error bound is $4.6\times$ worse than KAN's DA bound
+(end-to-end, using the network-level DA; recomputed 2026-08-03) for identical architecture dimensions.
+% TODO: per-component (14.0x) ratio basis unclear; pending recomputation (2026-08-03).
 
 \vspace{4pt}
 \noindent\textbf{Quantitative Error Propagation.}
@@ -4845,13 +4928,14 @@ All values use the same per-component LUT error $\varepsilon = 0.0041$
 \textbf{Metric} & \textbf{Value} \\
 \midrule
  Per-function error $\varepsilon$            & $0.0041$ \\
- KAN DA bound $\Delta_{\text{DA}}$           & $0.079$ \\
- KAN IA bound $\Delta_{\text{IA}}$           & $0.172$ \\
+ KAN DA bound $\Delta_{\text{DA}}$           & $0.66$ \\
+ KAN IA bound $\Delta_{\text{IA}}$           & $1.38$ \\
  MLP IA bound $\Delta_{\text{MLP}}$          & $3.04$ \\
 \midrule
- DA/IA tightening (KAN)                      & $2.2\times$ \\
- MLP IA / KAN DA overhead                    & $14.0\times$ (per-comp.), $38\times$ (E2E) \\
- MLP IA / KAN IA overhead                    & $17.7\times$ \\
+ DA/IA tightening (KAN)                      & $2.1\times$ \\
+ MLP IA / KAN DA overhead                    & $4.6\times$ (E2E, recomputed) \\
+ MLP IA / KAN IA overhead                    & $2.2\times$ \\
+% TODO: per-component (14.0x) ratio basis unclear; pending recomputation (2026-08-03)
  KAN end-to-end verified                     & Yes \\
  MLP end-to-end verified                     & No \\
 \bottomrule
@@ -4860,7 +4944,7 @@ All values use the same per-component LUT error $\varepsilon = 0.0041$
 
 \vspace{4pt}
 \noindent\textbf{Key Insight.} The verification gap is not merely
-quantitative (MLP propagation is $14.0\times$ looser for 2 layers via DA per-component, $38\times$ end-to-end; $17.7\times$ looser via IA)
+quantitative (MLP propagation is $4.6\times$ looser via DA end-to-end; $2.2\times$ looser via IA)% TODO: per-component ratio pending recomputation (2026-08-03)
 but \textit{structural}: KAN's decomposition into independent univariate
 B-spline functions \textbf{enables} compositional formal verification of neural network compilation in a way that standard MLP architectures cannot match. MLPs, regardless of
 activation choice, cannot decompose their forward pass into
@@ -5180,7 +5264,7 @@ verification side.
 
 Two certification tiers emerge from the SVNN error bounds
 (Table~\ref{tab:cert_thresholds}): a \textbf{high-probability} tier using DA
-with sign-balance evidence (SIL~2, $N{=}15$, safety $8.5\times$), and a
+with sign-balance evidence (SIL~2, $N{=}15$, safety $1.0\times$), and a
 \textbf{sound} tier using Segment-Aware IA with no sign-cancellation assumption
 (SIL~2 at $N{=}15$, SIL~3 at $N{\geq}20$). For SIL~3+, Level~2 arithmetic
 bounds supplement Level~3 MILP verification~\cite{schwartz2026optimal} on
@@ -5201,7 +5285,7 @@ in AI functional safety certification.
 \textbf{Guarantee} & \textbf{Method} & \textbf{$N_{\min}$} &
 \textbf{Safety} & \textbf{SIL Target} & \textbf{Evidence} \\
 \midrule
-High-probability & DA & 15 & $8.5\times$ & SIL~2 & Sign-balance (Lemma~
+High-probability & DA & 15 & $1.0\times$ & SIL~2 & Sign-balance (Lemma~
 \ref{lem:da_moment}) \\
 Sound            & Seg-IA & 15 & $2.9\times$ & SIL~2 & Per-function $M_2$ \\
 Sound            & IA (global) & 20 & $1.4\times$ & SIL~3 & No sign assumptions \\
@@ -5214,6 +5298,10 @@ $M_2^{\text{sound}} = 0.3$, $M_2^{\text{emp}} = 0.177$ (E11).
 Values for KAN $[28,16,4]$ on S7-1200 CPU~1211C.}
 \end{table}
 
+% TODO: tab:cert_thresholds rows 2--4 (Seg-IA 2.9x, IA 1.4x, IA 2.3x) were
+% computed from the stale constants and are not consistent with the
+% recomputed IA bound (1.38 at N=15, not a certificate); pending
+% recomputation (2026-08-03).
 
 \subsection{Future Work}
 
