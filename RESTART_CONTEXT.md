@@ -78,20 +78,22 @@
 
 | 文件 | 用途 |
 |------|------|
-| `paper/main.tex` | 主文件（81页，0e0w） |
+| `paper/main.tex` | 主文件（84页，0e0w，Thm 1-16） |
 | `paper/section_svnn.tex` | SVNN理论（Thm 2/8 + Corollary 3 DA最优性） |
-| `paper/section_lut_sharp.tex` | **Thm 9p**（锐常数） |
-| `paper/section_trichotomy.tex` | **Thm 10p**（三分法） |
-| `paper/section_svnn_theorems.tex` | **Thm 5p/6p** + Box延续引理 + 分辨率匹配 |
+| `paper/section_lut_sharp.tex` | **Thm 9p**（锐常数）+ **Thm 13**（T-I 最优 LUT） |
+| `paper/section_trichotomy.tex` | **Thm 10p**（三分法）+ **Thm 16**（T-III necessity 第一格） |
+| `paper/section_svnn_theorems.tex` | **Thm 5p/6p** + **Thm 14**（T-II minimax 率）+ **Thm 15**（T-IV Besov 率）+ Box延续 |
 | `paper/section_svnn_chebykan.tex` | ChebyKAN（Prop 3） |
 | `paper/references.bib` | 91条（已清理） |
 | `code/neuroplc/frontend.py` | scale折叠修复点（L234-264） |
 | `code/neuroplc/differential_test.py` | Tier 4差分测试器 |
 | `code/neuroplc/backend_iec.py` | 多厂商IEC后端 |
-| `code/theory/verify_*.py` | 4个定理验证脚本（全PASS） |
+| `code/theory/verify_*.py` | 8个验证脚本（全PASS，含 4 新定理） |
 | `results/theory/*.json` | 验证结果（thm9p/lemma3p/thm5p/thm10p/thm6p） |
 | `docs/AUDIT_2026-08-01.md` | 原始审查记录+修复后状态 |
-| `docs/REVIEWER-FAQ.md` | 审稿人防御文档（需更新新定理FAQ） |
+| `docs/REVIEWER-FAQ.md` | 审稿人防御文档 **v3（20问，含新定理）** |
+| `docs/cover_letter.md` | 投稿 cover letter 草稿 |
+| `docs/CHECKLIST.md` | P0 追踪表（17 CRITICAL 全绿） |
 
 **验证脚本速查**：
 ```bash
@@ -101,6 +103,11 @@ python theory/verify_lemma3_bennett.py       # Lemma 3p
 python theory/verify_thm5_eps_separation.py  # Thm 5p
 python theory/verify_trichotomy_thm10p.py    # Thm 10p
 python experiments/e59_thm6p_compile_aware.py  # Thm 6p（约7分钟）
+python theory/verify_optimal_lut.py             # T-I（Thm 13）
+python theory/verify_compile_aware_minimax.py   # T-II（Thm 14）
+python theory/verify_besov_pac.py               # T-IV（Thm 15）
+python theory/verify_necessity_first.py         # T-III（Thm 16）
+python theory/verify_da_bounds_recomputed.py    # 界值重算
 python -m neuroplc.differential_test         # Tier 4（需模型）
 python generate.py                           # 重新生成SCL
 cd paper && xelatex main && bibtex main && xelatex main && xelatex main  # 编译
@@ -111,11 +118,11 @@ cd paper && xelatex main && bibtex main && xelatex main && xelatex main  # 编�
 ## 4. 剩余待办（下一步优先）
 
 ### 投稿前（高优先）
-1. **REVIEWER-FAQ更新**：✅ v2 完成（18问）+ 2026-08-03 数字同步
-2. **`review-paper`深度审稿**：✅ 已跑（7-Agent，PRE_SUBMISSION_REVIEW_2026-08-03.md）；P0 修复后需**复跑一轮**验证 0 CRITICAL
+1. **REVIEWER-FAQ更新**：✅ **v3 完成（20问）**，含 Thm 13-16 防御 + 新 Q19/Q20
+2. **`review-paper`深度审稿**：✅ 已跑两轮（7-Agent 初审 + 复跑验证修复）；投稿前需**最终全量一轮**
 3. **E63-E68实验脚本归档确认**：✅ E67 已修复+JSON 落盘；E63-E66/E68 全 PASS
 4. **P0 剩余**：C11（加宽 LUT 实验）、C12（编译器边界声明）、M2（文献补引：MRW 1976/Tsybakov/Nye 2025/Kratsios 2025/CompCert/Giacobbe）、M26（iFA 跨厂商实验）、M6（硬编码→\ref）、M8-M11/M23-M25、图重生成（fig02/04/05/09/fig1_overview）
-5. **投稿材料**：cover letter、author bio、图清单（TNNLS要求）
+5. **投稿材料**：cover letter ✅ 草稿；author bio、图清单 待
 
 ### 理论深化（中优先）
 5. **Thm 10p necessity 从 conjecture 升级为正式证明**（三分法的necessity方向——现在是强证据）
@@ -134,9 +141,9 @@ cd paper && xelatex main && bibtex main && xelatex main && xelatex main  # 编�
 
 ```
 1. 读本文件（你正在读）
-2. cd D:/neuroplc-paper && git log --oneline -15   # 确认在 6de2d0b
+2. cd D:/neuroplc-paper && git log --oneline -15   # 确认 HEAD（今日 27 commits，最后 bd56791）
 3. 编译验证：cd paper && xelatex main && bibtex main && xelatex main && xelatex main
-   → 期望：81页，0 errors，0 undefined refs
+   → 期望：84页，0 errors，0 undefined refs
 4. 读 docs/AUDIT_2026-08-01.md 的状态更新段（修复后状态）
 5. 按「剩余待办」继续：先更新 REVIEWER-FAQ → 跑 review-paper 深度审稿
 ```
@@ -151,4 +158,4 @@ cd paper && xelatex main && bibtex main && xelatex main && xelatex main  # 编�
 - 数据：`data/processed/features_X.npy`（CWRU 28-D特征，13714样本）
 - Git：origin=Gitee, github=GitHub（双推工作流，见 [[gitee-github-push-workflow]]）
 
-*最后更新：2026-08-03 | 板板 + Claude | 81页 0e0w 投稿就绪状态*
+*最后更新：2026-08-03 深夜 | 板板 + Claude | 84页 0e0w | 27 commits 双推 | 投稿材料齐备*
