@@ -468,8 +468,9 @@ def part_b(X, y, train_idx, val_idx, test_idx):
     fit_knee = loglog_fit(ns, knee)
     fit_n01 = loglog_fit(ns, n01)
     fit_gap = loglog_fit(ns, 1.0 / gap)   # gap ~ n^{-a}  =>  log(1/gap) ~ a log n
-    print(f"  fit: knee N* ~ n^{fit_knee[0]:.2f}  (theory 0.25) | "
-          f"N*01 ~ n^{fit_n01[0]:.2f} | gap ~ n^{-{fit_gap[0]:.2f}} (theory 0.5)")
+    fk, fn, fg = f"{fit_knee[0]:.2f}", f"{fit_n01[0]:.2f}", f"{fit_gap[0]:.2f}"
+    print("  fit: knee N* ~ n^" + fk + "  (theory 0.25) | "
+          "N*01 ~ n^" + fn + " | gap ~ n^-" + fg + " (theory 0.5)")
     print(f"  elapsed {time.time() - t0:.0f}s")
 
     res = {"n_list": N_LIST,

@@ -4382,9 +4382,9 @@ what the three-tier verification system exploits.
 (Table~\ref{tab:compositional} summarizes the full compositional results.)
 
 \vspace{4pt}
-\noindent\textbf{Three-Tier Architecture.}
+\noindent\textbf{Four-Tier Architecture.}
 The key insight is that whole-program verification can be decomposed into
-three independent tiers, each with a distinct role and verification scope:
+four independent tiers, each with a distinct role and verification scope:
 \begin{enumerate}
     \item \textbf{Tier~1---Compiler Template Verification (One-Time):}
          We encode each IR operation's SCL code template as a Z3 SMT formula
@@ -4400,6 +4400,23 @@ three independent tiers, each with a distinct role and verification scope:
          applied, assembling the leaf certificates into an end-to-end
          guarantee. The checker performs \textit{no} Z3 solving---only
          structural validation and arithmetic checks.
+    \item \textbf{Tier~4---Differential Self-Test (Every Compilation):}
+         Before deployment, the compiler runs a differential test comparing
+         PyTorch FP32 logits against a faithful simulation of the generated
+         SCL semantics (topological-order DAG execution with the actual
+         emitted LUT tables and folded weights) on in-distribution features
+         and adversarial worst-case inputs. The test asserts 100\%
+         classification agreement and per-logit error below
+         $\frac{1}{2} \times$ the certified margin (E6: 1.35). Tier~4
+         catches code-generation regressions that the three proof tiers
+         cannot: it validates the \emph{emitter}, not just the templates.
+         In the 2026-08-01 audit, Tier~4-style testing caught a real
+         regression---the base/spline scale factors were stored in the IR
+         but dropped by the SCL emitter, causing 83\% classification
+         agreement on generated code---which no Tier~1--3 proof detected
+         (the templates and bounds were individually sound; the emitter
+         was not). After the fix, Tier~4 passes: 3{,}000 in-distribution
+         samples, 100\% agreement, max logit error 0.24 (E67).
 \end{enumerate}
 
 \vspace{4pt}

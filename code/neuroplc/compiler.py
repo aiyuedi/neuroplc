@@ -88,13 +88,21 @@ class NeuroPLCCompiler:
         self.sampling_error: dict = {}
 
     def compile(self, model, output: Optional[str] = None,
-                model_type: Optional[str] = None) -> "CompileResult":
+                model_type: Optional[str] = None,
+                verify: bool = False,
+                verify_features: Optional[np.ndarray] = None,
+                min_margin: Optional[float] = None) -> "CompileResult":
         """Compile a PyTorch model to SCL.
 
         Args:
             model:      PyTorch model (StudentKAN or StudentMLP)
             output:     optional SCL output path
             model_type: "kan" or "mlp" (auto-detected if None)
+            verify:     run Tier-4 differential self-test (compiler
+                        self-verification) before returning
+            verify_features: in-distribution features for the certified
+                        differential check (default: random in-domain)
+            min_margin: certified min inter-class margin (default: 1.35)
 
         Returns:
             CompileResult with .scl_code, .ir_graph, .analyzer_report
@@ -185,12 +193,33 @@ class NeuroPLCCompiler:
         if self.verbose:
             print(f"       Done.")
 
+        # ── Stage 6: Tier-4 differential self-test (optional) ──
+        tier4_report = None
+        if verify:
+            from .differential_test import DifferentialTester
+            if self.verbose:
+                print(f"[6/6] Tier-4 differential self-test")
+            tester = DifferentialTester(model, lut_points=self.lut_points,
+                                        x_range=self.x_range)
+            tier4_report = tester.run(
+                test_features=verify_features,
+                min_margin=min_margin,
+                quiet=not self.verbose)
+            if not tier4_report["pass"]:
+                raise RuntimeError(
+                    "Tier-4 differential self-test FAILED: generated SCL "
+                    "does not preserve PyTorch semantics. Refusing to "
+                    "deploy. See report: " +
+                    json.dumps({k: v for k, v in tier4_report.items()
+                                if k != "out_of_distribution"}))
+
         return CompileResult(
             scl_code=self.scl_code,
             ir_graph=self.ir_graph,
             analyzer_report=self.analyzer_report,
             optimizer_stats=self.optimizer_stats,
             sampling_error=self.sampling_error,
+            tier4_report=tier4_report,
         )
 
     def _detect_type(self, model) -> str:
@@ -223,12 +252,13 @@ class CompileResult:
 
     def __init__(self, scl_code: str, ir_graph: IRGraph,
                  analyzer_report: dict, optimizer_stats: dict,
-                 sampling_error: dict):
+                 sampling_error: dict, tier4_report: Optional[dict] = None):
         self.scl_code = scl_code
         self.ir_graph = ir_graph
         self.analyzer_report = analyzer_report
         self.optimizer_stats = optimizer_stats
         self.sampling_error = sampling_error
+        self.tier4_report = tier4_report
 
     @property
     def summary(self) -> str:
