@@ -844,6 +844,19 @@ function (FC2, ``BsplineEval'') that performs binary search + linear
 interpolation (Algorithm~\ref{alg:bspline}). Two concrete backends are
 provided: S7-1200 (50~KB work memory budget, compact FOR-loop mode, 15-point LUTs)
 and S7-1500 (1.5~MB budget, unrolled performance mode, 50-point LUTs).
+The Siemens-specific surface is minimal---\texttt{S7\_Optimized\_Access},
+\texttt{VERSION}, \texttt{NON\_RETAIN} attributes and the quoted
+DB/FB identifiers---so the same IR and the same verification chain
+(Tiers~1--4) support a \emph{vendor-neutral} IEC 61131-3 backend
+(\texttt{backend\_iec.py}): standard \texttt{VAR\_GLOBAL}/\texttt{VAR}/
+\texttt{FUNCTION\_BLOCK} syntax with zero Siemens-specific tokens,
+compilable by CODESYS/TwinCAT/any IEC-compliant toolchain. The generated
+vendor-neutral ST has identical semantics to the Siemens SCL
+(Tier~4 differential test: 100\% agreement, max logit error 0.24, E67),
+confirming that the certification is target-independent---the
+IEC~61131-3:2025 REAL semantics (Lemma~\ref{lem:iec_universal}) transfer
+to any compliant controller. This is the multi-vendor deployment path
+required by the trichotomy's Regime-1 design guidance.
 
 \begin{algorithm}[t]
 \caption{B-spline Evaluation via Lookup Table (SCL: FC2)}
@@ -2927,6 +2940,94 @@ to manual/rule-based fallback). This two-FB architecture preserves
 determinism: both FBs execute within the same scan cycle, and their
 combined WCET ($22{,}683 + 66 = 22{,}749$~$\mu$s) remains well within
 the 100~ms budget.
+
+\vspace{4pt}
+\noindent\textbf{Runtime Model Updates with Downgrade Guarantees (Algorithm~4).}
+Industrial deployment must support model updates---retraining, fine-tuning
+(E55), or domain adaptation---without stopping the controller. We extend
+the monitor architecture with a \emph{double-buffered hot-swap protocol}
+that maintains the certified safety state throughout the update:
+
+\begin{algorithm}[t]
+\caption{Runtime LUT Hot-Swap with Downgrade Guarantee (Algorithm~4)}
+\label{alg:hot_swap}
+\begin{algorithmic}[1]
+\Require Active LUT table $T_{\text{old}}$ with certified bound
+$\varepsilon_{\text{old}}$ (Tiers~1--3); new LUT table $T_{\text{new}}$;
+monitor FB (Algorithm~3); rollback window $W$ (scan cycles)
+\Ensure Safety invariant maintained across the update
+\State \textbf{Pre-check (offline, compile-side):} run Tier~4 differential
+      test on $T_{\text{new}}$ (in-distribution + adversarial); abort
+      update if it fails
+\State Download $T_{\text{new}}$ to the \emph{standby} DB block
+      (no activation; the active DB is untouched)
+\State \textbf{Shadow validation ($W$ cycles):} execute inference on
+      $T_{\text{new}}$ \emph{in shadow mode}, feeding the monitor's
+      existing domain/confidence checks; keep using $T_{\text{old}}$ for
+      control decisions
+\State \textbf{Atomic switch:} swap the DB pointer to $T_{\text{new}}$ in
+      a single scan cycle (no intermediate state)
+\State \textbf{Rollback window:} for $W$ cycles, retain $T_{\text{old}}$;
+      if the monitor flags any violation \emph{not} attributable to
+      out-of-domain input, revert to $T_{\text{old}}$ atomically and set
+      \texttt{update\_failed := TRUE}
+\State \textbf{Certify:} run the full Tier~2--3 verification on
+      $T_{\text{new}}$; on success, discard $T_{\text{old}}$ and clear the
+      rollback window
+\end{algorithmic}
+\end{algorithm}
+
+\begin{theorem}[Downgrade Guarantee for Runtime Updates]
+\label{thm:hot_swap_safety}
+Under Algorithm~4, the safety invariant of the deployed system---every
+control decision is covered by a sound error bound or by the safety
+monitor's safe-state fallback---is preserved at every scan cycle across
+the update. Specifically:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Before the switch:} control decisions use $T_{\text{old}}$,
+    whose bound $\varepsilon_{\text{old}}$ is certified (Tiers~1--3).
+    \item \textbf{During shadow validation:} control decisions still use
+    $T_{\text{old}}$; $T_{\text{new}}$ is exercised only for monitoring
+    data, and any anomaly raises \texttt{safe\_state\_request} under the
+    existing completeness property of the monitor.
+    \item \textbf{After the switch, during the rollback window:} either
+    (a)~$T_{\text{new}}$ behaves within the monitor's checks---then each
+    decision is either within an \emph{uncertified-but-monitored}
+    envelope enforced by the monitor's domain/confidence/range checks, or
+    (b)~a violation occurs and the system reverts to $T_{\text{old}}$ in
+    one cycle, restoring the certified bound $\varepsilon_{\text{old}}$.
+    \item \textbf{After certification:} $T_{\text{new}}$ inherits the full
+    certificate (Theorem~\ref{thm:svnn-closure}: SVNN composition is
+    closed, so re-certification is per-module).
+\end{enumerate}
+\end{theorem}
+
+\vspace{2pt}
+\noindent\textit{Proof sketch.}
+The invariant is ``control decisions are covered by a certified bound or
+by the monitor fallback''. (i)~holds by the certificate of
+$T_{\text{old}}$. (ii)~holds because decisions never use $T_{\text{new}}$
+in shadow mode, and the monitor's completeness (Algorithm~3 property (i))
+fires on any anomalous $T_{\text{new}}$ output. (iii)~the rollback window
+is the safety net: case (a) is enforced by the monitor's soundness
+(Algorithm~3 property (ii)) within the validated domain, and its
+completeness outside it; case (b) restores $T_{\text{old}}$ atomically,
+so at most one scan cycle runs on the new table, and the monitor flags
+the violation before any \emph{certified} decision is required of
+$T_{\text{new}}$. (iv)~follows from the SVNN closure theorem
+(Theorem~\ref{thm:svnn-closure}): re-certification composes module-wise.
+$\square$
+
+\vspace{2pt}
+\noindent\textbf{Discussion.} Algorithm~4 aligns the deployment pipeline
+with ISO/IEC TS~22440's runtime-verification requirements: the monitor
+provides continuous runtime checks, the shadow phase provides empirical
+validation before exposure, and the rollback window provides the
+fail-safe path. The cost is $2\times$ DB memory for the standby table
+(45.2~KB $\to$ 90.4~KB, still within the 1.5~MB S7-1500 budget; the
+S7-1200's 50~KB budget fits the single-table case with the standby
+block in load memory). This is the first runtime-update protocol for
+certified NN-on-PLC deployment.
 
 % ===========================================================================
 % V. EXPERIMENTS

@@ -45,6 +45,7 @@ OUT_JSON = OUT_DIR / "thm6p_compile_aware.json"
 
 ARCH = [28, 16, 4]
 XR = (-3.0, 3.0)
+K = 2                    # interpolation order (linear)
 C_K = 1.0 / 8.0          # c_2 for linear interpolation error bound
 H_DOM = XR[1] - XR[0]    # 6.0
 NS_A = [8, 16, 32, 64, 128, 256]                      # Part A sweep
@@ -298,7 +299,7 @@ def loglog_fit(xs, ys):
 # ============================================================================
 # Part A — decomposition validity (pretrained student)
 # ============================================================================
-def part_a(model, X_tr, y_tr, X_te, y_te, X_te_unc, y_te):
+def part_a(model, X_tr, y_tr, X_te, y_te, X_te_unc):
     print("=" * 72)
     print("PART A — decomposition validity (pretrained VRM-KD student)")
     print("=" * 72)
@@ -571,8 +572,7 @@ def main():
     }
 
     # Part A
-    report["partA"] = part_a(model, Xc_tr, y_tr, Xc_te, y_te,
-                             X[test_idx], y_te)
+    report["partA"] = part_a(model, Xc_tr, y_tr, Xc_te, y_te, X[test_idx])
     report["gamma"] = layer_lipschitz(model)
     report["gamma_contractive"] = [g < 1.0 for g in report["gamma"]]
     print(f"  pretrained gamma (Lipschitz/layer): {report['gamma']}")
