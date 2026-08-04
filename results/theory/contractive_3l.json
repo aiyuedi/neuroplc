@@ -1,0 +1,27 @@
+{
+  "date": "2026-08-04",
+  "model": "D:\\neuroplc-paper\\results\\student\\kan_contractive_3l.pt",
+  "arch": [
+    28,
+    16,
+    8,
+    4
+  ],
+  "gamma": [
+    0.988,
+    1.025,
+    1.024
+  ],
+  "test_acc": 0.9858,
+  "L_B": [
+    0.207,
+    0.185,
+    0.289
+  ],
+  "M2_max_scipy": 4.548873377696866,
+  "eps_max": 0.10443841938589743,
+  "sound_bound_theory": 0.08803064376115799,
+  "measured_maxae": 0.1004,
+  "sound_bound_floored": 0.11044000000000001,
+  "sound_safety": 6.111915972473741
+}

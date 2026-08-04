@@ -413,4 +413,19 @@ The exponential statement is **class-level only**: certifying that a given node 
 **Our Answer (two coordinates of one surface):**
 Theorem 6/14 govern the **sample dimension n** (statistical side: how many samples for a given resolution); Theorem 17 governs the **storage dimension B** (compilation side: how many bits for a given error) with the packing line, the three strata, and the CP-relative necessity. Together they form the two-coordinate capacity surface R(n, B); Theorem 17 adds what the statistical theorems cannot: (i) the universal packing line (no scheme, any verification cost, beats B^{-k}), (ii) the verification stratum structure (V_B decoupling — a dimension absent from learning theory), and (iii) the architecture-as-code law (Theorem 19) connecting smoothness to code choice. The minimax rates appear as the n-coordinate of the surface, not as duplicates.
 
-*Updated: 2026-08-04 | NeuroPLC Pre-Submission Defense Document (TNNLS v4: Thm 17–19 capacity defenses, Q21–Q26)*
+## Q27: "The soft-contractive safety factors differ 66x (sound 11.6x vs expected 763x). Which is the certificate?"
+
+**Our Answer (two tiers, both honest):**
+The sound certificate is **11.6×** (bound 0.058): the no-cancellation IA envelope at the scipy-exact worst-function M₂, floored by the full-set measured maxAE (0.053 over 13,714 inputs, Tier-4 simulator). It makes no sign-cancellation or calibration assumption, so it is the number to cite for worst-case claims. The **763×** figure is the expected tier (M₂_char median calibration, high-probability in the random-sign sense of Lemma da_moment) — the same nature as the released student's 1.0×. We report both with their semantics because the two answer different referee questions: "can you guarantee worst case?" (11.6×) and "what is the typical-case margin?" (763×). The released student's 1.0× is its expected tier; its sound worst-function envelope (12.4) is not a certificate — the soft-contractive model's sound tier *is* one (0.058 << 0.675).
+
+## Q28: "Soft-contractive training costs 1.4 pp accuracy (98.5% vs 99.93%). Is that acceptable?"
+
+**Our Answer (the capacity-theoretic trade-off, quantified):**
+The 1.4 pp is the *measured price of the contraction budget* — exactly what the capacity framework (Thm 17-19) predicts: the contraction budget is an expression budget, and the γ→1 branch of Theorem 4 purchases depth-independent bound growth. In return: (i) sound safety factor 1.0× → 11.6×, (ii) Box-Continuation coverage 0% → 99.9% of inputs (the released student's layer-1 signals range ±25, so its certificate covers a nominal subset), (iii) Z3 512/512, (iv) full compile chain (SCL 2,188 lines, WCET identical 3.86 ms). For IEC 61508 SIL 3+ deployment the certificate dominates the last 1.4 pp; the released student remains the accuracy-maximizing option when only a thin expected-tier guarantee is required. The trade-off is explicit and quantified — not a hidden regression.
+
+## Q29: "Does the certificate survive depth? The 3-layer DA bound was 5.66."
+
+**Our Answer (yes, with the same recipe):**
+The 5.66 figure is the *untrained* 3-layer KAN (E56, γ in the [15.4, 5.3] family). Training the 3-layer [28,16,8,4] with the same soft-γ-projection recipe (E-T9-3L) gives γ = [0.99, 1.03, 1.02], 98.6% test accuracy, and a sound certificate of 0.110 (safety 6.1×, measured-floor 0.1004). Per-layer bound growth drops from 8.6× (untrained) to 1.9× (soft-contractive) — the γ→1 branch of Theorem 4 instantiated at L=3. Depth scaling with a certificate is therefore a property of the *training recipe*, not an architecture accident.
+
+*Updated: 2026-08-04 | NeuroPLC Pre-Submission Defense Document (TNNLS v4: Thm 17–19 capacity defenses, Q21–Q26 + Q27–29 deployment-certificate defenses)*

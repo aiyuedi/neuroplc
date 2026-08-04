@@ -189,7 +189,13 @@ code-generation regressions (it detected a real emitter bug and
 validated the fix; the bug had degraded deployed accuracy to 83\%). Generated code
 compiles to 0 errors/0 warnings in TIA Portal V21 with a vendor-neutral
 IEC~61131-3 variant, and the runtime hot-swap protocol maintains the
-certified safety state across model updates. Four $C^2$-BV architectures
+certified safety state across model updates. Deployment-level
+certificates close the loop: adaptive LUT allocation lifts the DA safety
+factor to $3.6\times$ at unchanged storage, and soft-contractive training
+to an $11.6\times$ \emph{sound} (no-cancellation, measured-floor) /
+$763\times$ expected certificate with $99.9\%$ Box-Continuation coverage,
+Z3-verified components, and depth extension to $L=3$ ($6.1\times$);
+the sound bound (0.058) is tight against the measured maxAE (0.053). Four $C^2$-BV architectures
 (B-spline, Chebyshev, Fourier, Wavelet) and three datasets (CWRU, XJTU-SY,
 Paderborn) validate the framework, with MNIST as a fourth dataset (E42);
 RBF-KAN remains theoretical. The theory answers not ``can we compile neural networks to
@@ -4381,7 +4387,7 @@ E20& Motor Load Regression   & RMSE                & 0.011; zero code change \\
 E52& Verification Blind Spot & $N{=}4{\to}15$ safety scan & Acc.\ 99.93\% but safety $<$1 at $N{\le}7$; 225 flips \\
 E54& ChebyKAN Z3 Verif.     & Per-func.\ Z3 NRA   & \textbf{496/512 (96.9\%)}, Prop.~\ref{prop:chebykan-svnn} \\
 E55& XJTU-SY FT + SCL       & 100-ep FT + S7-1200 & \textbf{91.7\%}, 512/512 Z3, 0e 0w SCL \\
-E56& Deep KAN ($L{=}3$)       & [28,16,8,4] 120ep & \textbf{99.60\%}, 608/608 Z3, DA 5.66, sub-exp. depth \\
+E56& Deep KAN ($L{=}3$)       & [28,16,8,4] 120ep & \textbf{99.60\%}, 608/608 Z3, DA 5.66, sub-exp. depth; E-T9-3L: \textbf{98.6\%}, sound cert.\ $6.1\times$ \\
 E57& CROWN vs.\ NeuroPLC     & KAN[28,16,4] DA/IBP & \textbf{DA substantially tighter}, CROWN=IBP for KAN \\
 E60& FourierKAN SVNN           & [28,16,4] $K{=}6$, CWRU & \textbf{100\% acc}, 512/512 Z3, 2185-line SCL \\
 E61& WaveletKAN SVNN           & [28,16,4] $S{=}8$, M2-reg & \textbf{100\% acc}, 512/512 Z3, 2185-line SCL \\
@@ -4752,6 +4758,15 @@ The result is consistent with the depth-dependent (non-convergent) form:
           consistent with \emph{sub-exponential} depth scaling, not the
           exponential blowup expected for non-SVNN architectures (where
           $O(2^L)$ growth arises from wrapping effects).
+          \textbf{Soft-contractive depth extension (E-T9-3L, 2026-08-04):}
+          training the 3-layer KAN with the same $\gamma$-projection recipe
+          yields $\gamma = [0.99, 1.03, 1.02]$, $98.6\%$ test accuracy, and a
+          \emph{sound} certificate of $0.110$ (safety $6.1\times$;
+          no-cancellation IA form floored by the full-set measured maxAE
+          $0.10$)---depth scaling \emph{with} a certificate, the
+          $\gamma \to 1$ branch of Theorem~\ref{thm:generalization}
+          instantiated at $L = 3$ (per-layer bound growth $1.9\times$ vs.\
+          $8.6\times$ for the untrained 3-layer).
     \item \textbf{Condition~3 not certified:} the earlier $\gamma_0 = 0.404$ /
          $\gamma_1 = 0.318$ figures used a crossed-index max-abs-weight
          proxy, which is \emph{not} a valid contraction test; the honest
@@ -5549,9 +5564,12 @@ frontier.
    multivariate gates suffer $N^m$ cost and NP-hard tightness, and
    domain-dependent curvature requires reachability. The necessity
    direction---that no other regime attains all four properties---is
-   stated as a conjecture with strong evidence; establishing it
-   formally (formalizing ``design-time-computable'' as a complexity
-   class) is an open problem that the regime exclusions of the theorem
+   stated as a conjecture with strong evidence; within the
+   affine-certificate class it \emph{is} a theorem
+   (Theorem~\ref{thm:necessity_first}, {\S}\ref{sec:necessity-first}:
+   gates are essentially $C^2$ and univariate, and product coupling
+   makes $\varepsilon$-verification NP-hard), and extending it beyond
+   affine certificates is the open problem that the regime exclusions
    delimit.
 
     \item \textbf{$\varepsilon$-Separation (Theorem~\ref{thm:necessity}).}
@@ -5616,6 +5634,11 @@ Z3-equivalent verification preserved (E62); ChebyKAN achieves 496/512 Z3
 compilable via LUT extraction. All generated SCL compiles to
 \textbf{0 errors, 0 warnings} in TIA Portal V21. The compiler auto-generates
 a companion safety monitor (Algorithm~3, $\leq 5\%$ overhead).
+Soft-contractive training (E-T9) converts the certificate from thin
+($1.0\times$) to sound ($11.6\times$, measured-floor bound $0.058$ vs.\
+measured maxAE $0.053$) with $99.9\%$ Box-Continuation coverage and depth
+extension to $L{=}3$ ($6.1\times$); adaptive allocation (E15) achieves
+$3.6\times$ at unchanged storage.
 
 \vspace{4pt}
 \noindent\textbf{Open directions.} Mechanized proof of the IR type soundness

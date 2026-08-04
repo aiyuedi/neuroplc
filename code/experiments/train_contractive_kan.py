@@ -108,6 +108,8 @@ def main():
                     help="clip |spline_weight| <= w-bound (bounded-amplitude basis, "
                          "v2: unlocks gamma<1; 0 disables)")
     ap.add_argument("--out", type=str, default="kan_contractive_v2.pt")
+    ap.add_argument("--arch", type=str, default="28,16,4",
+                    help="comma-separated layer widths (default 2-layer 28,16,4)")
     args = ap.parse_args()
     gamma_target = args.gamma_target
     n_epochs = args.epochs
@@ -119,7 +121,8 @@ def main():
     Xt_t = torch.from_numpy(Xt); yt_t = torch.from_numpy(yt)
     Xv_t = torch.from_numpy(Xv); yv_t = torch.from_numpy(yv)
 
-    m = StudentKAN(ARCH)
+    arch = [int(x) for x in args.arch.split(",")]
+    m = StudentKAN(arch)
     opt = torch.optim.Adam(m.parameters(), lr=LR, weight_decay=1e-5)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, EPOCHS)
     rng = np.random.RandomState(SEED)
