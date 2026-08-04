@@ -1,0 +1,27 @@
+{
+  "date": "2026-08-04",
+  "note": "corrected propagation (dy=sum eps, per-edge L1)",
+  "out": {
+    "main": {
+      "sound_bound": 2.2872990754116658,
+      "safety": 0.2951078882758322,
+      "covers_f32_measured": true,
+      "measured": 0.5175,
+      "certificate": false
+    },
+    "soft2L": {
+      "sound_bound": 0.2881477518767398,
+      "safety": 2.342548208700733,
+      "covers_f32_measured": true,
+      "measured": 0.0527,
+      "certificate": true
+    },
+    "soft3L": {
+      "sound_bound": 1.2689264916441827,
+      "safety": 0.5319457072138073,
+      "covers_f32_measured": true,
+      "measured": 0.1004,
+      "certificate": false
+    }
+  }
+}

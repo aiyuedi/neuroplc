@@ -4013,7 +4013,8 @@ E40 compositional & 15 & DA network-level (Tier~3)                 & 0.66   & $1
 Adaptive-DA (E15) & 15$^{*}$ & DA, greedy adaptive $\varepsilon$    & 0.19   & $3.6\times$ \\
 Adaptive-IA (E15) & 15$^{*}$ & IA, greedy adaptive $\varepsilon$    & 0.39   & $1.7\times$ \\
 Soft-contractive expected (E-T9) & 15 & DA, $M_2^{\text{char}}$ & 0.0014 & $493\times^{\ddag}$ \\
-Soft-contractive float64 (E-T9) & 15 & per-$\varphi$ propag., floored & 0.026 & $26\times$ \\
+Soft-contractive theory (E-T9) & 15 & first-principles propag. & 0.288 & $2.34\times$ \\
+Soft-contractive float64 (E-T9) & 15 & float64 deploy., floored & 0.026 & $26\times$ \\
 Soft-contractive sound (E-T9) & 15 & float32 deploy., floored & 0.058 & $11.6\times$ \\
 FourierKAN sound (E-T10) & 15 & bounded-amp.\ basis, floored & 0.138 & $4.9\times$ \\
 WaveletKAN sound (E-T11) & 15 & bounded-amp.\ basis, floored & 0.237 & $2.8\times$ \\
@@ -4029,9 +4030,9 @@ is not a classification certificate for this checkpoint
 All released-student rows use the E11 $M_2^{\text{char}} = 0.177$
 calibration (500-pt float32); the full-$\varphi$ float64 recalibration
 (2026-08-04, \texttt{verify\_sound\_chain.py}) gives expected/worst
-envelopes 1.70/3.38 (safety $0.4\times$/$0.2\times$)---the design-time
+envelopes 1.70/2.29 (safety $0.4\times$/$0.3\times$)---the design-time
 certificate does not exist for this checkpoint, and its measured maxAE
-($0.52$) is a lucky $6.5\times$ below the per-function envelope.
+($0.52$) is a lucky $4.4\times$ below the theoretical envelope.
 \textbf{DA bound} (0.66): high-probability under the random-sign model
 (Lemma~\ref{lem:da_moment}), uses $|\sum W_{k,j}W_{j,i}|$; certifies
 classification at the $M_2^{\text{char}}$ calibration with thin margin
@@ -4064,7 +4065,7 @@ no-cancellation propagation floored by the float64 simulator maxAE
 $0.023$; theoretical envelope $0.0078$); the \textbf{sound row}
 (0.058) is the float32 deployment certificate (measured floor: maxAE
 $0.053$, 13{,}714 inputs, Tier-4 simulator). Released student:
-per-function envelope $3.38$ (safety $0.2\times$, not a certificate),
+per-function envelope $2.29$ (safety $0.3\times$, not a certificate),
 expected $1.70$ ($0.4\times$).}
 \end{table}
 

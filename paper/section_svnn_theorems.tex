@@ -370,7 +370,7 @@ Theorem~\ref{thm:generalization} is purchased with accuracy, exactly
 as the capacity framework ({\S}\ref{sec:capacity}) predicts (the
 contraction budget is an expression budget).  Full contractivity for
 B-spline KANs requires a bounded-amplitude basis family---and the
-$C^2$-BV family provides exactly that (FourierKAN, |\sin/\cos| $\leq 1$;
+$C^2$-BV family provides exactly that (FourierKAN, $|\sin/\cos| \leq 1$;
 WaveletKAN, bounded Mexican-hat). Training these bounded-amplitude bases
 with the same soft-$\gamma$ recipe (2026-08-04) attains sound
 certificates at essentially zero accuracy cost: FourierKAN
@@ -403,15 +403,25 @@ evaluates to $0.0014$ at the $M_2^{\text{char}}$ calibration (safety
 $493\times$, high-probability in the random-sign sense of
 Lemma~\ref{lem:da_moment}); the worst-function envelope (full-$\varphi$
 $M_2^{\max}$, float64 ground truth) is $0.039$ (safety $17.5\times$).
-The \emph{sound} certificate---no sign-cancellation assumption,
-per-function $\varepsilon$ propagation (each activation's own
-full-$\varphi$ $M_2$), floored by the full-set measured maxAE
-($0.053$ over 13{,}714 inputs, Tier-4 simulator)---is $0.058$, a safety
-factor of $11.6\times$ for the float32 deployment (SCL backend); the
-pure-LUT (float64) bound evaluates to $0.026$ (safety $26\times$,
-measured floor over the float64 simulator; theoretical per-function
-envelope $0.0078$), and the gap between them is the IEEE-754
-accumulation of the compiled float32 arithmetic---quantified by the
+The \emph{sound} certificate is two-tiered and fully self-consistent.
+\textbf{Theoretical tier (first-principles, no empirical floor):} the
+no-cancellation propagation with the corrected layer semantics (layer-0
+LUT errors sum directly at the hidden nodes, $dy_j = \sum_i
+\varepsilon_{j,i}$; layer-1 amplification uses per-edge Lipschitz
+constants $L_{k,j}$, not a global bound) evaluates to $0.288$
+(safety $2.34\times$). This envelope strictly covers the float32
+deployment measurement ($0.053$ over 13{,}714 inputs, Tier-4 simulator;
+$5.4\times$ headroom), so the certificate does \emph{not} depend on an
+empirical floor; the IEEE-754 accumulation $\delta_{\text{fp32}}$ is
+bounded by the per-operation $0.5$~ulp rule propagated through the
+network ($\lesssim 3\times10^{-5}$ on the logit scale), a negligible
+addendum to the LUT envelope.
+\textbf{Calibrated tier (deployment default):} the measured-floor bound
+$0.058$ (safety $11.6\times$) for the float32 SCL backend, and $0.026$
+(safety $26\times$) for a float64 backend (float64 simulator floor
+$0.023$), tighten the certificate to the actual deployment arithmetic.
+The gap between the two tiers is the conservatism of worst-case
+propagation versus the realized error profile---quantified by the
 differential simulator, not by the LUT analysis. The certificate
 therefore carries a deployment precision tier: $11.6\times$ (float32,
 measured) / $26\times$ (float64 backend, measured floor). Contrast the
