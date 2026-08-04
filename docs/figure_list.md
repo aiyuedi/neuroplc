@@ -26,6 +26,7 @@
 | 14 | fig12_cross_validation.pdf | fig:cross_validation | Cross-validation results | ✓ |
 | 15 | fig16_scl_code.pdf | fig:scl_snippet | Generated SCL excerpt (FB_Inference) | ✓ |
 | 16 | fig17_capacity_plane.pdf | fig:capacity_plane | (V_B, ε) capacity plane: three strata + packing line + verification cost (E-T4/E-T5) | ✓ (added 08-04) |
+| 17 | fig_cert_panorama.pdf | fig:cert_panorama | Certificate panorama: tier ladder / accuracy-certificate trade-off / curvature flattening (E-T9, added 08-04) | ✓ (added 08-04) |
 
 ## Orphan files in figures/final/ (not included in the manuscript)
 
@@ -40,4 +41,4 @@
   2026-08-03 22:31+ regeneration batch; fig1_overview no longer contains 22.67 ms.
 - The capacity section (Thm 17-19) has no figures yet; the (V_B, ε) plane figure
   is a suggested addition before final submission (A5/A6).
-- Delete the 3 orphan files and re-verify the figure count (15) when packaging.
+- Delete the 3 orphan files and re-verify the figure count (17) when packaging.
