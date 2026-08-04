@@ -154,9 +154,14 @@ design space. \textit{(iii) The unique-optimum reading.} SVNN is not
 ``one verifiable family among many'': it is \emph{conjecturally} the
 unique regime where second-order rate, linear LUT cost, closed-form
 sharp constants, and reachability-freedom coexist---the necessity
-direction of the trichotomy is a conjecture with strong evidence, and
-turning it into a theorem (formalizing ``design-time-computable'') is
-an open problem. \textit{(iv) Empirical confirmation (E66).}
+direction of the trichotomy is a conjecture with strong evidence.
+Within the affine-certificate class $\mathcal{C}$, however, the
+necessity direction \emph{is} a theorem
+(Theorem~\ref{thm:necessity_first}, {\S}\ref{sec:necessity-first}):
+gates are essentially $C^2$ and univariate, and product coupling makes
+$\varepsilon$-verification NP-hard. Extending the necessity beyond
+affine certificates (the absolute trichotomy) remains an open problem.
+\textit{(iv) Empirical confirmation (E66).}
 Rate trichotomy measured: $\{-2.04, -2.06, -1.77\}$ for tanh/sin/
 B-spline (Regime 1), $-1.03$ for ReLU (Regime 2); tensor-LUT storage
 $N^m$ for arity $m$ (Regime 3); tanh constant ratio $0.974 \times

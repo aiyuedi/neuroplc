@@ -435,16 +435,17 @@ over PROFINET/OPC UA. An on-PLC time-domain subset is also compiled
          SVNN decomposition of KAN ({\S}\ref{sec:ir}). Generated
          SCL compiles with \textbf{0e 0w} in TIA Portal V21
          on S7-1200 and S7-1500 ({\S}\ref{sec:tia}).
-    \item \textbf{Algorithm (Verification \& Optimization):} Three novel
+    \item \textbf{Algorithm (Verification \& Optimization):} Three
          algorithms: (i)~\textbf{Sign-structural affine arithmetic (DA)},
          achieving a $2.1\times$ tighter error bound than interval arithmetic
           ($3.1\times$ vs.\ the $\sqrt{d}$ random-weights baseline) by preserving
          weight-matrix sign structure ({\S}\ref{sec:da});
           (ii)~\textbf{Segment-Aware de~Boor Bounds}, exploiting the
          piecewise-linear structure of cubic B-spline second derivatives
-         for substantial per-segment tightening (composing with DA for
-         an improved combined safety factor; absolute values pending
-         recomputation on the released checkpoint); and
+         for substantial per-segment tightening (composing with DA for a
+         $3.6\times$/$6.6\times$ safety-factor improvement at
+         $N{=}15/20$ under the worst-function calibration, recomputed
+         2026-08-04); and
           (iii)~\textbf{Adaptive Mixed-Precision LUT Allocation}, a greedy
          max-heap algorithm reducing worst-case LUT error by $71.6\%$ at
          equal storage, with \textbf{Theorem~3} proving its minimax optimality
@@ -1303,7 +1304,9 @@ $M_2^{\text{char}}$ calibration (per-logit-element, in-domain; the
 worst-function $M_2^{\max}$ calibration pushes the bound above the
 half-margin, {\S}\ref{sec:limitations}): classification correctness is
 mathematically guaranteed under the LUT error distribution \emph{within
-the Box-Continuation domain}, albeit with a thin margin.
+the Box-Continuation domain}, albeit with a thin margin (restorable to
+$3.6\times$ via adaptive allocation, {\S}\ref{sec:adaptive-lut}, or to
+$196\times$ via soft-contractive training, E-T9).
 
 \subsubsection{Sign-Structural Affine Arithmetic: Tighter Bounds via Correlation Tracking}
 \label{sec:da}
@@ -1354,8 +1357,8 @@ factor of $1.0\times$ at the $M_2^{\text{char}}$ calibration; with
 adaptive LUT allocation (E15, unchanged storage budget) the bound drops
 to $0.19$---a $3.6\times$ safety factor---and the IA envelope to $0.39$
 (now a sound certificate, $1.7\times$), Table~\ref{tab:da_bounds_summary}.
-This represents a novel application of affine arithmetic
-to compiled neural network verification on industrial controllers.
+This applies affine arithmetic to
+compiled neural network verification on industrial controllers.
 
 \vspace{4pt}
 \noindent\textit{Why 3.1$\times$? A Sign-Structural Explanation.}
@@ -2012,11 +2015,15 @@ $\Delta_{\text{logit}}^{\text{DA}} \leq \mathbf{0.66}$,
 bound certifies classification correctness ($0.66 <
 \text{min-margin}/2 = 0.675$) at the $M_2^{\text{char}}$ calibration,
 but the margin is thin: under the measured per-function LUT-error
-distribution ($\varepsilon$ mean $0.017$, max $0.041$, E58) the bound
-exceeds the half-margin. The classification guarantee of this
-checkpoint is therefore marginal, and contractive training (spectral
-normalization) is the deployment recipe that restores a comfortable
-margin (future work).
+distribution ($M_2 h^2$ proxy: mean $0.017$, max $0.041$, E58; the
+de~Boor $\varepsilon$ bound used in Eq.~\ref{eq:theorem1} is
+$M_2^{\text{char}} h^2/8 = 0.00406$) the bound
+exceeds the half-margin. Two deployment recipes restore a comfortable
+margin at unchanged storage: adaptive LUT allocation (E15,
+{\S}\ref{sec:adaptive-lut}) lifts the DA safety factor to $3.6\times$,
+and soft-contractive training (E-T9) to $196\times$ with full
+Box-Continuation coverage---both implemented and verified
+(2026-08-04).
 
 The DA bound is the effective correctness certificate;
 the IA bound is the conservative sound upper envelope.
@@ -2258,7 +2265,9 @@ error correlation---when a single input feature $i$ activates multiple hidden
 B-splines with correlated error signs, the errors add constructively through
 $W^{(1)}$ rather than cancelling. For the trained KAN $[28,16,4]$, the
 correlation-aware aggregate bound evaluates to $2.95$ at $N=15$ LUT points
-(recomputed with the audit constants $L_{\text{net}} = 160.4$, 2026-08-04),
+(recomputed with the audit constants $L_{\text{net}}^{\text{IA}} = t_1 =
+160.4$; the DA amplification constant $L_B^{(1)} m_{\text{row}} + s_1 =
+162.2$ is a distinct quantity, 2026-08-04),
 covering the in-domain empirical worst case ($0.80$, E53) with a safety
 factor of ${\sim}3.7\times$---a realistic margin that reflects the genuine
 conservatism of the arithmetic bound approach without an implausible
@@ -2372,8 +2381,13 @@ $\|W_{\text{eff}}\|_{1,\infty} = 12.36$ (layer-0) / $6.52$ (layer-1),
 giving per-layer Lipschitz bounds of $25.1$ / $11.9$ and a measured
 per-activation-layer amplification $\gamma = [15.4, 5.3]$ (E68)---well
 above $1$, so the trained checkpoint falls in the $\gamma \geq 1$ branch
-below (the earlier instantiation with $\gamma \approx 0.18$ and an
-expected bound of $\approx 0.71$ used stale constants).
+below: the honest instantiation (Eq.~\ref{eq:expected_error},
+$\varepsilon_{\text{char}} = 0.00406$) evaluates to
+$\mathbb{E}[\Delta^{(2)}] \approx 1.8$---the expected error itself
+exceeds the half-margin $0.675$, quantifying why the $\gamma \geq 1$
+regime needs the deployment recipes of {\S}\ref{sec:adaptive-lut} and
+E-T9 (the soft-contractive checkpoint evaluates to $\approx 0.22$, an
+$8\times$ reduction).
 
 When $\gamma \geq 1$, the expected error grows \textbf{linearly} in $L$
 as $O(L d_{\max} M_{\max} h^2)$---exponential growth (the worst-case
@@ -2476,7 +2490,9 @@ $[28,16,4]$ KAN the measured per-activation-layer amplification is
 $\gamma = [15.4, 5.3] > 1$ (E68), placing it in the $\gamma \geq 1$
 branch: the expected-error term grows with depth rather than converging,
 and the earlier numeric instantiation ($\gamma \approx 0.18$,
-$\Delta \leq 0.71$, total $\Delta \leq 0.86$) used stale constants.
+$\Delta \leq 0.71$, total $\Delta \leq 0.86$) used stale constants;
+the honest $\gamma \geq 1$ instantiation gives
+$\mathbb{E}[\Delta^{(2)}] \approx 1.8$ (Eq.~\ref{eq:expected_error}).
 
 \vspace{4pt}
 \noindent\textit{Practical significance.}
@@ -2505,7 +2521,8 @@ per-activation-layer amplification $\gamma = [15.4, 5.3]$, E68) put the
 network in the $\gamma \geq 1$ branch: the expected-error term grows
 with depth, so the earlier depth-independent feasibility estimates
 ($\Delta^{(L)} \leq 0.14$--$0.21$) computed with the stale
-$\gamma \approx 0.20$ are obsolete.
+$\gamma \approx 0.20$ are obsolete; the honest expected-error values are
+$1.8$ (released) and $0.22$ (soft-contractive).
 
 \textit{Practical limit.} For a contractively trained KAN
 ($\gamma = L_B \cdot W_{\max} < 1$), Theorem~4
@@ -3777,11 +3794,12 @@ fundamental impediment but a training-data-scarcity issue addressable through
 fine-tuning.
 
 Critically, the SVNN conditions are \textbf{preserved} after fine-tuning:
-the DA bound \textit{tightens} after fine-tuning (absolute values
-pending recomputation on the released checkpoint; the learned weights
-exhibit better sign balance post-adaptation), the Z3 per-function
+the DA bound \textit{tightens} after fine-tuning (E68-constant
+recomputation, 2026-08-04: DA $0.411 \to 0.165$, safety factor
+$4.1\times$; IA $0.664 \to 0.269$, safety $2.5\times$---now a sound
+certificate where it was not before), the Z3 per-function
 verification remains at 512/512 (100\%, E55), and sign balance is
-maintained (L0: 0.067, L1: 0.094). This is because SVNN
+maintained (L0: 0.080, L1: 0.031, recomputed 2026-08-04). This is because SVNN
 verifiability depends on the KAN \textit{architecture} (Theorem~2),
 not the specific weight values. Fine-tuning changes only the B-spline
 coefficients and linear weights---the operation-type closure, univariate
@@ -3840,7 +3858,7 @@ from the stale $\gamma = 0.182$, $L_B = 0.65$) is withdrawn.
 What remains directly measured is the fine-tuning story itself: the
 observed perturbation $\|\Delta W\|_\infty \approx 0.003$ left the
 certificate intact---the DA bound \textit{tightened} after fine-tuning
-(absolute values pending recomputation)
+(DA $0.411 \to 0.165$, safety $4.1\times$, recomputed 2026-08-04)
 (i.e., $\mathrm{SF}$ \emph{increased}), consistent with the DA bound
 being Lipschitz in the weights with a small architecture constant, and
 Z3 verification stayed at 512/512 (E55). $\square$
@@ -3873,7 +3891,7 @@ Outer Race   & 20.3\% & 96.5\% & +76.2 pp \\
 \midrule
 \textbf{Overall} & \textbf{29.8\%} & \textbf{91.7\%} & \textbf{+61.9 pp} \\
 \midrule
-\multicolumn{4}{@{}l}{DA bound: tightens after FT (abs. values pending recompute) \quad Z3 verified: \textbf{512/512} (post-FT)} \\
+\multicolumn{4}{@{}l}{DA bound: $0.411 \to 0.165$ after FT ($4.1\times$, 2026-08-04) \quad Z3 verified: \textbf{512/512} (post-FT)} \\
 \multicolumn{4}{@{}l}{SCL compilation: 2,188 lines, \textbf{0 errors 0 warnings} (S7-1200)} \\
 \multicolumn{4}{@{}l}{SVNN Condition~3: \textbf{not satisfied by this checkpoint} (measured per-layer amplification $\gamma = [15.4, 5.3] > 1$, E68); Conditions~1--2 \textbf{preserved} (the certificate carried post-fine-tuning is the depth-dependent bound)} \\
 \bottomrule
@@ -3955,7 +3973,9 @@ matrices, cancelling positive and negative error propagation paths
 through the nested summation (Eq.~\ref{eq:da_bound}), yielding a
 \textbf{2.1$\times$ tighter} worst-case logit perturbation (0.66
 vs.\ 1.38; margin 1.35, E6). The resulting DA safety factor of $1.0\times$
-at 15~points certifies classification with a thin margin.
+at 15~points certifies classification with a thin margin; adaptive
+allocation (E15, {\S}\ref{sec:adaptive-lut}) lifts this to $3.6\times$,
+and soft-contractive training (E-T9) to $196\times$.
 
 \vspace{4pt}
 \noindent\textbf{DA Bound Summary.}
@@ -3980,8 +4000,8 @@ per-element or network-level.
 Thm~1 IA (recomputed)     & 15 & Interval Arithmetic (worst-case)   & 1.38  & $<1$ \\
 Thm~1 DA (recomputed)     & 15 & DA, $M_2^{\text{char}}$ calibration & 0.66  & $1.0\times$ \\
 Thm~1 DA, $M_2^{\max}$    & 15 & DA, worst-function $M_2$           & 5.9   & $<1$ \\
-E9 / E16 Seg-DA$^{\dag}$  & 15 & DA $+$ Segment-Aware de~Boor      & 0.056 & $11.9\times$ \\
-E9 / E16 Seg-DA$^{\dag}$  & 20 & DA $+$ Segment-Aware de~Boor      & 0.0215 & $\sim31\times$ \\
+E16 Seg-DA$^{\dag}$       & 15 & DA $+$ Segment-Aware, $M_2^{\max}$ & 1.65  & $0.4\times$ \\
+E16 Seg-DA$^{\dag}$       & 20 & DA $+$ Segment-Aware, $M_2^{\max}$ & 0.89  & $0.8\times$ \\
 E40 compositional & 15 & DA network-level (Tier~3)                 & 0.66   & $1.0\times$ \\
 Adaptive-DA (E15) & 15$^{*}$ & DA, greedy adaptive $\varepsilon$    & 0.19   & $3.6\times$ \\
 Adaptive-IA (E15) & 15$^{*}$ & IA, greedy adaptive $\varepsilon$    & 0.39   & $1.7\times$ \\
@@ -3999,13 +4019,15 @@ is not a classification certificate for this checkpoint
 \textbf{DA bound} (0.66): high-probability under the random-sign model
 (Lemma~\ref{lem:da_moment}), uses $|\sum W_{k,j}W_{j,i}|$; certifies
 classification at the $M_2^{\text{char}}$ calibration with thin margin
-($1.0\times$).
+($1.0\times$; see the adaptive and soft-contractive rows below).
 \textbf{DA, $M_2^{\max}$} (5.9): worst-function $M_2=1.586$ replaces the
 characteristic value---conservative, exceeds the half-margin.
-$^{\dag}$\textbf{Seg-DA} (0.056): values from the earlier weight set;
-recomputation against the released checkpoint is pending (segmented
-$M_2^{(k)}$ machinery, E16). \textbf{Compositional DA} matches the
-recomputed network-level DA ($0.66$, 2026-08-04; cf.\
+$^{\dag}$\textbf{Seg-DA} (1.65/0.89): per-input segment errors under the
+worst-function $M_2^{\max}$ calibration (global DA $5.9$): a
+$3.6\times$/$6.6\times$ tightening (recomputed 2026-08-04,
+\texttt{verify\_seg\_da.py}); the earlier $0.056/11.9\times$ mixed
+$M_2$ calibrations and is superseded. \textbf{Compositional DA} matches
+the recomputed network-level DA ($0.66$, 2026-08-04; cf.\
 Table~\ref{tab:compositional}).
 \textbf{MaxAE} (3.65): empirical maximum absolute logit error across
 2,743 test samples---includes out-of-domain activations (E68), not a
@@ -4027,13 +4049,12 @@ At the $M_2^{\max}$ calibration the same rows read 0.0086/0.0122
 \textbf{Segment-Aware Composition.} We further evaluate the Segment-Aware
 de Boor Bound ({\S}\ref{sec:da}, Eq.~\ref{eq:segment_bound}) composed with DA.
 By replacing the global $\varepsilon_{\text{LUT}}$ with per-input-segment
-$\varepsilon_i$ values, the DA bound tightens further: the worst-case
-logit perturbation decreases from 0.66 to
-$\sim$0.056, and the safety factor improves from $1.0\times$ to
-$\sim$11.9$\times$ at $N=15$ LUT points. This provides
+$\varepsilon_i$ values, the DA bound tightens under the heavy-tail
+regime (recomputed 2026-08-04): with the worst-function $M_2^{\max}$
+calibration (global bound $5.9$), the segment-aware DA bound is $1.65$
+at $N=15$ and $0.89$ at $N=20$ ($3.6\times$/$6.6\times$). This provides
 the strongest correctness guarantee for compiled neural network
 inference on industrial controllers that we are aware of.
-% against the released checkpoint (2026-08-03).
 
 \noindent\textbf{E10: LUT Precision---Storage Trade-off at Extreme Sparsity.}
 We push the LUT density to extreme sparsity to identify the \textit{fracture
@@ -4346,7 +4367,7 @@ E12& XJTU-SY Cross-Dataset & Zero-shot / FT 100ep & 29.8\% $\to$ 91.7\% (+61.9 p
 E13& Feature Ablation      & Time/Freq/DE    & Freq 99.93\%; All 99.96\% \\
 E14& Adversarial Robustness& Noise $\sigma$=0--0.2 & 0\% degradation \\
 E15& Adaptive LUT Allocation & Greedy vs Uniform  & 71.6\% $\downarrow$ worst $\varepsilon$ \\
-E16& Segment-Aware DA       & Seg-DA vs DA       & Substantial tightening (abs.\ values pending recompute) \\
+E16& Segment-Aware DA       & Seg-DA vs DA       & \textbf{3.6$\times$} vs.\ $M_2^{\max}$ (recomp.\ 2026-08-04) \\
 E17& RTNNIgen Comparison   & 7-dim.\ comparison  & Correctness model, 2,610$\times$ speedup \\
 E18& Paderborn Cross-Dataset& Zero-shot / FT     & 25.0\% $\to$ 79.4\%; Cohen's $d$ domain shift \\
 E19& Method Boundary        & 3 degradation cond. & DA$\to$IA, Adaptive$\to$Uniform, OOM boundary \\
@@ -4462,7 +4483,6 @@ Fig.~\ref{fig:segment_bounds} already reported the per-resolution breakdown;
 the $6.0\times$ per-segment tightening and the DA compositional
 improvement are both \textbf{structural properties} of trained KAN B-spline
 activations, not dataset-specific artifacts. The segment-aware DA guarantee
-% compositional ratio pending recomputation (2026-08-03).
 provides the strongest correctness bound for compiled neural
 inference on industrial controllers to date.
 
@@ -4697,8 +4717,9 @@ Sign-structural affine arithmetic (DA) exploits weight-matrix sign
 cancellation to achieve a $2.1\times$ tighter bound than interval arithmetic,
 while empirical calibration ($M_2^{\text{char}} = 0.177$) tightens the de~Boor
 LUT bound by a further $98.6\%$ vs.\ the analytical $M_2$ (E11).
-Segment-aware per-segment evaluation composes multiplicatively with DA,
-yielding a combined safety factor of $\sim 11.9\times$ at $N=15$ (E16).
+Segment-aware per-segment evaluation composes with DA to contain the
+heavy-tail regime (safety $3.6\times$/$6.6\times$ at $N{=}15/20$ vs.\ the
+worst-function calibration, E16, recomputed 2026-08-04).
 These mechanisms are not individually novel---affine arithmetic and de~Boor
 bounds each have decades of prior literature---but their \textit{composition}
 is: the compiler chains them into a bound that is computable from model
@@ -5402,8 +5423,10 @@ verification side.
 Two certification tiers emerge from the SVNN error bounds
 (Table~\ref{tab:cert_thresholds}): a \textbf{high-probability} tier using DA
 with sign-balance evidence (SIL~2, $N{=}15$, safety $1.0\times$), and a
-\textbf{sound} tier using Segment-Aware IA with no sign-cancellation assumption
-(SIL~2 at $N{\geq}22$, SIL~3 at $N{\geq}25$). For SIL~3+, Level~2 arithmetic
+\textbf{sound} tier using global IA with no sign-cancellation assumption
+(SIL~2 at $N{\geq}22$, SIL~3 at $N{\geq}25$; segment-aware IA composes
+further per the recomputed Seg-DA analysis, {\S}\ref{sec:segment-aware}).
+For SIL~3+, Level~2 arithmetic
 bounds supplement Level~3 MILP verification~\cite{schwartz2026optimal} on
 safety-critical outputs ({\S}\ref{sec:compositional}). We emphasize this
 outlines a \textit{pathway}, not completed certification---full compliance
@@ -5441,8 +5464,8 @@ $1.5\times$ safety margin \\
 $^{*}$Adaptive allocation (E15) at the $N{=}15$ storage budget.
 $M_2^{\text{char}} = 0.177$ (E11); half-margin $= 0.675$; all values
 recomputed from the released checkpoint (2026-08-03) for KAN
-$[28,16,4]$ on S7-1200 CPU~1211C. Segment-aware IA rows from the
-pre-recomputation constants are withdrawn (recomputation pending).}
+$[28,16,4]$ on S7-1200 CPU~1211C. Segment-aware rows follow the
+recomputed Seg-DA analysis ({\S}\ref{sec:segment-aware}, 2026-08-04).}
 \end{table}
 
 
