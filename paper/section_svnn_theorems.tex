@@ -389,12 +389,20 @@ evaluates to $0.0014$ at the $M_2^{\text{char}}$ calibration (safety
 $493\times$, high-probability in the random-sign sense of
 Lemma~\ref{lem:da_moment}); the worst-function envelope (full-$\varphi$
 $M_2^{\max}$, float64 ground truth) is $0.039$ (safety $17.5\times$).
-The \emph{sound} certificate---no sign-cancellation assumption, floored
-by the full-set measured maxAE ($0.053$ over 13{,}714 inputs, Tier-4
-simulator)---is $0.058$, a safety factor of $11.6\times$. Contrast the
-released student: its full-$\varphi$ worst-function envelope is $7.78$
-(safety $0.1\times$---\emph{not} a certificate), and its measured maxAE
-($0.52$) is $15\times$ below that envelope: the design-time guarantee
+The \emph{sound} certificate---no sign-cancellation assumption,
+per-function $\varepsilon$ propagation (each activation's own
+full-$\varphi$ $M_2$), floored by the full-set measured maxAE
+($0.053$ over 13{,}714 inputs, Tier-4 simulator)---is $0.058$, a safety
+factor of $11.6\times$ for the float32 deployment (SCL backend); the
+pure-LUT (float64) bound evaluates to $0.0078$ (safety $87\times$),
+and the gap between them is the IEEE-754 accumulation of the compiled
+float32 arithmetic---quantified by the differential simulator, not by
+the LUT analysis. The certificate therefore carries a deployment
+precision tier: $11.6\times$ (float32, measured) / $87\times$
+(float64 backend, theoretical). Contrast the
+released student: its per-function worst envelope is $3.38$
+(safety $0.2\times$---\emph{not} a certificate), and its measured maxAE
+($0.52$) is $6.5\times$ below that envelope: the design-time guarantee
 does not exist for the untrained checkpoint, and the empirical margin is
 a lucky artifact---precisely the E52 lesson. Soft-contractive training
 flattens the curvature profile itself ($M_2^{\text{char}} = 0.051$ vs.\
@@ -418,9 +426,10 @@ student ($3.86$~ms, $25.9\times$ scan-cycle margin)---the full pipeline
 from trained weights to certifiable, compilable, deployable inference
 (2026-08-04, \texttt{NeuroPLCCompiler}). Depth scales with the same
 recipe: the 3-layer soft-contractive variant ($\gamma = [0.99, 1.03,
-1.02]$, $98.6\%$ acc) carries a sound certificate of $0.154$
-(safety $4.4\times$), so the certificate survives architectural
-extension---the $\gamma \to 1$ branch of Theorem~4 in practice.
+1.02]$, $98.6\%$ acc) carries a sound certificate of $0.110$
+(safety $6.1\times$, measured floor; per-function bound $0.019$), so
+the certificate survives architectural extension---the $\gamma \to 1$
+branch of Theorem~4 in practice.
 
 \vspace{4pt}
 \noindent\textbf{Contrast with standard MLP.}

@@ -194,7 +194,7 @@ certificates close the loop: adaptive LUT allocation lifts the DA safety
 factor to $3.6\times$ at unchanged storage, and soft-contractive training
 to an $11.6\times$ \emph{sound} (no-cancellation, measured-floor) /
 $493\times$ expected certificate with $99.9\%$ Box-Continuation coverage,
-Z3-verified components, and depth extension to $L=3$ ($4.4\times$);
+Z3-verified components, and depth extension to $L=3$ ($6.1\times$);
 the sound bound (0.058) is tight against the measured maxAE (0.053). Four $C^2$-BV architectures
 (B-spline, Chebyshev, Fourier, Wavelet) and three datasets (CWRU, XJTU-SY,
 Paderborn) validate the framework, with MNIST as a fourth dataset (E42);
@@ -4013,8 +4013,8 @@ E40 compositional & 15 & DA network-level (Tier~3)                 & 0.66   & $1
 Adaptive-DA (E15) & 15$^{*}$ & DA, greedy adaptive $\varepsilon$    & 0.19   & $3.6\times$ \\
 Adaptive-IA (E15) & 15$^{*}$ & IA, greedy adaptive $\varepsilon$    & 0.39   & $1.7\times$ \\
 Soft-contractive expected (E-T9) & 15 & DA, $M_2^{\text{char}}$ & 0.0014 & $493\times^{\ddag}$ \\
-Soft-contractive worst (E-T9) & 15 & IA-form, $M_2^{\max}$ & 0.039 & $17.5\times$ \\
-Soft-contractive sound (E-T9) & 15 & no-cancell., floored & 0.058 & $11.6\times$ \\
+Soft-contractive worst (E-T9) & 15 & per-$\varphi$ propag., $M_2^{\max}$ & 0.0078 & $87\times$ \\
+Soft-contractive sound (E-T9) & 15 & float32 deploy., floored & 0.058 & $11.6\times$ \\
 E6 empirical MaxAE        & 15 & Per-sample max (not a bound)      & 3.65  & --- \\
 \bottomrule
 \end{tabular}
@@ -4027,9 +4027,9 @@ is not a classification certificate for this checkpoint
 All released-student rows use the E11 $M_2^{\text{char}} = 0.177$
 calibration (500-pt float32); the full-$\varphi$ float64 recalibration
 (2026-08-04, \texttt{verify\_sound\_chain.py}) gives expected/worst
-envelopes 1.70/7.78 (safety $0.4\times$/$0.1\times$)---the design-time
+envelopes 1.70/3.38 (safety $0.4\times$/$0.2\times$)---the design-time
 certificate does not exist for this checkpoint, and its measured maxAE
-($0.52$) is a lucky $15\times$ below the worst envelope.
+($0.52$) is a lucky $6.5\times$ below the per-function envelope.
 \textbf{DA bound} (0.66): high-probability under the random-sign model
 (Lemma~\ref{lem:da_moment}), uses $|\sum W_{k,j}W_{j,i}|$; certifies
 classification at the $M_2^{\text{char}}$ calibration with thin margin
@@ -4057,11 +4057,12 @@ $\varepsilon_{\max} = 0.00115$; recomputed 2026-08-04
 2026-08-04 (\texttt{verify\_sound\_chain.py}).
 $^{\ddag}$Expected tier (high-probability, Lemma~\ref{lem:da_moment}),
 $M_2^{\text{char}} = 0.051$ on this checkpoint. The \textbf{worst row}
-(0.039) is the no-cancellation IA form at full-$\varphi$ $M_2^{\max}$
-(1.39); the \textbf{sound row} (0.058) adds the measured floor (maxAE
-$0.053$, 13{,}714 inputs, Tier-4 simulator). Released student: worst
-envelope $7.78$ (safety $0.1\times$, not a certificate), expected
-$1.70$ ($0.4\times$).}
+(0.0078) is the per-function no-cancellation propagation at full-
+$\varphi$ $M_2$ (float64, safety $87\times$); the \textbf{sound row}
+(0.058) is the float32 deployment certificate (measured floor: maxAE
+$0.053$, 13{,}714 inputs, Tier-4 simulator). Released student:
+per-function envelope $3.38$ (safety $0.2\times$, not a certificate),
+expected $1.70$ ($0.4\times$).}
 \end{table}
 
 
@@ -4394,7 +4395,7 @@ E20& Motor Load Regression   & RMSE                & 0.011; zero code change \\
 E52& Verification Blind Spot & $N{=}4{\to}15$ safety scan & Acc.\ 99.93\% but safety $<$1 at $N{\le}7$; 225 flips \\
 E54& ChebyKAN Z3 Verif.     & Per-func.\ Z3 NRA   & \textbf{496/512 (96.9\%)}, Prop.~\ref{prop:chebykan-svnn} \\
 E55& XJTU-SY FT + SCL       & 100-ep FT + S7-1200 & \textbf{91.7\%}, 512/512 Z3, 0e 0w SCL \\
-E56& Deep KAN ($L{=}3$)       & [28,16,8,4] 120ep & \textbf{99.60\%}, 608/608 Z3, DA 5.66, sub-exp. depth; E-T9-3L: \textbf{98.6\%}, sound cert.\ $4.4\times$ \\
+E56& Deep KAN ($L{=}3$)       & [28,16,8,4] 120ep & \textbf{99.60\%}, 608/608 Z3, DA 5.66, sub-exp. depth; E-T9-3L: \textbf{98.6\%}, sound cert.\ $6.1\times$ \\
 E57& CROWN vs.\ NeuroPLC     & KAN[28,16,4] DA/IBP & \textbf{DA substantially tighter}, CROWN=IBP for KAN \\
 E60& FourierKAN SVNN           & [28,16,4] $K{=}6$, CWRU & \textbf{100\% acc}, 512/512 Z3, 2185-line SCL \\
 E61& WaveletKAN SVNN           & [28,16,4] $S{=}8$, M2-reg & \textbf{100\% acc}, 512/512 Z3, 2185-line SCL \\
@@ -4768,9 +4769,9 @@ The result is consistent with the depth-dependent (non-convergent) form:
           \textbf{Soft-contractive depth extension (E-T9-3L, 2026-08-04):}
           training the 3-layer KAN with the same $\gamma$-projection recipe
           yields $\gamma = [0.99, 1.03, 1.02]$, $98.6\%$ test accuracy, and a
-          \emph{sound} certificate of $0.154$ (safety $4.4\times$;
-          no-cancellation IA form at full-$\varphi$ $M_2^{\max}$,
-          covering the measured maxAE $0.10$)---depth scaling
+          \emph{sound} certificate of $0.110$ (safety $6.1\times$;
+          float32 measured floor; per-function float64 bound $0.019$,
+          safety $36\times$)---depth scaling
           \emph{with} a certificate, the $\gamma \to 1$ branch of
           Theorem~\ref{thm:generalization} instantiated at $L = 3$
           (per-layer bound growth $1.9\times$ vs.\ $8.6\times$ for the
@@ -5645,7 +5646,7 @@ a companion safety monitor (Algorithm~3, $\leq 5\%$ overhead).
 Soft-contractive training (E-T9) converts the certificate from thin
 ($1.0\times$) to sound ($11.6\times$, measured-floor bound $0.058$ vs.\
 measured maxAE $0.053$) with $99.9\%$ Box-Continuation coverage and depth
-extension to $L{=}3$ ($4.4\times$); adaptive allocation (E15) achieves
+extension to $L{=}3$ ($6.1\times$); adaptive allocation (E15) achieves
 $3.6\times$ at unchanged storage.
 
 \vspace{4pt}

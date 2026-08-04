@@ -1,0 +1,23 @@
+{
+  "date": "2026-08-04",
+  "out": {
+    "main": {
+      "perfunc_bound": 3.3761925568128315,
+      "sound_bound": 3.3761925568128315,
+      "sound_safety": 0.1999293549290946,
+      "measured_maxae": 0.5175
+    },
+    "soft2L": {
+      "perfunc_bound": 0.007806892923636404,
+      "sound_bound": 0.05797,
+      "sound_safety": 11.643953769190961,
+      "measured_maxae": 0.0527
+    },
+    "soft3L": {
+      "perfunc_bound": 0.019111002385080688,
+      "sound_bound": 0.11044000000000001,
+      "sound_safety": 6.111915972473741,
+      "measured_maxae": 0.1004
+    }
+  }
+}
