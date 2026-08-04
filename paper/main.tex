@@ -4013,7 +4013,7 @@ E40 compositional & 15 & DA network-level (Tier~3)                 & 0.66   & $1
 Adaptive-DA (E15) & 15$^{*}$ & DA, greedy adaptive $\varepsilon$    & 0.19   & $3.6\times$ \\
 Adaptive-IA (E15) & 15$^{*}$ & IA, greedy adaptive $\varepsilon$    & 0.39   & $1.7\times$ \\
 Soft-contractive expected (E-T9) & 15 & DA, $M_2^{\text{char}}$ & 0.0014 & $493\times^{\ddag}$ \\
-Soft-contractive worst (E-T9) & 15 & per-$\varphi$ propag., $M_2^{\max}$ & 0.0078 & $87\times$ \\
+Soft-contractive float64 (E-T9) & 15 & per-$\varphi$ propag., floored & 0.026 & $26\times$ \\
 Soft-contractive sound (E-T9) & 15 & float32 deploy., floored & 0.058 & $11.6\times$ \\
 E6 empirical MaxAE        & 15 & Per-sample max (not a bound)      & 3.65  & --- \\
 \bottomrule
@@ -4057,8 +4057,9 @@ $\varepsilon_{\max} = 0.00115$; recomputed 2026-08-04
 2026-08-04 (\texttt{verify\_sound\_chain.py}).
 $^{\ddag}$Expected tier (high-probability, Lemma~\ref{lem:da_moment}),
 $M_2^{\text{char}} = 0.051$ on this checkpoint. The \textbf{worst row}
-(0.0078) is the per-function no-cancellation propagation at full-
-$\varphi$ $M_2$ (float64, safety $87\times$); the \textbf{sound row}
+(0.026) is the float64 deployment certificate (per-function
+no-cancellation propagation floored by the float64 simulator maxAE
+$0.023$; theoretical envelope $0.0078$); the \textbf{sound row}
 (0.058) is the float32 deployment certificate (measured floor: maxAE
 $0.053$, 13{,}714 inputs, Tier-4 simulator). Released student:
 per-function envelope $3.38$ (safety $0.2\times$, not a certificate),

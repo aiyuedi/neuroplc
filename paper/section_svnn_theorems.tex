@@ -394,12 +394,13 @@ per-function $\varepsilon$ propagation (each activation's own
 full-$\varphi$ $M_2$), floored by the full-set measured maxAE
 ($0.053$ over 13{,}714 inputs, Tier-4 simulator)---is $0.058$, a safety
 factor of $11.6\times$ for the float32 deployment (SCL backend); the
-pure-LUT (float64) bound evaluates to $0.0078$ (safety $87\times$),
-and the gap between them is the IEEE-754 accumulation of the compiled
-float32 arithmetic---quantified by the differential simulator, not by
-the LUT analysis. The certificate therefore carries a deployment
-precision tier: $11.6\times$ (float32, measured) / $87\times$
-(float64 backend, theoretical). Contrast the
+pure-LUT (float64) bound evaluates to $0.026$ (safety $26\times$,
+measured floor over the float64 simulator; theoretical per-function
+envelope $0.0078$), and the gap between them is the IEEE-754
+accumulation of the compiled float32 arithmetic---quantified by the
+differential simulator, not by the LUT analysis. The certificate
+therefore carries a deployment precision tier: $11.6\times$ (float32,
+measured) / $26\times$ (float64 backend, measured floor). Contrast the
 released student: its per-function worst envelope is $3.38$
 (safety $0.2\times$---\emph{not} a certificate), and its measured maxAE
 ($0.52$) is $6.5\times$ below that envelope: the design-time guarantee
