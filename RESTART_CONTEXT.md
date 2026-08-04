@@ -1,7 +1,8 @@
-# NeuroPLC — 新窗口上手文档（2026-08-04 v2）
+# NeuroPLC — 新窗口上手文档（2026-08-05 v3）
 
 > **若在新 session 中接手本项目，先读此文件，再执行「上手第一步」。**
-> v2 由 2026-08-04 单日全会话更新：P3 容量理论 + P4 审稿修复 + 优化轮全部完成。
+> v3 由 2026-08-05 更新：证书体系（双层/有界幅值基）+ Phase 1 审稿闭环（4 P0 全清）。
+> 最新快速交接：`HANDOFF_2026-08-05.md`（三分钟版）。
 
 ---
 
@@ -13,7 +14,7 @@
 
 **一句话**：第一个证明"哪些神经网络架构天生可认证、以什么锐常数、什么复杂度、什么验证成本"的容量理论框架——universal packing 线 + 三层验证分层 + 架构即码选择律。
 
-**当前状态**：**89页，0e0w，0 undefined refs，19 定理（Thm 17-19 = 可认证部署容量理论）**，16 commits 双推
+**当前状态**：**91页，0e0w，0 undefined refs，19 定理（Thm 17-19 = 可认证部署容量理论；aux 实证编号 1-19 连续，Thm 12=hot_swap_safety）**，18 commits 双推，**4 P0 审稿阻塞项全清，可送审**
 
 ---
 
@@ -30,6 +31,11 @@
 - 数字诚实化：4.4×→25.9×、E41 架构统一（代码裁决 [28,16,4] 0/16）、E56 重算 1.90、E57 8.3×/5.45 撤回（口径不统一）、Seg-DA 11.9× 撤回、MNIST 声明修正、first verified→self-verifying
 - 图表：15 图全引用（5 处补引用）、fig17 (V_B,ε) 平面图新增、figure_list v2、3 个孤立图删除、tab:cert_thresholds 重算（IA 需 N≥22）
 - 投稿材料：REVIEWER-FAQ v4（Q21-26 容量防御）、cover letter v2、figure_list v2、author bio
+
+### 2026-08-04 深夜~08-05：证书体系 + Phase 1 审稿闭环（commits 561fcc6→278e494）
+- **双层证书体系**（section_svnn_theorems E-T9 段）：理论 tier（first-principles 传播修正 dy=Σε + per-edge Lipschitz → **sound 0.288/2.34×**，唯一对未见输入成立的界，δ_fp32≤3×10⁻⁵）+ 实测校准 tier（**validated** 0.058/11.6× f32、0.026/26× f64，公式 0.058=max(0.039, 0.053×1.1)）+ expected 0.00137/493×；main 无证书（2.29/0.3×）
+- **有界幅值基证书**（E-T10/11）：FourierKAN 4.9×@99.96%（validated，理论 0.110 不覆盖含超界实测）、WaveletKAN 2.8×@99.67%（sound，理论覆盖实测）——证书几乎免费（0.03/0.26pp vs B-spline 1.4pp）；fig_cert_panorama 三面板
+- **Phase 1 审稿闭环**（PRE_SUBMISSION_REVIEW_2026-08-05.md，4 P0 全清）：「sound」措辞纪律（只留 0.288/2.34×）；tab:cross_domain/scalability_grid 重算；da_bounds_summary 口径钉死（expected/worst/validated/sound 四档）；Thm 编号 aux 实证连续；γ²=28.1→237；53.7%→TIA 45.2KB/90.4%；SCL 行数 2,188/2,184；FAQ Q10/Q27-29、cover letter、figure_list v3 同步
 
 ### 优化轮（commit 9e3c1c9/f01c775）
 - **理论**：c_ent ≈ 0.079（构造性下界，verify_packing_constant.py）、c_* ≲ 0.082 vs c_k=0.125（verify_width_constant.py，gap≥1.53×）、ρ*(B) Lambert-W 闭式、比特参数化 local-vs-global code gap remark
@@ -49,10 +55,12 @@
 | `paper/section_lut_sharp.tex` | Thm 9p/13（锐常数 + 最优 LUT） |
 | `paper/section_trichotomy.tex` | Thm 10p/16（三分法 + necessity 第一格） |
 | `PRE_SUBMISSION_REVIEW_2026-08-04.md` | **6-Agent 审稿合并报告**（修复清单来源） |
+| `docs/PRE_SUBMISSION_REVIEW_2026-08-05.md` | **Phase 1 审稿报告**（4 P0/14 P1/12 P2 + 修复核对表） |
+| `HANDOFF_2026-08-05.md` | 最新快速交接（三分钟上手） |
 | `docs/CAPACITY_DESIGN.md` | 容量理论设计文档 v4（三定理 + necessity 链 + 三条红线） |
-| `docs/REVIEWER-FAQ.md` | 审稿人防御 v4（Q1-26） |
-| `docs/cover_letter.md` | 投稿信 v2（容量主线） |
-| `docs/figure_list.md` | 图清单 v2（15 图真实清单 + 3 孤立已删） |
+| `docs/REVIEWER-FAQ.md` | 审稿人防御（Q1-29，含双层证书三层语义） |
+| `docs/cover_letter.md` | 投稿信 v2（双层证书 + 有界幅值基） |
+| `docs/figure_list.md` | 图清单 v3（17 图） |
 | `docs/CHECKLIST.md` | P0 追踪表 |
 
 **验证脚本速查**（全部 PASS）：
@@ -78,17 +86,20 @@ cd paper && xelatex main && bibtex main && xelatex main && xelatex main  # 编�
 
 ## 4. 剩余待办
 
-### 投稿前（高优先）
-1. **TNNLS 页数策略（板板决策）**：89 页单栏 ≈ 44 页双栏 vs ~14 页限制——压缩核心理论+实验转补充材料 vs 分流（IMA J. Inf. Inference / FoCM 理论侧；IEEE TII 系统侧）
-2. **FIXME/TODO 源码注释清扫**（~30 处——不影响 PDF，最终提交前一次 grep 清扫）
-3. **tab:summary 加 E-T 行**（E-T1-E-T9 实验入汇总表——计数文字已更新）
-4. **Box-Continuation 域加宽实验（C11）**：加宽层 2 LUT 域 → 重编译 512/512（依赖编译工具链）
-5. **T1 归约尝试**：stratum-3 类级归约（ε-Verify → 结构最优性）——失败保持 conjecture
-6. **定理顺序重编号**（A4：文档顺序乱 + Thm 12 缺失）——高风险，建议搁置
+### 投稿前（按优先级）
+1. **TNNLS 页数策略（板板决策，挂起中）**：91 页单栏 ≈ 44 页双栏 vs ~14 页限制——压缩 vs 分流（IMA J. Inf. Inference / FoCM 理论侧；IEEE TII 系统侧），投稿前必须定案
+2. **T1 归约尝试**（建议独立 session 专攻）：stratum-3 类级归约（ε-Verify → 结构最优性，NP-hard 归约边界）——失败保持 conjecture
+3. **物理 PLC WCET 实测**（目前 PLCSIM/Z3 模拟）——诚实限制，cover letter 已声明
+4. **P2 残余**：16 个 overfull hbox（最大 tab:xjtu_ft 189pt）、0.03/0.26pp 基线注明（已加 99.93% 基线）
+5. **CN 中文版同步**（板板明确"先不理"，5 个 bib key 缺失会编译 [?]）
 
-### 理论深化（中优先）
-7. 有界幅值 B-spline 基 → 全收缩训练（γ<1）——E-T9 标注的未来工作
-8. 三分法 necessity 绝对形式（CP 内定理 + conjecture 坐标化——保持开放问题定位）
+### 已结案（勿再动）
+- FIXME/TODO 清扫 ✅（2026-08-04 完成 18 处）
+- tab:summary E-T 行 ✅（E-T1-E-T11）
+- Box-Continuation ✅（soft 模型 99.9% 覆盖，main 0%——收缩训练才是钥匙，加宽域收益有限）
+- 定理重编号 ✅（aux 实证 1-19 连续无跳号，容量=17-19，不再动）
+- 有界幅值基全收缩 ✅（Fourier/Wavelet 第一层 γ<1，第二层仍>1——诚实限制已入 cover letter）
+- 三分法 necessity：CP 内定理 + 绝对形式开放问题定位 ✅（保持）
 
 ---
 
@@ -103,12 +114,12 @@ cd paper && xelatex main && bibtex main && xelatex main && xelatex main  # 编�
 ## 6. 上手第一步（新session立刻执行）
 
 ```
-1. 读本文件（你正在读）
-2. cd D:/neuroplc-paper && git log --oneline -5   # 确认 HEAD（16 commits 双推）
-3. 编译验证：cd paper && xelatex main && bibtex main && xelatex main && xelatex main
-   → 期望：89页，0 errors，0 undefined refs
-4. 读 PRE_SUBMISSION_REVIEW_2026-08-04.md（审稿状态）与 docs/CAPACITY_DESIGN.md（理论设计）
-5. 按「剩余待办」继续：先定页数策略 → FIXME 清扫 → 投稿
+1. 读 HANDOFF_2026-08-05.md（三分钟版）与本文件
+2. cd D:/neuroplc-paper && git log --oneline -5   # 确认 HEAD（18 commits 双推，最新 278e494）
+3. 编译验证：cd paper && xelatex -interaction=nonstopmode -halt-on-error main.tex（两遍）
+   → 期望：91页，0 errors，0 undefined refs
+4. 读 docs/PRE_SUBMISSION_REVIEW_2026-08-05.md（审稿状态）与 HANDOFF_2026-08-05.md（证书矩阵）
+5. 按「剩余待办」继续：页数策略（板板）→ T1 归约（独立 session）→ 投稿
 ```
 
 ---
@@ -121,4 +132,4 @@ cd paper && xelatex main && bibtex main && xelatex main && xelatex main  # 编�
 - 数据：`data/processed/features_X.npy`（CWRU 28-D，13714 样本）
 - Git：origin=Gitee, github=GitHub（双推工作流）
 
-*最后更新：2026-08-04 | 板板 + Claude | 89页 0e0w | 19 定理 | 16 commits 双推 | 容量理论 + 审稿闭环 + 优化轮完成*
+*最后更新：2026-08-05 | 板板 + Claude | 91页 0e0w | 19 定理 | 18 commits 双推 | 容量理论 + 证书体系 + Phase 1 审稿闭环（可送审）*
