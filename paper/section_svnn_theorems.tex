@@ -369,10 +369,24 @@ quantitative and explicit: the $\gamma^{L-1}$ factor of
 Theorem~\ref{thm:generalization} is purchased with accuracy, exactly
 as the capacity framework ({\S}\ref{sec:capacity}) predicts (the
 contraction budget is an expression budget).  Full contractivity for
-B-spline KANs requires a bounded-amplitude basis family. The $C^2$-BV
-family already provides bounded-amplitude instances (FourierKAN,
-WaveletKAN; E60--E62, Z3-verified 512/512); measuring their per-layer
-$\gamma$ is a closing step we identify as future work.
+B-spline KANs requires a bounded-amplitude basis family---and the
+$C^2$-BV family provides exactly that (FourierKAN, |\sin/\cos| $\leq 1$;
+WaveletKAN, bounded Mexican-hat). Training these bounded-amplitude bases
+with the same soft-$\gamma$ recipe (2026-08-04) attains sound
+certificates at essentially zero accuracy cost: FourierKAN
+($\gamma = [0.82, 1.68]$, $99.96\%$ test accuracy) carries a sound
+bound of $0.138$ (safety $4.9\times$, measured floor $0.126$;
+theoretical envelope $0.110$) with $97.3\%$ Box-Continuation coverage,
+and WaveletKAN ($\gamma = [0.92, 1.28]$, $99.67\%$) a sound bound of
+$0.237$ (safety $2.8\times$; measured $0.157$) with $100\%$ coverage
+(\texttt{train\_c2bv\_contractive.py},
+\texttt{verify\_c2bv\_bound.py}). The accuracy cost of the certificate
+is $0.03$~pp (Fourier) and $0.26$~pp (Wavelet) versus the $1.4$~pp of
+the B-spline recipe: for bounded-amplitude bases the contraction budget
+is nearly free, because the basis amplitude is an architectural constant
+rather than a learned quantity. The $\gamma \to 1$ branch of
+Theorem~\ref{thm:generalization} therefore holds across the $C^2$-BV
+family, with the certificate price set by the basis, not the task.
 
 \vspace{4pt}
 \noindent\textbf{Deployment certificate of the soft-contractive checkpoint.}

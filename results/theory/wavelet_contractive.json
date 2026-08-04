@@ -1,0 +1,14 @@
+{
+  "date": "2026-08-04",
+  "model": "wavelet",
+  "contractive": true,
+  "gamma_target": 0.85,
+  "gamma_measured": [
+    0.9231,
+    1.2792
+  ],
+  "test_acc": 0.9967189431190491,
+  "best_val": 0.9970845580101013,
+  "condition3_satisfied": false,
+  "verdict": "CHECK"
+}

@@ -1,0 +1,35 @@
+{
+  "date": "2026-08-04",
+  "out": {
+    "fourier_v1": {
+      "sound_bound": 0.16890263557434082,
+      "safety": 3.996385241146255,
+      "certificate": true,
+      "m2_max": 1.6732980012893677
+    },
+    "fourier_v2": {
+      "sound_bound": 0.11033003777265549,
+      "safety": 6.118007512975709,
+      "certificate": true,
+      "m2_max": 1.3241018056869507
+    },
+    "fourier_base": {
+      "sound_bound": 0.7819059491157532,
+      "safety": 0.8632751813224447,
+      "certificate": false,
+      "m2_max": 2.8126702308654785
+    },
+    "wavelet_v1": {
+      "sound_bound": 0.2368347655008742,
+      "safety": 2.8500883245433344,
+      "certificate": true,
+      "m2_max": 4.312293169015689
+    },
+    "wavelet_base": {
+      "sound_bound": 1.0401620737860835,
+      "safety": 0.648937331028682,
+      "certificate": false,
+      "m2_max": 7.310033699692927
+    }
+  }
+}

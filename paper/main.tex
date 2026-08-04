@@ -543,8 +543,8 @@ achieve 100\% CWRU and 100\% XJTU-SY domain-shift accuracy (E62),
 with 512/512 Z3-equivalent verification preserved, confirming the
 $C^2$-BV family's cross-architecture fine-tuning stability. In total,
 74 experiments (E1--E58 + E60--E68
-+ V1--V7) plus nine capacity-theory verification experiments
-(E-T1--E-T9, {\S}\ref{sec:capacity}) spanning compression,
++ V1--V7) plus eleven capacity-theory verification experiments
+(E-T1--E-T11, {\S}\ref{sec:capacity}) spanning compression,
 generalization, correctness bounds,
 scalability, cross-dataset transfer, cross-architecture verification
 (FourierKAN E60, WaveletKAN E61), and domain-shift SVNN preservation
@@ -4015,6 +4015,8 @@ Adaptive-IA (E15) & 15$^{*}$ & IA, greedy adaptive $\varepsilon$    & 0.39   & $
 Soft-contractive expected (E-T9) & 15 & DA, $M_2^{\text{char}}$ & 0.0014 & $493\times^{\ddag}$ \\
 Soft-contractive float64 (E-T9) & 15 & per-$\varphi$ propag., floored & 0.026 & $26\times$ \\
 Soft-contractive sound (E-T9) & 15 & float32 deploy., floored & 0.058 & $11.6\times$ \\
+FourierKAN sound (E-T10) & 15 & bounded-amp.\ basis, floored & 0.138 & $4.9\times$ \\
+WaveletKAN sound (E-T11) & 15 & bounded-amp.\ basis, floored & 0.237 & $2.8\times$ \\
 E6 empirical MaxAE        & 15 & Per-sample max (not a bound)      & 3.65  & --- \\
 \bottomrule
 \end{tabular}
@@ -4409,7 +4411,7 @@ E66& Verifiability Trichotomy  & Rates: tanh/sin/B-spline/ReLU & slopes $-2.04/-
 E67& Tier-4 Differential Test  & PyTorch vs SCL-sim (emitter) & 3{,}357 samples 100\% agree; maxAE 0.47; \textbf{caught scale regression} \\
 E68& Compile-Aware PAC         & Decomp.\ + resolution matching & bias slope 0.99 vs $h^2$; per-act.\ ratio 0.996--1.000; knee $N^{*}$ exp.\ 0.14 \\
 \midrule
-\multicolumn{4}{l}{\textit{Capacity-Theory Verification (E-T1--E-T9):}} \\
+\multicolumn{4}{l}{\textit{Capacity-Theory Verification (E-T1--E-T11):}} \\
 E-T1 & Curvature-Aware LUT Optimality & Worst-$\varepsilon$ vs uniform & \textbf{2.75$\times$} cross-func. \\
 E-T2 & Compile-Aware Minimax Rate & Deployment risk vs width & Matches $W^2_\infty$ minimax \\
 E-T3 & Besov Deployment PAC & Deployment risk & PAC rate ($s$-smooth) \\
@@ -4419,6 +4421,8 @@ E-T6 & Architecture Selection Law & Spectral-vs-LUT crossover & $\rho^*$ Lambert
 E-T7 & Packing Constant $c_{\text{ent}}$ & Constructive lower bound & $c_{\text{ent}} \approx 0.079$ \\
 E-T8 & Width Constant $c_*$ & Numerical estimate & $c_* \lesssim 0.082$; gap $\geq 1.53\times$ \\
 E-T9 & Soft-Contractive Training & $\gamma$ post-training & $[1.03,1.38]$; 98.5\%; sound cert.\ $11.6\times$ \\
+E-T10 & FourierKAN Contr.\ Cert. & Bounded-amp.\ basis & sound $0.138$ ($4.9\times$); \textbf{99.96\%} \\
+E-T11 & WaveletKAN Contr.\ Cert. & Bounded-amp.\ basis & sound $0.237$ ($2.8\times$); \textbf{99.67\%} \\
 \midrule
 \multicolumn{4}{l}{\textit{Validation Experiments (V1--V7):}} \\
 V1 & Worst-Case Adversarial   & 5,000 inputs, 100 worst  & 100/100 preserved, VALIDATED \\
@@ -5634,8 +5638,8 @@ frontier.
 \end{enumerate}
 
 \vspace{4pt}
-\noindent\textbf{Empirical validation (74 experiments + 9 capacity
-experiments E-T1--E-T9, 4 architectures).}
+\noindent\textbf{Empirical validation (74 experiments + 11 capacity
+experiments E-T1--E-T11, 4 architectures).}
 B-spline KAN achieves 99.93\% CWRU accuracy; FourierKAN and WaveletKAN
 achieve 100\% on both CWRU and XJTU-SY domain-shift with 512/512
 Z3-equivalent verification preserved (E62); ChebyKAN achieves 496/512 Z3
