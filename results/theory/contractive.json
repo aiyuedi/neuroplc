@@ -1,17 +1,20 @@
 {
   "date": "2026-08-04",
   "script": "train_contractive_kan.py",
-  "gamma_target": 0.85,
+  "gamma_target": 0.75,
+  "epochs": 100,
+  "gamma_lambda": 40.0,
+  "w_bound": 0.3,
   "gamma_measured": [
-    1.0265,
-    1.38
+    1.1505,
+    1.2361
   ],
   "gamma_history_last": [
-    1.6972,
-    1.2717
+    1.2004,
+    1.1892
   ],
-  "test_acc": 0.9854174256324768,
-  "best_val": 0.9868804812431335,
+  "test_acc": 0.9799489378929138,
+  "best_val": 0.9861515760421753,
   "condition3_satisfied": false,
   "verdict": "CHECK"
 }

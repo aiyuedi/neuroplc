@@ -1,0 +1,20 @@
+{
+  "date": "2026-08-04",
+  "model": "D:\\neuroplc-paper\\results\\student\\kan_kd_vrmKD_best.pt",
+  "N15": {
+    "global_DA_check": 0.6586193442344666,
+    "segDA_max_over_test": 1.6527496080424235,
+    "segIA_max_over_test": 3.1878172895555914,
+    "segDA_mean": 1.4173164956064275,
+    "DA_tightening_vs_global": 0.398499168312954,
+    "IA_tightening_vs_global": 0.002462151931980621
+  },
+  "N20": {
+    "global_DA_check": 0.6586193442344666,
+    "segDA_max_over_test": 0.8893819679353672,
+    "segIA_max_over_test": 1.7344488272638618,
+    "segDA_mean": 0.7623582311251018,
+    "DA_tightening_vs_global": 0.7405359766438726,
+    "IA_tightening_vs_global": 0.004525293784920916
+  }
+}

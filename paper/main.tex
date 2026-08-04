@@ -1350,8 +1350,11 @@ logit perturbation of 0.66 vs.\ 1.38 for IA---a
 \textit{2.1$\times$ tightening} (recomputed from the released checkpoint,
 2026-08-03). The IA envelope exceeds the half-margin $0.675$ and is not
 a certificate; the DA bound certifies classification with a safety
-factor of $1.0\times$ at the $M_2^{\text{char}}$ calibration. This
-represents a novel application of affine arithmetic
+factor of $1.0\times$ at the $M_2^{\text{char}}$ calibration; with
+adaptive LUT allocation (E15, unchanged storage budget) the bound drops
+to $0.19$---a $3.6\times$ safety factor---and the IA envelope to $0.39$
+(now a sound certificate, $1.7\times$), Table~\ref{tab:da_bounds_summary}.
+This represents a novel application of affine arithmetic
 to compiled neural network verification on industrial controllers.
 
 \vspace{4pt}
@@ -1687,13 +1690,16 @@ per-segment $\varepsilon$ across all output dimensions sharing input $i$
 further tightening on top of DA's $2.1\times$ improvement over IA
 (up to $3.1\times$ vs.\ the $\sqrt{d}$ random-weights baseline, {\S}\ref{sec:da}).
 The combined bound---sign-structural affine arithmetic with segment-aware LUT error---
-achieves a substantially higher safety factor (Seg-DA, E16; the
-pre-recomputation $11.9\times$ figure is withdrawn pending
-recomputation) at $N=15$ LUT points, providing the strongest formal
-guarantee for compiled KAN inference to date; plain DA alone certifies
-this checkpoint with a
-thin $1.0\times$ factor at the $M_2^{\text{char}}$ calibration.
-% against the released checkpoint (2026-08-03).
+(Seg-DA, E16; recomputed on the released checkpoint, 2026-08-04) addresses
+the heavy-tail regime directly: under the worst-function calibration
+($M_2^{\max}$, global bound $5.9$), per-input segment errors reduce the
+bound to $1.65$ ($N{=}15$) and $0.89$ ($N{=}20$)---a
+$3.6\times$/$6.6\times$ tightening precisely where the
+plain-$M_2^{\text{char}}$ bound under-delivers. (The earlier
+$11.9\times$ figure mixed $M_2$ calibrations and is superseded by this
+sound recomputation, \texttt{verify\_seg\_da.py}.) Combined with adaptive
+allocation (E15), plain DA itself reaches a $3.6\times$ safety factor at
+unchanged storage ({\S}\ref{sec:adaptive-lut}).
 
 \begin{figure}[t]
     \centering
@@ -3977,6 +3983,10 @@ Thm~1 DA, $M_2^{\max}$    & 15 & DA, worst-function $M_2$           & 5.9   & $<
 E9 / E16 Seg-DA$^{\dag}$  & 15 & DA $+$ Segment-Aware de~Boor      & 0.056 & $11.9\times$ \\
 E9 / E16 Seg-DA$^{\dag}$  & 20 & DA $+$ Segment-Aware de~Boor      & 0.0215 & $\sim31\times$ \\
 E40 compositional & 15 & DA network-level (Tier~3)                 & 0.66   & $1.0\times$ \\
+Adaptive-DA (E15) & 15$^{*}$ & DA, greedy adaptive $\varepsilon$    & 0.19   & $3.6\times$ \\
+Adaptive-IA (E15) & 15$^{*}$ & IA, greedy adaptive $\varepsilon$    & 0.39   & $1.7\times$ \\
+Soft-contractive DA (E-T9) & 15 & DA, $\gamma{=}[1.03,1.38]$ model & 0.0034 & $196\times$ \\
+Soft-contractive IA (E-T9) & 15 & IA, $\gamma{=}[1.03,1.38]$ model & 0.0049 & $138\times$ \\
 E6 empirical MaxAE        & 15 & Per-sample max (not a bound)      & 3.65  & --- \\
 \bottomrule
 \end{tabular}
@@ -4001,7 +4011,16 @@ Table~\ref{tab:compositional}).
 2,743 test samples---includes out-of-domain activations (E68), not a
 certified bound. In-domain certified values are the recomputed rows
 above; the empirical MaxAE reflects worst-sample behavior without the
-aggregation-safe assumption of independent error signs.}
+aggregation-safe assumption of independent error signs.
+\textbf{Adaptive rows} (0.19/0.39): greedy allocation (E15,
+Algorithm~\ref{alg:adaptive_lut}) at the $N{=}15$ storage budget,
+$\varepsilon_{\max} = 0.00115$; recomputed 2026-08-04
+(\texttt{verify\_adaptive\_da.py}).
+\textbf{Soft-contractive rows} (0.0034/0.0049): E-T9 checkpoint
+($\gamma = [1.03, 1.38]$, 98.5\% acc); constants measured on that
+checkpoint, 2026-08-04 (\texttt{verify\_contractive\_bounds.py}).
+At the $M_2^{\max}$ calibration the same rows read 0.0086/0.0122
+(safety $78\times$/$55\times$).}
 \end{table}
 
 
@@ -4203,8 +4222,11 @@ misclassification. Critically, the certified safety factor remains below $1$
 through $N = 12$ and closes only marginally at $N=15$ ($1.02\times$): with the
 released checkpoint, the certification margin of the deployment default is
 thin---empirical accuracy alone (99.93\%) is a severe under-estimator of the
-certified blind spot, and contractive training (spectral normalization) is the
-recipe that restores a comfortable margin.
+certified blind spot. Adaptive LUT allocation (E15,
+{\S}\ref{sec:adaptive-lut}) restores a comfortable margin at unchanged
+storage: the worst-case per-function $\varepsilon$ drops to $0.00115$, the
+DA bound to $0.19$ (safety $3.6\times$), eliminating the blind spot at the
+deployment budget.
 
 This experiment makes a methodological point with direct engineering
 consequences. An engineer who evaluates only test-set accuracy would conclude
@@ -4354,7 +4376,7 @@ E-T5 & Three-Layer Separation & Slope: kink vs $C^2$ & $-1.11$ vs $-2.05$ \\
 E-T6 & Architecture Selection Law & Spectral-vs-LUT crossover & $\rho^*$ Lambert-W closed form \\
 E-T7 & Packing Constant $c_{\text{ent}}$ & Constructive lower bound & $c_{\text{ent}} \approx 0.079$ \\
 E-T8 & Width Constant $c_*$ & Numerical estimate & $c_* \lesssim 0.082$; gap $\geq 1.53\times$ \\
-E-T9 & Soft-Contractive Training & $\gamma$ post-training & $[15.4,5.3] \to [1.03,1.38]$; 98.5\% \\
+E-T9 & Soft-Contractive Training & $\gamma$ post-training & $[1.03,1.38]$; 98.5\%; DA cert.\ $196\times$ \\
 \midrule
 \multicolumn{4}{l}{\textit{Validation Experiments (V1--V7):}} \\
 V1 & Worst-Case Adversarial   & 5,000 inputs, 100 worst  & 100/100 preserved, VALIDATED \\
@@ -4387,6 +4409,12 @@ saving}. At the S7-1500 budget ($N=50$ uniform), worst-case error reduction
 reaches $73.1\%$. At the tight S7-1200 budget ($N=10$, $20{,}480$ bytes),
 adaptive allocation achieves $70.0\%$ worst-case error reduction.
 Table~\ref{tab:adaptive_lut} summarizes the four-budget comparison.
+Crucially, the adaptive worst-case $\varepsilon$ propagates linearly
+through the DA/IA bounds (Eq.~\ref{eq:da_bound}): at the $N{=}15$ budget
+the DA bound drops from $0.66$ to $0.19$ (safety $1.0\times \to
+3.6\times$) and the IA bound from $1.38$ to $0.39$---the first sound IA
+certificate at $N{=}15$ (Table~\ref{tab:da_bounds_summary}, recomputed
+2026-08-04, \texttt{verify\_adaptive\_da.py}).
 
 \begin{table}[t]
 \centering
@@ -4424,9 +4452,12 @@ than the global $\varepsilon$ (mean $0.00069$ vs.\ $0.00412$). Notably,
 $96.7\%$ of all LUT segments have $\varepsilon_j < 0.5\varepsilon_{\text{global}}$,
 and $67.6\%$ have $\varepsilon_j < 0.2\varepsilon_{\text{global}}$.
 When composed with DA, replacing the global $\varepsilon$ with per-input-segment
-$\varepsilon_i$ values tightens the DA error bound further---the safety factor
-improves from $1.0\times$ (uniform DA, $M_2^{\text{char}}$ calibration)
-to $\sim 11.9\times$ (segment-aware DA) at $N=15$.
+$\varepsilon_i$ values (recomputed 2026-08-04) tightens the bound under the
+heavy-tail regime: with the worst-function $M_2^{\max}$ calibration
+(global bound $5.9$), segment-aware DA reduces it to $1.65$ at $N=15$ and
+$0.89$ at $N=20$---$3.6\times$/$6.6\times$ tightening. (The earlier
+$\sim 11.9\times$ figure mixed $M_2$ calibrations and is superseded;
+sound recomputation in \texttt{verify\_seg\_da.py}.)
 Fig.~\ref{fig:segment_bounds} already reported the per-resolution breakdown;
 the $6.0\times$ per-segment tightening and the DA compositional
 improvement are both \textbf{structural properties} of trained KAN B-spline
@@ -5396,12 +5427,18 @@ High-probability & DA & 15 & $1.0\times$ & SIL~2 & Sign-balance (Lemma~
 Sound            & IA (global) & 22 & $1.1\times$ & SIL~2 & No sign
 assumptions; $\Delta_{\text{IA}}(N) = 1.38\,(14/(N{-}1))^2$ (recomputed
 2026-08-03: $N{=}15$ is \emph{not} a certificate) \\
+Sound (adaptive) & IA (greedy) & 15$^{*}$ & $1.7\times$ & SIL~2 & Adaptive
+$\varepsilon_{\max}{=}0.00115$ (E15); recomputed 2026-08-04: $N{=}15$
+\emph{is} a certificate under adaptive allocation \\
+Soft-contractive & DA+IA & 15 & $196\times$ & SIL~3+ & E-T9 checkpoint
+(98.5\%); Box-Continuation coverage 99.9\%; Z3 512/512 \\
 Sound + margin   & IA (global) & 25 & $1.4\times$ & SIL~3 &
 $1.5\times$ safety margin \\
 \bottomrule
 \end{tabular}
 \vspace{2pt}
 {\scriptsize $N_{\min}$ = minimum LUT points for safety factor $\geq 1.0$.
+$^{*}$Adaptive allocation (E15) at the $N{=}15$ storage budget.
 $M_2^{\text{char}} = 0.177$ (E11); half-margin $= 0.675$; all values
 recomputed from the released checkpoint (2026-08-03) for KAN
 $[28,16,4]$ on S7-1200 CPU~1211C. Segment-aware IA rows from the

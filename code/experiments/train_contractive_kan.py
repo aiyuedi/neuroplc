@@ -13,6 +13,7 @@ Output: results/student/kan_contractive.pt + results/theory/contractive.json
 Run: python experiments/train_contractive_kan.py
 """
 
+import argparse
 import json
 import os
 import sys
@@ -99,6 +100,19 @@ def project_contractive(model, target):
 
 
 def main():
+    ap = argparse.ArgumentParser(description="contractive KAN training (v2)")
+    ap.add_argument("--gamma-target", type=float, default=GAMMA_TARGET)
+    ap.add_argument("--epochs", type=int, default=EPOCHS)
+    ap.add_argument("--gamma-lambda", type=float, default=GAMMA_LAMBDA)
+    ap.add_argument("--w-bound", type=float, default=0.0,
+                    help="clip |spline_weight| <= w-bound (bounded-amplitude basis, "
+                         "v2: unlocks gamma<1; 0 disables)")
+    ap.add_argument("--out", type=str, default="kan_contractive_v2.pt")
+    args = ap.parse_args()
+    gamma_target = args.gamma_target
+    n_epochs = args.epochs
+    gamma_lambda = args.gamma_lambda
+
     torch.manual_seed(SEED)
     np.random.seed(SEED)
     Xt, yt, Xv, yv, Xte, yte = load_data()
@@ -112,7 +126,7 @@ def main():
     best_val, best_sd, bad, n = -1.0, None, 0, len(Xt)
 
     gamma_history = []
-    for ep in range(EPOCHS):
+    for ep in range(n_epochs):
         m.train()
         perm = rng.permutation(n)
         for b in range(0, n, BATCH):
@@ -123,13 +137,18 @@ def main():
             # (a) soft gamma penalty
             with torch.no_grad():
                 g = measure_gamma(m)
-            pen = sum(max(0.0, gi - GAMMA_TARGET) ** 2 for gi in g)
-            loss = loss + GAMMA_LAMBDA * pen
+            pen = sum(max(0.0, gi - gamma_target) ** 2 for gi in g)
+            loss = loss + gamma_lambda * pen
             loss.backward()
             opt.step()
-            # (b) hard projection cadence
+            # (b) bounded-amplitude basis (v2): clip spline control points
+            if args.w_bound > 0:
+                with torch.no_grad():
+                    for layer in m.kan_layers:
+                        layer.spline_weight.data.clamp_(-args.w_bound, args.w_bound)
+            # (c) hard projection cadence
             if (b // BATCH) % PROJ_EVERY == 0:
-                project_contractive(m, GAMMA_TARGET)
+                project_contractive(m, gamma_target)
         sched.step()
         m.eval()
         with torch.no_grad():
@@ -144,7 +163,7 @@ def main():
             bad += 1
         if bad >= 20:
             break
-        if ep % 5 == 0 or ep == EPOCHS - 1:
+        if ep % 5 == 0 or ep == n_epochs - 1:
             print(f"ep {ep}: val {va:.4f} gamma {[round(x, 3) for x in g]}",
                   flush=True)
 
@@ -155,10 +174,11 @@ def main():
                      torch.from_numpy(yte)).float().mean())
     g_final = measure_gamma(m)
 
-    out_model = OUT / "kan_contractive.pt"
+    out_model = OUT / args.out
     torch.save(best_sd, out_model)
     res = {"date": "2026-08-04", "script": "train_contractive_kan.py",
-           "gamma_target": GAMMA_TARGET,
+           "gamma_target": gamma_target, "epochs": n_epochs,
+           "gamma_lambda": gamma_lambda, "w_bound": args.w_bound,
            "gamma_measured": [round(x, 4) for x in g_final],
            "gamma_history_last": [round(x, 4) for x in gamma_history[-1]],
            "test_acc": float(acc), "best_val": float(best_val),

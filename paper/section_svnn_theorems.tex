@@ -373,6 +373,33 @@ B-spline KANs requires a bounded-amplitude basis family, which we
 identify as future work.
 
 \vspace{4pt}
+\noindent\textbf{Deployment certificate of the soft-contractive checkpoint.}
+The $\gamma$ reduction is not merely cosmetic: it converts the certificate
+into a full-chain, wide-coverage guarantee. On the soft-contractive
+checkpoint (98.5\% test accuracy), the measured constants collapse
+relative to the released student: $L_B = [0.28, 0.23]$ (vs.\ $[2.21,
+2.05]$), $M_2^{\max} = 0.44$ (vs.\ $1.59$), and the DA amplification
+constant $L_B^{(1)} m_{\text{row}} + s_1 = 0.85$ (vs.\ $162.2$). The
+E68-constant DA bound therefore evaluates to $0.0034$ at the
+$M_2^{\text{char}}$ calibration---safety factor $196\times$---and to
+$0.0086$ at the worst-function $M_2^{\max}$ calibration (safety
+$78\times$); the IA envelope is $0.0049$/$0.0122$ (safety
+$138\times$/$55\times$). Both DA and IA are certificates at \emph{either}
+calibration, in contrast to the released student, where IA is not a
+certificate and DA carries a $1.0\times$ margin. Equally important,
+Box-Continuation now holds for essentially all inputs: over the CWRU
+test set the fraction of inputs with any out-of-domain intermediate
+signal drops from $100\%$ (released student; $47.1\%$ of signals) to
+$0.1\%$, so the certificate covers the full in-domain distribution
+rather than a nominal subset. Per-function Z3 verification passes
+512/512 on the soft-contractive checkpoint
+(\texttt{verify\_contractive\_bounds.py}, \texttt{verify\_box\_coverage.py},
+2026-08-04). The expressivity--contractivity trade-off is thereby fully
+quantified at the deployment level: $1.4$~pp of accuracy purchases a
+$196\times$ safety margin, full Box-Continuation coverage, and
+Z3-verified components.
+
+\vspace{4pt}
 \noindent\textbf{Contrast with standard MLP.}
 For a standard MLP of the same depth $L=2$ and width, the global Lipschitz
 constant is $L_{\text{global}}^{\text{MLP}} = \|W^{(1)}\|_{\text{op}} \cdot

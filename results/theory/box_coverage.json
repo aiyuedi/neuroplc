@@ -1,0 +1,35 @@
+{
+  "date": "2026-08-04",
+  "n": 13714,
+  "layer1_range": [
+    -24.25872802734375,
+    25.432113647460938
+  ],
+  "box_violation_pct_L3": 1.0,
+  "rows": [
+    {
+      "L": 3.0,
+      "coverage": 0.0,
+      "N_eps_preserving": 15,
+      "uncovered": 1.0
+    },
+    {
+      "L": 4.0,
+      "coverage": 0.01990666472218171,
+      "N_eps_preserving": 20,
+      "uncovered": 0.9800933352778183
+    },
+    {
+      "L": 5.0,
+      "coverage": 0.08553303193816537,
+      "N_eps_preserving": 25,
+      "uncovered": 0.9144669680618346
+    },
+    {
+      "L": 6.0,
+      "coverage": 0.15451363570074378,
+      "N_eps_preserving": 29,
+      "uncovered": 0.8454863642992563
+    }
+  ]
+}

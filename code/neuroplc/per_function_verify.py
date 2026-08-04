@@ -220,19 +220,26 @@ def compute_true_spline(x_vals: np.ndarray, coeffs: np.ndarray,
 
 def estimate_m2(coeffs: np.ndarray, grid: np.ndarray) -> float:
     """
-    Estimate max |f''(x)| for a B-spline from its coefficients.
+    Exact max |f''(x)| for a cubic B-spline.
 
-    Uses finite differences on control points, which for cubic B-splines
-    gives a close approximation to the true second derivative bound.
+    A cubic B-spline's second derivative is piecewise linear, so
+    max |f''| on each knot interval occurs at an endpoint; sampling
+    knots plus midpoints (catching any interior sign flip) with a
+    1.2x safety factor gives an exact-up-to-sampling bound.
+    (2026-08-04 audit: the previous control-point-difference estimate
+    under-bounded M2 for some functions, failing 13/512 on the
+    soft-contractive model; scipy BSpline derivative is exact here.)
     """
+    from scipy.interpolate import BSpline
+
     n_ctrl = len(coeffs)
-    h = float(grid[1] - grid[0])
-
     if n_ctrl < 4:
-        return float(np.max(np.abs(coeffs))) * 2.0 / max(h * h, 1e-10)
+        return float(np.max(np.abs(coeffs))) * 2.0 / max(grid[1] - grid[0], 1e-10) ** 2
 
-    d2 = np.diff(coeffs[:n_ctrl], n=2) / (h * h)
-    return float(np.max(np.abs(d2))) * 1.2  # 1.2x safety factor
+    bs = BSpline(grid, coeffs, k=3, extrapolate=True)
+    d2 = bs.derivative(2)
+    xs = np.concatenate([grid, 0.5 * (grid[:-1] + grid[1:])])
+    return float(np.abs(d2(xs)).max()) * 1.2  # 1.2x safety factor
 
 
 # ============================================================================
