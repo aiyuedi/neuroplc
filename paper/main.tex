@@ -4024,6 +4024,12 @@ E6 empirical MaxAE        & 15 & Per-sample max (not a bound)      & 3.65  & ---
 $x$, uses $\sum|W_{k,j}W_{j,i}|$; exceeds the half-margin $0.675$, so it
 is not a classification certificate for this checkpoint
 (\texttt{verify\_da\_bounds\_recomputed.py}, 2026-08-03).
+All released-student rows use the E11 $M_2^{\text{char}} = 0.177$
+calibration (500-pt float32); the full-$\varphi$ float64 recalibration
+(2026-08-04, \texttt{verify\_sound\_chain.py}) gives expected/worst
+envelopes 1.70/7.78 (safety $0.4\times$/$0.1\times$)---the design-time
+certificate does not exist for this checkpoint, and its measured maxAE
+($0.52$) is a lucky $15\times$ below the worst envelope.
 \textbf{DA bound} (0.66): high-probability under the random-sign model
 (Lemma~\ref{lem:da_moment}), uses $|\sum W_{k,j}W_{j,i}|$; certifies
 classification at the $M_2^{\text{char}}$ calibration with thin margin
