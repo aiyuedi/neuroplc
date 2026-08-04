@@ -1288,8 +1288,9 @@ results.
     margin (ratio of the per-function margin to $\max M_2 \cdot h^2/8$).
     WaveletKAN's wide margin reflects M2-regularized training ($\lambda=0.01$).
     FourierKAN's M$_2$ is bounded by $\omega^2 \sum k^2(|c_k|+|d_k|)$ (Proposition~\ref{prop:c2bv-family}(c)).
-    Safety margins $\geq 2\times$ confirm deployability
-    for all $C^2$-BV architectures.}
+    Margins differ across architectures (ChebyKAN lowest under its
+    conservative Markov $M_2$ bound, E54); per-architecture deployability
+    is reported in Table~\ref{tab:cross_domain}.}
     \label{fig:c2bv_verification}
 \end{figure*}
 

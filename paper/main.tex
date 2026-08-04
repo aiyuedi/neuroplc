@@ -192,10 +192,12 @@ IEC~61131-3 variant, and the runtime hot-swap protocol maintains the
 certified safety state across model updates. Deployment-level
 certificates close the loop: adaptive LUT allocation lifts the DA safety
 factor to $3.6\times$ at unchanged storage, and soft-contractive training
-to an $11.6\times$ \emph{sound} (no-cancellation, measured-floor) /
-$493\times$ expected certificate with $99.9\%$ Box-Continuation coverage,
-Z3-verified components, and depth extension to $L=3$ ($6.1\times$);
-the sound bound (0.058) is tight against the measured maxAE (0.053). Four $C^2$-BV architectures
+to a first-principles \emph{sound} certificate of $2.34\times$ (pure
+propagation, no empirical floor; IEEE-754 $\delta_{\text{fp32}} \lesssim
+3\times10^{-5}$) / $493\times$ expected, with an empirically validated
+$11.6\times$ float32 tier (measured floor $0.058$ vs.\ measured maxAE
+$0.053$) and $99.9\%$ Box-Continuation coverage,
+Z3-verified components, and depth extension to $L=3$ ($6.1\times$). Four $C^2$-BV architectures
 (B-spline, Chebyshev, Fourier, Wavelet) and three datasets (CWRU, XJTU-SY,
 Paderborn) validate the framework, with MNIST as a fourth dataset (E42);
 RBF-KAN remains theoretical. The theory answers not ``can we compile neural networks to
@@ -1304,16 +1306,19 @@ the worst-case logit perturbation at 15 LUT points is:
 The interval-arithmetic envelope ($1.38$, recomputed from the released
 checkpoint 2026-08-03) exceeds the half-margin $1.35/2 = 0.675$: the IA
 bound is sound but is \emph{not} a classification certificate for this
-checkpoint. The DA bound ($0.66$, {\S}\ref{sec:da}) provides the
-certificate, with a safety factor of $1.0\times$ at the
-$M_2^{\text{char}}$ calibration (per-logit-element, in-domain; the
-worst-function $M_2^{\max}$ calibration pushes the bound above the
-half-margin, {\S}\ref{sec:limitations}): classification correctness is
-mathematically guaranteed under the LUT error distribution \emph{within
-the Box-Continuation domain}, albeit with a thin margin (restorable to
-$3.6\times$ via adaptive allocation, {\S}\ref{sec:adaptive-lut}, or to
-$11.6\times$ (sound) / $493\times$ (expected) via soft-contractive
-training, E-T9).
+checkpoint. The DA bound ($0.66$, {\S}\ref{sec:da}) provides an
+\emph{expected-tier} (high-probability, random-sign) certificate with a
+safety factor of $1.0\times$ at the $M_2^{\text{char}}$ calibration
+(per-logit-element, in-domain; the worst-function $M_2^{\max}$
+calibration pushes the bound above the half-margin,
+{\S}\ref{sec:limitations}): classification correctness holds with
+high probability under the LUT error distribution \emph{within the
+Box-Continuation domain}, but no \emph{sound} certificate exists for
+this checkpoint (the full-$\varphi$ float64 recalibration gives $1.70$,
+safety $0.4\times$). The margin is restorable to $3.6\times$ via
+adaptive allocation, {\S}\ref{sec:adaptive-lut}, or to $2.34\times$
+(sound) / $11.6\times$ (validated) / $493\times$ (expected) via
+soft-contractive training, E-T9.
 
 \subsubsection{Sign-Structural Affine Arithmetic: Tighter Bounds via Correlation Tracking}
 \label{sec:da}
@@ -2028,7 +2033,8 @@ $M_2^{\text{char}} h^2/8 = 0.00406$) the bound
 exceeds the half-margin. Two deployment recipes restore a comfortable
 margin at unchanged storage: adaptive LUT allocation (E15,
 {\S}\ref{sec:adaptive-lut}) lifts the DA safety factor to $3.6\times$,
-and soft-contractive training (E-T9) to $11.6\times$ (sound) with full
+and soft-contractive training (E-T9) to $2.34\times$ (first-principles
+sound) / $11.6\times$ (validated) with full
 Box-Continuation coverage---both implemented and verified
 (2026-08-04).
 
@@ -3586,7 +3592,8 @@ All 2--4 layer KANs remain within S7-1200 budget.}
 
 \begin{table}[t]
 \centering
-\caption{Scalability: Grid Resolution (KAN $[28,16,4]$, S7-1200)}
+\caption{Scalability: Grid Resolution (KAN $[28,16,4]$, S7-1200; DA bounds at
+the E11 $M_2^{\text{char}}$ network-level recalibration, anchored at $G{=}15$)}
 \label{tab:scalability_grid}
 \small
 \footnotesize
@@ -3595,17 +3602,22 @@ All 2--4 layer KANs remain within S7-1200 budget.}
 \textbf{$G$} & \textbf{Memory} & \textbf{Operations} &
   \textbf{WCET} & \textbf{DA Bound} & \textbf{Safety Factor} \\
 \midrule
-4  & 11\,KB & 4,518  & 2,948\,$\mu$s & 0.4683  & 27$\times$ \\
-8  & 19\,KB & 4,562  & 3,050\,$\mu$s & 0.0860  & 146$\times$ \\
-12 & 27\,KB & 4,606  & 3,151\,$\mu$s & 0.0348  & 361$\times$ \\
-15 & 33\,KB & 4,606  & 3,151\,$\mu$s & 0.0215  & 584$\times$ \\
-20 & 43\,KB & 4,650  & 3,252\,$\mu$s & 0.0117  & 1{,}076$\times$ \\
+4  & 11\,KB & 4,518  & 2,948\,$\mu$s & 14.4  & $<1$ \\
+8  & 19\,KB & 4,562  & 3,050\,$\mu$s & 2.64  & $<1$ \\
+12 & 27\,KB & 4,606  & 3,151\,$\mu$s & 1.07  & $<1$ \\
+15 & 33\,KB & 4,606  & 3,151\,$\mu$s & 0.66  & 1.0$\times$ \\
+20 & 43\,KB & 4,650  & 3,252\,$\mu$s & 0.36  & 1.9$\times$ \\
 \bottomrule
 \end{tabular}
 \vspace{2pt}
-{\scriptsize DA bound $\propto 1/G^2$ (Theorem~1). WCET scales as $O(\log G)$ (binary search).
-Increasing $G$ from 4 to 20 improves the safety factor by 40$\times$ at only $+10\%$ WCET cost.
-The precision--safety tradeoff is strongly asymmetric in favor of higher $G$.}
+{\scriptsize DA bound scales as $\Delta(G) = \Delta(15)\,(h_G/h_{15})^2$ with
+$h_G = 6/(G-1)$ (Theorem~1, $\Delta \propto h^2/8$), anchored at the
+recalibrated $\Delta(15) = 0.66$ (Table~\ref{tab:compositional}); WCET
+scales as $O(\log G)$ (binary search). Only $G \geq 15$ yields a
+classification certificate for the released checkpoint---raising $G$ is
+the cheap axis of the precision--certificate trade-off ($+10\%$ WCET
+from $G{=}15$ to $G{=}20$; soft-contractive training is the orthogonal
+axis, E-T9).}
 \end{table}
 
 \vspace{4pt}
@@ -3982,7 +3994,8 @@ through the nested summation (Eq.~\ref{eq:da_bound}), yielding a
 vs.\ 1.38; margin 1.35, E6). The resulting DA safety factor of $1.0\times$
 at 15~points certifies classification with a thin margin; adaptive
 allocation (E15, {\S}\ref{sec:adaptive-lut}) lifts this to $3.6\times$,
-and soft-contractive training (E-T9) to $11.6\times$ (sound).
+and soft-contractive training (E-T9) to $2.34\times$ (sound) /
+$11.6\times$ (validated).
 
 \vspace{4pt}
 \noindent\textbf{DA Bound Summary.}
@@ -4012,13 +4025,14 @@ E16 Seg-DA$^{\dag}$       & 20 & DA $+$ Segment-Aware, $M_2^{\max}$ & 0.89  & $0
 E40 compositional & 15 & DA network-level (Tier~3)                 & 0.66   & $1.0\times$ \\
 Adaptive-DA (E15) & 15$^{*}$ & DA, greedy adaptive $\varepsilon$    & 0.19   & $3.6\times$ \\
 Adaptive-IA (E15) & 15$^{*}$ & IA, greedy adaptive $\varepsilon$    & 0.39   & $1.7\times$ \\
-Soft-contractive expected (E-T9) & 15 & DA, $M_2^{\text{char}}$ & 0.0014 & $493\times^{\ddag}$ \\
-Soft-contractive theory (E-T9) & 15 & first-principles propag. & 0.288 & $2.34\times$ \\
-Soft-contractive float64 (E-T9) & 15 & float64 deploy., floored & 0.026 & $26\times$ \\
-Soft-contractive sound (E-T9) & 15 & float32 deploy., floored & 0.058 & $11.6\times$ \\
-FourierKAN sound (E-T10) & 15 & bounded-amp.\ basis, floored & 0.138 & $4.9\times$ \\
-WaveletKAN sound (E-T11) & 15 & bounded-amp.\ basis, floored & 0.237 & $2.8\times$ \\
-E6 empirical MaxAE        & 15 & Per-sample max (not a bound)      & 3.65  & --- \\
+Soft-contractive expected (E-T9) & 15 & DA, $M_2^{\text{char}}$ & 0.00137 & $493\times^{\ddag}$ \\
+Soft-contractive worst (E-T9) & 15 & DA, $M_2^{\max}$ & 0.039 & $17.5\times^{\natural}$ \\
+Soft-contractive sound (E-T9) & 15 & first-principles propag. & 0.288 & $2.34\times$ \\
+Soft-contractive validated (E-T9) & 15 & float64 deploy., floor${\times}1.1$ & 0.026 & $26\times$ \\
+Soft-contractive validated (E-T9) & 15 & float32 deploy., floor${\times}1.1$ & 0.058 & $11.6\times$ \\
+FourierKAN validated (E-T10) & 15 & bounded-amp.\ basis, floor${\times}1.1$ & 0.138 & $4.9\times$ \\
+WaveletKAN sound (E-T11) & 15 & bounded-amp.\ basis, first-principles & 0.237 & $2.8\times$ \\
+E6 empirical MaxAE        & 15 & Per-sample max, OOD-incl.\ (not a bound) & 3.65 & --- \\
 \bottomrule
 \end{tabular}
 \vspace{2pt}
@@ -4030,15 +4044,24 @@ is not a classification certificate for this checkpoint
 All released-student rows use the E11 $M_2^{\text{char}} = 0.177$
 calibration (500-pt float32); the full-$\varphi$ float64 recalibration
 (2026-08-04, \texttt{verify\_sound\_chain.py}) gives expected/worst
-envelopes 1.70/2.29 (safety $0.4\times$/$0.3\times$)---the design-time
-certificate does not exist for this checkpoint, and its measured maxAE
-($0.52$) is a lucky $4.4\times$ below the theoretical envelope.
-\textbf{DA bound} (0.66): high-probability under the random-sign model
-(Lemma~\ref{lem:da_moment}), uses $|\sum W_{k,j}W_{j,i}|$; certifies
-classification at the $M_2^{\text{char}}$ calibration with thin margin
-($1.0\times$; see the adaptive and soft-contractive rows below).
+envelopes 1.70/2.29 (safety $0.4\times$/$0.3\times$)---no \emph{sound}
+certificate exists for this checkpoint, and its measured maxAE ($0.52$)
+is a lucky $4.4\times$ below the theoretical envelope.
+\textbf{DA bound} (0.66): \emph{expected-tier} (high-probability,
+random-sign, Lemma~\ref{lem:da_moment}), uses $|\sum W_{k,j}W_{j,i}|$;
+certifies classification in the expected sense at the
+$M_2^{\text{char}}$ calibration with thin margin ($1.0\times$; see the
+adaptive and soft-contractive rows below). \textbf{Validated rows}
+(0.058/0.026/0.138): measured-floor bounds ($\times 1.1$ margin over the
+full-set Tier-4 maxAE on 13{,}714 inputs); they certify those inputs
+empirically---the first-principles envelopes are the \emph{sound}
+numbers (0.288/2.34$\times$; WaveletKAN 0.237 first-principles covers
+its measured 0.157, so no floor is needed there).
 \textbf{DA, $M_2^{\max}$} (5.9): worst-function $M_2=1.586$ replaces the
 characteristic value---conservative, exceeds the half-margin.
+$^{\natural}$\textbf{Soft-contractive worst} (0.039/$17.5\times$):
+worst-function ($M_2^{\max}$) envelope, per-function independent---the
+float32 validated bound is $\max(0.039, 0.053\times1.1) = 0.058$.
 $^{\dag}$\textbf{Seg-DA} (1.65/0.89): per-input segment errors under the
 worst-function $M_2^{\max}$ calibration (global DA $5.9$): a
 $3.6\times$/$6.6\times$ tightening (recomputed 2026-08-04,
@@ -4048,7 +4071,8 @@ the recomputed network-level DA ($0.66$, 2026-08-04; cf.\
 Table~\ref{tab:compositional}).
 \textbf{MaxAE} (3.65): empirical maximum absolute logit error across
 2,743 test samples---includes out-of-domain activations (E68), not a
-certified bound. In-domain certified values are the recomputed rows
+certified bound; the in-domain Tier-4 full-set maxAE is $0.52$
+(E52, 2026-08-04). In-domain certified values are the recomputed rows
 above; the empirical MaxAE reflects worst-sample behavior without the
 aggregation-safe assumption of independent error signs.
 \textbf{Adaptive rows} (0.19/0.39): greedy allocation (E15,
@@ -4236,7 +4260,7 @@ misclassifications the test set missed.}
 8  & 99.93\% & 2.64  & 0.26$\times$ & \textbf{YES} & 64/20,000 \\
 10 & 99.93\% & 1.60  & 0.42$\times$ & \textbf{YES} & 54/20,000 \\
 12 & 99.93\% & 1.07  & 0.63$\times$ & \textbf{YES} & 43/20,000 \\
-15 & 99.93\% & 0.66  & 1.02$\times$ & No$^{\dag}$ & 37/20,000 \\
+15 & 99.93\% & 0.66  & 1.0$\times$ & No$^{\dag}$ & 37/20,000 \\
 \bottomrule
 \end{tabular}
 \vspace{2pt}
@@ -4399,10 +4423,11 @@ E20& Motor Load Regression   & RMSE                & 0.011; zero code change \\
 E52& Verification Blind Spot & $N{=}4{\to}15$ safety scan & Acc.\ 99.93\% but safety $<$1 at $N{\le}7$; 225 flips \\
 E54& ChebyKAN Z3 Verif.     & Per-func.\ Z3 NRA   & \textbf{496/512 (96.9\%)}, Prop.~\ref{prop:chebykan-svnn} \\
 E55& XJTU-SY FT + SCL       & 100-ep FT + S7-1200 & \textbf{91.7\%}, 512/512 Z3, 0e 0w SCL \\
-E56& Deep KAN ($L{=}3$)       & [28,16,8,4] 120ep & \textbf{99.60\%}, 608/608 Z3, DA 5.66, sub-exp. depth; E-T9-3L: \textbf{98.6\%}, sound cert.\ $6.1\times$ \\
+E56& Deep KAN ($L{=}3$)       & [28,16,8,4] 120ep & \textbf{99.60\%}, 608/608 Z3, DA 5.66, sub-exp. depth; E-T9-3L: \textbf{98.6\%}, validated cert.\ $6.1\times$ \\
 E57& CROWN vs.\ NeuroPLC     & KAN[28,16,4] DA/IBP & \textbf{DA substantially tighter}, CROWN=IBP for KAN \\
-E60& FourierKAN SVNN           & [28,16,4] $K{=}6$, CWRU & \textbf{100\% acc}, 512/512 Z3, 2185-line SCL \\
-E61& WaveletKAN SVNN           & [28,16,4] $S{=}8$, M2-reg & \textbf{100\% acc}, 512/512 Z3, 2185-line SCL \\
+E58& Per-Func.\ M$_2$ / Z3    & M$_2$ proxy, Z3 NRA & mean 0.017, max 0.041; Z3 512/512 \\
+E60& FourierKAN SVNN           & [28,16,4] $K{=}6$, CWRU & \textbf{100\% acc}, 512/512 Z3, 2184-line SCL \\
+E61& WaveletKAN SVNN           & [28,16,4] $S{=}8$, M2-reg & \textbf{100\% acc}, 512/512 Z3, 2184-line SCL \\
 E62& XJTU-SY Cross-Arch.       & FT Fourier/WaveletKAN & \textbf{100\% acc}, 512/512 Z3 preserved \\
 E53& Sound In-Domain Worst-Case & Real LUT, in-domain search & IA-sound certifies $N{\ge}20$; high-prob.\ DA at all $N$ \\
 E63& Sharp k-th Order LUT Bounds & $k{=}2..5$, extremal family & \textbf{extremal ratio $=$ 1.000000}; soundness $\leq 1$ \\
@@ -4767,8 +4792,8 @@ The result is consistent with the depth-dependent (non-convergent) form:
     \item \textbf{DA error bound:} the 3-layer DA chain measures
           $5.66$ (E68-constant recomputation, 2026-08-04; the earlier
           $1.90$ used the pre-audit $L_B = 0.65$)---below the full
-          per-layer amplification envelope $\gamma^{2} = 28.1$ that
-          would apply at $L = 3$ under worst-case amplification,
+          per-layer amplification envelope $\gamma^{L-1} = 15.4^2 = 237$
+          that would apply at $L = 3$ under worst-case amplification,
           consistent with \emph{sub-exponential} depth scaling, not the
           exponential blowup expected for non-SVNN architectures (where
           $O(2^L)$ growth arises from wrapping effects).
@@ -5176,15 +5201,15 @@ architecture (Proposition~\ref{prop:chebykan-svnn}).}
 \begin{tabular}{@{}lcccccc@{}}
 \toprule
 \textbf{Metric} & \textbf{MNIST} & \textbf{CWRU} & \textbf{XJTU-SY} & \textbf{ChebyKAN} & \textbf{FourierKAN} & \textbf{WaveletKAN} \\
- & \textbf{(Image)} & \textbf{(Vib.)} & \textbf{(Nat.Wear)} & \textbf{(Poly.)} & \textbf{(E60)} & \textbf{(E61)} \\
+ & \textbf{(Image)} & \textbf{(Vib.)} & \textbf{(Nat.Wear)} & \textbf{(Poly.)} & \textbf{(E-T10)} & \textbf{(E-T11)} \\
 \midrule
- Accuracy & 0.9859$^{\sharp}$ & 0.9993 & 0.9172$^{*}$ & 1.0000 & \textbf{1.0000} & \textbf{1.0000} \\
- Training & Scratch & KD (VRM) & FT 100ep & Scratch & FT 20ep$^{\S}$ & FT 20ep$^{\S}$ \\
+ Accuracy & 0.9859$^{\sharp}$ & 0.9993 & 0.9172$^{*}$ & 1.0000 & \textbf{0.9996} & \textbf{0.9967} \\
+ Training & Scratch & KD (VRM) & FT 100ep & Scratch & C2-BV contr.\ FT$^{\S}$ & C2-BV contr.\ FT$^{\S}$ \\
 \midrule
  Per-func.\ verified & 512/512 & 512/512 & 512/512 & 496/512 & \textbf{512/512} & \textbf{512/512} \\
- M$_2$ max & — & 1.586 & — & 5.4$\times$ M$_2$ & 2.298 & 1.781 \\
- Safety margin & — & 4.5$\times$ & — & 1.1$\times$ & \textbf{2.9$\times$} & \textbf{5.6$\times$} \\
- SVNN Cond.~3 & Yes & Yes & Yes & Yes & Yes & Yes \\
+ M$_2$ max & — & 1.586 & — & 5.4$\times$ M$_2$ & 1.324 & 4.312 \\
+ Safety margin & — & 1.0$\times^{**}$ & — & 1.1$\times$ & \textbf{4.9$\times^{\S\S}$} & \textbf{2.8$\times^{\S\S}$} \\
+ SVNN Cond.~3 & — & No & No & — & No & No \\
  SCL compiled & 0e 0w & 0e 0w & 0e 0w & 0e 0w$^{\ddag}$ & \textbf{0e 0w} & \textbf{0e 0w} \\
 \bottomrule
 \end{tabular}
@@ -5192,10 +5217,13 @@ architecture (Proposition~\ref{prop:chebykan-svnn}).}
 {\scriptsize
 $^{\sharp}$MNIST digits 0--3, PCA(784$\to$28) + z-score, scratch training, 512/512 verified, DA~0.1199 (E42).
 $^{*}$Fine-tuned 100 epochs from CWRU checkpoint (E55).
-$^{\S}$Fine-tuned 20 epochs from CWRU pre-training with M2 regularization ($\lambda{=}0.01$, E60--E61).
+$^{\S}$Bounded-amplitude basis with soft-contractive projection (E-T10/E-T11).
+$^{**}$CWRU column is the released checkpoint: \emph{expected-tier} 1.0$\times$ (E11 $M_2^{\text{char}}$ calibration); no sound certificate ($\gamma=[15.4,5.3]>1$, E68).
+$^{\S\S}$E-T10/E-T11 certificates: FourierKAN validated floor bound 0.138 (first-principles 0.110 does not cover the full-set measured 0.126, which includes 2.7\% out-of-domain inputs); WaveletKAN first-principles sound 0.237 (covers measured 0.157).
 $^{\ddag}$ChebyKAN uses Markov-based global $M_2$ bounds, 5.4$\times$ looser than empirical (E54).
 FourierKAN M$_2$ from $\omega^2\sum k^2(|c_k|+|d_k|)$; WaveletKAN M$_2$ from $\max_s|c_s|/a_s^2 \cdot 2.602$.
-All $C^2$-BV architectures 100\% Z3-equivalent verified post fine-tuning (E62).}
+All $C^2$-BV architectures 100\% Z3-equivalent verified post fine-tuning (E62).
+SVNN Cond.~3 (per-layer $\gamma<1$) is a \emph{training} property, not a pipeline property: unsatisfied by the released checkpoint and by E-T10/E-T11 (second-layer $\gamma>1$); MNIST (E42) and ChebyKAN (E54) were not measured. This table documents \emph{pipeline} generality (compiler/verification domain-independence); contraction is established by the soft-contractive recipe (E-T9--E-T11).}
 \end{table*}
 
 The verification results (Table~\ref{tab:cross_domain}) converge across domains because the
@@ -5342,7 +5370,7 @@ cannot compile the code due to Siemens-specific syntax requirements (2D
 ARRAY initialization, INT/REAL type constraints in binary search) that
 the LLM was unaware of. In contrast, NeuroPLC embeds all 6,148 trained
 parameters as IEEE~754 REAL literals via a mechanical, auditable extraction
-process, producing 2,187 lines of SCL that compiles with 0 errors and 0
+process, producing 2,188 lines of SCL that compiles with 0 errors and 0
 warnings. More fundamentally: (1)~LLM output is stochastic---sampling from a
 token distribution---violating the determinism required by IEC~61508;
 (2)~current LLMs do not provide the mathematical correctness guarantees required for safety-critical compilation (Theorem~1,
@@ -5489,11 +5517,11 @@ assumptions; $\Delta_{\text{IA}}(N) = 1.38\,(14/(N{-}1))^2$ (recomputed
 Sound (adaptive) & IA (greedy) & 15$^{*}$ & $1.7\times$ & SIL~2 & Adaptive
 $\varepsilon_{\max}{=}0.00115$ (E15); recomputed 2026-08-04: $N{=}15$
 \emph{is} a certificate under adaptive allocation \\
-Soft-contractive & Sound IA & 15 & $11.6\times$ & SIL~3+ & E-T9 checkpoint
+Soft-contractive & Validated IA & 15 & $11.6\times$ & SIL~3+ & E-T9 checkpoint
 (98.5\%); Box-Continuation coverage 99.9\%; Z3 512/512;
-expected tier $493\times$ \\
+expected tier $493\times$; sound tier $2.34\times$ \\
 Sound + margin   & IA (global) & 25 & $1.4\times$ & SIL~3 &
-$1.5\times$ safety margin \\
+safety factor $0.675/0.470 = 1.44\times$ \\
 \bottomrule
 \end{tabular}
 \vspace{2pt}
@@ -5650,10 +5678,11 @@ compilable via LUT extraction. All generated SCL compiles to
 \textbf{0 errors, 0 warnings} in TIA Portal V21. The compiler auto-generates
 a companion safety monitor (Algorithm~3, $\leq 5\%$ overhead).
 Soft-contractive training (E-T9) converts the certificate from thin
-($1.0\times$) to sound ($11.6\times$, measured-floor bound $0.058$ vs.\
-measured maxAE $0.053$) with $99.9\%$ Box-Continuation coverage and depth
-extension to $L{=}3$ ($6.1\times$); adaptive allocation (E15) achieves
-$3.6\times$ at unchanged storage.
+($1.0\times$, expected) to sound ($2.34\times$, first-principles) with a
+validated float32 tier of $11.6\times$ (measured-floor bound $0.058$
+vs.\ measured maxAE $0.053$), $99.9\%$ Box-Continuation coverage, and
+depth extension to $L{=}3$ ($6.1\times$); adaptive allocation (E15)
+achieves $3.6\times$ at unchanged storage.
 
 \vspace{4pt}
 \noindent\textbf{Open directions.} Mechanized proof of the IR type soundness

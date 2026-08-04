@@ -1,12 +1,12 @@
-# NeuroPLC Figure List (TNNLS submission, v2 — 2026-08-04)
+# NeuroPLC Figure List (TNNLS submission, v3 — 2026-08-04)
 
-> v2 rewrite after pre-submission review (A5): the previous version listed 24 entries
-> (16 pointed at tables/algorithms); the manuscript contains **15 figure environments**.
+> v3 update after the certificate-panorama addition: the manuscript contains
+> **17 figure environments** (15 v2 figures + fig:capacity_plane + fig:cert_panorama).
 > All figure PDFs were regenerated 2026-08-03 22:31-22:32 (post-recomputation batch);
-> FIXME/TODO comments in the .tex sources are residuals and are being cleared.
-> All 15 figures are now referenced in the main text (references added 2026-08-04).
+> fig_cert_panorama generated 2026-08-04.
+> All 17 figures are referenced in the main text.
 
-## Figure environments (15)
+## Figure environments (17)
 
 | # | File (figures/final/) | Label | Caption (abridged) | Referenced |
 |---|----------------------|-------|--------------------|-----------|
@@ -37,8 +37,10 @@
 ## Notes
 
 - All figure captions use IEEE sentence-case style; figures are in `paper/figures/final/`.
-- Figure content (WCET 3.86 ms, safety ~1.0×, γ honest values) is from the
-  2026-08-03 22:31+ regeneration batch; fig1_overview no longer contains 22.67 ms.
-- The capacity section (Thm 17-19) has no figures yet; the (V_B, ε) plane figure
-  is a suggested addition before final submission (A5/A6).
-- Delete the 3 orphan files and re-verify the figure count (17) when packaging.
+- Figure content (WCET 3.86 ms, γ honest values) is from the 2026-08-03 22:31+
+  regeneration batch; fig1_overview no longer contains 22.67 ms.
+- fig_cert_panorama (E-T9 certificate panorama: tier ladder / accuracy-certificate
+  trade-off / curvature flattening) added 2026-08-04 with the two-tier certificate
+  system (theory 2.34× / calibrated 11.6× & 26×).
+- Delete the 3 orphan files (fig13/14/15) and re-verify the figure count (17)
+  when packaging.

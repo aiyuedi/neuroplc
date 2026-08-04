@@ -136,11 +136,11 @@ construction.
     \caption{\textbf{Sharp Necessity Bound: Per-Layer Error Amplification Gap.}
     Left: MLP with adversarial weight matrix $W = (1/\sqrt{d}) \cdot J_d$ (all-ones)
     achieves $\|W\|_{1,\infty} = \sqrt{d}$ exactly (solid red); the dashed blue
-    line is the illustrative contractive case $\gamma = 0.182$ used in earlier
-    versions---stale, since the trained student's measured per-layer
-    amplification is $\gamma = [15.4, 5.3] > 1$ (E68).
+    line marks the illustrative contractive case $\gamma = 0.182$, shown for
+    contrast against the trained student's measured per-layer amplification
+    $\gamma = [15.4, 5.3] > 1$ (E68).
     Right: per-layer amplification ratio $R(d) = \sqrt{d} / \gamma$ for widths
-    $d$ from 4 to 256 (computed for the same illustrative $\gamma$).
+    $d$ from 4 to 256 (the construction is sharp for any fixed $\gamma$).
     The all-ones construction is \textbf{sharp}:
     $\|W\|_{1,\infty} \leq \sqrt{d} \cdot \|W\|_F$ by Cauchy-Schwarz,
     with equality at rank-1 equal-magnitude matrices.

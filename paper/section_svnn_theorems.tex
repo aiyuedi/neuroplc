@@ -356,9 +356,10 @@ The non-contractive checkpoint raises a natural question: can
 Condition~3 be approached by training?  We trained KAN $[28,16,4]$ on
 CWRU with per-step numeric $\gamma$ projection (E68 semantics) and a
 soft $\gamma$ penalty.  The trained model achieves $98.5\%$ test
-accuracy with measured amplification $\gamma = [1.03, 1.38]$---an
-$11\times$/$3.8\times$ reduction from the released checkpoint's
-$[15.4, 5.3]$---at a $1.4$~pp accuracy cost
+accuracy with measured amplification $\gamma = [1.03, 1.38]$---a
+$15\times$/$3.8\times$ component-wise reduction from the released
+checkpoint's $[15.4, 5.3]$ ($15.4\to1.03$; $5.3\to1.38$)---at a $1.4$~pp
+accuracy cost
 (\texttt{train\_contractive\_kan.py}, four runs, $\gamma \to 1$
 monotonically as the target tightens).  Full contractivity
 ($\gamma < 1$) is not reached: the B-spline basis amplitude
@@ -372,17 +373,20 @@ contraction budget is an expression budget).  Full contractivity for
 B-spline KANs requires a bounded-amplitude basis family---and the
 $C^2$-BV family provides exactly that (FourierKAN, $|\sin/\cos| \leq 1$;
 WaveletKAN, bounded Mexican-hat). Training these bounded-amplitude bases
-with the same soft-$\gamma$ recipe (2026-08-04) attains sound
-certificates at essentially zero accuracy cost: FourierKAN
-($\gamma = [0.82, 1.68]$, $99.96\%$ test accuracy) carries a sound
-bound of $0.138$ (safety $4.9\times$, measured floor $0.126$;
-theoretical envelope $0.110$) with $97.3\%$ Box-Continuation coverage,
-and WaveletKAN ($\gamma = [0.92, 1.28]$, $99.67\%$) a sound bound of
-$0.237$ (safety $2.8\times$; measured $0.157$) with $100\%$ coverage
+with the same soft-$\gamma$ recipe (2026-08-04) attains certificates at
+essentially zero accuracy cost: FourierKAN
+($\gamma = [0.82, 1.68]$, $99.96\%$ test accuracy) carries a validated
+bound of $0.138$ (safety $4.9\times$, measured floor $0.126$; its
+first-principles envelope $0.110$ does not cover the full-set measured
+$0.126$, which includes $2.7\%$ out-of-domain inputs) with $97.3\%$
+Box-Continuation coverage, and WaveletKAN ($\gamma = [0.92, 1.28]$,
+$99.67\%$) a first-principles sound bound of $0.237$ (safety
+$2.8\times$; covers measured $0.157$) with $100\%$ coverage
 (\texttt{train\_c2bv\_contractive.py},
 \texttt{verify\_c2bv\_bound.py}). The accuracy cost of the certificate
 is $0.03$~pp (Fourier) and $0.26$~pp (Wavelet) versus the $1.4$~pp of
-the B-spline recipe: for bounded-amplitude bases the contraction budget
+the B-spline recipe, both against the same $99.93\%$ B-spline baseline
+(E1): for bounded-amplitude bases the contraction budget
 is nearly free, because the basis amplitude is an architectural constant
 rather than a learned quantity. The $\gamma \to 1$ branch of
 Theorem~\ref{thm:generalization} therefore holds across the $C^2$-BV
@@ -395,7 +399,10 @@ into a full-chain, wide-coverage guarantee. On the soft-contractive
 checkpoint (98.5\% test accuracy), the measured constants collapse
 relative to the released student: $L_B = [0.28, 0.23]$ (vs.\ $[2.21,
 2.05]$), the no-cancellation amplification constant $K = 1.2$
-(vs.\ $340$), and the $M_2$ profile is far lighter
+(vs.\ $340$; $K$ is the per-layer-Lipschitz form---the global-$L_B$ form
+of Thm.~\ref{thm:compiler} gives $L_{\text{net}}^{\text{IA}} = 171.1$
+for the released student; the two no-cancellation definitions differ in
+Lipschitz granularity), and the $M_2$ profile is far lighter
 ($M_2^{\text{char}} = 0.051$ vs.\ $0.218$, full-$\varphi$ float64
 methodology). The
 E68-constant bounds tighten accordingly: the expected-tier bound
@@ -403,31 +410,38 @@ evaluates to $0.0014$ at the $M_2^{\text{char}}$ calibration (safety
 $493\times$, high-probability in the random-sign sense of
 Lemma~\ref{lem:da_moment}); the worst-function envelope (full-$\varphi$
 $M_2^{\max}$, float64 ground truth) is $0.039$ (safety $17.5\times$).
-The \emph{sound} certificate is two-tiered and fully self-consistent.
-\textbf{Theoretical tier (first-principles, no empirical floor):} the
-no-cancellation propagation with the corrected layer semantics (layer-0
-LUT errors sum directly at the hidden nodes, $dy_j = \sum_i
-\varepsilon_{j,i}$; layer-1 amplification uses per-edge Lipschitz
-constants $L_{k,j}$, not a global bound) evaluates to $0.288$
-(safety $2.34\times$). This envelope strictly covers the float32
-deployment measurement ($0.053$ over 13{,}714 inputs, Tier-4 simulator;
-$5.4\times$ headroom), so the certificate does \emph{not} depend on an
-empirical floor; the IEEE-754 accumulation $\delta_{\text{fp32}}$ is
-bounded by the per-operation $0.5$~ulp rule propagated through the
-network ($\lesssim 3\times10^{-5}$ on the logit scale), a negligible
-addendum to the LUT envelope.
-\textbf{Calibrated tier (deployment default):} the measured-floor bound
-$0.058$ (safety $11.6\times$) for the float32 SCL backend, and $0.026$
+The certificate is two-tiered, the tiers distinguished by \emph{what
+they guarantee}. \textbf{Theoretical tier (sound; every in-domain input,
+including unseen):} the no-cancellation propagation with the corrected
+layer semantics (layer-0 LUT errors sum directly at the hidden nodes,
+$dy_j = \sum_i \varepsilon_{j,i}$; layer-1 amplification uses per-edge
+Lipschitz constants $L_{k,j}$, not a global bound) evaluates to $0.288$
+(safety $2.34\times$)---a first-principles envelope with no empirical
+floor. It strictly covers the float32 deployment measurement ($0.053$
+over 13{,}714 inputs, Tier-4 simulator; $5.4\times$ headroom); the
+IEEE-754 accumulation $\delta_{\text{fp32}}$, bounded by the
+per-operation $0.5$~ulp rule propagated through the network
+($\lesssim 3\times10^{-5}$ on the logit scale), is a negligible addendum
+to the LUT envelope.
+\textbf{Calibrated tier (empirically validated; the 13{,}714 measured
+inputs):} the measured-floor bounds $0.058 = \max(0.039, 0.053 \times
+1.1)$ (safety $11.6\times$) for the float32 SCL backend, and $0.026$
 (safety $26\times$) for a float64 backend (float64 simulator floor
-$0.023$), tighten the certificate to the actual deployment arithmetic.
-The gap between the two tiers is the conservatism of worst-case
-propagation versus the realized error profile---quantified by the
-differential simulator, not by the LUT analysis. The certificate
+$0.023$; $0.026 \approx 0.023 \times 1.1$, conservative rounding),
+quantify the \emph{realized} error
+on the validation corpus and tighten the deployment margin to the
+actual arithmetic. Unlike the theoretical tier, they certify the inputs
+on which they were measured (13{,}714 Tier-4 samples); their extension
+to unseen inputs is an empirical generalization claim, not a proof, and
+they are labeled as such. The gap between the tiers is the conservatism
+of worst-case propagation versus the realized error profile---quantified
+by the differential simulator, not by the LUT analysis. The certificate
 therefore carries a deployment precision tier: $11.6\times$ (float32,
-measured) / $26\times$ (float64 backend, measured floor). Contrast the
-released student: its per-function worst envelope is $3.38$
-(safety $0.2\times$---\emph{not} a certificate), and its measured maxAE
-($0.52$) is $6.5\times$ below that envelope: the design-time guarantee
+measured) / $26\times$ (float64 backend, measured floor), always under
+the theoretical $2.34\times$ floor. Contrast the
+released student: its per-function envelope is $2.29$
+(safety $0.3\times$---\emph{not} a certificate), and its measured maxAE
+($0.52$) is $4.4\times$ below that envelope: the design-time guarantee
 does not exist for the untrained checkpoint, and the empirical margin is
 a lucky artifact---precisely the E52 lesson. Soft-contractive training
 flattens the curvature profile itself ($M_2^{\text{char}} = 0.051$ vs.\
@@ -445,14 +459,16 @@ rather than a nominal subset. Per-function Z3 verification passes
 quantified at the deployment level: $1.4$~pp of accuracy purchases an
 $11.6\times$ sound safety margin (expected tier $493\times$), full
 Box-Continuation coverage, and Z3-verified components. The deployment chain closes: the checkpoint
-compiles to 2{,}188-line SCL (40.3~KB, 53.7\% of the S7-1200 work-memory
-budget; 7{,}388 FLOPs per inference) with WCET identical to the released
+compiles to 2{,}188-line SCL (40.3~KB estimated; the TIA Portal V21
+measured total work memory on the same structure is 45.2~KB, 90.4\% of
+the CPU~1211C 50-KB budget, Table~\ref{tab:tia_blocks}; 7{,}388 FLOPs
+per inference) with WCET identical to the released
 student ($3.86$~ms, $25.9\times$ scan-cycle margin)---the full pipeline
 from trained weights to certifiable, compilable, deployable inference
 (2026-08-04, \texttt{NeuroPLCCompiler}). Depth scales with the same
 recipe: the 3-layer soft-contractive variant ($\gamma = [0.99, 1.03,
-1.02]$, $98.6\%$ acc) carries a sound certificate of $0.110$
-(safety $6.1\times$, measured floor; per-function bound $0.019$), so
+1.02]$, $98.6\%$ acc) carries a validated certificate of $0.110$
+(safety $6.1\times$, measured floor), so
 the certificate survives architectural extension---the $\gamma \to 1$
 branch of Theorem~4 in practice. Figure~\ref{fig:cert_panorama}
 summarizes the certificate panorama: the tier ladder
@@ -466,17 +482,18 @@ summarizes the certificate panorama: the tier ladder
     \caption{\textbf{Certificate panorama across checkpoints.}
     (a) Error-bound tiers per checkpoint (log scale; dashed line:
     half-margin $0.675$; shade deepens with certificate strength). The
-    released student's expected/per-function envelopes ($1.70$/$3.38$)
+    released student's expected/per-function envelopes ($1.70$/$2.29$)
     exceed the margin---no design-time certificate. The soft-contractive
-    checkpoints carry expected $0.0014$, per-function $0.0078$,
-    float64 sound $0.026$, and float32 sound $0.058$ (2L) / $0.110$
-    (3L)---all below the margin. (b) Accuracy--certificate trade-off:
-    $1.4$~pp of accuracy purchases the sound certificate ($11.6\times$
-    vs.\ none for the released student)---the contraction budget is an
-    expression budget (Thm.~\ref{thm:capacity-stratification}).
+    checkpoints carry expected $0.00137$, per-function $0.0078$,
+    validated $0.026$ (float64) / $0.058$ (float32), and first-principles
+    sound $0.288$ (2L) / validated $0.110$ (3L)---all below the margin.
+    (b) Accuracy--certificate trade-off: $1.4$~pp of accuracy purchases
+    the sound certificate ($2.34\times$) and a validated margin
+    ($11.6\times$)---vs.\ none for the released student---the contraction
+    budget is an expression budget (Thm.~\ref{thm:capacity-stratification}).
     (c) Full-$\varphi$ $M_2$ distributions (float64 ground truth):
     contractive training flattens the curvature profile (median
-    $0.218 \to 0.051/0.052$).}
+    $0.218 \to 0.051$ (2L) / $0.050$ (3L)).}
     \label{fig:cert_panorama}
 \end{figure*}
 

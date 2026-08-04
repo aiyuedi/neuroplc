@@ -51,11 +51,11 @@ HALF_MARGIN = 0.675
 # ── data (from verify_sound_chain / verify_perfunc_bound, 2026-08-04) ──
 MODELS = [
     # name, acc, expected, perfunc, f64_sound, f32_sound, measured, k
-    ("main",  99.93, 1.70, 3.38, None,     None, 0.517, 340),
-    ("soft2L", 98.5, 0.0014, 0.0078, 0.026, 0.058, 0.053, 1.2),
+    ("main",  99.93, 1.70, 2.29, None,     None, 0.517, 340),
+    ("soft2L", 98.5, 0.00137, 0.0078, 0.026, 0.058, 0.053, 1.2),
     ("soft3L", 98.6, 0.0015, 0.019, None,  0.110, 0.100, 1.26),
 ]
-TIERS = ["expected", "per-func", "float64 sound", "float32 sound"]
+TIERS = ["expected", "per-func", "f64 validated", "f32 validated"]
 
 
 def m2_arrays():
@@ -148,7 +148,7 @@ def main():
 
     # ── Panel B: accuracy vs sound safety (capacity trade-off) ──
     ax = fig.add_subplot(gs[0, 1])
-    safety = {"main": 0.2, "soft2L": 11.6, "soft3L": 6.1}
+    safety = {"main": 0.3, "soft2L": 11.6, "soft3L": 6.1}
     acc = {"main": 99.93, "soft2L": 98.5, "soft3L": 98.6}
     marks = {"main": ("o", "none"), "soft2L": ("o", SERIES["soft2L"]),
              "soft3L": ("o", SERIES["soft3L"])}
@@ -168,7 +168,7 @@ def main():
     ax.set_xscale("log")
     ax.set_xlim(0.12, 25)
     ax.set_ylim(98.2, 100.1)
-    ax.set_xlabel("sound safety factor (log)", fontsize=8)
+    ax.set_xlabel("certificate safety factor (log)", fontsize=8)
     ax.set_ylabel("test accuracy (%)", fontsize=8)
     ax.set_title("(b) Accuracy–certificate trade-off", fontsize=8.5, pad=4)
     ax.grid(color=GRID, linewidth=0.4, which="both")
