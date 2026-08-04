@@ -1306,7 +1306,8 @@ half-margin, {\S}\ref{sec:limitations}): classification correctness is
 mathematically guaranteed under the LUT error distribution \emph{within
 the Box-Continuation domain}, albeit with a thin margin (restorable to
 $3.6\times$ via adaptive allocation, {\S}\ref{sec:adaptive-lut}, or to
-$196\times$ via soft-contractive training, E-T9).
+$11.6\times$ (sound) / $763\times$ (expected) via soft-contractive
+training, E-T9).
 
 \subsubsection{Sign-Structural Affine Arithmetic: Tighter Bounds via Correlation Tracking}
 \label{sec:da}
@@ -2021,7 +2022,7 @@ $M_2^{\text{char}} h^2/8 = 0.00406$) the bound
 exceeds the half-margin. Two deployment recipes restore a comfortable
 margin at unchanged storage: adaptive LUT allocation (E15,
 {\S}\ref{sec:adaptive-lut}) lifts the DA safety factor to $3.6\times$,
-and soft-contractive training (E-T9) to $196\times$ with full
+and soft-contractive training (E-T9) to $11.6\times$ (sound) with full
 Box-Continuation coverage---both implemented and verified
 (2026-08-04).
 
@@ -3975,7 +3976,7 @@ through the nested summation (Eq.~\ref{eq:da_bound}), yielding a
 vs.\ 1.38; margin 1.35, E6). The resulting DA safety factor of $1.0\times$
 at 15~points certifies classification with a thin margin; adaptive
 allocation (E15, {\S}\ref{sec:adaptive-lut}) lifts this to $3.6\times$,
-and soft-contractive training (E-T9) to $196\times$.
+and soft-contractive training (E-T9) to $11.6\times$ (sound).
 
 \vspace{4pt}
 \noindent\textbf{DA Bound Summary.}
@@ -4005,8 +4006,9 @@ E16 Seg-DA$^{\dag}$       & 20 & DA $+$ Segment-Aware, $M_2^{\max}$ & 0.89  & $0
 E40 compositional & 15 & DA network-level (Tier~3)                 & 0.66   & $1.0\times$ \\
 Adaptive-DA (E15) & 15$^{*}$ & DA, greedy adaptive $\varepsilon$    & 0.19   & $3.6\times$ \\
 Adaptive-IA (E15) & 15$^{*}$ & IA, greedy adaptive $\varepsilon$    & 0.39   & $1.7\times$ \\
-Soft-contractive DA (E-T9) & 15 & DA, $\gamma{=}[1.03,1.38]$ model & 0.0034 & $196\times$ \\
-Soft-contractive IA (E-T9) & 15 & IA, $\gamma{=}[1.03,1.38]$ model & 0.0049 & $138\times$ \\
+Soft-contractive DA (E-T9) & 15 & DA, $\gamma{=}[1.03,1.38]$ model & 0.0009 & $763\times^{\ddag}$ \\
+Soft-contractive IA (E-T9) & 15 & IA, $\gamma{=}[1.03,1.38]$ model & 0.0013 & $537\times^{\ddag}$ \\
+Soft-contractive sound (E-T9) & 15 & IA-form, no cancell., floored & 0.058 & $11.6\times$ \\
 E6 empirical MaxAE        & 15 & Per-sample max (not a bound)      & 3.65  & --- \\
 \bottomrule
 \end{tabular}
@@ -4038,11 +4040,15 @@ aggregation-safe assumption of independent error signs.
 Algorithm~\ref{alg:adaptive_lut}) at the $N{=}15$ storage budget,
 $\varepsilon_{\max} = 0.00115$; recomputed 2026-08-04
 (\texttt{verify\_adaptive\_da.py}).
-\textbf{Soft-contractive rows} (0.0034/0.0049): E-T9 checkpoint
-($\gamma = [1.03, 1.38]$, 98.5\% acc); constants measured on that
-checkpoint, 2026-08-04 (\texttt{verify\_contractive\_bounds.py}).
-At the $M_2^{\max}$ calibration the same rows read 0.0086/0.0122
-(safety $78\times$/$55\times$).}
+\textbf{Soft-contractive rows}: E-T9 checkpoint ($\gamma =
+[1.03, 1.38]$, 98.5\% acc), constants measured on that checkpoint,
+2026-08-04 (\texttt{verify\_contractive\_bounds.py}).
+$^{\ddag}$Expected tier (high-probability, Lemma~\ref{lem:da_moment}),
+$M_2^{\text{char}} = 0.040$ on this checkpoint. At the $M_2^{\max}$
+calibration the DA/IA envelopes read 0.030/0.043 (safety
+$22.6\times$/$15.9\times$). The \textbf{sound row} (0.058) uses the
+no-cancellation IA form floored by the full-set measured maxAE
+($0.053$, 13{,}714 inputs, Tier-4 simulator).}
 \end{table}
 
 
@@ -4397,7 +4403,7 @@ E-T5 & Three-Layer Separation & Slope: kink vs $C^2$ & $-1.11$ vs $-2.05$ \\
 E-T6 & Architecture Selection Law & Spectral-vs-LUT crossover & $\rho^*$ Lambert-W closed form \\
 E-T7 & Packing Constant $c_{\text{ent}}$ & Constructive lower bound & $c_{\text{ent}} \approx 0.079$ \\
 E-T8 & Width Constant $c_*$ & Numerical estimate & $c_* \lesssim 0.082$; gap $\geq 1.53\times$ \\
-E-T9 & Soft-Contractive Training & $\gamma$ post-training & $[1.03,1.38]$; 98.5\%; DA cert.\ $196\times$ \\
+E-T9 & Soft-Contractive Training & $\gamma$ post-training & $[1.03,1.38]$; 98.5\%; sound cert.\ $11.6\times$ \\
 \midrule
 \multicolumn{4}{l}{\textit{Validation Experiments (V1--V7):}} \\
 V1 & Worst-Case Adversarial   & 5,000 inputs, 100 worst  & 100/100 preserved, VALIDATED \\
@@ -5453,8 +5459,9 @@ assumptions; $\Delta_{\text{IA}}(N) = 1.38\,(14/(N{-}1))^2$ (recomputed
 Sound (adaptive) & IA (greedy) & 15$^{*}$ & $1.7\times$ & SIL~2 & Adaptive
 $\varepsilon_{\max}{=}0.00115$ (E15); recomputed 2026-08-04: $N{=}15$
 \emph{is} a certificate under adaptive allocation \\
-Soft-contractive & DA+IA & 15 & $196\times$ & SIL~3+ & E-T9 checkpoint
-(98.5\%); Box-Continuation coverage 99.9\%; Z3 512/512 \\
+Soft-contractive & Sound IA & 15 & $11.6\times$ & SIL~3+ & E-T9 checkpoint
+(98.5\%); Box-Continuation coverage 99.9\%; Z3 512/512;
+expected tier $763\times$ \\
 Sound + margin   & IA (global) & 25 & $1.4\times$ & SIL~3 &
 $1.5\times$ safety margin \\
 \bottomrule

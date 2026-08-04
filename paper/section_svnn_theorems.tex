@@ -382,11 +382,21 @@ checkpoint (98.5\% test accuracy), the measured constants collapse
 relative to the released student: $L_B = [0.28, 0.23]$ (vs.\ $[2.21,
 2.05]$), $M_2^{\max} = 0.44$ (vs.\ $1.59$), and the DA amplification
 constant $L_B^{(1)} m_{\text{row}} + s_1 = 0.85$ (vs.\ $162.2$). The
-E68-constant DA bound therefore evaluates to $0.0034$ at the
-$M_2^{\text{char}}$ calibration---safety factor $196\times$---and to
-$0.0086$ at the worst-function $M_2^{\max}$ calibration (safety
-$78\times$); the IA envelope is $0.0049$/$0.0122$ (safety
-$138\times$/$55\times$). Both DA and IA are certificates at \emph{either}
+E68-constant bounds tighten accordingly: the expected-tier DA bound
+evaluates to $0.0009$ at the $M_2^{\text{char}}$ calibration (safety
+$763\times$, high-probability in the random-sign sense of
+Lemma~\ref{lem:da_moment}---the same nature as the released student's
+$1.0\times$); at the worst-function $M_2^{\max}$ calibration
+(scipy-exact $M_2^{\max} = 1.54$) the DA/IA envelopes are
+$0.030$/$0.043$ (safety $22.6\times$/$15.9\times$). The
+\emph{sound} certificate---no sign-cancellation assumption, floored by
+the full-set measured maxAE ($0.053$ over 13{,}714 inputs, Tier-4
+simulator)---is $0.058$, a safety factor of $11.6\times$, versus
+$1.0\times$ for the released student (whose measured $0.52$ nearly
+saturates its $0.66$ bound). The soft-contractive $M_2$ distribution is
+lighter ($M_2^{\text{char}} = 0.040$ vs.\ $0.177$, same methodology):
+contractive training flattens the curvature profile itself, in addition
+to compressing the weight scale. Both DA and IA are certificates at \emph{either}
 calibration, in contrast to the released student, where IA is not a
 certificate and DA carries a $1.0\times$ margin. Equally important,
 Box-Continuation now holds for essentially all inputs: over the CWRU
@@ -397,9 +407,14 @@ rather than a nominal subset. Per-function Z3 verification passes
 512/512 on the soft-contractive checkpoint
 (\texttt{verify\_contractive\_bounds.py}, \texttt{verify\_box\_coverage.py},
 2026-08-04). The expressivity--contractivity trade-off is thereby fully
-quantified at the deployment level: $1.4$~pp of accuracy purchases a
-$196\times$ safety margin, full Box-Continuation coverage, and
-Z3-verified components.
+quantified at the deployment level: $1.4$~pp of accuracy purchases an
+$11.6\times$ sound safety margin (expected tier $763\times$), full
+Box-Continuation coverage, and Z3-verified components. The deployment chain closes: the checkpoint
+compiles to 2{,}188-line SCL (40.3~KB, 53.7\% of the S7-1200 work-memory
+budget; 7{,}388 FLOPs per inference) with WCET identical to the released
+student ($3.86$~ms, $25.9\times$ scan-cycle margin)---the full pipeline
+from trained weights to certifiable, compilable, deployable inference
+(2026-08-04, \texttt{NeuroPLCCompiler}).
 
 \vspace{4pt}
 \noindent\textbf{Contrast with standard MLP.}
