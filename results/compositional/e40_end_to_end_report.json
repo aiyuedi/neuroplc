@@ -6,8 +6,8 @@
     16,
     4
   ],
-  "timestamp": "2026-07-07T13:36:05.771558",
-  "tier1_templates_proved": 4,
+  "timestamp": "2026-08-04T18:21:36.109331",
+  "tier1_templates_proved": 0,
   "tier2_leaves_verified": "512/512",
   "tier3_certificate_valid": true,
   "da_bound": 0.1196105107665062,
@@ -16,5 +16,5 @@
   "end_to_end_bound": 0.1196105107665062,
   "classification_preserved": true,
   "checker_warnings": [],
-  "total_time_ms": 1715.8699999999953
+  "total_time_ms": 2162.171199999875
 }

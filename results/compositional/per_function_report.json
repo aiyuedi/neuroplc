@@ -10,7 +10,7 @@
   "min_safety_margin": 1.207773722500832,
   "max_theoretical_bound": 0.003591770176984822,
   "max_empirical_error": 0.002768865108490004,
-  "total_time_ms": 1658.7871000010637,
+  "total_time_ms": 2162.171199999875,
   "z3_binary_search": null,
   "results": [
     {

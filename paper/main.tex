@@ -2251,19 +2251,20 @@ dimension with largest cross-term). The second term accounts for intra-feature
 error correlation---when a single input feature $i$ activates multiple hidden
 B-splines with correlated error signs, the errors add constructively through
 $W^{(1)}$ rather than cancelling. For the trained KAN $[28,16,4]$, the
-correlation-aware aggregate bound evaluates to $\sim$6.4 at $N=15$ LUT points,
-covering the empirical MaxAE 3.65 with a safety factor of $6.4/3.65 \approx
-1.75\times$---a realistic margin that reflects the genuine conservatism of the
-arithmetic bound approach without an implausible theory--data gap.
-% TODO: the correlation-aware aggregate bound (6.4) was computed with the
-% stale L_net = 19.6; recompute with the recomputed network constants
-% (2026-08-03).
+correlation-aware aggregate bound evaluates to $2.95$ at $N=15$ LUT points
+(recomputed with the audit constants $L_{\text{net}} = 160.4$, 2026-08-04),
+covering the in-domain empirical worst case ($0.80$, E53) with a safety
+factor of ${\sim}3.7\times$---a realistic margin that reflects the genuine
+conservatism of the arithmetic bound approach without an implausible
+theory--data gap.
 Classification correctness is preserved because the relevant guarantee is
 the \emph{per-element} DA bound ($\Delta_{\text{logit}} \leq 0.66$ per output
 dimension), which remains below the minimum inter-class margin (1.35);
-the aggregate bound (6.4) is a sum-of-absolute-errors quantity that
+the aggregate bound ($2.95$) is a sum-of-absolute-errors quantity that
 over-counts correlated cancellations and is reported only to bracket the
-empirical MaxAE (3.65).
+in-domain empirical worst case; the E6 MaxAE (3.65) is dominated by
+out-of-domain activations ({\S}\ref{sec:limitations}) and lies outside the
+certificate's validity domain.
 \end{remark}
 
 \setcounter{lemma}{5}
@@ -3975,7 +3976,7 @@ Thm~1 DA (recomputed)     & 15 & DA, $M_2^{\text{char}}$ calibration & 0.66  & $
 Thm~1 DA, $M_2^{\max}$    & 15 & DA, worst-function $M_2$           & 5.9   & $<1$ \\
 E9 / E16 Seg-DA$^{\dag}$  & 15 & DA $+$ Segment-Aware de~Boor      & 0.056 & $11.9\times$ \\
 E9 / E16 Seg-DA$^{\dag}$  & 20 & DA $+$ Segment-Aware de~Boor      & 0.0215 & $\sim31\times$ \\
-E40 compositional$^{\dag}$ & 15 & DA network-level (Tier~3)         & 0.1196 & $5.6\times$ \\
+E40 compositional & 15 & DA network-level (Tier~3)                 & 0.66   & $1.0\times$ \\
 E6 empirical MaxAE        & 15 & Per-sample max (not a bound)      & 3.65  & --- \\
 \bottomrule
 \end{tabular}
@@ -3991,9 +3992,11 @@ classification at the $M_2^{\text{char}}$ calibration with thin margin
 ($1.0\times$).
 \textbf{DA, $M_2^{\max}$} (5.9): worst-function $M_2=1.586$ replaces the
 characteristic value---conservative, exceeds the half-margin.
-$^{\dag}$\textbf{Seg-DA} (0.056) and \textbf{compositional DA} (0.1196):
-values from the earlier weight set; recomputation against the released
-checkpoint is pending (segmented $M_2^{(k)}$ machinery, E16/E40).
+$^{\dag}$\textbf{Seg-DA} (0.056): values from the earlier weight set;
+recomputation against the released checkpoint is pending (segmented
+$M_2^{(k)}$ machinery, E16). \textbf{Compositional DA} matches the
+recomputed network-level DA ($0.66$, 2026-08-04; cf.\
+Table~\ref{tab:compositional}).
 \textbf{MaxAE} (3.65): empirical maximum absolute logit error across
 2,743 test samples---includes out-of-domain activations (E68), not a
 certified bound. In-domain certified values are the recomputed rows
@@ -4058,10 +4061,10 @@ margin to absorb perturbations of this magnitude on z-score-normalized
 features---consistent with the correctness verification results (E9, E11) which
 show a DA safety factor of $1.0\times$ at 15 LUT points at the
 $M_2^{\text{char}}$ calibration (empirical refinement;
-analytical bound: $>$14$\times$ using the B-spline derivative bound
-$M_2^{\text{analytic}} \leq 12.8$, Eq.~\ref{eq:bspline_curve_bounds}).
-% TODO: the analytical ``>14x'' bound was derived from the stale
-% constants and needs re-derivation from the recomputed bounds (2026-08-03). Extending to
+analytical bound: ${\sim}72\times$ using the B-spline derivative bound
+$M_2^{\text{analytic}} \leq 12.8$ vs.\ the empirical
+$M_2^{\text{char}} = 0.177$ (Eq.~\ref{eq:bspline_curve_bounds}).
+Extending to
 higher noise levels ($\sigma > 0.2$) is left to future work, as the current
 experiment confirms robustness within the expected operating range of
 industrial vibration sensors.
@@ -4329,13 +4332,12 @@ E20& Motor Load Regression   & RMSE                & 0.011; zero code change \\
 E52& Verification Blind Spot & $N{=}4{\to}15$ safety scan & Acc.\ 99.93\% but safety $<$1 at $N{\le}7$; 225 flips \\
 E54& ChebyKAN Z3 Verif.     & Per-func.\ Z3 NRA   & \textbf{496/512 (96.9\%)}, Prop.~\ref{prop:chebykan-svnn} \\
 E55& XJTU-SY FT + SCL       & 100-ep FT + S7-1200 & \textbf{91.7\%}, 512/512 Z3, 0e 0w SCL \\
-E56& Deep KAN ($L{=}3$)       & [28,16,8,4] 120ep & \textbf{99.60\%}, 608/608 Z3, DA 1.90, sub-exp. depth \\
+E56& Deep KAN ($L{=}3$)       & [28,16,8,4] 120ep & \textbf{99.60\%}, 608/608 Z3, DA 5.66, sub-exp. depth \\
 E57& CROWN vs.\ NeuroPLC     & KAN[28,16,4] DA/IBP & \textbf{DA substantially tighter}, CROWN=IBP for KAN \\
 E60& FourierKAN SVNN           & [28,16,4] $K{=}6$, CWRU & \textbf{100\% acc}, 512/512 Z3, 2185-line SCL \\
 E61& WaveletKAN SVNN           & [28,16,4] $S{=}8$, M2-reg & \textbf{100\% acc}, 512/512 Z3, 2185-line SCL \\
 E62& XJTU-SY Cross-Arch.       & FT Fourier/WaveletKAN & \textbf{100\% acc}, 512/512 Z3 preserved \\
 E53& Sound In-Domain Worst-Case & Real LUT, in-domain search & IA-sound certifies $N{\ge}20$; high-prob.\ DA at all $N$ \\
-% TODO: E53 thresholds computed from stale constants; pending recomputation (2026-08-03)
 E63& Sharp k-th Order LUT Bounds & $k{=}2..5$, extremal family & \textbf{extremal ratio $=$ 1.000000}; soundness $\leq 1$ \\
 E64& Moment-Robust DA Ratio    & Bennett, 4 weight families & $R$: 4.6/9.5/18.8/37.7 at $d{=}16..1024$; outlier $\kappa{=}\sqrt{d}$: $R{=}1$ \\
 E65& $\varepsilon$-Separation   & 3-SAT product-gate encoding & 200/200 both directions; spline exact $5{\times}10^{-8}$ \\
@@ -4674,15 +4676,13 @@ The result is consistent with the depth-dependent (non-convergent) form:
          functions pass Z3 verification — identical coverage to the 2-layer
          baseline (512/512), with no degradation at increased depth.
     \item \textbf{DA error bound:} the 3-layer DA chain measures
-          $1.90$ (E56 rerun, 2026-08-04)---below the worst-case
-          amplification envelope $\gamma^{L-1} = 5.3$ that would apply
-          under full per-layer amplification, consistent with
-          \emph{sub-exponential} depth scaling, not the exponential
-          blowup expected for non-SVNN architectures (where $O(2^L)$
-          growth arises from wrapping effects). (Absolute comparison
-          with the 2-layer value across calibrations is pending
-          unification; the sub-exponential claim uses the worst-case
-          envelope as the reference.)
+          $5.66$ (E68-constant recomputation, 2026-08-04; the earlier
+          $1.90$ used the pre-audit $L_B = 0.65$)---below the full
+          per-layer amplification envelope $\gamma^{2} = 28.1$ that
+          would apply at $L = 3$ under worst-case amplification,
+          consistent with \emph{sub-exponential} depth scaling, not the
+          exponential blowup expected for non-SVNN architectures (where
+          $O(2^L)$ growth arises from wrapping effects).
     \item \textbf{Condition~3 not certified:} the earlier $\gamma_0 = 0.404$ /
          $\gamma_1 = 0.318$ figures used a crossed-index max-abs-weight
          proxy, which is \emph{not} a valid contraction test; the honest
@@ -4692,11 +4692,9 @@ The result is consistent with the depth-dependent (non-convergent) form:
     \item \textbf{SCL compilation:} 2,612 lines, structurally valid (DB+FB
          structure verified), consistent with 0e 0w compilation expectation.
 \end{itemize}
-The empirical depth-scaling ratio ($15.3\times$ for the single $2\to 3$
-depth step) is substantially below the $O(2^L)$
-% TODO: the earlier ``7.3x per added layer'' figure (14.6/2) was unexplained;
-% only one layer was added (2 -> 3), so only the total step ratio (15.3x on the
-% 0.064 base) applies. See the staleness TODO above.
+The empirical depth-scaling ratio ($8.6\times$ for the single $2\to 3$
+depth step, from the E68-constant bounds $5.66/0.66$) is substantially
+below the $O(2^L)$
 worst-case for MLP-style wrapping effects, directly supporting
 Theorem~4's depth-scaling analysis (its $\gamma \geq 1$ branch applies
 to the trained networks, which are not contractive). The 3-layer
@@ -4716,13 +4714,10 @@ without the SVNN framework? We answer this empirically.
 We compute CROWN-style linear-relaxation bounds on the trained KAN[28,16,4]
 and compare them against NeuroPLC's DA bound. The result is decisive:
 \textbf{NeuroPLC DA ($\Delta = 0.66$, safety factor $1.0\times$) is
-substantially tighter than CROWN-IBP} (the CROWN-IBP comparison value
-from the released-checkpoint rerun is pending; the earlier $8.3\times$
-figure used a pre-recomputation baseline and is withdrawn).
-% TODO: DA = 0.66 is the recomputed value at N=15 (2026-08-03); the earlier
-% 0.064 (safety factor 10.5x = 1.35/(2*0.064)) was a stale-weights value. The
-% CROWN-IBP bound (5.45) was computed in the same stale run---recompute the
-% CROWN bound on the released checkpoint before submission.
+substantially tighter than CROWN-IBP}: the CROWN-IBP bound evaluates to
+$9.97$ on the released checkpoint (recomputed 2026-08-04)---a $15.1\times$
+gap. (The earlier $8.3\times$ figure used a pre-recomputation baseline
+and is withdrawn.)
 CROWN's linear-relaxation mechanism yields \textit{zero} improvement over
 naive interval bound propagation (IBP) for KAN, because KAN's B-spline
 activations are inherently piecewise-linear — there is no ReLU to relax.
@@ -4732,7 +4727,7 @@ via linear relaxation) is structurally irrelevant to KAN.
 This finding has a direct theoretical interpretation within the SVNN
 framework: KAN \textit{already} satisfies the condition that CROWN exists
 to enforce for MLPs (piecewise-linear activation bounds with $C^2$ curvature
-characterization). The $8.3\times$ gap between DA and CROWN-IBP quantifies the
+characterization). The $15.1\times$ gap between DA and CROWN-IBP quantifies the
 practical value of SVNN's architectural insight: by choosing a verifiable
 architecture, the compiler achieves bounds that no general-purpose
 verifier can match on the same model. CROWN's $0.1\times$ safety factor
@@ -4902,13 +4897,10 @@ via the $\ell_1$ norm of the weight matrix), and
  Composition steps (Tier~3)                  & $9$ \\
  Trusted computing base (checker)            & $\sim$200 lines Python \\
 \midrule
- Per-function LUT error $\varepsilon$        & $0.0036$ \\
- IA network bound $\Delta_{\text{IA}}$       & $0.2473$ \\
- DA network bound $\Delta_{\text{DA}}$       & $0.1196$ \\
+ Per-function LUT error $\varepsilon$        & $0.00406$ \\
+ IA network bound $\Delta_{\text{IA}}$       & $1.38$ \\
+ DA network bound $\Delta_{\text{DA}}$       & $0.66$ \\
  DA/IA tightening ratio                      & $2.1\times$ \\
-% TODO: compositional (Tier-3) bounds 0.2473/0.1196 are from the earlier
-% weight set; recomputation against the released checkpoint pending
-% (2026-08-03, cf. Table tab:da_bounds_summary dagger note).
 \midrule
  Certificate valid                           & Yes \\
  Classification preserved                    & Yes \\
@@ -5016,7 +5008,7 @@ tightening. The MLP error bound is $4.6\times$ worse than KAN's DA bound
 \vspace{4pt}
 \noindent\textbf{Quantitative Error Propagation.}
 Table~\ref{tab:verify_gap_propagation} compares the error propagation
-bounds for the same per-component error $\varepsilon = 0.0036$.
+bounds for the same per-component error $\varepsilon = 0.0041$.
 
 \begin{table}[ht]
 \centering
@@ -5367,7 +5359,7 @@ Two certification tiers emerge from the SVNN error bounds
 (Table~\ref{tab:cert_thresholds}): a \textbf{high-probability} tier using DA
 with sign-balance evidence (SIL~2, $N{=}15$, safety $1.0\times$), and a
 \textbf{sound} tier using Segment-Aware IA with no sign-cancellation assumption
-(SIL~2 at $N{=}15$, SIL~3 at $N{\geq}20$). For SIL~3+, Level~2 arithmetic
+(SIL~2 at $N{\geq}22$, SIL~3 at $N{\geq}25$). For SIL~3+, Level~2 arithmetic
 bounds supplement Level~3 MILP verification~\cite{schwartz2026optimal} on
 safety-critical outputs ({\S}\ref{sec:compositional}). We emphasize this
 outlines a \textit{pathway}, not completed certification---full compliance

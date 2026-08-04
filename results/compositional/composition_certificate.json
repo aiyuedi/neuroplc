@@ -6,7 +6,7 @@
     4
   ],
   "model_hash": "80813a0917bce62d",
-  "template_report_hash": "4b227777d4dd1fc6",
+  "template_report_hash": "",
   "leaf_certificates": [
     {
       "function_id": "L0_o0_i0",
@@ -6346,8 +6346,8 @@
     }
   ],
   "end_to_end_bound": 0.34328195452690125,
-  "safety_margin": 36.587999556544524,
+  "safety_margin": 3.9326273408706296,
   "classification_preserved": true,
-  "generated_at": "2026-07-07T13:36:05.767632",
+  "generated_at": "2026-08-04T18:21:36.102959",
   "total_verification_time_ms": 0.0
 }

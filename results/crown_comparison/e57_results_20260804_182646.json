@@ -1,0 +1,13 @@
+{
+  "experiment": "E57",
+  "description": "CROWN comparison \u2014 NeuroPLC DA vs CROWN-IBP on KAN[28,16,4]",
+  "neuroplc_da": 0.08019258081912994,
+  "neuroplc_ia": 0.24154722690582275,
+  "neuroplc_tightening": 3.012089490890503,
+  "crown_ibp": 10.06766865959232,
+  "crown_linear": 10.06766865959232,
+  "lipschitz_global": 470.2749451361845,
+  "lipschitz_empirical": 19.51222801208496,
+  "key_finding": "CROWN = IBP for KAN. DA achieves tightening via sign structure, which CROWN cannot exploit on non-decomposed KAN.",
+  "timestamp": "2026-08-04T18:26:46.570246"
+}

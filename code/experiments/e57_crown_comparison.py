@@ -43,7 +43,7 @@ X_RANGE       = (-3.0, 3.0)
 RANDOM_SEED   = 42
 
 PROJECT_ROOT  = Path(__file__).resolve().parent.parent.parent
-CKPT_PATH     = PROJECT_ROOT / "results" / "student" / "kan_kd_28x16x4_vrmKD_best.pt"
+CKPT_PATH     = PROJECT_ROOT / "results" / "student" / "kan_kd_vrmKD_best.pt"  # released main model (2026-08-04 R5 audit)
 OUTPUT_DIR    = PROJECT_ROOT / "results" / "crown_comparison"
 
 
@@ -57,11 +57,12 @@ def neuroplc_bounds(model):
 
     l0 = model.kan_layers[0]
     l1 = model.kan_layers[1]
-    w0 = (l0.base_weight.detach().numpy() + l0.spline_weight.detach().mean(-1).numpy())
-    w1 = (l1.base_weight.detach().numpy() + l1.spline_weight.detach().mean(-1).numpy())
+    # base-folded weights (matches verify_da_bounds_recomputed.py, 2026-08-04 audit)
+    w0 = (l0.base_weight.detach().numpy() * l0.scale_base.detach().numpy())
+    w1 = (l1.base_weight.detach().numpy() * l1.scale_base.detach().numpy())
 
-    eps = 0.0041  # per-function LUT error (N=15, M2=0.177)
-    lb  = 0.65    # B-spline Lipschitz
+    eps = 0.00406  # per-function LUT error (M2_char=0.177, N=15; 2026-08-04 audit)
+    lb  = 2.05     # B-spline Lipschitz, layer-1 measured (E68)
 
     _, da, ia = propagate_error_doubleton(w0, w1, eps, lb)
 
@@ -143,7 +144,7 @@ def compute_lipschitz_global(model, n_samples=1000):
 # CROWN-equivalent bound computation (linear relaxation for ReLU-like case)
 # ============================================================================
 
-def crown_style_bounds(model, eps_input=0.0041):
+def crown_style_bounds(model, eps_input=0.00406):  # M2_char=0.177, N=15 (2026-08-04 R5 audit)
     """Compute CROWN-style linear-relaxation bounds for KAN.
 
     Since KAN's B-spline activations are already piecewise-linear (LUT),
