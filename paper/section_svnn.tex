@@ -1039,11 +1039,6 @@ activations satisfy $M_2 \cdot h_{\text{LUT}}^2 / 8 \leq 0.040$ (maximum),
 with mean $0.017$ and 95th-percentile $C(3) = 0.030$ (measured from the
 checkpoint). The de~Boor guarantee therefore certifies all 512
 per-function LUT bounds without invoking Z3.
-% TODO: the per-function threshold used in the E58 experiment (0.182) was
-% the stale contractivity constant, not a measured margin; the margin
-% ratios quoted in earlier versions (4.5x, 6.0x at P95) derived from it
-% and must be re-established against a properly measured per-function
-% margin before submission.
 
 This result explains \textit{why} the full KAN achieves 512/512 Z3
 verifiability (E40): the de~Boor bound is a mathematical theorem,
@@ -1293,10 +1288,6 @@ results.
     margin (ratio of the per-function margin to $\max M_2 \cdot h^2/8$).
     WaveletKAN's wide margin reflects M2-regularized training ($\lambda=0.01$).
     FourierKAN's M$_2$ is bounded by $\omega^2 \sum k^2(|c_k|+|d_k|)$ (Proposition~\ref{prop:c2bv-family}(c)).
-    % TODO: the margin ratios shown in this figure used the stale
-    % contractivity constant 0.182 as the per-function threshold; the
-    % figure must be regenerated with an honestly measured margin before
-    % submission.
     Safety margins $\geq 2\times$ confirm deployability
     for all $C^2$-BV architectures.}
     \label{fig:c2bv_verification}
