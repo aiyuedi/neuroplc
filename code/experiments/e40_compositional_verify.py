@@ -83,24 +83,24 @@ def compute_da_enhanced_bound(model, per_func_results, x_range=X_RANGE) -> dict:
     w0 = effective_weights[0]  # (16, 28)
     w1 = effective_weights[1]  # (4, 16)
 
-    # Per-function LUT error bound
-    eps = max(
-        max((r.bound_theoretical for r in per_func_results if r.layer == 0), default=0.046),
-        max((r.bound_theoretical for r in per_func_results if r.layer == 1), default=0.046),
-    )
+    # Per-function LUT error bound — E68 audit constants (2026-08-04):
+    # matches verify_da_bounds_recomputed.py (M2_char=0.177, h=6/14, N=15)
+    eps = 0.00406
+    L_B1 = 2.05   # measured layer-1 B-spline Lipschitz (E68)
 
-    L_B = 0.65
+    # IA bound (interval arithmetic, E68 form: eps * (L_B1 * t1 + t2))
+    rowsum0 = np.abs(w0).sum(axis=1)           # (16,)
+    t1v = np.abs(w1) @ rowsum0                 # (4,)
+    t2v = np.abs(w1).sum(axis=1)               # (4,)
+    ia_bound = eps * (L_B1 * t1v + t2v)        # (4,)
 
-    # IA bound (interval arithmetic — no sign tracking)
-    l0_l1 = np.abs(w0).sum(axis=1)
-    l0_dev = eps * l0_l1
-    delta_max = l0_dev.max()
-    l1_l1 = np.abs(w1).sum(axis=1)
-    ia_bound = (eps + L_B * delta_max) * l1_l1
+    # DA bound (sign-structural doubleton, E68 form: eps * (L_B1 * m_row + s1))
+    m_rowv = np.abs(w1 @ w0).sum(axis=1)       # (4,)
+    s1v = np.abs(w1.sum(axis=1))               # (4,)
+    da_arr = eps * (L_B1 * m_rowv + s1v)       # (4,)
+    da_bound = float(da_arr.max())
 
-    # DA bound (doubleton — sign-aware)
-    _, da_pert, _ = propagate_error_doubleton(w0, w1, eps, L_B)
-    da_bound = float(da_pert.max())
+    l0_dev = eps * np.abs(w0).sum(axis=1)      # (16,) layer-0 deviation
 
     return {
         "eps": float(eps),
@@ -108,7 +108,7 @@ def compute_da_enhanced_bound(model, per_func_results, x_range=X_RANGE) -> dict:
         "da_bound": da_bound,
         "tightening": float(ia_bound.max()) / max(da_bound, 1e-15),
         "l0_max_deviation": float(l0_dev.max()),
-        "l1_perturbation_da": [float(v) for v in da_pert],
+        "l1_perturbation_da": [float(v) for v in da_arr],
         "l1_perturbation_ia": [float(v) for v in ia_bound],
     }
 
@@ -308,7 +308,7 @@ def main():
         arch = [28, 16, 4]
         print(f"\nLoading trained KAN {arch}...")
         ckpt_path = (Path(__file__).resolve().parent.parent.parent /
-                    "results" / "student" / "kan_kd_28x16x4_vrmKD_best.pt")
+                    "results" / "student" / "kan_kd_vrmKD_best.pt")  # released main model (2026-08-04 audit)
         model = StudentKAN(arch)
         if ckpt_path.exists():
             ckpt = torch.load(str(ckpt_path), map_location='cpu', weights_only=True)

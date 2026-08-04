@@ -6,15 +6,15 @@
     16,
     4
   ],
-  "timestamp": "2026-08-04T18:21:36.109331",
+  "timestamp": "2026-08-04T18:37:57.765490",
   "tier1_templates_proved": 0,
   "tier2_leaves_verified": "512/512",
   "tier3_certificate_valid": true,
-  "da_bound": 0.1196105107665062,
-  "ia_bound": 0.24734461307525635,
-  "da_ia_tightening": 2.0679170374759304,
-  "end_to_end_bound": 0.1196105107665062,
+  "da_bound": 0.6579468250274658,
+  "ia_bound": 1.3784253597259521,
+  "da_ia_tightening": 2.0950406739456646,
+  "end_to_end_bound": 0.6579468250274658,
   "classification_preserved": true,
   "checker_warnings": [],
-  "total_time_ms": 2162.171199999875
+  "total_time_ms": 1839.5237999998244
 }
