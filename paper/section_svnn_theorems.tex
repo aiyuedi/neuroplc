@@ -430,7 +430,31 @@ recipe: the 3-layer soft-contractive variant ($\gamma = [0.99, 1.03,
 1.02]$, $98.6\%$ acc) carries a sound certificate of $0.110$
 (safety $6.1\times$, measured floor; per-function bound $0.019$), so
 the certificate survives architectural extension---the $\gamma \to 1$
-branch of Theorem~4 in practice.
+branch of Theorem~4 in practice. Figure~\ref{fig:cert_panorama}
+summarizes the certificate panorama: the tier ladder
+(Fig.~\ref{fig:cert_panorama}a), the accuracy--certificate trade-off
+(Fig.~\ref{fig:cert_panorama}b), and the curvature flattening
+(Fig.~\ref{fig:cert_panorama}c).
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.98\textwidth]{figures/final/fig_cert_panorama}
+    \caption{\textbf{Certificate panorama across checkpoints.}
+    (a) Error-bound tiers per checkpoint (log scale; dashed line:
+    half-margin $0.675$; shade deepens with certificate strength). The
+    released student's expected/per-function envelopes ($1.70$/$3.38$)
+    exceed the margin---no design-time certificate. The soft-contractive
+    checkpoints carry expected $0.0014$, per-function $0.0078$,
+    float64 sound $0.026$, and float32 sound $0.058$ (2L) / $0.110$
+    (3L)---all below the margin. (b) Accuracy--certificate trade-off:
+    $1.4$~pp of accuracy purchases the sound certificate ($11.6\times$
+    vs.\ none for the released student)---the contraction budget is an
+    expression budget (Thm.~\ref{thm:capacity-stratification}).
+    (c) Full-$\varphi$ $M_2$ distributions (float64 ground truth):
+    contractive training flattens the curvature profile (median
+    $0.218 \to 0.051/0.052$).}
+    \label{fig:cert_panorama}
+\end{figure*}
 
 \vspace{4pt}
 \noindent\textbf{Contrast with standard MLP.}
