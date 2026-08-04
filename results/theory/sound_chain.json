@@ -1,0 +1,48 @@
+{
+  "date": "2026-08-04",
+  "note": "full-phi M2; sound = IA form floored by measured",
+  "out": {
+    "main": {
+      "m2_median": 0.21723768422066314,
+      "m2_max": 0.996444690223143,
+      "K": 340.03222555396985,
+      "eps_char": 0.004987599892821347,
+      "eps_max": 0.022877556663286443,
+      "expected_tier_bound": 1.6959446917287841,
+      "expected_safety": 0.39800826246988613,
+      "worst_tier_bound": 7.779106507454342,
+      "worst_safety": 0.08677089063547082,
+      "sound_bound": 7.779106507454342,
+      "sound_safety": 0.08677089063547082,
+      "measured_maxae": 0.5175
+    },
+    "soft2L": {
+      "m2_median": 0.04954554105064801,
+      "m2_max": 1.3945340348682294,
+      "K": 1.2030627709746462,
+      "eps_char": 0.001137525177183245,
+      "eps_max": 0.03201736304544404,
+      "expected_tier_bound": 0.0013685141917155002,
+      "expected_safety": 493.23565958337207,
+      "worst_tier_bound": 0.03851889750475314,
+      "worst_safety": 17.523866043069035,
+      "sound_bound": 0.05797,
+      "sound_safety": 11.643953769190961,
+      "measured_maxae": 0.0527
+    },
+    "soft3L": {
+      "m2_median": 0.05046141602355192,
+      "m2_max": 5.345246075510659,
+      "K": 1.2558410035466359,
+      "eps_char": 0.0011585529189080796,
+      "eps_max": 0.12272248642754062,
+      "expected_tier_bound": 0.0014549582603434069,
+      "expected_safety": 463.9308345798752,
+      "worst_tier_bound": 0.15411993051290102,
+      "worst_safety": 4.379706101304642,
+      "sound_bound": 0.15411993051290102,
+      "sound_safety": 4.379706101304642,
+      "measured_maxae": 0.1004
+    }
+  }
+}

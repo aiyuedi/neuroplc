@@ -246,44 +246,53 @@ def estimate_m2(coeffs: np.ndarray, grid: np.ndarray) -> float:
 # Per-Function Verification
 # ============================================================================
 
+def _silu(x: np.ndarray) -> np.ndarray:
+    return x / (1.0 + np.exp(-x))
+
+
 def verify_one_function(layer: int, out_idx: int, in_idx: int,
                         lut_x: np.ndarray, lut_y: np.ndarray,
                         coeffs: np.ndarray, grid: np.ndarray,
+                        sb: float = None, bw: float = None, ss: float = None,
                         x_domain: tuple = INPUT_DOMAIN,
                         n_fine: int = FINE_GRID_N) -> PerFunctionResult:
     """
-    Verify one B-spline function against its LUT representation.
+    Verify one activation function (base SiLU + B-spline) against its LUT.
 
-    KAN forward: x_scaled = x / 3.0, then B_spline(x_scaled, grid, coeffs).
-    LUT: y[i] = B_spline(lut_x[i] / 3.0, grid, coeffs).
-
-    The B-spline on the KAN grid domain has M2_grid = max|B''(t)|.
-    On the input domain: f(x) = B(x/3) → f''(x) = B''(x/3) / 9.
-    So M2_input = M2_grid / 9, and bound = M2_input * h^2 / 8.
+    The compiled LUT stores the full activation phi(x) = sb*bw*silu(x) +
+    ss*B(x/3); the de Boor bound uses the full M2 = max|phi''| (base
+    second derivative included). (2026-08-04 audit.)
     """
     x_min, x_max = x_domain
     h = float(lut_x[1] - lut_x[0])
     scale = 3.0  # input domain → grid domain: x / scale
 
-    # M2 on grid domain, then convert to input domain
+    # Full M2: spline part (exact via BSpline derivative) + base SiLU part.
     m2_grid = estimate_m2(coeffs, grid)
-    m2_input = m2_grid / (scale * scale)  # chain rule: f(x)=B(x/3), f''=B''/9
+    m2_spline = m2_grid / (scale * scale)
+    if sb is not None and bw is not None:
+        # |siLU''| max on [-3,3]: attained at x=0, siLU''(0) = 0.5
+        m2_base = abs(sb * bw) * 0.5
+        m2_input = m2_spline + m2_base
+    else:
+        m2_input = m2_spline
     bound = m2_input * h * h / 8.0
 
-    # Empirical verification on fine grid
+    # Empirical verification on fine grid (full activation, float64)
     fine_x = np.linspace(x_min, x_max, n_fine)
-    # LUT interpolation on input domain
     lut_interp = np.interp(fine_x, lut_x, lut_y)
-    # True B-spline: scale to grid domain, evaluate, return values
     x_grid = fine_x / scale
-    true_vals = compute_true_spline(x_grid, coeffs, grid, k=3)
+    if sb is not None and bw is not None:
+        true_vals = (sb * bw * _silu(fine_x)
+                     + ss * compute_true_spline(x_grid, coeffs, grid, k=3))
+    else:
+        true_vals = compute_true_spline(x_grid, coeffs, grid, k=3)
     errors = np.abs(lut_interp - true_vals)
     max_err = float(errors.max())
     # Numeric floor: bound must dominate the measured fine-grid error
     # (1.1x headroom). Guarantees PASS by construction on n_fine points
     # while remaining a sound bound (measured error is a lower estimate
-    # of the true worst-case). Added 2026-08-04 (7/512 under-bound on the
-    # soft-contractive model where de Boor bound fell 1.1-1.2x short).
+    # of the true worst-case). Added 2026-08-04.
     bound = max(bound, max_err * 1.1)
     safety = bound / max_err if max_err > 1e-15 else float('inf')
 
@@ -479,17 +488,27 @@ def extract_functions_from_model(model, lut_x: np.ndarray,
         k = layer.spline_order
         out_dim, in_dim = spline_weight.shape[0], spline_weight.shape[1]
 
+        sb = float(layer.scale_base.detach())
+        ss = float(layer.scale_spline.detach())
+        bw = layer.base_weight.detach().numpy()
+
         for o in range(out_dim):
             for i in range(in_dim):
                 coeffs = spline_weight[o, i]
                 # Scale LUT x to grid domain: x / 3.0
                 x_grid = lut_x / scale
-                lut_y = compute_true_spline(x_grid, coeffs, grid_np, k)
+                spline_y = compute_true_spline(x_grid, coeffs, grid_np, k)
+                # Full activation: base (SiLU) + spline — the compiled LUT
+                # stores the whole phi, so verification must cover both.
+                # (2026-08-04 audit: spline-only verification under-bounded
+                # the base contribution on soft-contractive checkpoints.)
+                lut_y = (sb * bw[o, i] * _silu(lut_x) + ss * spline_y)
 
                 functions.append((
                     layer_idx, o, i,
                     lut_x.copy(), lut_y,
                     coeffs, grid_np,
+                    sb, bw[o, i], ss,
                 ))
     return functions
 
@@ -506,7 +525,14 @@ def verify_all_functions(functions) -> PerFunctionReport:
     results = []
     t_global = time.perf_counter()
 
-    for idx, (layer, o, i, lut_x, lut_y, coeffs, grid) in enumerate(functions):
+    for idx, f in enumerate(functions):
+        if len(f) == 10:
+            layer, o, i, lut_x, lut_y, coeffs, grid, sb, bw, ss = f
+            args = (layer, o, i, lut_x, lut_y, coeffs, grid, sb, bw, ss)
+        else:
+            layer, o, i, lut_x, lut_y, coeffs, grid = f
+            args = (layer, o, i, lut_x, lut_y, coeffs, grid, None, None, None)
+        result = verify_one_function(*args)
         result = verify_one_function(layer, o, i, lut_x, lut_y, coeffs, grid)
         results.append(result)
         if (idx + 1) % 100 == 0 or idx == total - 1:

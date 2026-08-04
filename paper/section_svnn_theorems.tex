@@ -380,25 +380,27 @@ The $\gamma$ reduction is not merely cosmetic: it converts the certificate
 into a full-chain, wide-coverage guarantee. On the soft-contractive
 checkpoint (98.5\% test accuracy), the measured constants collapse
 relative to the released student: $L_B = [0.28, 0.23]$ (vs.\ $[2.21,
-2.05]$), $M_2^{\max} = 0.44$ (vs.\ $1.59$), and the DA amplification
-constant $L_B^{(1)} m_{\text{row}} + s_1 = 0.85$ (vs.\ $162.2$). The
-E68-constant bounds tighten accordingly: the expected-tier DA bound
-evaluates to $0.0009$ at the $M_2^{\text{char}}$ calibration (safety
-$763\times$, high-probability in the random-sign sense of
-Lemma~\ref{lem:da_moment}---the same nature as the released student's
-$1.0\times$); at the worst-function $M_2^{\max}$ calibration
-(scipy-exact $M_2^{\max} = 1.54$) the DA/IA envelopes are
-$0.030$/$0.043$ (safety $22.6\times$/$15.9\times$). The
-\emph{sound} certificate---no sign-cancellation assumption, floored by
-the full-set measured maxAE ($0.053$ over 13{,}714 inputs, Tier-4
-simulator)---is $0.058$, a safety factor of $11.6\times$, versus
-$1.0\times$ for the released student (whose measured $0.52$ nearly
-saturates its $0.66$ bound). The soft-contractive $M_2$ distribution is
-lighter ($M_2^{\text{char}} = 0.040$ vs.\ $0.177$, same methodology):
-contractive training flattens the curvature profile itself, in addition
-to compressing the weight scale. Both DA and IA are certificates at \emph{either}
-calibration, in contrast to the released student, where IA is not a
-certificate and DA carries a $1.0\times$ margin. Equally important,
+2.05]$), the no-cancellation amplification constant $K = 1.2$
+(vs.\ $340$), and the $M_2$ profile is far lighter
+($M_2^{\text{char}} = 0.051$ vs.\ $0.218$, full-$\varphi$ float64
+methodology). The
+E68-constant bounds tighten accordingly: the expected-tier bound
+evaluates to $0.0014$ at the $M_2^{\text{char}}$ calibration (safety
+$493\times$, high-probability in the random-sign sense of
+Lemma~\ref{lem:da_moment}); the worst-function envelope (full-$\varphi$
+$M_2^{\max}$, float64 ground truth) is $0.039$ (safety $17.5\times$).
+The \emph{sound} certificate---no sign-cancellation assumption, floored
+by the full-set measured maxAE ($0.053$ over 13{,}714 inputs, Tier-4
+simulator)---is $0.058$, a safety factor of $11.6\times$. Contrast the
+released student: its full-$\varphi$ worst-function envelope is $7.78$
+(safety $0.1\times$---\emph{not} a certificate), and its measured maxAE
+($0.52$) is $15\times$ below that envelope: the design-time guarantee
+does not exist for the untrained checkpoint, and the empirical margin is
+a lucky artifact---precisely the E52 lesson. Soft-contractive training
+flattens the curvature profile itself ($M_2^{\text{char}} = 0.051$ vs.\
+$0.218$, full-$\varphi$ methodology), in addition to compressing the
+weight scale ($K = 1.2$ vs.\ $340$), converting a non-existent
+certificate into a sound one. Equally important,
 Box-Continuation now holds for essentially all inputs: over the CWRU
 test set the fraction of inputs with any out-of-domain intermediate
 signal drops from $100\%$ (released student; $47.1\%$ of signals) to
@@ -408,7 +410,7 @@ rather than a nominal subset. Per-function Z3 verification passes
 (\texttt{verify\_contractive\_bounds.py}, \texttt{verify\_box\_coverage.py},
 2026-08-04). The expressivity--contractivity trade-off is thereby fully
 quantified at the deployment level: $1.4$~pp of accuracy purchases an
-$11.6\times$ sound safety margin (expected tier $763\times$), full
+$11.6\times$ sound safety margin (expected tier $493\times$), full
 Box-Continuation coverage, and Z3-verified components. The deployment chain closes: the checkpoint
 compiles to 2{,}188-line SCL (40.3~KB, 53.7\% of the S7-1200 work-memory
 budget; 7{,}388 FLOPs per inference) with WCET identical to the released
@@ -416,8 +418,8 @@ student ($3.86$~ms, $25.9\times$ scan-cycle margin)---the full pipeline
 from trained weights to certifiable, compilable, deployable inference
 (2026-08-04, \texttt{NeuroPLCCompiler}). Depth scales with the same
 recipe: the 3-layer soft-contractive variant ($\gamma = [0.99, 1.03,
-1.02]$, $98.6\%$ acc) carries a sound certificate of $0.110$
-(safety $6.1\times$), so the certificate survives architectural
+1.02]$, $98.6\%$ acc) carries a sound certificate of $0.154$
+(safety $4.4\times$), so the certificate survives architectural
 extension---the $\gamma \to 1$ branch of Theorem~4 in practice.
 
 \vspace{4pt}

@@ -70,7 +70,7 @@ We are transparent about CWRU's limitations (Section Limitations, with explicit 
 
 1. **The compiler is data-agnostic**: The SVNN framework (Theorem 2) depends on KAN architecture, not data provenance. Experiment E42 (MNIST) proves identical verification guarantees (512/512 functions, certificate valid) on image classification — a completely different domain.
 
-2. **Cross-dataset with fine-tuning (E55)**: CWRU→XJTU-SY improves from 29.8% (zero-shot, on stratified validation split) to **91.7%** (100-epoch fine-tuning, +61.9 pp), with SVNN conditions **preserved** after fine-tuning (DA bound: 0.064→0.049, tightened; Z3: 512/512 preserved; SCL: 2,188 lines, 0e 0w). XJTU-SY (Wang et al. 2020, IEEE Trans. Reliability) uses naturally degraded bearings in run-to-failure tests — addressing the "artificial EDM faults" critique.
+2. **Cross-dataset with fine-tuning (E55)**: CWRU→XJTU-SY improves from 29.8% (zero-shot, on stratified validation split) to **91.7%** (100-epoch fine-tuning, +61.9 pp), with SVNN conditions **preserved** after fine-tuning (DA bound: 0.411→0.165 (E68 constant, tightened; 2026-08-04 recomputation); Z3: 512/512 preserved; SCL: 2,188 lines, 0e 0w). XJTU-SY (Wang et al. 2020, IEEE Trans. Reliability) uses naturally degraded bearings in run-to-failure tests — addressing the "artificial EDM faults" critique.
 
 3. **Cross-architecture verification (E54)**: ChebyKAN (Chebyshev polynomial basis, Proposition 3) achieves 100.0% CWRU accuracy with 496/512 Z3-verifiable components via polynomial NRA — confirming the compiler generality is data- AND architecture-independent.
 
@@ -416,7 +416,7 @@ Theorem 6/14 govern the **sample dimension n** (statistical side: how many sampl
 ## Q27: "The soft-contractive safety factors differ 66x (sound 11.6x vs expected 763x). Which is the certificate?"
 
 **Our Answer (two tiers, both honest):**
-The sound certificate is **11.6×** (bound 0.058): the no-cancellation IA envelope at the scipy-exact worst-function M₂, floored by the full-set measured maxAE (0.053 over 13,714 inputs, Tier-4 simulator). It makes no sign-cancellation or calibration assumption, so it is the number to cite for worst-case claims. The **763×** figure is the expected tier (M₂_char median calibration, high-probability in the random-sign sense of Lemma da_moment) — the same nature as the released student's 1.0×. We report both with their semantics because the two answer different referee questions: "can you guarantee worst case?" (11.6×) and "what is the typical-case margin?" (763×). The released student's 1.0× is its expected tier; its sound worst-function envelope (12.4) is not a certificate — the soft-contractive model's sound tier *is* one (0.058 << 0.675).
+The sound certificate is **11.6×** (bound 0.058): the no-cancellation IA envelope at the scipy-exact worst-function M₂, floored by the full-set measured maxAE (0.053 over 13,714 inputs, Tier-4 simulator). It makes no sign-cancellation or calibration assumption, so it is the number to cite for worst-case claims. The **493×** figure is the expected tier (M₂_char median calibration, high-probability in the random-sign sense of Lemma da_moment) — the same nature as the released student's 1.0×. We report both with their semantics because the two answer different referee questions: "can you guarantee worst case?" (11.6×) and "what is the typical-case margin?" (493×). The released student's 1.0× is its expected tier; its sound worst-function envelope (12.4) is not a certificate — the soft-contractive model's sound tier *is* one (0.058 << 0.675).
 
 ## Q28: "Soft-contractive training costs 1.4 pp accuracy (98.5% vs 99.93%). Is that acceptable?"
 
@@ -426,6 +426,6 @@ The 1.4 pp is the *measured price of the contraction budget* — exactly what th
 ## Q29: "Does the certificate survive depth? The 3-layer DA bound was 5.66."
 
 **Our Answer (yes, with the same recipe):**
-The 5.66 figure is the *untrained* 3-layer KAN (E56, γ in the [15.4, 5.3] family). Training the 3-layer [28,16,8,4] with the same soft-γ-projection recipe (E-T9-3L) gives γ = [0.99, 1.03, 1.02], 98.6% test accuracy, and a sound certificate of 0.110 (safety 6.1×, measured-floor 0.1004). Per-layer bound growth drops from 8.6× (untrained) to 1.9× (soft-contractive) — the γ→1 branch of Theorem 4 instantiated at L=3. Depth scaling with a certificate is therefore a property of the *training recipe*, not an architecture accident.
+The 5.66 figure is the *untrained* 3-layer KAN (E56, γ in the [15.4, 5.3] family). Training the 3-layer [28,16,8,4] with the same soft-γ-projection recipe (E-T9-3L) gives γ = [0.99, 1.03, 1.02], 98.6% test accuracy, and a sound certificate of 0.110 (safety 4.4×, measured-floor 0.1004). Per-layer bound growth drops from 8.6× (untrained) to 1.9× (soft-contractive) — the γ→1 branch of Theorem 4 instantiated at L=3. Depth scaling with a certificate is therefore a property of the *training recipe*, not an architecture accident.
 
 *Updated: 2026-08-04 | NeuroPLC Pre-Submission Defense Document (TNNLS v4: Thm 17–19 capacity defenses, Q21–Q26 + Q27–29 deployment-certificate defenses)*

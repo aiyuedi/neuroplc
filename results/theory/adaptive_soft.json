@@ -1,0 +1,14 @@
+{
+  "date": "2026-08-04",
+  "model": "D:\\neuroplc-paper\\results\\student\\kan_contractive.pt",
+  "eps_uniform": 0.035359208788338516,
+  "eps_adaptive": 0.0016160203618408031,
+  "N_range": [
+    5,
+    67
+  ],
+  "N_median": 13.0,
+  "sound_uniform": 0.04253929172259159,
+  "sound_adaptive": 0.0019441713759349125,
+  "sound_safety_adaptive": 347.1916150783808
+}
