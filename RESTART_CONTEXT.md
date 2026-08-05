@@ -1,6 +1,7 @@
-# NeuroPLC — 新窗口上手文档（2026-08-05 v4）
+# NeuroPLC — 新窗口上手文档（2026-08-05 v5）
 
 > **若在新 session 中接手本项目，先读此文件，再执行「上手第一步」。**
+> v5 由 2026-08-05 更新：证书体系第三轮（soft3L/Fourier sound）+ M21/CMI/conjecture 锚定。
 > v4 由 2026-08-05 更新：P2 残余全清（16 overfull hbox → 0）。
 > v3 由 2026-08-05 更新：证书体系（双层/有界幅值基）+ Phase 1 审稿闭环（4 P0 全清）。
 > 最新快速交接：`HANDOFF_2026-08-05.md`（三分钟版）。
@@ -88,13 +89,20 @@ cd paper && xelatex main && bibtex main && xelatex main && xelatex main  # 编�
 ## 4. 剩余待办
 
 ### 投稿前（按优先级）
-1. **TNNLS 页数策略（板板决策，挂起中）**：91 页单栏 ≈ 44 页双栏 vs ~14 页限制——压缩 vs 分流（IMA J. Inf. Inference / FoCM 理论侧；IEEE TII 系统侧），投稿前必须定案
-2. **T1 归约尝试**（建议独立 session 专攻）：stratum-3 类级归约（ε-Verify → 结构最优性，NP-hard 归约边界）——失败保持 conjecture
-3. **物理 PLC WCET 实测**（目前 PLCSIM/Z3 模拟）——诚实限制，cover letter 已声明
-4. ~~**P2 残余**：16 个 overfull hbox~~ ✅ **已全清（2026-08-05，commit c876ce5）**：0 overfull / 0 errors / 0 undefined / 91 页不变
+1. **TNNLS 页数策略（板板决策，挂起中）**：92 页单栏 ≈ 46 页双栏 vs ~14 页限制——压缩 vs 分流（IMA J. Inf. Inference / FoCM 理论侧；IEEE TII 系统侧），投稿前必须定案
+2. **γ<1 全层（v1/v2/v3 均未破第二层 γ₂=1.68）**：现有软惩罚+投影无法压——嫌疑 bias 未缩放 + 信号比非 per-edge L——需 per-edge L 训练约束（方法升级项）
+3. **物理 PLC WCET 实测**（目前 PLCSIM/Z3 模拟 + L0-direct 估算 24.8ms）——诚实限制，cover letter 已声明
+4. ~~**P2 残余**~~ ✅ 已全清（c876ce5）；44 underfull 遗留（低优先）
 5. **CN 中文版同步**（板板明确"先不理"，5 个 bib key 缺失会编译 [?]）
+6. ~~**T1 归约**~~ ✅ conjecture 已锚定（free-knot NP-hard：Mohr 2023/Beliakov 2004）；完整归约证明仍开放（独立 session）
 
 ### 已结案（勿再动）
+- **证书第三轮 ✅（2026-08-05，904dc16/72c840a/781920d 等）**：
+  - **soft3L SOUND 0.284/2.4×**（信号域传播：输出层 per-edge L 4.69→0.29；Box-in 81.4%；修正 0.110 误标 sound 的过度声称）
+  - **FourierKAN SOUND 0.130/5.2×**（L0-direct 配置：L0 解析 SIN/COS + L1 LUT N=16 域 6.3；SCL 4,363 行；f32 模拟 maxAE 0.091 被覆盖；WCET 24.8ms/4.0× 余量——e60e61_l0direct.py）
+  - **M21 first 断言弱化**（18 处 to our knowledge）、**M6 注释编号修复**、**CMI 引用**（Sefidgaran NeurIPS 2025 Oral, arXiv:2510.23485 + Thm 6 关系段）
+  - **c_*/T1 conjecture 锚定**（free-knot 最优性 NP-hard 文献：Mohr 2023 set-partitioning + Beliakov 2004）
+  - **cross_domain 表全填**（Cond.3：MNIST/ChebyKAN 实测 No；M2 max：MNIST 0.83/XJTU 27.1）
 - **16 overfull hbox 全清 ✅（2026-08-05，c876ce5）**：tab:xjtu_ft 189pt（5 列声明+脚注移出）、tab:cert_thresholds 79pt（7 列声明+Evidence p 列）、长代码路径段落 4 处（局部 tolerance 组）、Thm 5/6 段落、FourierKAN/WaveletKAN 列宽、Step4/TableIX 微溢出
 - FIXME/TODO 清扫 ✅（2026-08-04 完成 18 处）
 - tab:summary E-T 行 ✅（E-T1-E-T11）

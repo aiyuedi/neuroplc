@@ -4,8 +4,8 @@
   "contractive": true,
   "gamma_target": 0.7,
   "gamma_measured": [
-    0.8233,
-    1.679
+    0.8235,
+    1.6808
   ],
   "test_acc": 0.9996354579925537,
   "best_val": 0.9985422492027283,
