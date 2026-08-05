@@ -1,0 +1,11 @@
+{
+  "date": "2026-08-05",
+  "config": "L0 analytic (SIN/COS) + L1 LUT N=16 [-3.15,3.15]",
+  "scl_lines": 4363,
+  "maxAE_f32_scsim": 0.09056222775784173,
+  "sound_bound": 0.1302,
+  "covered": true,
+  "wcet_us": 24746.0,
+  "wcet_ms": 24.746,
+  "scan_margin": 4.041057140547967
+}

@@ -313,9 +313,18 @@ optimality}: reaching $c_*$ requires non-affine, structure-optimal
 approximation, whose class-level certification is conjecturally
 exponential (Theorem~\ref{thm:capacity-stratification}, item 4)---a
 closed-form certificate at constant $c_*$ would decide the conjectured
-NP-hard class-level problem. (The instance-level bound---fixed node
-set, one function---is closed-form and cheap, consistent with SOS
-certificates verifying polynomial optimality at the instance level.)
+NP-hard class-level problem. The conjecture is anchored in the
+established hardness of free-knot optimality: globally optimal knot
+placement for free-knot splines is a set-partitioning-hard global
+optimization (deterministic global optimization of free knots is
+NP-hard in general~\cite{beliakov2004least}; the best-known global
+solvers terminate only with exponential worst-case
+effort~\cite{mohr2023globally}), and certifying that a node set
+achieves the width constant $c_*$ is at least as hard as deciding
+free-knot optimality at the class level. (The instance-level
+bound---fixed node set, one function---is closed-form and cheap,
+consistent with SOS certificates verifying polynomial optimality at
+the instance level.)
 \emph{(ii) Class-adaptation is free on analytic classes.} On analytic
 classes $A_\rho$ (spectral coefficients $e^{-\rho n}$), the spectral
 code (Fourier/Chebyshev truncation) achieves

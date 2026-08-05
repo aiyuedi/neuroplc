@@ -405,7 +405,14 @@ measured L0 outputs; a compiler extension, distinct from the shipped
 full-LUT $N{=}15$ backend)---a \emph{sound} bound of $0.130$ (safety
 $5.2\times$; 2026-08-05, \texttt{verify\_fourier\_l0direct.py}), which
 covers the measured $0.091$ (L0-direct deployment) with $1.4\times$
-headroom. WaveletKAN ($\gamma = [0.92, 1.28]$,
+headroom. The configuration compiles to 4{,}363-line SCL
+(\texttt{e60e61\_l0direct.py}): L0 emits software $\sin/\cos$ harmonic
+evaluations (S7-1200 float library), L1 emits the $N{=}16$ LUT with the
+standard binary-search structure; a float32 SCL simulation over the
+full 13{,}714 inputs reproduces the measured maxAE $0.091$ (covered by
+the sound bound; IEEE-754 rounding is below $10^{-5}$), and the WCET
+estimate is $\approx 24.8$~ms ($4.0\times$ scan-cycle margin; the
+software transcendental library is the cost of removing the L0 LUT). WaveletKAN ($\gamma = [0.92, 1.28]$,
 $99.67\%$) carries a first-principles sound bound of $0.237$ (safety
 $2.8\times$; covers measured $0.157$) with $100\%$ coverage
 (\texttt{train\_c2bv\_contractive.py},
