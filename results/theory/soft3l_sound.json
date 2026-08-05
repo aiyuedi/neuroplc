@@ -1,0 +1,23 @@
+{
+  "date": "2026-08-05",
+  "model": "kan_contractive_3l",
+  "signal_domain_L1_out": [
+    -1.294431447982788,
+    1.516680121421814
+  ],
+  "box_in_coverage": 0.8136940352924019,
+  "L2_signal": {
+    "max": 0.28935500845051365,
+    "row_sum_max": 1.867057079275411
+  },
+  "M2_2_signal": {
+    "max": 0.9691318171788055,
+    "avg": 0.6050115624926069
+  },
+  "sound_bound": 0.2840567346630476,
+  "safety": 2.376285852897293,
+  "certificate": true,
+  "covers_f32_measured": true,
+  "global_h_bound": 1.2689,
+  "measured_f32": 0.1004
+}

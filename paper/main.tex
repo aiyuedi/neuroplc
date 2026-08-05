@@ -4421,7 +4421,7 @@ E20& Motor Load Regression   & RMSE                & 0.011; zero code change \\
 E52& Verification Blind Spot & $N{=}4{\to}15$ safety scan & Acc.\ 99.93\% but safety $<$1 at $N{\le}7$; 225 flips \\
 E54& ChebyKAN Z3 Verif.     & Per-func.\ Z3 NRA   & \textbf{496/512 (96.9\%)}, Prop.~\ref{prop:chebykan-svnn} \\
 E55& XJTU-SY FT + SCL       & 100-ep FT + S7-1200 & \textbf{91.7\%}, 512/512 Z3, 0e 0w SCL \\
-E56& Deep KAN ($L{=}3$)       & [28,16,8,4] 120ep & \textbf{99.60\%}, 608/608 Z3, DA 5.66, sub-exp. depth; E-T9-3L: \textbf{98.6\%}, validated cert.\ $6.1\times$ \\
+E56& Deep KAN ($L{=}3$)       & [28,16,8,4] 120ep & \textbf{99.60\%}, 608/608 Z3, DA 5.66, sub-exp. depth; E-T9-3L: \textbf{98.6\%}, sound $2.4\times$ (Box-in 81\%) + validated $6.1\times$ \\
 E57& CROWN vs.\ NeuroPLC     & KAN[28,16,4] DA/IBP & \textbf{DA substantially tighter}, CROWN=IBP for KAN \\
 E58& Per-Func.\ M$_2$ / Z3    & M$_2$ proxy, Z3 NRA & mean 0.017, max 0.041; Z3 512/512 \\
 E60& FourierKAN SVNN           & [28,16,4] $K{=}6$, CWRU & \textbf{100\% acc}, 512/512 Z3, 2184-line SCL \\
@@ -4798,9 +4798,12 @@ The result is consistent with the depth-dependent (non-convergent) form:
           \textbf{Soft-contractive depth extension (E-T9-3L, 2026-08-04):}
           training the 3-layer KAN with the same $\gamma$-projection recipe
           yields $\gamma = [0.99, 1.03, 1.02]$, $98.6\%$ test accuracy, and a
-          \emph{sound} certificate of $0.110$ (safety $6.1\times$;
-          float32 measured floor; per-function float64 bound $0.019$,
-          safety $36\times$)---depth scaling
+          \emph{sound} certificate of $0.284$ (safety $2.4\times$;
+          signal-domain propagation, Box-in $81.4\%$; the output-layer
+          per-edge Lipschitz is $0.29$ on its actual signal domain vs.\
+          $4.69$ on the full design domain; 2026-08-05), plus the
+          validated $0.110$ ($6.1\times$, full-set measured floor) and
+          per-function float64 bound $0.019$ (safety $36\times$)---depth scaling
           \emph{with} a certificate, the $\gamma \to 1$ branch of
           Theorem~\ref{thm:generalization} instantiated at $L = 3$
           (per-layer bound growth $1.9\times$ vs.\ $8.6\times$ for the

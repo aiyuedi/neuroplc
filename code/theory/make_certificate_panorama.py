@@ -53,9 +53,9 @@ MODELS = [
     # name, acc, expected, perfunc, f64_sound, f32_sound, measured, k
     ("main",  99.93, 1.70, 2.29, None,     None, 0.517, 340),
     ("soft2L", 98.5, 0.00137, 0.0078, 0.026, 0.058, 0.053, 1.2),
-    ("soft3L", 98.6, 0.0015, 0.019, None,  0.110, 0.100, 1.26),
+    ("soft3L", 98.6, 0.0015, 0.019, 0.284, 0.110, 0.100, 1.26),
 ]
-TIERS = ["expected", "per-func", "f64 validated", "f32 validated"]
+TIERS = ["expected", "per-func", "f64", "f32 validated"]
 
 
 def m2_arrays():
@@ -148,7 +148,7 @@ def main():
 
     # ── Panel B: accuracy vs sound safety (capacity trade-off) ──
     ax = fig.add_subplot(gs[0, 1])
-    safety = {"main": 0.3, "soft2L": 11.6, "soft3L": 6.1}
+    safety = {"main": 0.3, "soft2L": 11.6, "soft3L": 2.4}
     acc = {"main": 99.93, "soft2L": 98.5, "soft3L": 98.6}
     marks = {"main": ("o", "none"), "soft2L": ("o", SERIES["soft2L"]),
              "soft3L": ("o", SERIES["soft3L"])}
