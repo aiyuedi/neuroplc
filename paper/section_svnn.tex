@@ -779,7 +779,7 @@ $\square$
 \input{section_svnn_chebykan}
 
 % ============================================================================
-% Theorem 3 (Computational Necessity) + Theorem 4 (Generalization Bound)
+% Theorem 5 (Computational Necessity) + Theorem 6 (Generalization Bound)
 % ============================================================================
 \input{section_svnn_theorems}
 
@@ -838,14 +838,14 @@ compilers targeting safety-critical embedded platforms should be designed:
           function, as demonstrated by Schwartz et~al.~\cite{schwartz2026optimal}.
           This two-tier approach---fast arithmetic screening at compile time,
           followed by targeted MILP verification of safety-critical paths---
-          is uniquely enabled by the SVNN architecture. Standard MLPs do not
+          is, to our knowledge, uniquely enabled by the SVNN architecture. Standard MLPs do not
           admit this decomposition: their multivariate ReLU activations
           require exponentially many PWA pieces to abstract, making MILP-based
           verification intractable beyond trivial depths~\cite{schwartz2026optimal}.
 \end{enumerate}
 
 These implications position \neuroplc not merely as a tool for compiling
-KANs to PLCs, but as the first instance of a broader compiler design
+KANs to PLCs, but as, to our knowledge, the first instance of a broader compiler design
 paradigm: \textit{structurally verifiable compilation}, where the compiler's
 ability to provide correctness guarantees is achieved by targeting
 architectures that are designed to be verifiable.

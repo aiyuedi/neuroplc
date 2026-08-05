@@ -193,6 +193,23 @@ at rate $N^{-k}$ ($N = (b-a)/h$ LUT points).
 \end{theorem}
 
 \vspace{2pt}
+\noindent\textbf{Relationship to compression-based generalization bounds.}
+The deployed network $\bar{N}$ is a \emph{deterministic, structural}
+compression (LUT discretization) of the trained network $N$. The nearest
+statistical neighbor is the $\varepsilon$-lossy-compression
+conditional-mutual-information (CMI) bound of
+Sefidgaran et al.~\cite{sefidgaran2025cmi}, which compresses the hypothesis
+by random projection and stochastic quantization and bounds generalization
+through the CMI of the compressed algorithm. Two differences matter for
+deployment: (i) our compression is deterministic and verification-targeted
+(the LUT grid is the object of the certificate, not a proxy), so the bias
+term is explicit ($O(\gamma^{L-1}c_kM_kh^k)$) and instantiated per
+checkpoint; (ii) the two-scale decomposition separates the sample gap from
+the LUT bias, yielding the explicit memory law
+$N^{*} \asymp n^{1/(2k)}$---a compiler rule that compression-based bounds
+do not state.
+
+\vspace{2pt}
 \noindent\textit{Proof sketch.}
 \textbf{(1) Bias term.} By Theorem~\ref{thm:sharp-lut}, each activation
 layer $\ell$ contributes pointwise error $|e_\ell| \leq c_k M_k^{(\ell)}

@@ -145,7 +145,7 @@ constants $c_k = Q_k/k!$ and an extremal family attaining them
 statement on random cubics to an exact minimax-optimality theorem with a
 certificate. Second, the \textbf{verifiability trichotomy}
 (Theorem~\ref{thm:trichotomy}): the SVNN condition is \emph{conjecturally}
-the unique regime where second-order rate, linear LUT cost, closed-form
+conjecturally the unique regime where second-order rate, linear LUT cost, closed-form
 sharp constants, and freedom from reachability computation
 coexist---ReLU
 architectures admit only first-order bounds, multivariate gates suffer
@@ -358,7 +358,7 @@ S7-1200 CPU~1211C). Existing ML$\to$PLC tools
 ICSML~\cite{icsml2023}) provide only empirical validation; general-purpose
 compilers cannot target IEC~61131-3.
 
-We instantiate the SVNN type system in \neuroplc, the first IR-based
+We instantiate the SVNN type system in \neuroplc,, to our knowledge, the first IR-based
 compiler from PyTorch to Siemens S7-1200/1500 SCL. The compiler is the
 \textit{proof of concept} for the type theory---not its primary
 contribution. Its 6-op IR has a formal syntax, operational semantics, and
@@ -384,7 +384,7 @@ provided no correctness guarantees. The gap these tools leave is not an
 implementation gap---it is an \textit{architectural} gap. Our central finding
 is that no amount of compiler engineering can close it for architectures
 violating the SVNN conditions (Theorem~5). \neuroplc instantiates the
-theory as the first self-verifying PyTorch-to-IEC~61131-3 compiler,
+theory as, to our knowledge, the first self-verifying PyTorch-to-IEC~61131-3 compiler,
 demonstrating that the certification transfers across vendors (a
 vendor-neutral IEC~61131-3 backend with identical semantics) and across
 model updates (Algorithm~4).
@@ -418,7 +418,7 @@ over PROFINET/OPC UA. An on-PLC time-domain subset is also compiled
           \textbf{DA Galois Connection} (Theorem~\ref{thm:galois}) proves that
          Doubleton Arithmetic forms a canonical instance of the Cousot abstract
          interpretation framework with a defined Galois connection
-          $(\alpha, \gamma)$, making NeuroPLC the first neural network
+          $(\alpha, \gamma)$, making NeuroPLC, to our knowledge, the first neural network
          compiler to be formally grounded in abstract interpretation
          theory. \textbf{DA Tightness} (Theorem~\ref{thm:tightness}) proves the DA bound
          is \textit{semantically tight}---the de~Boor bound $M_2 \cdot
@@ -592,7 +592,7 @@ decomposition that makes KANs parameter-efficient also makes them
 \textit{verifiable at compile time}---the question this paper answers.
 
 \textbf{KAN hardware deployment.} Four independent lines of work demonstrate
-that KAN's univariate B-spline structure is uniquely amenable to LUT-based
+that KAN's univariate B-spline structure is, to our knowledge, uniquely amenable to LUT-based
 hardware evaluation---a property absent from MLPs. On FPGA, KANEL\'{E}%
 ~\cite{kanele2026} (ISFPGA 2026 Best Paper) achieves 2,700$\times$ speedup
 via LUT-based evaluation with quantized B-splines. On microcontrollers,
@@ -612,7 +612,7 @@ KANEL\'{E} and LUT-KAN validate the LUT paradigm empirically; we formalize
 \textit{why} it works (Theorem~2) and \textit{when} it fails (Theorem~5,
 Proposition~\ref{prop:mlp_negative}). Corr\^ea demonstrates KAN-on-PLC feasibility but provides no
 native SCL compilation, no correctness guarantee, and no compiler toolchain.
-\neuroplc is the first to provide all three.
+\neuroplc is, to our knowledge, the first to provide all three.
 
 \textbf{KAN verification.} Schwartz et~al.~\cite{schwartz2026optimal} proposed
 PWA abstraction with MILP encoding for KAN verification---operating at SVNN
@@ -648,7 +648,7 @@ univariate activation structure produces naturally sparse inter-sample
 relations. Ren et~al.~\cite{ren2024lightweight} applied multi-stage
 pruning-distillation for industrial fault diagnosis, establishing the
 practical viability of compressed models for bearing monitoring. We
-contribute the first VRM-KD to a KAN student: the distillation is the
+contribute, to our knowledge, the first VRM-KD to a KAN student: the distillation is the
 \textit{training mechanism}, not the contribution; the contribution is
 that KAN's 7.9$\times$ compression does not compromise verifiability.
 
@@ -2648,7 +2648,7 @@ is available in the supplementary material.
     \label{fig:scl_snippet}
 \end{figure}
 
-This is the first PyTorch-trained model achieving 0-error
+This is, to our knowledge, the first PyTorch-trained model achieving 0-error
 compilation in the Siemens TIA Portal V21 engineering environment
 (not a live factory floor; TIA Portal V21 is Siemens' offline engineering
 workbench for PLC programming and commissioning).
@@ -2976,7 +2976,7 @@ The SVNN guarantee (Theorem~\ref{thm:svnn_conditions}) certifies
 that the \textit{output} of the compiled SCL stays within
 $\varepsilon$ of the trained model's output. But for real-time industrial
 deployment, correctness also requires that the compiled code executes
-\textit{within the scan cycle}. We provide the first parameterized WCET
+\textit{within the scan cycle}. We provide, to our knowledge, the first parameterized WCET
 analysis for SVNN-compiled networks on Siemens S7-1200.
 
 \vspace{4pt}
@@ -3077,7 +3077,7 @@ smallest Siemens S7-1200 CPU (1211C, 50~KB work memory).
 
 \vspace{4pt}
 \noindent\textbf{Industrial significance.}
-Theorem~\ref{thm:wcet} provides the first formal guarantee that a
+Theorem~\ref{thm:wcet} provides, to our knowledge, the first formal guarantee that a
 neural network compiler's output is not only \textit{correct} (Theorem~1)
 but also \textit{timely} (Theorem~\ref{thm:wcet}). For IEC~61508 SIL~2
 certification, both properties are required: a correct inference that
@@ -3251,7 +3251,7 @@ validation before exposure, and the rollback window provides the
 fail-safe path. The cost is $2\times$ DB memory for the standby table
 (45.2~KB $\to$ 90.4~KB, still within the 1.5~MB S7-1500 budget; the
 S7-1200's 50~KB budget fits the single-table case with the standby
-block in load memory). This is the first runtime-update protocol for
+block in load memory). This is, to our knowledge, the first runtime-update protocol for
 certified NN-on-PLC deployment.
 
 % ===========================================================================
@@ -4995,7 +4995,7 @@ confirming the per-function error bound $\varepsilon = 0.0036$ (the E40
 verification query; the $M_2^{\text{char}}$ audit value is $\varepsilon =
 0.00406$, Table~\ref{tab:compositional}).
 Average verification time is $285$\,ms per function (total 146\,s).
-This is the first formal, machine-checkable proof that \textit{every}
+This is, to our knowledge, the first formal, machine-checkable proof that \textit{every}
 B-spline activation in a trained KAN satisfies its LUT error bound.
 
 \vspace{4pt}
@@ -5342,7 +5342,7 @@ for IEC~61508, and multi-architecture SVNN coverage (5 $C^2$-BV variants).}
 \end{table*}
 
 Five properties distinguish \neuroplc from prior KAN hardware deployment work:
-(1)~\textbf{type-theoretic foundation}---17 theorems providing the first formal
+(1)~\textbf{type-theoretic foundation}---17 theorems providing, to our knowledge, the first formal
 characterization of certifiable neural architectures;
 (2)~\textbf{universal IEC~61131-3 compliance}---Lemma~\ref{lem:iec_universal}
 extends certification to any IEC-compliant controller;
@@ -5637,7 +5637,7 @@ frontier.
 
     \item \textbf{DA Galois Connection (Theorem~B).} Doubleton Arithmetic is a
    canonical instance of Cousot abstract interpretation with a defined Galois
-   connection $(\alpha, \gamma)$, making the framework the first neural
+   connection $(\alpha, \gamma)$, making the framework, to our knowledge, the first neural
    network compilation theory formally grounded in abstract interpretation.
 
     \item \textbf{DA Tightness (Theorem~C).} The DA bound $M_2 \cdot h^2 / 8$ is
