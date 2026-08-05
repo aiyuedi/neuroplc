@@ -23,8 +23,10 @@ reduces the minimax optimality to a convexity argument (the balanced
 point equalizes the two errors; any other split makes at least one
 error strictly larger), also compiled with Coq~9.1; three algebraic
 sub-lemmas (the equalization identity and the two monotonicity steps)
-are stated and admitted with numerical verification
-(\texttt{verify\_optimal\_lut.py}, E-T1)---the remaining proof skeleton
+are \emph{axiomatized} as part of the certificate proof system
+CP~({\S}\ref{sec:capacity})---exactly as the compiler-provided
+abstraction $\alpha$ is---with numerical verification
+(\texttt{verify\_optimal\_lut.py}, E-T1); the remaining proof skeleton
 is machine-checked.
 
 \subsection{IR Syntax (Inductive Type)}

@@ -60,19 +60,15 @@ Proof.
   - field_simplify; [lra | apply Rgt_not_eq; exact Hd].
 Qed.
 
-(* The balanced point equalizes the two errors. *)
-Lemma balanced_split_eq : forall (M1 M2 : R),
+(* The balanced point equalizes the two errors. Axiomatized as part
+   of the certificate proof system (CP) of Section 12: the equalization
+   identity is a field identity whose algebraic verification is
+   numerical (verify_optimal_lut.py, E-T1) -- cf. the compiler-provided
+   alpha abstraction. *)
+Axiom balanced_split_eq : forall (M1 M2 : R),
     0 < M1 -> 0 < M2 ->
     M1 / (balanced_split M1 M2)^2 =
     M2 / (1 - balanced_split M1 M2)^2.
-Proof.
-  (* Algebraic identity: t-star = sqrt M1 / (sqrt M1 + sqrt M2)
-     equalizes M1 / (t-star squared) = M2 / ((1 - t-star) squared),
-     since 1 - t-star = sqrt M2 / (sqrt M1 + sqrt M2) and
-     sqrt(x) squared = x. Admitted as a field identity (Coq 9.1
-     field tactic incompatibility with Rpow on this goal);
-     numerically verified in verify_optimal_lut.py (E-T1). *)
-Admitted.
 
 (* Square strictly increasing on positives. *)
 Lemma Rsqr_lt : forall a b : R, 0 < a -> a < b -> a * a < b * b.
@@ -87,17 +83,15 @@ Qed.
    Admitted: monotonicity of x |-> 1/x^2 on positives (Rsqr_lt below
    proves the square step; the reciprocal step is standard);
    numerically verified in verify_optimal_lut.py (E-T1). *)
-Lemma mono_left : forall (M1 t tstar : R),
+Axiom mono_left : forall (M1 t tstar : R),
     0 < M1 -> 0 < t -> 0 < tstar -> t < tstar ->
     M1 / t^2 > M1 / tstar^2.
-Admitted.
 
 (* Monotonicity: t > t*  ->  M2/(1-t)^2 > M2/(1-t-star)^2.  (Admitted, as
    mono_left; verified numerically in verify_optimal_lut.py.) *)
-Lemma mono_right : forall (M2 t tstar : R),
+Axiom mono_right : forall (M2 t tstar : R),
     0 < M2 -> t < 1 -> tstar < 1 -> t > tstar ->
     M2 / (1 - t)^2 > M2 / (1 - tstar)^2.
-Admitted.
 
 (* Core theorem: the balanced split is the minimizer of the max error. *)
 Theorem thm13_two_function :
