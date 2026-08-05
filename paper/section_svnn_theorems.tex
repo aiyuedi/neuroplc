@@ -22,9 +22,10 @@ simultaneously---which no non-SVNN method can.
 \setcounter{theorem}{4}
 \begin{theorem}[$\varepsilon$-Separation of LUT-Verification Complexity]
 \label{thm:necessity}
+\begingroup\tolerance=9999\emergencystretch=3em
 Let $\varepsilon$-Verify$(N, \mathrm{LUT}, \varepsilon)$ be the decision
-problem: ``is $\sup_{x \in \Omega} |N(x) - \mathrm{LUT}(x)| \leq \varepsilon$?''
-for a feedforward network $N$ on a compact box $\Omega$.
+problem: ``is \allowbreak$\sup_{x\in\Omega} |N(x) - \mathrm{LUT}(x)| \leq \varepsilon$?''
+for a feedforward network $N$ on a compact box $\Omega$.\par\endgroup
 
 \begin{enumerate}
     \item \textbf{SVNN regime (polynomial).} For SVNNs with order-$k$
@@ -561,11 +562,11 @@ architecture for the SVNN framework:
           problem is polynomial for SVNN and NP-hard for coupled
           architectures (self-contained 3-SAT reduction); SVNN uniquely
           attains (polynomial time, zero slack).
-    \item \textbf{Theorem~6} ({\S}\ref{sec:svnn-generalization}):
+    \item \begingroup\tolerance=9999\emergencystretch=3em\textbf{Theorem~6} ({\S}\ref{sec:svnn-generalization}):
           \textit{Compile-aware learning theory}---the deployed risk
           decomposes as $\hat{R}(N) + O(\gamma^{L-1}/\sqrt{n}) +
           O(\gamma^{L-1}c_kM_kh^k)$, with the resolution-matching law
-          $N^{*} \asymp n^{1/(2k)}$ (Corollary~\ref{cor:resolution_matching}).
+          $N^{*} \asymp n^{1/(2k)}$\allowbreak{} (Corollary~\ref{cor:resolution_matching}).\par\endgroup
 \end{itemize}
 \noindent\textbf{Propositions} (structural membership):
 \begin{itemize}

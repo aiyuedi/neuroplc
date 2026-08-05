@@ -76,11 +76,12 @@ e(x^*) = \frac{M_2}{2} \cdot \frac{h}{2} \cdot \frac{h}{2}
 \label{eq:error_at_midpoint}
 \end{equation}
 
+\begingroup\tolerance=9999\emergencystretch=3em
 The error achieves the de~Boor bound \textit{exactly}. MATLAB symbolic
 verification on 1{,}000 random quadratics confirms:
 $\max \text{error} = M_2 \cdot h^2 / 8$ with
 \textbf{100.0\%} precision (all 1{,}000 cases exact within machine epsilon;
-\texttt{code/theory/da\_tightness\_proof.m}).
+\texttt{code/theory/\allowbreak{}da\_tightness\_\allowbreak{}proof.m}).\par\endgroup
 
 For part~(iii): Since $f^*$ belongs to $\mathcal{F}$ (it is $C^2$ with
 $\sup |f^*{}''| = M_2$), and its interpolation error equals the de~Boor

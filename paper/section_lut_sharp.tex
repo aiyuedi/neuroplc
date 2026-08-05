@@ -221,14 +221,15 @@ recovery of a \emph{family} of functions under one storage budget
 which fixes a single function and a single interpolation scheme.
 
 \vspace{2pt}
+\begingroup\tolerance=9999\emergencystretch=3em
 \noindent\textbf{Engineering consequence (E-T1, 2026-08-03).}
 The compiler's curvature-aware LUT pass
-(\texttt{optimizer.py::adaptive\_bspline\_sampling}) used the density
+(\texttt{optimizer.py::\allowbreak{}adaptive\_bspline\_sampling}) used the density
 $|\phi''|/(1+\phi'^2)^{3/2}$; Theorem~\ref{thm:optimal_lut} shows the
 minimax density is $\sqrt{|\phi''|}$ and the old density is worse than
 uniform on real activations. The pass has been corrected
-(\texttt{verify\_optimal\_lut.py}, E-T1: cross-function $2.75\times$,
+(\texttt{verify\_optimal\_\allowbreak{}lut.py}, E-T1: cross-function $2.75\times$,
 within-function $3.32\times$ improvement; results in
-\texttt{results/theory/ti\_optimal\_lut.json}). This converts the
+\texttt{results/theory/\allowbreak{}ti\_optimal\_lut.json}). This converts the
 adaptive-LUT engineering heuristic (E15) into a provably optimal
-allocation at both levels.
+allocation at both levels.\par\endgroup

@@ -306,14 +306,14 @@ boundaries and quantitative laws} of certifiable compilation:
     slack under ETH) simultaneously (completeness of this boundary is the
     trichotomy necessity conjecture).
 
-    \item \textbf{Compile-aware generalization
+    \item \begingroup\tolerance=9999\emergencystretch=3em\textbf{Compile-aware generalization
     (Theorem~\ref{thm:generalization}).}
     The deployed risk decomposes as
-    $\hat{R}(N) + O(\gamma^{L-1}/\sqrt{n}) + O(\gamma^{L-1}c_kM_kh^k)$,
+    \hspace{0pt}$\hat{R}(N) + O(\gamma^{L-1}/\sqrt{n}) + O(\gamma^{L-1}c_kM_kh^k)$,
     yielding the \textbf{resolution-matching law}
-    $N^{*} \asymp n^{1/(2k)}$: deployed LUT memory should scale as the
+    $N^{*} \asymp n^{1/(2k)}$:\hspace{0pt} deployed LUT memory should scale as the
     $2k$-th root of the sample count---a directly actionable compiler
-    rule no existing PAC bound states.
+    rule no existing PAC bound states.\par\endgroup
 
     \item \textbf{Verifiable deployment capacity
     (Theorem~\ref{thm:capacity-stratification}, {\S}\ref{sec:capacity}).}
@@ -1409,7 +1409,7 @@ magnitude. Table~\ref{tab:da_sign} summarizes the sign statistics.
 \caption{Sign Structure of Trained KAN Weights (DA Tightening Analysis)}
 \label{tab:da_sign}
 \footnotesize
-\begin{tabular}{@{}p{2.0cm}p{1.5cm}p{1.5cm}p{1.5cm}p{1.2cm}@{}}
+\begin{tabular}{@{}p{1.9cm}p{1.5cm}p{1.5cm}p{1.5cm}p{1.3cm}@{}}
 \toprule
 \textbf{Matrix} & \textbf{Shape} & \textbf{Pos.} & \textbf{Neg.} &
 \textbf{Dom./Row} \\
@@ -1849,9 +1849,9 @@ second-largest $\varepsilon_k$ is bounded by the marginal benefit of
 one additional point to the bottleneck function---precisely the
 equalization residual arising from integrality.
 
-\noindent\textit{Step 4 (Exchange argument for optimality).}
+\begingroup\tolerance=9999\emergencystretch=3em\noindent\textit{Step 4 (Exchange argument for optimality).}
 Suppose for contradiction that a non-greedy allocation
-$\{n_k'\}$ achieves $\max_k \varepsilon_k(n_k') < \max_k
+$\{n_k'\}$ achieves\hspace{0pt} $\max_k \varepsilon_k(n_k') < \max_k
 \varepsilon_k(\text{greedy})$. Since both allocations have the same
 total $\sum_k n_k$, there must exist indices $i, j$ such that the
 non-greedy allocation gives $f_i$ fewer points and $f_j$ more points
@@ -1868,7 +1868,7 @@ strictly increases or leaves unchanged the final maximum. At the
 integer optimum, $\max_k \varepsilon_k(\text{greedy}) = \text{OPT}(B)
 + \delta_{\text{int}}$, where $\delta_{\text{int}}$ is the
 integer-granularity gap bounded by the maximum single-step marginal
-benefit among active functions.
+benefit among active functions.\par\endgroup
 
 \noindent\textit{Step 5 (Empirical verification of near-optimality).}
 We validate the optimality empirically by comparing the greedy
@@ -2629,7 +2629,7 @@ and $\lambda_{\text{rel}}=0.5$. Training: 100 epochs, Adam
 We validated the compiled SCL in Siemens TIA Portal V21 with an S7-1200
 CPU~1211C V4.7 via the Openness API~\cite{siemens_s7_1200_2022}. The
 DB+FB split architecture was used: \texttt{NeuroPLC\_Weights} (DB2,
-32.4~KB parameter arrays) and \texttt{NeuroPLC\_Inference} (FB2, 168~lines
+32.4~KB parameter arrays) and \texttt{NeuroPLC\_\allowbreak{}Inference} (FB2, 168~lines
 inference logic). Both blocks compiled with \textbf{0 errors, 0 warnings} on
 the first attempt. The FB inference block (168 SCL lines $\approx$ 3--5~KB)
 sits well under the 64~KB per-block limit; DB parameters occupy load memory,
@@ -2811,8 +2811,9 @@ a static instruction-level cycle count analysis on the generated SCL code,
 mapping each operation to its S7-1200/1500 instruction timing per the Siemens
 system manual~\cite{siemens_s7_1200_2022}.
 
+\begingroup\tolerance=9999\emergencystretch=3em
 Table~\ref{tab:cycle_count} presents the per-operation breakdown and estimated
-per-inference latency for KAN $[28,16,4]$ and MLP $[28,32,16,4]$ on both targets.
+per-inference latency for KAN\hspace{0pt} $[28,16,4]$ and MLP $[28,32,16,4]$ on both targets.\par\endgroup
 
 \begin{table}[t]
 \centering
@@ -3354,14 +3355,14 @@ generalization from the B-spline parameterization (Table~\ref{tab:models}).
 \caption{Model Comparison: Accuracy, Parameters, and FLOPs}
 \label{tab:models}
 \footnotesize
-\begin{tabular}{@{}p{1.4cm}p{3.0cm}rrr@{}}
+\begin{tabular}{@{}p{1.55cm}p{3.0cm}rrr@{}}
 \toprule
 \textbf{Model} & \textbf{Architecture} & \textbf{Params} & \textbf{FLOPs} & \textbf{Acc.} \\
 \midrule
 Teacher CNN   & CNN+SA [16,32,64]   & 48,708 & ---   & 99.93\% \\
 KAN VRM-KD    & B-spline [28,16,4], $G{=}8$ & 6,148  & 7,388 & 99.93\% \\
-FourierKAN    & Fourier [28,16,4], $K{=}6$, $\omega{=}0.4$ & 6,676 & 8,188 & \textbf{100\%} \\
-WaveletKAN    & Wavelet [28,16,4], $S{=}8$ & 4,628 & 5,644 & \textbf{100\%} \\
+FourierKAN    & Fourier [28,16,4], $K{=}6$, \newline $\omega{=}0.4$ & 6,676 & 8,188 & \textbf{100\%} \\
+WaveletKAN    & Wavelet [28,16,4], \newline $S{=}8$ & 4,628 & 5,644 & \textbf{100\%} \\
 ChebyKAN      & Chebyshev [28,16,4], deg{=}5 & $\sim$6,400 & $\sim$7,500 & 99.87\% \\
 KAN Hinton-KD & B-spline [28,16,4], $G{=}8$ & 6,148  & 7,388 & 99.89\% \\
 MLP VRM-KD    & [28,32,16,4]       & 1,524  & 4,572 & 99.89\% \\
@@ -3899,7 +3900,7 @@ without re-engineering the compiler or weakening the safety analysis.
 \caption{Cross-Dataset Fine-Tuning: CWRU $\to$ XJTU-SY (Post-Fine-Tuning)}
 \label{tab:xjtu_ft}
 \footnotesize
-\begin{tabular}{@{}lrrrr@{}}
+\begin{tabular}{@{}lrrr@{}}
 \toprule
 \textbf{Class} & \textbf{Zero-Shot} & \textbf{Fine-Tuned} & \textbf{Improvement} \\
 \midrule
@@ -3910,13 +3911,10 @@ Outer Race   & 20.3\% & 96.5\% & +76.2 pp \\
 \midrule
 \textbf{Overall} & \textbf{29.8\%} & \textbf{91.7\%} & \textbf{+61.9 pp} \\
 \midrule
-\multicolumn{4}{@{}l}{DA bound: $0.411 \to 0.165$ after FT ($4.1\times$, 2026-08-04) \quad Z3 verified: \textbf{512/512} (post-FT)} \\
-\multicolumn{4}{@{}l}{SCL compilation: 2,188 lines, \textbf{0 errors 0 warnings} (S7-1200)} \\
-\multicolumn{4}{@{}l}{SVNN Condition~3: \textbf{not satisfied by this checkpoint} (measured per-layer amplification $\gamma = [15.4, 5.3] > 1$, E68); Conditions~1--2 \textbf{preserved} (the certificate carried post-fine-tuning is the depth-dependent bound)} \\
 \bottomrule
 \end{tabular}
 \vspace{2pt}
-{\scriptsize $^{*}$Per-class zero-shot shows Inner Race retains partial transfer (76.7\%), while Normal collapses completely (0\%). The 29.8\% overall zero-shot accuracy (on the validation split) differs from the 62.5\% full-dataset figure (Table~\ref{tab:xjtu_sy}) due to class-imbalance normalization in stratified splitting. Fine-tuning at 100 epochs recovers all classes to $\geq$80\%, with Normal and Outer Race exceeding 95\%.}
+{\scriptsize $^{*}$Per-class zero-shot shows Inner Race retains partial transfer (76.7\%), while Normal collapses completely (0\%). The 29.8\% overall zero-shot accuracy (on the validation split) differs from the 62.5\% full-dataset figure (Table~\ref{tab:xjtu_sy}) due to class-imbalance normalization in stratified splitting. Fine-tuning at 100 epochs recovers all classes to $\geq$80\%, with Normal and Outer Race exceeding 95\%. DA bound: $0.411 \to 0.165$ after FT ($4.1\times$, 2026-08-04); Z3 verified: \textbf{512/512} (post-FT). SCL compilation: 2,188 lines, \textbf{0 errors 0 warnings} (S7-1200). SVNN Condition~3: \textbf{not satisfied} by this checkpoint (measured per-layer amplification $\gamma = [15.4, 5.3] > 1$, E68); Conditions~1--2 \textbf{preserved} (the certificate carried post-fine-tuning is the depth-dependent bound).}
 \end{table}
 
 \begin{table}[t]
@@ -5504,7 +5502,7 @@ in AI functional safety certification.
 \caption{Certification Thresholds: Minimum LUT Density for Each Guarantee Tier.}
 \label{tab:cert_thresholds}
 \footnotesize
-\begin{tabular}{@{}lcccccc@{}}
+\begin{tabular}{@{}lcccc>{\raggedright\arraybackslash}p{2.1in}@{}}
 \toprule
 \textbf{Guarantee} & \textbf{Method} & \textbf{$N_{\min}$} &
 \textbf{Safety} & \textbf{SIL Target} & \textbf{Evidence} \\
