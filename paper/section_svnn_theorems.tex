@@ -464,10 +464,13 @@ they guarantee}. \textbf{Theoretical tier (sound; every in-domain input,
 including unseen):} the no-cancellation propagation with the corrected
 layer semantics (layer-0 LUT errors sum directly at the hidden nodes,
 $dy_j = \sum_i \varepsilon_{j,i}$; layer-1 amplification uses per-edge
-Lipschitz constants $L_{k,j}$, not a global bound) evaluates to $0.288$
-(safety $2.34\times$)---a first-principles envelope with no empirical
+Lipschitz constants $L_{k,j}$, not a global bound) evaluates to $0.081$
+(safety $8.37\times$) on the pervasive-contractivity checkpoint
+(2026-08-06, \texttt{verify\_v5\_sound2.py}: L1 row-sum $1.54$ and
+$M_2^{\max} = 0.354$ vs.\ $4.91$/$1.39$ before the recipe)---a
+first-principles envelope with no empirical
 floor. It strictly covers the float32 deployment measurement ($0.053$
-over 13{,}714 inputs, Tier-4 simulator; $5.4\times$ headroom); the
+over 13{,}714 inputs, Tier-4 simulator; $1.5\times$ headroom); the
 IEEE-754 accumulation $\delta_{\text{fp32}}$, bounded by the
 per-operation $0.5$~ulp rule propagated through the network
 ($\lesssim 3\times10^{-5}$ on the logit scale), is a negligible addendum
@@ -487,7 +490,7 @@ of worst-case propagation versus the realized error profile---quantified
 by the differential simulator, not by the LUT analysis. The certificate
 therefore carries a deployment precision tier: $11.6\times$ (float32,
 measured) / $26\times$ (float64 backend, measured floor), always under
-the theoretical $2.34\times$ floor. Contrast the
+the theoretical $8.37\times$ floor. Contrast the
 released student: its per-function envelope is $2.29$
 (safety $0.3\times$---\emph{not} a certificate), and its measured maxAE
 ($0.52$) is $4.4\times$ below that envelope: the design-time guarantee
@@ -542,9 +545,9 @@ summarizes the certificate panorama: the tier ladder
     exceed the margin---no design-time certificate. The soft-contractive
     checkpoints carry expected $0.00137$, per-function $0.0078$,
     validated $0.026$ (float64) / $0.058$ (float32), and first-principles
-    sound $0.288$ (2L) / sound $0.284$ (3L, Box-in $81.4\%$) / validated $0.110$ (3L)---all below the margin.
+    sound $0.081$ (2L) / sound $0.284$ (3L, Box-in $81.4\%$) / validated $0.110$ (3L)---all below the margin.
     (b) Accuracy--certificate trade-off: $1.4$~pp of accuracy purchases
-    the sound certificate ($2.34\times$) and a validated margin
+    the sound certificate ($8.37\times$) and a validated margin
     ($11.6\times$)---vs.\ none for the released student---the contraction
     budget is an expression budget (Thm.~\ref{thm:capacity-stratification}).
     (c) Full-$\varphi$ $M_2$ distributions (float64 ground truth):

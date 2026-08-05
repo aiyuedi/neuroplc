@@ -192,7 +192,7 @@ IEC~61131-3 variant, and the runtime hot-swap protocol maintains the
 certified safety state across model updates. Deployment-level
 certificates close the loop: adaptive LUT allocation lifts the DA safety
 factor to $3.6\times$ at unchanged storage, and soft-contractive training
-to a first-principles \emph{sound} certificate of $2.34\times$ (pure
+to a first-principles \emph{sound} certificate of $8.37\times$ (pure
 propagation, no empirical floor; IEEE-754 $\delta_{\text{fp32}} \lesssim
 3\times10^{-5}$) / $493\times$ expected, with an empirically validated
 $11.6\times$ float32 tier (measured floor $0.058$ vs.\ measured maxAE
@@ -1322,7 +1322,7 @@ high probability under the LUT error distribution \emph{within the
 Box-Continuation domain}, but no \emph{sound} certificate exists for
 this checkpoint (the full-$\varphi$ float64 recalibration gives $1.70$,
 safety $0.4\times$). The margin is restorable to $3.6\times$ via
-adaptive allocation, {\S}\ref{sec:adaptive-lut}, or to $2.34\times$
+adaptive allocation, {\S}\ref{sec:adaptive-lut}, or to $8.37\times$
 (sound) / $11.6\times$ (validated) / $493\times$ (expected) via
 soft-contractive training, E-T9.
 
@@ -2039,7 +2039,7 @@ $M_2^{\text{char}} h^2/8 = 0.00406$) the bound
 exceeds the half-margin. Two deployment recipes restore a comfortable
 margin at unchanged storage: adaptive LUT allocation (E15,
 {\S}\ref{sec:adaptive-lut}) lifts the DA safety factor to $3.6\times$,
-and soft-contractive training (E-T9) to $2.34\times$ (first-principles
+and soft-contractive training (E-T9) to $8.37\times$ (first-principles
 sound) / $11.6\times$ (validated) with full
 Box-Continuation coverage---both implemented and verified
 (2026-08-04).
@@ -3998,7 +3998,7 @@ through the nested summation (Eq.~\ref{eq:da_bound}), yielding a
 vs.\ 1.38; margin 1.35, E6). The resulting DA safety factor of $1.0\times$
 at 15~points certifies classification with a thin margin; adaptive
 allocation (E15, {\S}\ref{sec:adaptive-lut}) lifts this to $3.6\times$,
-and soft-contractive training (E-T9) to $2.34\times$ (sound) /
+and soft-contractive training (E-T9) to $8.37\times$ (sound) /
 $11.6\times$ (validated).
 
 \vspace{4pt}
@@ -4031,7 +4031,7 @@ Adaptive-DA (E15) & 15$^{*}$ & DA, greedy adaptive $\varepsilon$    & 0.19   & $
 Adaptive-IA (E15) & 15$^{*}$ & IA, greedy adaptive $\varepsilon$    & 0.39   & $1.7\times$ \\
 Soft-contractive expected (E-T9) & 15 & DA, $M_2^{\text{char}}$ & 0.00137 & $493\times^{\ddag}$ \\
 Soft-contractive worst (E-T9) & 15 & DA, $M_2^{\max}$ & 0.039 & $17.5\times^{\natural}$ \\
-Soft-contractive sound (E-T9) & 15 & first-principles propag. & 0.288 & $2.34\times$ \\
+Soft-contractive sound (E-T9) & 15 & first-principles propag. & 0.081 & $8.37\times$ \\
 Soft-contractive validated (E-T9) & 15 & float64 deploy., floor${\times}1.1$ & 0.026 & $26\times$ \\
 Soft-contractive validated (E-T9) & 15 & float32 deploy., floor${\times}1.1$ & 0.058 & $11.6\times$ \\
 FourierKAN validated (E-T10) & 15 & bounded-amp.\ basis, floor${\times}1.1$ & 0.138 & $4.9\times$ \\
@@ -4059,7 +4059,7 @@ adaptive and soft-contractive rows below). \textbf{Validated rows}
 (0.058/0.026/0.138): measured-floor bounds ($\times 1.1$ margin over the
 full-set Tier-4 maxAE on 13{,}714 inputs); they certify those inputs
 empirically---the first-principles envelopes are the \emph{sound}
-numbers (0.288/2.34$\times$; WaveletKAN 0.237 first-principles covers
+numbers (0.081/8.37$\times$; WaveletKAN 0.237 first-principles covers
 its measured 0.157, so no floor is needed there).
 \textbf{DA, $M_2^{\max}$} (5.9): worst-function $M_2=1.586$ replaces the
 characteristic value---conservative, exceeds the half-margin.
@@ -5530,7 +5530,7 @@ $\varepsilon_{\max}{=}0.00115$ (E15); recomputed 2026-08-04: $N{=}15$
 Soft-contractive & Validated IA & 15 & $11.6\times$ & SIL~3+ & E-T9 checkpoint
 (98.5\%; $\gamma=[0.95,0.95]$ pervasive, per-edge-$L$ recipe
 2026-08-06); Box-Continuation coverage 99.9\%; Z3 512/512;
-expected tier $493\times$; sound tier $2.34\times$ \\
+expected tier $493\times$; sound tier $8.37\times$ \\
 Soft-contractive 3L & Signal-domain IA & 15 & $2.4\times$ & SIL~2 & E-T9-3L
 (98.6\%); output-layer per-edge Lipschitz $0.29$ on its signal domain
 vs.\ $4.69$ full-domain (2026-08-05); Box-in $81.4\%$; validated $6.1\times$ \\
@@ -5693,7 +5693,7 @@ compilable via LUT extraction. All generated SCL compiles to
 \textbf{0 errors, 0 warnings} in TIA Portal V21. The compiler auto-generates
 a companion safety monitor (Algorithm~3, $\leq 5\%$ overhead).
 Soft-contractive training (E-T9) converts the certificate from thin
-($1.0\times$, expected) to sound ($2.34\times$, first-principles) with a
+($1.0\times$, expected) to sound ($8.37\times$, first-principles) with a
 validated float32 tier of $11.6\times$ (measured-floor bound $0.058$
 vs.\ measured maxAE $0.053$), $99.9\%$ Box-Continuation coverage, and
 depth extension to $L{=}3$ (sound $2.4\times$ via signal-domain

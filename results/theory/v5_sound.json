@@ -1,0 +1,28 @@
+{
+  "v3": {
+    "model": "v3",
+    "m2_median": 0.04954554105064801,
+    "m2_max": 0.9600183420843678,
+    "K": 0.7452917128442659,
+    "expected_tier_bound": 0.0008477880877063777,
+    "expected_safety": 796.189531072745,
+    "worst_tier_bound": 0.016427151609198307,
+    "worst_safety": 41.09050771906414,
+    "sound_bound": 0.05797,
+    "sound_safety": 11.643953769190961
+  },
+  "v5": {
+    "model": "v5",
+    "m2_median": 0.0417201089439061,
+    "m2_max": 0.3535146909900959,
+    "K": 0.5430777564862089,
+    "expected_tier_bound": 0.0005201922665575272,
+    "expected_safety": 1297.5971451227888,
+    "worst_tier_bound": 0.004407841039312118,
+    "worst_safety": 153.13619388264956,
+    "sound_bound": 0.05797,
+    "sound_safety": 11.643953769190961
+  },
+  "date": "2026-08-06",
+  "note": "sound = max(worst-tier IA, measured_v3*1.1); v5 = pervasive-contractivity checkpoint (gamma=[0.95,0.95])"
+}

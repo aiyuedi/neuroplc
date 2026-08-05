@@ -95,6 +95,8 @@ cd paper && xelatex main && bibtex main && xelatex main && xelatex main  # 编�
 4. ~~**P2 残余**~~ ✅ 已全清（c876ce5）；44 underfull 遗留（低优先）
 5. **CN 中文版同步**（板板明确"先不理"，5 个 bib key 缺失会编译 [?]）
 6. ~~**T1 归约**~~ ✅ **conjecture 升级为定理**（2026-08-06，thm:stratum3-transfer）：单元素嵌入 F={f}∪{0}（ε(S,0)=0）→ 类级可达性 Reach NP-hard（Beliakov 决策形式）+ c_* 计算 NP-hard + ETH 指数下界 + 穷举量化网格上界（2^N log(1/h) 预算达 c_*）+ 结构最优性认证 = 阈值 e*(f,N) ≤ ε(S,f)；与 thm:necessity 互补（实例级耦合 vs 类级自由节点）；7 处 conjecture 措辞同步（stratum-3 段/tradeoff(i)/proof/unification/coordinates/related work）；94 页 0e0w 0 undefined 编译通过
+7. ~~**stratum-2 sharp 常数**~~ ✅（2026-08-06，prop:kink-sharp）：锯齿极值构造 s=M₁·dist(x,2Z/N)——2N 极值/鸽巢 → 某段含 ≥2 极值（极差 ≥M₁/N）→ 误差 ≥ 极差/2 = **M₁/(2N)**；上界：均匀网格（段宽=周期）常数逼近误差恰 M₁/(2N) → **c_kink=1/2 sharp 完全钉死**；对比 c_2=1/8——rate loss + 常数对比显式化
+8. ~~**soft2L sound 升级**~~ ✅（2026-08-06，verify_v5_sound2.py）：perfunc_v2 口径（dy=Σeps + per-edge L1）重算 v5——**sound 0.288/2.34× → 0.081/8.37×（3.6×）**（L1 row-sum 4.91→1.54、M2 max 1.39→0.35）；覆盖实测 0.053（1.5× headroom）；13 处论文数字同步（摘要/表格/结论/证书段）；validated 11.6× 与 expected 493× 不变（0.058 floor 由 measured 主导）
 
 ### 已结案（勿再动）
 - **证书第三轮 ✅（2026-08-05，904dc16/72c840a/781920d 等）**：

@@ -172,10 +172,14 @@ and a deterministic perfectly sound verifier
 
     \item \textbf{Stratum 2 (kinked gates).} Gates with unbounded second
     derivative (ReLU, $|x|$, tents) admit no second-order certificate;
-    the class width degrades to first order,
-    $\varepsilon \geq c\, M_1\, N^{-1}$ (measured slope $-1.034$, E66;
+    the class width degrades to first order with a \emph{sharp}
+    constant, $\varepsilon \geq c_{\mathrm{kink}}\, M_1\, N^{-1}$,
+    $c_{\mathrm{kink}} = 1/2$
+    (Proposition~\ref{prop:kink-sharp}; measured slope $-1.034$, E66;
     $-1.11$ on smooth tents, $E$-$T5$)---rate loss, not just constant
-    loss.
+    loss: against $c_k M_k N^{-k}$ at $k \geq 2$, the kinked class is a
+    full order slower at a comparable constant
+    ($1/2$ vs.\ $c_2 = 1/8$).
 
     \item \textbf{Stratum 3 (structure-optimal / coupled gates).} The
     class-optimal \emph{width} constant $c_* < c_k$ (free-node splines,
@@ -248,6 +252,37 @@ free-knot feasibility to class-level structure-optimality
 certification (the instance-level bound is closed-form and cheap).
 (5)~The four-step necessity argument above, under the
 premise-computability assumption. $\square$
+
+\vspace{4pt}
+\begin{proposition}[Kinked-Class Sharp Constant]
+\label{prop:kink-sharp}
+Let $s$ be the sawtooth extremal
+$s(x) = M_1 \cdot \mathrm{dist}(x, \tfrac{2}{N}\mathbb{Z})$ on $[-1,1]$
+($\|s'\|_\infty = M_1$ a.e.; $2N$ peak/valley extrema, consecutive
+extrema differing by exactly $M_1/N$). Every $N$-cell order-2
+(piecewise-linear) deployment $S$ satisfies
+$\varepsilon(S, s) \geq M_1 / (2N)$, and the bound is \emph{sharp}: the
+uniform grid (cell width $2/N$, one sawtooth period) achieves
+$\varepsilon \leq M_1/(2N)$ (a cell-constant value at the period
+midpoint interpolates between the extremal values with error exactly
+half the amplitude). Hence the kinked class satisfies the first-order
+lower bound with sharp constant $c_{\mathrm{kink}} = 1/2$.
+\end{proposition}
+
+\vspace{2pt}
+\noindent\textit{Proof.}
+A piecewise-linear deployment partitions $[-1,1]$ into $N$ cells; the
+sawtooth's $2N$ extrema lie in these cells, so by the pigeonhole
+principle some cell contains at least two extrema. Their values differ
+by at least $M_1/N$ (consecutive extrema differ by exactly $M_1/N$,
+any other pair by an integer multiple). On that cell the sawtooth has
+range $\geq M_1/N$, so every linear function $L$ within the cell errs
+by at least half the range,
+$\max_x |s(x) - L(x)| \geq (\max s - \min s)/2 \geq M_1/(2N)$
+(triangle inequality). Sharpness: on the uniform grid each cell is one
+period on which the sawtooth is affine between the extremal values
+$0$ and $M_1/N$; the cell-constant value $M_1/(2N)$ errs by exactly
+$M_1/(2N)$ at both extrema. $\square$
 
 \vspace{2pt}
 \noindent\textbf{Capacity coordinates of the trichotomy.}
