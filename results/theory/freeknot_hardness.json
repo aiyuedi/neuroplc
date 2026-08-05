@@ -1,0 +1,10 @@
+{
+  "date": "2026-08-05",
+  "script": "verify_freeknot_hardness.py",
+  "note": "free-knot local-optima landscape on peaked quartic; supports c_*/necessity conjecture anchor (Mohr 2023 set-partitioning, Beliakov 2004 NP-hard)",
+  "restarts": 40,
+  "distinct_local_optima": 40,
+  "best_err_xN2": 0.0087,
+  "worst_err_xN2": 0.2243,
+  "local_optima_ratio": 25.72
+}
