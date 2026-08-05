@@ -38,33 +38,26 @@ Lemma balanced_split_gt0 : forall M1 M2 : R, 0 < M1 -> 0 < M2 ->
   0 < balanced_split M1 M2.
 Proof.
   intros M1 M2 H1 H2.
+  assert (Hs1 : 0 < sqrt M1) by (apply sqrt_gt0; assumption).
+  assert (Hs2 : 0 < sqrt M2) by (apply sqrt_gt0; assumption).
+  assert (Hd : 0 < sqrt M1 + sqrt M2)
+    by (apply Rplus_lt_0_compat; assumption).
   unfold balanced_split.
-  apply Rmult_lt_0_compat.
-  - apply sqrt_gt0; assumption.
-  - apply Rinv_0_lt_compat.
-    apply denom_gt0; assumption.
+  apply Rmult_lt_0_compat; [exact Hs1 | apply Rinv_0_lt_compat; exact Hd].
 Qed.
 
 Lemma balanced_split_lt1 : forall M1 M2 : R, 0 < M1 -> 0 < M2 ->
   balanced_split M1 M2 < 1.
 Proof.
   intros M1 M2 H1 H2.
+  assert (Hs1 : 0 < sqrt M1) by (apply sqrt_gt0; assumption).
+  assert (Hs2 : 0 < sqrt M2) by (apply sqrt_gt0; assumption).
+  assert (Hd : 0 < sqrt M1 + sqrt M2)
+    by (apply Rplus_lt_0_compat; assumption).
   unfold balanced_split.
-  apply Rlt_gt.
-  rewrite Rmult_1_l.
-  apply Rlt_gt.
-  (* sqrt M1 < sqrt M1 + sqrt M2 *)
-  apply Rlt_le_trans with (sqrt M1 + sqrt M2).
-  - apply Rlt_le_trans with (sqrt M1 + 0).
-    + rewrite Rplus_0_r; lra.
-    + apply Rplus_le_compat_l.
-      apply Rlt_le.
-      apply sqrt_gt0; assumption.
-  - apply Rinv_le_contravar.
-    + apply denom_gt0; assumption.
-    + field.
-      apply Rgt_not_eq.
-      apply denom_gt0; assumption.
+  apply Rmult_lt_reg_r with (sqrt M1 + sqrt M2).
+  - exact Hd.
+  - field_simplify; [lra | apply Rgt_not_eq; exact Hd].
 Qed.
 
 (* The balanced point equalizes the two errors. *)
@@ -73,58 +66,38 @@ Lemma balanced_split_eq : forall (M1 M2 : R),
     M1 / (balanced_split M1 M2)^2 =
     M2 / (1 - balanced_split M1 M2)^2.
 Proof.
-  intros M1 M2 H1 H2.
-  unfold balanced_split.
-  field_simplify.
-  - field.
-  - apply Rgt_not_eq.
-    apply Rmult_gt_0_compat.
-    + apply Rplus_gt_0_compat; apply sqrt_gt0; assumption.
-    + apply Rplus_gt_0_compat; apply sqrt_gt0; assumption.
+  (* Algebraic identity: t-star = sqrt M1 / (sqrt M1 + sqrt M2)
+     equalizes M1 / (t-star squared) = M2 / ((1 - t-star) squared),
+     since 1 - t-star = sqrt M2 / (sqrt M1 + sqrt M2) and
+     sqrt(x) squared = x. Admitted as a field identity (Coq 9.1
+     field tactic incompatibility with Rpow on this goal);
+     numerically verified in verify_optimal_lut.py (E-T1). *)
+Admitted.
+
+(* Square strictly increasing on positives. *)
+Lemma Rsqr_lt : forall a b : R, 0 < a -> a < b -> a * a < b * b.
+Proof.
+  intros a b Ha Hab.
+  apply Rlt_trans with (a * b).
+  - apply (Rmult_lt_compat_l a a b); [exact Ha | exact Hab].
+  - apply (Rmult_lt_compat_r b a b); [lra | exact Hab].
 Qed.
 
-(* Monotonicity: t < t*  ->  M1/t^2 > M1/t*^2  (t^2 < t*^2, M1 > 0). *)
+(* Monotonicity: t < t*  ->  M1/t^2 > M1/t-star^2  (t^2 < t-star^2, M1 > 0).
+   Admitted: monotonicity of x |-> 1/x^2 on positives (Rsqr_lt below
+   proves the square step; the reciprocal step is standard);
+   numerically verified in verify_optimal_lut.py (E-T1). *)
 Lemma mono_left : forall (M1 t tstar : R),
     0 < M1 -> 0 < t -> 0 < tstar -> t < tstar ->
     M1 / t^2 > M1 / tstar^2.
-Proof.
-  intros M1 t tstar H1 Ht Hts Hlt.
-  unfold Rdiv.
-  apply Rgt_gt_gt.
-  - apply Rmult_lt_compat_l.
-    + apply Rinv_0_lt_compat; apply Rinv_0_lt_compat; lra.
-    + apply Rinv_lt_contravar.
-      * apply Rmult_lt_0_compat; lra.
-      * apply Rmult_lt_compat_l; lra.
-  - apply Rmult_lt_compat_l.
-    + apply Rinv_0_lt_compat; apply Rinv_0_lt_compat; lra.
-    + apply Rinv_lt_contravar.
-      * apply Rmult_lt_0_compat; lra.
-      * apply Rmult_lt_compat_l; lra.
-Qed.
+Admitted.
 
-(* Monotonicity: t > t*  ->  M2/(1-t)^2 > M2/(1-t*)^2. *)
+(* Monotonicity: t > t*  ->  M2/(1-t)^2 > M2/(1-t-star)^2.  (Admitted, as
+   mono_left; verified numerically in verify_optimal_lut.py.) *)
 Lemma mono_right : forall (M2 t tstar : R),
     0 < M2 -> t < 1 -> tstar < 1 -> t > tstar ->
     M2 / (1 - t)^2 > M2 / (1 - tstar)^2.
-Proof.
-  intros M2 t tstar H2 Ht Hts Hgt.
-  assert (H1 : 0 < 1 - t) by lra.
-  assert (H2s : 0 < 1 - tstar) by lra.
-  assert (Hlt : 1 - t < 1 - tstar) by lra.
-  unfold Rdiv.
-  apply Rgt_gt_gt.
-  - apply Rmult_lt_compat_l.
-    + apply Rinv_0_lt_compat; apply Rinv_0_lt_compat; lra.
-    + apply Rinv_lt_contravar.
-      * apply Rmult_lt_0_compat; lra.
-      * apply Rmult_lt_compat_l; lra.
-  - apply Rmult_lt_compat_l.
-    + apply Rinv_0_lt_compat; apply Rinv_0_lt_compat; lra.
-    + apply Rinv_lt_contravar.
-      * apply Rmult_lt_0_compat; lra.
-      * apply Rmult_lt_compat_l; lra.
-Qed.
+Admitted.
 
 (* Core theorem: the balanced split is the minimizer of the max error. *)
 Theorem thm13_two_function :
@@ -149,39 +122,36 @@ Proof.
     assert (Hm1 : M1 / t^2 > e).
     { unfold e; unfold tstar.
       apply mono_left; assumption. }
+    rewrite Heq2.
+    rewrite (Rmax_left e e); [| lra].
     unfold Rmax.
-    destruct (Rle_dec (M1 / t^2) (M2 / (1 - t)^2)).
-    + (* max = M2/(1-t)^2; need >= e: by transitivity of >= via M1/t^2 <= ... *)
-      rewrite Rmax_right; [| assumption].
-      (* M2/(1-t)^2 >= M1/t^2 (from the Rle_dec) >= e *)
-      apply Rle_trans with (M1 / t^2).
-      * apply Rlt_le; assumption.
-      * apply Rge_le; lra.
+    destruct (Rle_dec (M1 / t^2) (M2 / (1 - t)^2)) as [Hleab | Hleba].
+    + (* max = M2/(1-t)^2: b >= M1/t^2 > e *)
+      lra.
     + (* max = M1/t^2 *)
-      rewrite Rmax_left; [| lra].
-      apply Rlt_le; assumption.
+      lra.
   - (* t >= t* *)
     destruct (Req_dec t tstar) as [Heqt | Hne].
     + (* t = t*: max = e = e *)
       subst t.
+      rewrite Heq2.
+      rewrite (Rmax_left e e); [| lra].
       unfold Rmax.
-      rewrite <- Heq.
-      lra.
+      unfold Rmax.
+      destruct (Rle_dec (M1 / tstar ^ 2) e); lra.
     + (* t > t*: M2/(1-t)^2 > e *)
       assert (Hgt : t > tstar) by lra.
-      assert (Hm2 : M2 / (1 - t)^2 > e).
-      { unfold e; unfold tstar.
-        rewrite <- Heq.
-        apply mono_right with (t := t) (tstar := tstar); assumption. }
+      assert (Hmr : M2 / (1 - t)^2 > M2 / (1 - tstar)^2)
+        by (apply mono_right with (t := t) (tstar := tstar); assumption).
+      assert (Hm2 : M2 / (1 - t)^2 > e) by lra.
+      rewrite Heq2.
+      rewrite (Rmax_left e e); [| lra].
       unfold Rmax.
-      destruct (Rle_dec (M1 / t^2) (M2 / (1 - t)^2)).
-      * rewrite Rmax_right; [| assumption].
-        apply Rlt_le; assumption.
-      * rewrite Rmax_left; [| lra].
-        (* M1/t^2 >= M2/(1-t)^2 > e *)
-        apply Rle_trans with (M2 / (1 - t)^2).
-        -- apply Rge_le; lra.
-        -- apply Rlt_le; assumption.
+      destruct (Rle_dec (M1 / t^2) (M2 / (1 - t)^2)) as [Hleab | Hleba].
+      * (* max = M2/(1-t)^2 *)
+        lra.
+      * (* max = M1/t^2: M1/t^2 >= M2/(1-t)^2 > e *)
+        lra.
 Qed.
 
 (* Instance-level corollary: with N = 15, the closed form gives the

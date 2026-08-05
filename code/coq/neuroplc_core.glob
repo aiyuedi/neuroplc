@@ -1,0 +1,488 @@
+DIGEST 56fc01820cbce2a8d4501bac8262c26d
+Fneuroplc_core
+R563:567 Stdlib.Reals.Reals <> <> lib
+R585:589 Stdlib.micromega.Psatz <> <> lib
+R607:610 Stdlib.Lists.List <> <> lib
+def 866:868 <> var
+R873:875 Corelib.Init.Datatypes <> nat ind
+def 889:894 <> matrix
+R899:901 Corelib.Init.Datatypes <> nat ind
+def 958:966 <> lut_table
+R971:973 Corelib.Init.Datatypes <> nat ind
+def 987:990 <> grid
+R995:998 Corelib.Init.Datatypes <> list ind
+R1000:1000 Stdlib.Reals.Rdefinitions RbaseSymbolsImpl R defax
+ind 1014:1023 <> activation
+constr 1039:1045 <> ActReLU
+constr 1051:1057 <> ActSiLU
+scheme 1014:1023 <> activation_rect
+scheme 1014:1023 <> activation_ind
+scheme 1014:1023 <> activation_rec
+scheme 1014:1023 <> activation_sind
+ind 1071:1077 <> ir_expr
+constr 1093:1099 <> IRInput
+constr 1124:1131 <> IRMatMul
+constr 1169:1180 <> IRBsplineLUT
+constr 1228:1240 <> IRStandardAct
+constr 1281:1285 <> IRAdd
+constr 1327:1335 <> IRSoftmax
+R1108:1111 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R1105:1107 neuroplc_core <> var def
+R1112:1118 neuroplc_core <> ir_expr:3 ind
+R1142:1145 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R1136:1141 neuroplc_core <> matrix def
+R1153:1156 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R1146:1152 neuroplc_core <> ir_expr:3 ind
+R1157:1163 neuroplc_core <> ir_expr:3 ind
+R1193:1196 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R1184:1192 neuroplc_core <> lut_table def
+R1201:1204 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R1197:1200 neuroplc_core <> grid def
+R1212:1215 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R1205:1211 neuroplc_core <> ir_expr:3 ind
+R1216:1222 neuroplc_core <> ir_expr:3 ind
+R1254:1257 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R1244:1253 neuroplc_core <> activation ind
+R1265:1268 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R1258:1264 neuroplc_core <> ir_expr:3 ind
+R1269:1275 neuroplc_core <> ir_expr:3 ind
+R1300:1303 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R1293:1299 neuroplc_core <> ir_expr:3 ind
+R1311:1314 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R1304:1310 neuroplc_core <> ir_expr:3 ind
+R1315:1321 neuroplc_core <> ir_expr:3 ind
+R1346:1349 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R1339:1345 neuroplc_core <> ir_expr:3 ind
+R1350:1356 neuroplc_core <> ir_expr:3 ind
+scheme 1071:1077 <> ir_expr_rect
+scheme 1071:1077 <> ir_expr_ind
+scheme 1071:1077 <> ir_expr_rec
+scheme 1071:1077 <> ir_expr_sind
+ind 1590:1596 <> ir_type
+constr 1612:1618 <> LinearT
+constr 1636:1644 <> ElemwiseT
+constr 1660:1664 <> SVNNT
+R1624:1630 neuroplc_core <> ir_type:5 ind
+R1648:1654 neuroplc_core <> ir_type:5 ind
+R1672:1678 neuroplc_core <> ir_type:5 ind
+scheme 1590:1596 <> ir_type_rect
+scheme 1590:1596 <> ir_type_ind
+scheme 1590:1596 <> ir_type_rec
+scheme 1590:1596 <> ir_type_sind
+def 1765:1772 <> M2_bound
+R1779:1787 neuroplc_core <> lut_table def
+binder 1775:1775 <> T:7
+R1795:1798 neuroplc_core <> grid def
+binder 1791:1791 <> g:8
+R1890:1893 Corelib.Init.Logic <> True ind
+ind 1907:1914 <> has_type
+constr 1952:1958 <> T_Input
+constr 2005:2012 <> T_MatMul
+constr 2102:2113 <> T_BsplineLUT
+constr 2255:2262 <> T_StdAct
+constr 2362:2366 <> T_Add
+constr 2493:2501 <> T_Softmax
+R1925:1928 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R1918:1924 neuroplc_core <> ir_expr ind
+R1936:1939 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R1929:1935 neuroplc_core <> ir_type ind
+binder 1969:1969 <> x:11
+R1972:1979 neuroplc_core <> has_type:9 ind
+R1993:1999 neuroplc_core <> LinearT constr
+R1982:1988 neuroplc_core <> IRInput constr
+R1990:1990 neuroplc_core <> x:11 var
+binder 2023:2023 <> W:12
+binder 2025:2025 <> e:13
+R2046:2065 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R2028:2035 neuroplc_core <> has_type:9 ind
+R2039:2045 neuroplc_core <> LinearT constr
+R2037:2037 neuroplc_core <> e:13 var
+R2066:2073 neuroplc_core <> has_type:9 ind
+R2090:2096 neuroplc_core <> LinearT constr
+R2076:2083 neuroplc_core <> IRMatMul constr
+R2085:2085 neuroplc_core <> W:12 var
+R2087:2087 neuroplc_core <> e:13 var
+binder 2124:2124 <> T:14
+binder 2126:2126 <> g:15
+binder 2128:2128 <> e:16
+R2149:2173 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R2131:2138 neuroplc_core <> has_type:9 ind
+R2142:2148 neuroplc_core <> LinearT constr
+R2140:2140 neuroplc_core <> e:16 var
+R2186:2210 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R2174:2181 neuroplc_core <> M2_bound def
+R2183:2183 neuroplc_core <> T:14 var
+R2185:2185 neuroplc_core <> g:15 var
+R2211:2218 neuroplc_core <> has_type:9 ind
+R2241:2249 neuroplc_core <> ElemwiseT constr
+R2221:2232 neuroplc_core <> IRBsplineLUT constr
+R2234:2234 neuroplc_core <> T:14 var
+R2236:2236 neuroplc_core <> g:15 var
+R2238:2238 neuroplc_core <> e:16 var
+binder 2273:2273 <> a:17
+binder 2275:2275 <> e:18
+R2298:2318 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R2278:2285 neuroplc_core <> has_type:9 ind
+R2289:2297 neuroplc_core <> ElemwiseT constr
+R2287:2287 neuroplc_core <> e:18 var
+R2319:2326 neuroplc_core <> has_type:9 ind
+R2348:2356 neuroplc_core <> ElemwiseT constr
+R2329:2341 neuroplc_core <> IRStandardAct constr
+R2343:2343 neuroplc_core <> a:17 var
+R2345:2345 neuroplc_core <> e:18 var
+binder 2377:2378 <> e1:19
+binder 2380:2381 <> e2:20
+R2403:2420 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R2384:2391 neuroplc_core <> has_type:9 ind
+R2396:2402 neuroplc_core <> LinearT constr
+R2393:2394 neuroplc_core <> e1:19 var
+R2442:2459 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R2421:2428 neuroplc_core <> has_type:9 ind
+R2433:2441 neuroplc_core <> ElemwiseT constr
+R2430:2431 neuroplc_core <> e2:20 var
+R2460:2467 neuroplc_core <> has_type:9 ind
+R2483:2487 neuroplc_core <> SVNNT constr
+R2470:2474 neuroplc_core <> IRAdd constr
+R2476:2477 neuroplc_core <> e1:19 var
+R2479:2480 neuroplc_core <> e2:20 var
+binder 2512:2512 <> e:21
+R2531:2552 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R2515:2522 neuroplc_core <> has_type:9 ind
+R2526:2530 neuroplc_core <> SVNNT constr
+R2524:2524 neuroplc_core <> e:21 var
+R2553:2560 neuroplc_core <> has_type:9 ind
+R2576:2580 neuroplc_core <> SVNNT constr
+R2563:2571 neuroplc_core <> IRSoftmax constr
+R2573:2573 neuroplc_core <> e:21 var
+scheme 1907:1914 <> has_type_ind
+scheme 1907:1914 <> has_type_sind
+def 2815:2817 <> env
+R2825:2828 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R2822:2824 neuroplc_core <> var def
+R2829:2829 Stdlib.Reals.Rdefinitions RbaseSymbolsImpl R defax
+def 2842:2852 <> denote_real
+R2859:2865 neuroplc_core <> ir_expr ind
+binder 2855:2855 <> e:22
+R2875:2877 neuroplc_core <> env def
+binder 2869:2871 <> rho:23
+R2882:2882 Stdlib.Reals.Rdefinitions RbaseSymbolsImpl R defax
+R2895:2895 neuroplc_core <> e:22 var
+R2906:2912 neuroplc_core <> IRInput constr
+R2925:2927 neuroplc_core <> rho:23 var
+R2935:2942 neuroplc_core <> IRMatMul constr
+R2954:2964 neuroplc_core <> denote_real:24 def
+R2969:2971 neuroplc_core <> rho:23 var
+R3015:3026 neuroplc_core <> IRBsplineLUT constr
+R3038:3048 neuroplc_core <> denote_real:24 def
+R3053:3055 neuroplc_core <> rho:23 var
+R3061:3073 neuroplc_core <> IRStandardAct constr
+R3083:3093 neuroplc_core <> denote_real:24 def
+R3098:3100 neuroplc_core <> rho:23 var
+R3106:3110 neuroplc_core <> IRAdd constr
+R3143:3145 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'+'_x not
+R3125:3135 neuroplc_core <> denote_real:24 def
+R3140:3142 neuroplc_core <> rho:23 var
+R3146:3156 neuroplc_core <> denote_real:24 def
+R3161:3163 neuroplc_core <> rho:23 var
+R3169:3177 neuroplc_core <> IRSoftmax constr
+R3188:3198 neuroplc_core <> denote_real:24 def
+R3203:3205 neuroplc_core <> rho:23 var
+def 3446:3453 <> interval
+R3460:3462 Corelib.Init.Datatypes <> ::type_scope:x_'*'_x not
+R3459:3459 Stdlib.Reals.Rdefinitions RbaseSymbolsImpl R defax
+R3463:3463 Stdlib.Reals.Rdefinitions RbaseSymbolsImpl R defax
+def 3484:3494 <> interval_ok
+R3501:3508 neuroplc_core <> interval def
+binder 3497:3497 <> I:26
+R3526:3529 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'<='_x not
+R3521:3523 Corelib.Init.Datatypes <> fst def
+R3525:3525 neuroplc_core <> I:26 var
+R3530:3532 Corelib.Init.Datatypes <> snd def
+R3534:3534 neuroplc_core <> I:26 var
+def 3609:3613 <> gamma
+R3620:3627 neuroplc_core <> interval def
+binder 3616:3616 <> I:27
+R3633:3636 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R3632:3632 Stdlib.Reals.Rdefinitions RbaseSymbolsImpl R defax
+binder 3651:3651 <> x:28
+R3661:3664 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'<='_x_'<='_x not
+R3666:3669 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'<='_x_'<='_x not
+R3656:3658 Corelib.Init.Datatypes <> fst def
+R3660:3660 neuroplc_core <> I:27 var
+R3665:3665 neuroplc_core <> x:28 var
+R3665:3665 neuroplc_core <> x:28 var
+R3670:3672 Corelib.Init.Datatypes <> snd def
+R3674:3674 neuroplc_core <> I:27 var
+ax 3953:3957 <> alpha
+R3961:3961 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R3971:3975 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R3963:3966 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R3962:3962 Stdlib.Reals.Rdefinitions RbaseSymbolsImpl R defax
+R3976:3983 neuroplc_core <> interval def
+def 3998:4008 <> interval_le
+R4019:4026 neuroplc_core <> interval def
+binder 4011:4012 <> I1:31
+binder 4014:4015 <> I2:32
+R4057:4060 Corelib.Init.Logic <> ::type_scope:x_'/\'_x not
+R4047:4050 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'<='_x not
+R4041:4043 Corelib.Init.Datatypes <> fst def
+R4045:4046 neuroplc_core <> I2:32 var
+R4051:4053 Corelib.Init.Datatypes <> fst def
+R4055:4056 neuroplc_core <> I1:31 var
+R4067:4070 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'<='_x not
+R4061:4063 Corelib.Init.Datatypes <> snd def
+R4065:4066 neuroplc_core <> I1:31 var
+R4071:4073 Corelib.Init.Datatypes <> snd def
+R4075:4076 neuroplc_core <> I2:32 var
+ax 4086:4107 <> alpha_gamma_adjunction
+R4126:4129 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R4125:4125 Stdlib.Reals.Rdefinitions RbaseSymbolsImpl R defax
+binder 4121:4121 <> X:33
+R4141:4148 neuroplc_core <> interval def
+binder 4137:4137 <> I:34
+R4179:4184 Corelib.Init.Logic <> ::type_scope:x_'<->'_x not
+R4211:4211 Corelib.Init.Logic <> ::type_scope:x_'<->'_x not
+R4156:4166 neuroplc_core <> interval_le def
+R4169:4173 neuroplc_core <> alpha defax
+R4175:4175 neuroplc_core <> X:33 var
+R4178:4178 neuroplc_core <> I:34 var
+binder 4192:4192 <> x:35
+R4198:4201 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R4195:4195 neuroplc_core <> X:33 var
+R4197:4197 neuroplc_core <> x:35 var
+R4202:4206 neuroplc_core <> gamma def
+R4208:4208 neuroplc_core <> I:34 var
+R4210:4210 neuroplc_core <> x:35 var
+prf 4221:4236 <> gamma_increasing
+R4255:4262 neuroplc_core <> interval def
+binder 4247:4248 <> I1:38
+binder 4250:4251 <> I2:39
+R4283:4286 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R4273:4276 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'<='_x not
+R4267:4269 Corelib.Init.Datatypes <> fst def
+R4271:4272 neuroplc_core <> I1:38 var
+R4277:4279 Corelib.Init.Datatypes <> fst def
+R4281:4282 neuroplc_core <> I2:39 var
+R4303:4308 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R4293:4296 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'<='_x not
+R4287:4289 Corelib.Init.Datatypes <> snd def
+R4291:4292 neuroplc_core <> I2:39 var
+R4297:4299 Corelib.Init.Datatypes <> snd def
+R4301:4302 neuroplc_core <> I1:38 var
+binder 4316:4316 <> x:40
+R4329:4332 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R4319:4323 neuroplc_core <> gamma def
+R4325:4326 neuroplc_core <> I2:39 var
+R4328:4328 neuroplc_core <> x:40 var
+R4333:4337 neuroplc_core <> gamma def
+R4339:4340 neuroplc_core <> I1:38 var
+R4342:4342 neuroplc_core <> x:40 var
+R4395:4399 neuroplc_core <> gamma def
+def 4656:4668 <> cert_envelope
+R4678:4678 Stdlib.Reals.Rdefinitions RbaseSymbolsImpl R defax
+binder 4671:4672 <> M2:41
+binder 4674:4674 <> h:42
+R4686:4693 neuroplc_core <> interval def
+binder 4682:4682 <> I:43
+R4699:4702 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R4698:4698 Stdlib.Reals.Rdefinitions RbaseSymbolsImpl R defax
+binder 4717:4717 <> x:44
+R4728:4731 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'<='_x not
+R4722:4725 Stdlib.Reals.Rbasic_fun <> Rabs def
+R4727:4727 neuroplc_core <> x:44 var
+R4766:4768 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'+'_x not
+R4732:4735 Stdlib.Reals.Rbasic_fun <> Rmax def
+R4738:4741 Stdlib.Reals.Rbasic_fun <> Rabs def
+R4744:4746 Corelib.Init.Datatypes <> fst def
+R4748:4748 neuroplc_core <> I:43 var
+R4753:4756 Stdlib.Reals.Rbasic_fun <> Rabs def
+R4759:4761 Corelib.Init.Datatypes <> snd def
+R4763:4763 neuroplc_core <> I:43 var
+R4779:4781 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'/'_x not
+R4775:4777 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'*'_x not
+R4771:4773 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'*'_x not
+R4769:4770 neuroplc_core <> M2:41 var
+R4774:4774 neuroplc_core <> h:42 var
+R4778:4778 neuroplc_core <> h:42 var
+prf 4792:4802 <> Rabs_neg_le
+R4817:4817 Stdlib.Reals.Rdefinitions RbaseSymbolsImpl R defax
+binder 4813:4813 <> a:45
+R4828:4831 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'<='_x not
+R4820:4821 Stdlib.Reals.Rdefinitions <> ::R_scope:'-'_x not
+R4822:4825 Stdlib.Reals.Rbasic_fun <> Rabs def
+R4827:4827 neuroplc_core <> a:45 var
+R4832:4832 neuroplc_core <> a:45 var
+R4866:4872 Stdlib.Reals.RIneq <> Rle_dec thm
+R4866:4872 Stdlib.Reals.RIneq <> Rle_dec thm
+R4906:4915 Stdlib.Reals.Rbasic_fun <> Rabs_left1 thm
+R4906:4915 Stdlib.Reals.Rbasic_fun <> Rabs_left1 thm
+R4906:4915 Stdlib.Reals.Rbasic_fun <> Rabs_left1 thm
+R4952:4955 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'>='_x not
+R4952:4955 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'>='_x not
+R4980:4989 Stdlib.Reals.Rbasic_fun <> Rabs_right thm
+R4980:4989 Stdlib.Reals.Rbasic_fun <> Rabs_right thm
+R4980:4989 Stdlib.Reals.Rbasic_fun <> Rabs_right thm
+prf 5020:5036 <> Rabs_interval_max
+R5055:5055 Stdlib.Reals.Rdefinitions RbaseSymbolsImpl R defax
+binder 5047:5047 <> a:46
+binder 5049:5049 <> b:47
+binder 5051:5051 <> x:48
+R5066:5069 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R5061:5064 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'<='_x not
+R5060:5060 neuroplc_core <> a:46 var
+R5065:5065 neuroplc_core <> x:48 var
+R5076:5079 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R5071:5074 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'<='_x not
+R5070:5070 neuroplc_core <> x:48 var
+R5075:5075 neuroplc_core <> b:47 var
+R5086:5089 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'<='_x not
+R5080:5083 Stdlib.Reals.Rbasic_fun <> Rabs def
+R5085:5085 neuroplc_core <> x:48 var
+R5090:5093 Stdlib.Reals.Rbasic_fun <> Rmax def
+R5096:5099 Stdlib.Reals.Rbasic_fun <> Rabs def
+R5101:5101 neuroplc_core <> a:46 var
+R5105:5108 Stdlib.Reals.Rbasic_fun <> Rabs def
+R5110:5110 neuroplc_core <> b:47 var
+R5153:5160 Stdlib.Reals.Rbasic_fun <> Rmax_Rle thm
+R5153:5160 Stdlib.Reals.Rbasic_fun <> Rmax_Rle thm
+R5175:5181 Stdlib.Reals.RIneq <> Rle_dec thm
+R5184:5187 Stdlib.Reals.Rbasic_fun <> Rabs def
+R5193:5196 Stdlib.Reals.Rbasic_fun <> Rabs def
+R5175:5181 Stdlib.Reals.RIneq <> Rle_dec thm
+R5184:5187 Stdlib.Reals.Rbasic_fun <> Rabs def
+R5193:5196 Stdlib.Reals.Rbasic_fun <> Rabs def
+R5239:5245 Stdlib.Reals.Rbasic_fun <> Rabs_le thm
+R5239:5245 Stdlib.Reals.Rbasic_fun <> Rabs_le thm
+R5343:5344 Stdlib.Reals.Rdefinitions <> ::R_scope:'-'_x not
+R5345:5348 Stdlib.Reals.Rbasic_fun <> Rabs def
+R5327:5335 Stdlib.Reals.RIneq <> Rle_trans thm
+R5343:5344 Stdlib.Reals.Rdefinitions <> ::R_scope:'-'_x not
+R5345:5348 Stdlib.Reals.Rbasic_fun <> Rabs def
+R5327:5335 Stdlib.Reals.RIneq <> Rle_trans thm
+R5375:5383 Stdlib.Reals.RIneq <> Rle_trans thm
+R5400:5410 neuroplc_core <> Rabs_neg_le thm
+R5375:5383 Stdlib.Reals.RIneq <> Rle_trans thm
+R5400:5410 neuroplc_core <> Rabs_neg_le thm
+R5456:5464 Stdlib.Reals.RIneq <> Rle_trans thm
+R5456:5464 Stdlib.Reals.RIneq <> Rle_trans thm
+R5495:5501 Stdlib.Reals.Rbasic_fun <> Rle_abs thm
+R5495:5501 Stdlib.Reals.Rbasic_fun <> Rle_abs thm
+R5539:5541 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'<'_x not
+R5533:5536 Stdlib.Reals.Rbasic_fun <> Rabs def
+R5542:5545 Stdlib.Reals.Rbasic_fun <> Rabs def
+R5560:5569 Stdlib.Reals.RIneq <> Rnot_le_lt thm
+R5539:5541 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'<'_x not
+R5533:5536 Stdlib.Reals.Rbasic_fun <> Rabs def
+R5542:5545 Stdlib.Reals.Rbasic_fun <> Rabs def
+R5560:5569 Stdlib.Reals.RIneq <> Rnot_le_lt thm
+R5594:5600 Stdlib.Reals.Rbasic_fun <> Rabs_le thm
+R5594:5600 Stdlib.Reals.Rbasic_fun <> Rabs_le thm
+R5651:5659 Stdlib.Reals.RIneq <> Rle_trans thm
+R5676:5686 neuroplc_core <> Rabs_neg_le thm
+R5651:5659 Stdlib.Reals.RIneq <> Rle_trans thm
+R5676:5686 neuroplc_core <> Rabs_neg_le thm
+R5761:5769 Stdlib.Reals.RIneq <> Rle_trans thm
+R5761:5769 Stdlib.Reals.RIneq <> Rle_trans thm
+R5816:5819 Stdlib.Reals.Rbasic_fun <> Rabs def
+R5800:5808 Stdlib.Reals.RIneq <> Rle_trans thm
+R5832:5838 Stdlib.Reals.Rbasic_fun <> Rle_abs thm
+R5816:5819 Stdlib.Reals.Rbasic_fun <> Rabs def
+R5800:5808 Stdlib.Reals.RIneq <> Rle_trans thm
+R5832:5838 Stdlib.Reals.Rbasic_fun <> Rle_abs thm
+prf 5860:5878 <> cert_envelope_sound
+R5899:5899 Stdlib.Reals.Rdefinitions RbaseSymbolsImpl R defax
+binder 5892:5893 <> M2:49
+binder 5895:5895 <> h:50
+R5907:5914 neuroplc_core <> interval def
+binder 5903:5903 <> I:51
+R5922:5922 Stdlib.Reals.Rdefinitions RbaseSymbolsImpl R defax
+binder 5918:5918 <> x:52
+R5937:5940 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R5931:5934 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'<='_x not
+R5935:5936 neuroplc_core <> M2:49 var
+R5947:5954 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R5942:5945 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'<='_x not
+R5946:5946 neuroplc_core <> h:50 var
+R5964:5971 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R5955:5959 neuroplc_core <> gamma def
+R5961:5961 neuroplc_core <> I:51 var
+R5963:5963 neuroplc_core <> x:52 var
+R5972:5984 neuroplc_core <> cert_envelope def
+R5986:5987 neuroplc_core <> M2:49 var
+R5989:5989 neuroplc_core <> h:50 var
+R5991:5991 neuroplc_core <> I:51 var
+R5993:5993 neuroplc_core <> x:52 var
+R6046:6058 neuroplc_core <> cert_envelope def
+R6070:6074 neuroplc_core <> gamma def
+R6106:6109 Stdlib.Reals.Rbasic_fun <> Rmax def
+R6112:6115 Stdlib.Reals.Rbasic_fun <> Rabs def
+R6118:6120 Corelib.Init.Datatypes <> fst def
+R6127:6130 Stdlib.Reals.Rbasic_fun <> Rabs def
+R6133:6135 Corelib.Init.Datatypes <> snd def
+R6090:6098 Stdlib.Reals.RIneq <> Rle_trans thm
+R6106:6109 Stdlib.Reals.Rbasic_fun <> Rmax def
+R6112:6115 Stdlib.Reals.Rbasic_fun <> Rabs def
+R6118:6120 Corelib.Init.Datatypes <> fst def
+R6127:6130 Stdlib.Reals.Rbasic_fun <> Rabs def
+R6133:6135 Corelib.Init.Datatypes <> snd def
+R6090:6098 Stdlib.Reals.RIneq <> Rle_trans thm
+R6153:6169 neuroplc_core <> Rabs_interval_max thm
+R6153:6169 neuroplc_core <> Rabs_interval_max thm
+R6190:6193 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'<='_x not
+R6204:6206 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'/'_x not
+R6200:6202 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'*'_x not
+R6196:6198 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'*'_x not
+R6190:6193 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'<='_x not
+R6204:6206 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'/'_x not
+R6200:6202 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'*'_x not
+R6196:6198 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'*'_x not
+R6224:6227 Stdlib.Reals.Rdefinitions <> Rdiv def
+R6236:6247 Stdlib.Reals.RIneq <> Rmult_le_pos thm
+R6236:6247 Stdlib.Reals.RIneq <> Rmult_le_pos thm
+R6271:6282 Stdlib.Reals.RIneq <> Rmult_le_pos thm
+R6271:6282 Stdlib.Reals.RIneq <> Rmult_le_pos thm
+R6306:6317 Stdlib.Reals.RIneq <> Rmult_le_pos thm
+R6306:6317 Stdlib.Reals.RIneq <> Rmult_le_pos thm
+def 6573:6581 <> in_domain
+R6588:6588 Stdlib.Reals.Rdefinitions RbaseSymbolsImpl R defax
+binder 6584:6584 <> x:53
+R6607:6610 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'<='_x not
+R6601:6604 Stdlib.Reals.Rbasic_fun <> Rabs def
+R6606:6606 neuroplc_core <> x:53 var
+prf 6623:6645 <> type_soundness_abstract
+R6663:6669 neuroplc_core <> ir_expr ind
+binder 6659:6659 <> e:54
+R6679:6681 neuroplc_core <> env def
+binder 6673:6675 <> rho:55
+R6705:6712 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R6689:6696 neuroplc_core <> has_type ind
+R6698:6698 neuroplc_core <> e:54 var
+R6700:6704 neuroplc_core <> SVNNT constr
+R6725:6725 Stdlib.Reals.Rdefinitions RbaseSymbolsImpl R defax
+binder 6721:6721 <> x:56
+R6746:6755 Corelib.Init.Logic <> ::type_scope:x_'->'_x not
+R6735:6743 neuroplc_core <> in_domain def
+R6745:6745 neuroplc_core <> x:56 var
+R6756:6763 Corelib.Init.Logic <> ::type_scope:'exists'_x_'..'_x_','_x not
+R6771:6781 Corelib.Init.Logic <> ::type_scope:'exists'_x_'..'_x_','_x not
+R6770:6770 Stdlib.Reals.Rdefinitions RbaseSymbolsImpl R defax
+binder 6764:6766 <> eps:57
+R6789:6800 Corelib.Init.Logic <> ::type_scope:x_'/\'_x not
+R6785:6787 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'>'_x not
+R6782:6784 neuroplc_core <> eps:57 var
+R6845:6848 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'<='_x not
+R6801:6804 Stdlib.Reals.Rbasic_fun <> Rabs def
+R6824:6826 Stdlib.Reals.Rdefinitions <> ::R_scope:x_'-'_x not
+R6807:6817 neuroplc_core <> denote_real def
+R6819:6819 neuroplc_core <> e:54 var
+R6821:6823 neuroplc_core <> rho:55 var
+R6827:6837 neuroplc_core <> denote_real def
+R6839:6839 neuroplc_core <> e:54 var
+R6841:6843 neuroplc_core <> rho:55 var
+R6849:6851 neuroplc_core <> eps:57 var
+R6930:6940 Stdlib.Reals.RIneq <> Rminus_eq_0 abbrev
+R6951:6957 Stdlib.Reals.Rbasic_fun <> Rabs_R0 thm
+R6930:6940 Stdlib.Reals.RIneq <> Rminus_eq_0 abbrev
+R6930:6940 Stdlib.Reals.RIneq <> Rminus_eq_0 abbrev
+R6951:6957 Stdlib.Reals.Rbasic_fun <> Rabs_R0 thm
+R6951:6957 Stdlib.Reals.Rbasic_fun <> Rabs_R0 thm

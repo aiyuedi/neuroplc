@@ -106,7 +106,7 @@ Axiom alpha_gamma_adjunction :
     interval_le (alpha X) I <-> (forall x, X x -> gamma I x).
 
 Lemma gamma_increasing : forall I1 I2 : interval,
-  fst I1 >= fst I2 -> snd I1 <= snd I2 ->
+  fst I1 <= fst I2 -> snd I2 <= snd I1 ->
   forall x, gamma I2 x -> gamma I1 x.
 Proof.
   intros I1 I2 Hlo Hhi x [H1 H2].
@@ -122,6 +122,43 @@ Qed.
 Definition cert_envelope (M2 h : R) (I : interval) : R -> Prop :=
   fun x => Rabs x <= Rmax (Rabs (fst I)) (Rabs (snd I)) + M2 * h * h / 8.
 
+Lemma Rabs_neg_le : forall a : R, - Rabs a <= a.
+Proof.
+  intros a.
+  destruct (Rle_dec a 0) as [Ha | Ha].
+  - rewrite (Rabs_left1 a Ha).
+    lra.
+  - assert (Hap : a >= 0) by lra.
+    rewrite (Rabs_right a Hap).
+    lra.
+Qed.
+
+Lemma Rabs_interval_max : forall a b x : R,
+  a <= x -> x <= b -> Rabs x <= Rmax (Rabs a) (Rabs b).
+Proof.
+  intros a b x Hax Hxb.
+  apply Rmax_Rle.
+  destruct (Rle_dec (Rabs a) (Rabs b)) as [Hab | Hba].
+  - right.
+    apply Rabs_le.
+    split.
+    + (* -Rabs b <= x : chain -|b| <= -|a| <= a <= x *)
+      apply Rle_trans with (- Rabs a); [lra |].
+      apply Rle_trans with a; [apply Rabs_neg_le | lra].
+    + (* x <= Rabs b *)
+      apply Rle_trans with b; [lra |].
+      apply Rle_abs.
+  - left.
+    assert (Hba' : Rabs b < Rabs a) by (apply Rnot_le_lt; exact Hba).
+    apply Rabs_le.
+    split.
+    + (* -Rabs a <= x *)
+      apply Rle_trans with a; [apply Rabs_neg_le | lra].
+    + (* x <= Rabs a : chain x <= b <= |b| <= |a| *)
+      apply Rle_trans with b; [lra |].
+      apply Rle_trans with (Rabs b); [apply Rle_abs | lra].
+Qed.
+
 Lemma cert_envelope_sound :
   forall (M2 h : R) (I : interval) (x : R),
     0 <= M2 -> 0 <= h ->
@@ -132,11 +169,7 @@ Proof.
   unfold cert_envelope.
   unfold gamma in *.
   apply Rle_trans with (Rmax (Rabs (fst I)) (Rabs (snd I))).
-  - apply Rmax_case.
-    + apply Rabs_le.
-      split; lra.
-    + apply Rabs_le.
-      split; lra.
+  - apply Rabs_interval_max; lra.
   - assert (0 <= M2 * h * h / 8).
     { unfold Rdiv; apply Rmult_le_pos; try lra.
       apply Rmult_le_pos; try lra.
@@ -157,7 +190,7 @@ Theorem type_soundness_abstract :
       in_domain x ->
       exists (eps : R),
         eps > 0 /\
-        Rabs (denote_real e rho x - denote_real e rho x) <= eps.
+        Rabs (denote_real e rho - denote_real e rho) <= eps.
 Proof.
   intros e rho Hty x Hdom.
   exists 1.

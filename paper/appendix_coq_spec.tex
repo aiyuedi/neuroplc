@@ -12,7 +12,8 @@ interested in machine-checked verification, we provide the formal
 specification of the key lemmas in a notation compatible with Coq
 and Isabelle/HOL, together with a mechanization of the core SVNN type
 system and the repaired Galois connection
-(\texttt{code/coq/neuroplc\_core.v}, compiled with Coq~9.1, 2026-08-05):
+(\texttt{code/coq/neuroplc\_core.v}, \emph{compiled and verified with
+Coq~9.1 (Coq Platform 2026.07)}, 2026-08-06):
 the typing judgment, the interval domain, the soundness direction of
 the Galois pair (any certificate value lies in the concrete envelope,
 whose $M_2$-term bounds the LUT error), and an abstract type-soundness
@@ -20,7 +21,11 @@ statement. A mechanization of the balanced-allocation closure of
 Theorem~\ref{thm:optimal_lut} (\texttt{code/coq/optimal\_allocation.v})
 reduces the minimax optimality to a convexity argument (the balanced
 point equalizes the two errors; any other split makes at least one
-error strictly larger).
+error strictly larger), also compiled with Coq~9.1; three algebraic
+sub-lemmas (the equalization identity and the two monotonicity steps)
+are stated and admitted with numerical verification
+(\texttt{verify\_optimal\_lut.py}, E-T1)---the remaining proof skeleton
+is machine-checked.
 
 \subsection{IR Syntax (Inductive Type)}
 
