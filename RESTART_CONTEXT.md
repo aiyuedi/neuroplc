@@ -1,6 +1,7 @@
-# NeuroPLC — 新窗口上手文档（2026-08-05 v3）
+# NeuroPLC — 新窗口上手文档（2026-08-05 v4）
 
 > **若在新 session 中接手本项目，先读此文件，再执行「上手第一步」。**
+> v4 由 2026-08-05 更新：P2 残余全清（16 overfull hbox → 0）。
 > v3 由 2026-08-05 更新：证书体系（双层/有界幅值基）+ Phase 1 审稿闭环（4 P0 全清）。
 > 最新快速交接：`HANDOFF_2026-08-05.md`（三分钟版）。
 
@@ -90,10 +91,11 @@ cd paper && xelatex main && bibtex main && xelatex main && xelatex main  # 编�
 1. **TNNLS 页数策略（板板决策，挂起中）**：91 页单栏 ≈ 44 页双栏 vs ~14 页限制——压缩 vs 分流（IMA J. Inf. Inference / FoCM 理论侧；IEEE TII 系统侧），投稿前必须定案
 2. **T1 归约尝试**（建议独立 session 专攻）：stratum-3 类级归约（ε-Verify → 结构最优性，NP-hard 归约边界）——失败保持 conjecture
 3. **物理 PLC WCET 实测**（目前 PLCSIM/Z3 模拟）——诚实限制，cover letter 已声明
-4. **P2 残余**：16 个 overfull hbox（最大 tab:xjtu_ft 189pt）、0.03/0.26pp 基线注明（已加 99.93% 基线）
+4. ~~**P2 残余**：16 个 overfull hbox~~ ✅ **已全清（2026-08-05，commit c876ce5）**：0 overfull / 0 errors / 0 undefined / 91 页不变
 5. **CN 中文版同步**（板板明确"先不理"，5 个 bib key 缺失会编译 [?]）
 
 ### 已结案（勿再动）
+- **16 overfull hbox 全清 ✅（2026-08-05，c876ce5）**：tab:xjtu_ft 189pt（5 列声明+脚注移出）、tab:cert_thresholds 79pt（7 列声明+Evidence p 列）、长代码路径段落 4 处（局部 tolerance 组）、Thm 5/6 段落、FourierKAN/WaveletKAN 列宽、Step4/TableIX 微溢出
 - FIXME/TODO 清扫 ✅（2026-08-04 完成 18 处）
 - tab:summary E-T 行 ✅（E-T1-E-T11）
 - Box-Continuation ✅（soft 模型 99.9% 覆盖，main 0%——收缩训练才是钥匙，加宽域收益有限）
