@@ -5209,8 +5209,8 @@ architecture (Proposition~\ref{prop:chebykan-svnn}).}
 \midrule
  Per-func.\ verified & 512/512 & 512/512 & 512/512 & 496/512 & \textbf{512/512} & \textbf{512/512} \\
  M$_2$ max & 0.83$^{\P}$ & 1.586 & 27.1$^{\P}$ & 5.4$\times$ M$_2$ & 1.324 & 4.312 \\
- Safety margin & 5.6$\times^{\P\P}$ & 1.0$\times^{**}$ & 13.7$\times^{\P\P\P}$ & 1.1$\times$ & \textbf{4.9$\times^{\S\S}$} & \textbf{2.8$\times^{\S\S}$} \\
- SVNN Cond.~3 & No & No & No & No & No & No \\
+ Safety margin & 5.6$\times^{\P\P}$ & 1.0$\times^{**}$ & 13.7$\times^{\P\P\P}$ & 1.1$\times$ & \textbf{9.6$\times^{\S\S}$} & \textbf{4.0$\times^{\S\S}$} \\
+ SVNN Cond.~3 & No & No & No & No & \textbf{Yes} & \textbf{Yes} \\
  SCL compiled & 0e 0w & 0e 0w & 0e 0w & 0e 0w$^{\ddag}$ & \textbf{0e 0w} & \textbf{0e 0w} \\
 \bottomrule
 \end{tabular}
@@ -5220,7 +5220,7 @@ $^{\sharp}$MNIST digits 0--3, PCA(784$\to$28) + z-score, scratch training, 512/5
 $^{*}$Fine-tuned 100 epochs from CWRU checkpoint (E55).
 $^{\S}$Bounded-amplitude basis with soft-contractive projection (E-T10/E-T11).
 $^{**}$CWRU column is the released checkpoint: \emph{expected-tier} 1.0$\times$ (E11 $M_2^{\text{char}}$ calibration); no sound certificate ($\gamma=[15.4,5.3]>1$, E68).
-$^{\S\S}$E-T10/E-T11 certificates: FourierKAN validated floor bound 0.138 (N=15 full-LUT; first-principles 0.110 does not cover the full-set measured 0.126, which includes 2.7\% out-of-domain inputs); FourierKAN L0-direct configuration sound 0.130 (N=16 L1 LUT, Box 100\%, covers measured 0.091; 2026-08-05); WaveletKAN first-principles sound 0.237 (covers measured 0.157).
+$^{\S\S}$E-T10/E-T11 certificates (2026-08-05 v4/v2): FourierKAN $\gamma=[0.82, 0.95]$ (post-hoc projection, Cond.~3 satisfied, 99.96\% acc preserved) L0-direct sound 0.070 (safety $9.6\times$, N=16 L1 LUT, Box 100\%, covers measured 0.049); full-LUT N=15 validated floor 0.138 (4.9$\times$) retained; WaveletKAN $\gamma=[0.92, 0.95]$ (Cond.~3 satisfied, 99.75\%) sound 0.168 (safety $4.0\times$, covers measured 0.157 family).
 $^{\ddag}$ChebyKAN uses Markov-based global $M_2$ bounds, 5.4$\times$ looser than empirical (E54).
 $^{\P}$MNIST/XJTU $M_2$ max measured full-$\varphi$ float64 (40{,}001 points, 2026-08-05): MNIST 0.83 (scratch-trained, E42); XJTU-SY 27.1 after 100-epoch fine-tuning (E55), consistent with its $\gamma>1$ and expected-tier-only status; the CWRU column retains the existing folded-weight convention (1.586, E11).
 $^{\P\P}$MNIST safety = $0.675/\Delta_{\text{DA}} = 5.6\times$ (expected-tier, E42 DA~0.1199, 512/512 Z3; no sound certificate---$\gamma=[6.3,3.2]>1$).

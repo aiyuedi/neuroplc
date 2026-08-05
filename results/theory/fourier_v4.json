@@ -1,0 +1,10 @@
+{
+  "date": "2026-08-05",
+  "gamma": [
+    0.8233357667922974,
+    0.9504155516624451
+  ],
+  "test_acc": 0.9994895458221436,
+  "cond3_all_layers": true,
+  "method": "post-hoc joint projection (accuracy-neutral logit scaling)"
+}

@@ -1,0 +1,8 @@
+{
+  "date": "2026-08-05",
+  "model": "fourier_contractive_v4",
+  "sound_bound": 0.07002132385969162,
+  "safety": 9.639920566948458,
+  "measured_maxAE": 0.04871333031765557,
+  "covers": true
+}

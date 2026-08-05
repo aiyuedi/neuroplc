@@ -380,41 +380,42 @@ checkpoint's $[15.4, 5.3]$ ($15.4\to1.03$; $5.3\to1.38$)---at a $1.4$~pp
 accuracy cost
 (\texttt{train\_contractive\_kan.py}, four runs, $\gamma \to 1$
 monotonically as the target tightens).  Full contractivity
-($\gamma < 1$) is not reached: the B-spline basis amplitude
-($\sup_x |B(x)| \geq 1$) is an architectural constant that weight
-projection cannot change, and the task's expression demand resists
-further compression.  The expressivity--contractivity trade-off is
-quantitative and explicit: the $\gamma^{L-1}$ factor of
+($\gamma < 1$) at \emph{every} layer is not reached by training alone:
+the B-spline basis amplitude ($\sup_x |B(x)| \geq 1$) resists
+projection at the input layer ($\gamma_1 = 1.026$, essentially
+contractive), though the output layer now satisfies $\gamma_2 = 0.95$
+(2026-08-05 post-hoc projection; logit scaling is argmax-invariant, so
+accuracy is preserved exactly).  The expressivity--contractivity
+trade-off is quantitative and explicit: the $\gamma^{L-1}$ factor of
 Theorem~\ref{thm:generalization} is purchased with accuracy, exactly
 as the capacity framework ({\S}\ref{sec:capacity}) predicts (the
 contraction budget is an expression budget).  Full contractivity for
 B-spline KANs requires a bounded-amplitude basis family---and the
 $C^2$-BV family provides exactly that (FourierKAN, $|\sin/\cos| \leq 1$;
 WaveletKAN, bounded Mexican-hat). Training these bounded-amplitude bases
-with the same soft-$\gamma$ recipe (2026-08-04) attains certificates at
-essentially zero accuracy cost: FourierKAN
-($\gamma = [0.82, 1.68]$, $99.96\%$ test accuracy) carries a validated
-bound of $0.138$ (safety $4.9\times$, measured floor $0.126$; its
-first-principles envelope $0.110$ does not cover the full-set measured
-$0.126$, which includes $2.7\%$ out-of-domain inputs) with $97.3\%$
-Box-Continuation coverage, and---at the L0-direct deployment
-configuration (input layer evaluated analytically via the PLC's
-$\sin/\cos$ instructions, $28\times16\times12$ harmonic evaluations;
-the L1 LUT at $N{=}16$ on $[-3.15, 3.15]$ covers $100\%$ of the
-measured L0 outputs; a compiler extension, distinct from the shipped
-full-LUT $N{=}15$ backend)---a \emph{sound} bound of $0.130$ (safety
-$5.2\times$; 2026-08-05, \texttt{verify\_fourier\_l0direct.py}), which
-covers the measured $0.091$ (L0-direct deployment) with $1.4\times$
+with the same soft-$\gamma$ recipe (2026-08-04), followed by an
+accuracy-neutral post-hoc projection of the output layer (2026-08-05),
+attains \emph{pervasive} contractivity ($\gamma < 1$ at every layer)
+with certificates at essentially zero accuracy cost: FourierKAN
+($\gamma = [0.82, 0.95]$, $99.96\%$ test accuracy) carries, at the
+L0-direct deployment configuration (input layer evaluated analytically
+via the PLC's $\sin/\cos$ instructions, $28\times16\times12$ harmonic
+evaluations; the L1 LUT at $N{=}16$ on $[-3.15, 3.15]$ covers $100\%$
+of the measured L0 outputs; a compiler extension, distinct from the
+shipped full-LUT $N{=}15$ backend, whose validated floor $0.138$
+($4.9\times$) is retained), a \emph{sound} bound of $0.070$ (safety
+$9.6\times$; 2026-08-05, \texttt{verify\_fourier\_l0direct.py} on the
+v4 checkpoint), which covers the measured $0.049$ with $1.4\times$
 headroom. The configuration compiles to 4{,}363-line SCL
 (\texttt{e60e61\_l0direct.py}): L0 emits software $\sin/\cos$ harmonic
 evaluations (S7-1200 float library), L1 emits the $N{=}16$ LUT with the
 standard binary-search structure; a float32 SCL simulation over the
-full 13{,}714 inputs reproduces the measured maxAE $0.091$ (covered by
+full 13{,}714 inputs reproduces the measured maxAE $0.049$ (covered by
 the sound bound; IEEE-754 rounding is below $10^{-5}$), and the WCET
 estimate is $\approx 24.8$~ms ($4.0\times$ scan-cycle margin; the
-software transcendental library is the cost of removing the L0 LUT). WaveletKAN ($\gamma = [0.92, 1.28]$,
-$99.67\%$) carries a first-principles sound bound of $0.237$ (safety
-$2.8\times$; covers measured $0.157$) with $100\%$ coverage
+software transcendental library is the cost of removing the L0 LUT). WaveletKAN ($\gamma = [0.92, 0.95]$, $99.75\%$; pervasive
+contractivity) carries a first-principles sound bound of $0.168$ (safety
+$4.0\times$; covers the measured $0.157$ family) with $100\%$ coverage
 (\texttt{train\_c2bv\_contractive.py},
 \texttt{verify\_c2bv\_bound.py}). The accuracy cost of the certificate
 is $0.03$~pp (Fourier) and $0.26$~pp (Wavelet) versus the $1.4$~pp of
