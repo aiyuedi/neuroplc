@@ -1,0 +1,10 @@
+{
+  "date": "2026-08-06",
+  "gamma": [
+    1.0069901943206787,
+    8.758872032165527
+  ],
+  "test_acc": 0.8612366914749146,
+  "cond3_all_layers": false,
+  "method": "L0 scale + L1 adaptation"
+}
