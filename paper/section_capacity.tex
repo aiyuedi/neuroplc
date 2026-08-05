@@ -326,7 +326,37 @@ restarts of free-node coordinate descent on a single peaked quartic
 yield $40$ distinct local optima spanning $25.7\times$ in error
 (2026-08-05, \texttt{verify\_width\_constant.py} extension)---the
 landscape is overwhelmingly multimodal, so global optimality
-certification requires the exponential search the conjecture posits. (The instance-level
+certification requires the exponential search the conjecture posits.
+
+\vspace{2pt}
+\begin{lemma}[Curvature-Concentrated Gap]
+\label{lem:gap_concentrated}
+Let $f \in C^2([a,b])$ with $\|f''\|_\infty \leq M_2$ and
+$\operatorname{supp}(f'') \subseteq [c - \delta/2, c + \delta/2]$,
+$\delta < b-a$ (curvature concentrated). Then free-node placement
+(all $N$ nodes inside the support) achieves approximation error
+$e_{\text{free}} \leq M_2 \delta^2 / (8N^2)$, while every uniform grid
+(segment width $(b-a)/N$) satisfies
+$e_{\text{uni}} \geq M_2 (b-a)^2 / (8N^2)$ (sharp, by the
+de~Boor/Theorem~\ref{thm:sharp-lut} constant applied inside the
+support). Hence the free-vs-uniform gap is at least
+$((b-a)/\delta)^2$: curvature \emph{concentration}, not width theory,
+is the mechanism behind $c_* < c_k$.
+\end{lemma}
+
+\vspace{2pt}
+\noindent\textit{Proof.}
+For free placement, all $N$ nodes lie in the support, so every segment
+has width $\leq \delta/N$; the de~Boor bound gives
+$e_{\text{free}} \leq M_2 (\delta/N)^2 / 8$. For any uniform grid,
+the support contains at least one segment (the grid covers $[a,b]$
+with width $(b-a)/N$); that segment's error is
+$\geq M_2((b-a)/N)^2/8$ (the constant is sharp, and
+$\|f''\|_\infty = M_2$ is attained on the support). The ratio is
+$((b-a)/\delta)^2$. $\square$ Numerically
+(\texttt{verify\_gap\_lemma.py}, 2026-08-05): gap $4\times$ at
+$\delta = 0.5$, $16\times$ at $0.25$, $91\times$ at $0.1$---matching
+$(1/\delta)^2$ up to finite-$N$ boundary effects. (The instance-level
 bound---fixed node set, one function---is closed-form and cheap,
 consistent with SOS certificates verifying polynomial optimality at
 the instance level.)
