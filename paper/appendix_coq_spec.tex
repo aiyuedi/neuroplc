@@ -10,7 +10,17 @@ syntax and on SCL execution traces, respectively. These proofs are
 rigorous but presented in standard mathematical prose. For readers
 interested in machine-checked verification, we provide the formal
 specification of the key lemmas in a notation compatible with Coq
-and Isabelle/HOL.
+and Isabelle/HOL, together with a mechanization of the core SVNN type
+system and the repaired Galois connection
+(\texttt{code/coq/neuroplc\_core.v}, compiled with Coq~9.1, 2026-08-05):
+the typing judgment, the interval domain, the soundness direction of
+the Galois pair (any certificate value lies in the concrete envelope,
+whose $M_2$-term bounds the LUT error), and an abstract type-soundness
+statement. A mechanization of the balanced-allocation closure of
+Theorem~\ref{thm:optimal_lut} (\texttt{code/coq/optimal\_allocation.v})
+reduces the minimax optimality to a convexity argument (the balanced
+point equalizes the two errors; any other split makes at least one
+error strictly larger).
 
 \subsection{IR Syntax (Inductive Type)}
 
