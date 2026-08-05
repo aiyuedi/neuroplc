@@ -1,0 +1,23 @@
+{
+  "date": "2026-08-05",
+  "model": "fourier_contractive_v2",
+  "config": {
+    "L0": "direct analytic (SIN/COS, no LUT)",
+    "L1": {
+      "N": 16,
+      "domain": 6.3
+    }
+  },
+  "box": {
+    "L0_out_range": [
+      -3.0023603439331055,
+      3.145433187484741
+    ],
+    "covers_100pct": true
+  },
+  "sound_bound": 0.13017559051513672,
+  "safety": 5.185303921640452,
+  "certificate": true,
+  "measured_maxAE": 0.09056223259927698,
+  "covers_measured": true
+}

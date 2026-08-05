@@ -380,8 +380,15 @@ essentially zero accuracy cost: FourierKAN
 bound of $0.138$ (safety $4.9\times$, measured floor $0.126$; its
 first-principles envelope $0.110$ does not cover the full-set measured
 $0.126$, which includes $2.7\%$ out-of-domain inputs) with $97.3\%$
-Box-Continuation coverage, and WaveletKAN ($\gamma = [0.92, 1.28]$,
-$99.67\%$) a first-principles sound bound of $0.237$ (safety
+Box-Continuation coverage, and---at the L0-direct deployment
+configuration (input layer evaluated analytically via the PLC's
+$\sin/\cos$ instructions, $28\times16\times12$ harmonic evaluations;
+the L1 LUT at $N{=}16$ on $[-3.15, 3.15]$ covers $100\%$ of the
+measured L0 outputs)---a \emph{sound} bound of $0.130$ (safety
+$5.2\times$; 2026-08-05, \texttt{verify\_fourier\_l0direct.py}), which
+covers the measured $0.091$ (L0-direct deployment) with $1.4\times$
+headroom. WaveletKAN ($\gamma = [0.92, 1.28]$,
+$99.67\%$) carries a first-principles sound bound of $0.237$ (safety
 $2.8\times$; covers measured $0.157$) with $100\%$ coverage
 (\texttt{train\_c2bv\_contractive.py},
 \texttt{verify\_c2bv\_bound.py}). The accuracy cost of the certificate

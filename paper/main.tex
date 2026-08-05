@@ -4424,7 +4424,7 @@ E55& XJTU-SY FT + SCL       & 100-ep FT + S7-1200 & \textbf{91.7\%}, 512/512 Z3,
 E56& Deep KAN ($L{=}3$)       & [28,16,8,4] 120ep & \textbf{99.60\%}, 608/608 Z3, DA 5.66, sub-exp. depth; E-T9-3L: \textbf{98.6\%}, sound $2.4\times$ (Box-in 81\%) + validated $6.1\times$ \\
 E57& CROWN vs.\ NeuroPLC     & KAN[28,16,4] DA/IBP & \textbf{DA substantially tighter}, CROWN=IBP for KAN \\
 E58& Per-Func.\ M$_2$ / Z3    & M$_2$ proxy, Z3 NRA & mean 0.017, max 0.041; Z3 512/512 \\
-E60& FourierKAN SVNN           & [28,16,4] $K{=}6$, CWRU & \textbf{100\% acc}, 512/512 Z3, 2184-line SCL \\
+E60& FourierKAN SVNN           & [28,16,4] $K{=}6$, CWRU & \textbf{100\% acc}, 512/512 Z3, 2184-line SCL; E-T10: validated $4.9\times$ + sound $5.2\times$ (L0-direct) \\
 E61& WaveletKAN SVNN           & [28,16,4] $S{=}8$, M2-reg & \textbf{100\% acc}, 512/512 Z3, 2184-line SCL \\
 E62& XJTU-SY Cross-Arch.       & FT Fourier/WaveletKAN & \textbf{100\% acc}, 512/512 Z3 preserved \\
 E53& Sound In-Domain Worst-Case & Real LUT, in-domain search & IA-sound certifies $N{\ge}20$; high-prob.\ DA at all $N$ \\
@@ -5208,7 +5208,7 @@ architecture (Proposition~\ref{prop:chebykan-svnn}).}
  Training & Scratch & KD (VRM) & FT 100ep & Scratch & C2-BV contr.\ FT$^{\S}$ & C2-BV contr.\ FT$^{\S}$ \\
 \midrule
  Per-func.\ verified & 512/512 & 512/512 & 512/512 & 496/512 & \textbf{512/512} & \textbf{512/512} \\
- M$_2$ max & — & 1.586 & — & 5.4$\times$ M$_2$ & 1.324 & 4.312 \\
+ M$_2$ max & 0.83$^{\P}$ & 1.586 & 27.1$^{\P}$ & 5.4$\times$ M$_2$ & 1.324 & 4.312 \\
  Safety margin & — & 1.0$\times^{**}$ & — & 1.1$\times$ & \textbf{4.9$\times^{\S\S}$} & \textbf{2.8$\times^{\S\S}$} \\
  SVNN Cond.~3 & No & No & No & No & No & No \\
  SCL compiled & 0e 0w & 0e 0w & 0e 0w & 0e 0w$^{\ddag}$ & \textbf{0e 0w} & \textbf{0e 0w} \\
@@ -5220,8 +5220,9 @@ $^{\sharp}$MNIST digits 0--3, PCA(784$\to$28) + z-score, scratch training, 512/5
 $^{*}$Fine-tuned 100 epochs from CWRU checkpoint (E55).
 $^{\S}$Bounded-amplitude basis with soft-contractive projection (E-T10/E-T11).
 $^{**}$CWRU column is the released checkpoint: \emph{expected-tier} 1.0$\times$ (E11 $M_2^{\text{char}}$ calibration); no sound certificate ($\gamma=[15.4,5.3]>1$, E68).
-$^{\S\S}$E-T10/E-T11 certificates: FourierKAN validated floor bound 0.138 (first-principles 0.110 does not cover the full-set measured 0.126, which includes 2.7\% out-of-domain inputs); WaveletKAN first-principles sound 0.237 (covers measured 0.157).
+$^{\S\S}$E-T10/E-T11 certificates: FourierKAN validated floor bound 0.138 (N=15 full-LUT; first-principles 0.110 does not cover the full-set measured 0.126, which includes 2.7\% out-of-domain inputs); FourierKAN L0-direct configuration sound 0.130 (N=16 L1 LUT, Box 100\%, covers measured 0.091; 2026-08-05); WaveletKAN first-principles sound 0.237 (covers measured 0.157).
 $^{\ddag}$ChebyKAN uses Markov-based global $M_2$ bounds, 5.4$\times$ looser than empirical (E54).
+$^{\P}$MNIST/XJTU $M_2$ max measured full-$\varphi$ float64 (40{,}001 points, 2026-08-05): MNIST 0.83 (scratch-trained, E42); XJTU-SY 27.1 after 100-epoch fine-tuning (E55), consistent with its $\gamma>1$ and expected-tier-only status; the CWRU column retains the existing folded-weight convention (1.586, E11).
 FourierKAN M$_2$ from $\omega^2\sum k^2(|c_k|+|d_k|)$; WaveletKAN M$_2$ from $\max_s|c_s|/a_s^2 \cdot 2.602$.
 All $C^2$-BV architectures 100\% Z3-equivalent verified post fine-tuning (E62).
 SVNN Cond.~3 (per-layer $\gamma<1$) is a \emph{training} property, not a pipeline property: unsatisfied by the released checkpoint and by E-T10/E-T11 (second-layer $\gamma>1$); measured on MNIST (E42, $\gamma=[6.3,3.2]$) and ChebyKAN (E54, $\gamma=[1.2,2.1]$) on 2026-08-05 (cond3\_complement.json). This table documents \emph{pipeline} generality (compiler/verification domain-independence); contraction is established by the soft-contractive recipe (E-T9--E-T11).}
