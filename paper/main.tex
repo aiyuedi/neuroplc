@@ -5207,7 +5207,7 @@ architecture (Proposition~\ref{prop:chebykan-svnn}).}
  Per-func.\ verified & 512/512 & 512/512 & 512/512 & 496/512 & \textbf{512/512} & \textbf{512/512} \\
  M$_2$ max & — & 1.586 & — & 5.4$\times$ M$_2$ & 1.324 & 4.312 \\
  Safety margin & — & 1.0$\times^{**}$ & — & 1.1$\times$ & \textbf{4.9$\times^{\S\S}$} & \textbf{2.8$\times^{\S\S}$} \\
- SVNN Cond.~3 & — & No & No & — & No & No \\
+ SVNN Cond.~3 & No & No & No & No & No & No \\
  SCL compiled & 0e 0w & 0e 0w & 0e 0w & 0e 0w$^{\ddag}$ & \textbf{0e 0w} & \textbf{0e 0w} \\
 \bottomrule
 \end{tabular}
@@ -5221,7 +5221,7 @@ $^{\S\S}$E-T10/E-T11 certificates: FourierKAN validated floor bound 0.138 (first
 $^{\ddag}$ChebyKAN uses Markov-based global $M_2$ bounds, 5.4$\times$ looser than empirical (E54).
 FourierKAN M$_2$ from $\omega^2\sum k^2(|c_k|+|d_k|)$; WaveletKAN M$_2$ from $\max_s|c_s|/a_s^2 \cdot 2.602$.
 All $C^2$-BV architectures 100\% Z3-equivalent verified post fine-tuning (E62).
-SVNN Cond.~3 (per-layer $\gamma<1$) is a \emph{training} property, not a pipeline property: unsatisfied by the released checkpoint and by E-T10/E-T11 (second-layer $\gamma>1$); MNIST (E42) and ChebyKAN (E54) were not measured. This table documents \emph{pipeline} generality (compiler/verification domain-independence); contraction is established by the soft-contractive recipe (E-T9--E-T11).}
+SVNN Cond.~3 (per-layer $\gamma<1$) is a \emph{training} property, not a pipeline property: unsatisfied by the released checkpoint and by E-T10/E-T11 (second-layer $\gamma>1$); measured on MNIST (E42, $\gamma=[6.3,3.2]$) and ChebyKAN (E54, $\gamma=[1.2,2.1]$) on 2026-08-05 (cond3\_complement.json). This table documents \emph{pipeline} generality (compiler/verification domain-independence); contraction is established by the soft-contractive recipe (E-T9--E-T11).}
 \end{table*}
 
 The verification results (Table~\ref{tab:cross_domain}) converge across domains because the

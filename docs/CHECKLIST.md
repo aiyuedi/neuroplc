@@ -60,8 +60,11 @@
 ## C. 状态汇总
 
 - ✅ 完成：C1,C2,C4,C5,C7,C13,C16,M1,M5,M12,M13,M14,M15,M18
-- 🔄 进行中：C2,C4,C5,M19,数字同步
-- 🔄 进行中：—
-- 其余：⬜
+- ✅ 2026-08-04/05 追认完成：C6（Lemma 1.6 硬编码 0 残留）、C8（T-I 最优恢复已消化 verify_optimal_lut.py）、C9（T-III verify_necessity_first.py + conjecture 全篇标注）、C17（T-II verify_compile_aware_minimax.py + 分辨率匹配律）、M2（CompCert/Tsybakov/MRW/Nye/Kratsios/Giacobbe 全入 bib 且被引用）、M10（E58 行已补）、M11（17 图全部有 \ref）、M19（γ 口径 2026-08-04 批次）
+- ✅ 2026-08-05 P2 清扫：16 overfull → 0（c876ce5）
+- ⬜ 真遗留（2026-08-05 核对）：
+  - M2 残余：NeurIPS'25 CMI/ε-lossy 引用缺失（防假铁律：待联网确认，不编造）
+  - M3/M4/M6/M7/M8/M9/M16/M17/M20/M21/M22/M23/M24/M25/M27（08-03 列表，未系统性核对——多为术语/语言/表清理类）
+  - 新发现：FourierKAN sound 升级路径（N=16 理论覆盖需 L0-无-LUT 部署语义或 N=24 全 LUT sum 口径——记 HANDOFF，独立 session）
 
-*更新：2026-08-03 | 建立于 P0 首日*
+*更新：2026-08-05 | P0 首日建立，08-05 二次核对*

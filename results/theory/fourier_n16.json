@@ -1,0 +1,28 @@
+{
+  "date": "2026-08-05",
+  "model": "fourier_contractive_v2",
+  "box": {
+    "lo": -3.15,
+    "hi": 3.15,
+    "l0_range": [
+      -3.0023603439331055,
+      3.145433187484741
+    ],
+    "covers_100pct_inputs": true
+  },
+  "theory": {
+    "N": 16,
+    "domain": 6.3,
+    "sound_bound": 1.077413558959961,
+    "safety": 0.6265003761894224,
+    "old_N15_bound": 1.2120873928070068
+  },
+  "measured": {
+    "fullset_maxAE": 0.20232729475349065
+  },
+  "certificate": {
+    "type": "sound",
+    "covers_measured": true,
+    "box_100pct": true
+  }
+}

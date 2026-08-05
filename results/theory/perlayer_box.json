@@ -1,0 +1,93 @@
+{
+  "date": "2026-08-05",
+  "note": "per-layer Box B_{l+1}=L@B_l+|phi0| (iterated), per-layer h=2B_l/N, per-layer M2 on [-B_l,B_l]",
+  "out": {
+    "main": {
+      "perlayer_boxes": [
+        3.0,
+        24.69602851867676,
+        42.52753143310547
+      ],
+      "measured_ranges": [
+        [
+          -22.46480369567871,
+          23.52002716064453
+        ],
+        [
+          -40.502410888671875,
+          38.361572265625
+        ]
+      ],
+      "box_covers_measured": {
+        "L0": true,
+        "L1": true
+      },
+      "sound_bound_perlayer": 9.138192678689068,
+      "safety_perlayer": 0.07386580954614246,
+      "certificate_perlayer": false,
+      "sound_bound_global_h": 1.992491639025274,
+      "safety_global_h": 0.3387718105207256,
+      "measured_f32": 0.5175
+    },
+    "soft2L": {
+      "perlayer_boxes": [
+        3.0,
+        2.9599277257919314,
+        1.8585961103439332
+      ],
+      "measured_ranges": [
+        [
+          -2.1231255531311035,
+          2.818978786468506
+        ],
+        [
+          -1.4993398189544678,
+          1.7700915336608887
+        ]
+      ],
+      "box_covers_measured": {
+        "L0": true,
+        "L1": true
+      },
+      "sound_bound_perlayer": 0.24780584548877727,
+      "safety_perlayer": 2.7239066885957284,
+      "certificate_perlayer": true,
+      "sound_bound_global_h": 0.25100870830151567,
+      "safety_global_h": 2.68914972937584,
+      "measured_f32": 0.0527
+    },
+    "soft3L": {
+      "perlayer_boxes": [
+        3.0,
+        3.660639524459839,
+        1.5925141274929047,
+        1.0603089809417725
+      ],
+      "measured_ranges": [
+        [
+          -3.486323356628418,
+          2.3823959827423096
+        ],
+        [
+          -1.294431447982788,
+          1.516680121421814
+        ],
+        [
+          -0.9114670753479004,
+          1.0098180770874023
+        ]
+      ],
+      "box_covers_measured": {
+        "L0": true,
+        "L1": true,
+        "L2": true
+      },
+      "sound_bound_perlayer": 1.123893701285568,
+      "safety_perlayer": 0.6005906067699285,
+      "certificate_perlayer": false,
+      "sound_bound_global_h": 1.1053759660544882,
+      "safety_global_h": 0.6106519598117685,
+      "measured_f32": 0.1004
+    }
+  }
+}

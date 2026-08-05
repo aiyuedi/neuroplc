@@ -1,0 +1,27 @@
+{
+  "date": "2026-08-05",
+  "note": "Cond.3 (gamma<1) complement for tab:cross_domain",
+  "out": {
+    "mnist": {
+      "test_acc": 0.9869346733668342,
+      "gamma": [
+        6.266340732574463,
+        3.214127779006958
+      ],
+      "cond3": false
+    },
+    "chebykan": {
+      "test_acc": 1.0,
+      "gamma": [
+        1.2274880409240723,
+        2.1157307624816895
+      ],
+      "cond3": false,
+      "arch": [
+        28,
+        16,
+        4
+      ]
+    }
+  }
+}
