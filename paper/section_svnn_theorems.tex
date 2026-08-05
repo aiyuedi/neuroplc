@@ -384,7 +384,8 @@ Box-Continuation coverage, and---at the L0-direct deployment
 configuration (input layer evaluated analytically via the PLC's
 $\sin/\cos$ instructions, $28\times16\times12$ harmonic evaluations;
 the L1 LUT at $N{=}16$ on $[-3.15, 3.15]$ covers $100\%$ of the
-measured L0 outputs)---a \emph{sound} bound of $0.130$ (safety
+measured L0 outputs; a compiler extension, distinct from the shipped
+full-LUT $N{=}15$ backend)---a \emph{sound} bound of $0.130$ (safety
 $5.2\times$; 2026-08-05, \texttt{verify\_fourier\_l0direct.py}), which
 covers the measured $0.091$ (L0-direct deployment) with $1.4\times$
 headroom. WaveletKAN ($\gamma = [0.92, 1.28]$,
