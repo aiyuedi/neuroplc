@@ -177,6 +177,70 @@ $N^m$ for arity $m$ (Regime 3); tanh constant ratio $0.974 \times
 M_2 h^2/8$ (sharpness of the Regime-1 constant).
 
 \vspace{4pt}
+\subsection{Activation-Class Verification Spectrum}
+\label{sec:spectrum}
+
+The trichotomy, instantiated over concrete activation families, yields
+a complete verification spectrum---the complexity-class analogue of the
+activation-function zoo. Table~\ref{tab:spectrum} classifies every
+common activation family by regime, verification complexity, and
+certificate constant, with deployment evidence from
+{\S}\ref{sec:cross_domain}. Three structural facts organize the
+spectrum: (i) the \emph{C$^2$-with-bounded-$M_k$} boundary separates
+certificate-bearing classes (Regime 1: polynomial verification, sharp
+constants) from certificate-free ones (Regime 2: kinks have
+$\sup|\varphi''| = \infty$, so no finite affine certificate exists;
+Regime 3: product coupling makes even the LUT exponential; Regime 4:
+constants depend on the reachable set); (ii) the \emph{width-optimal}
+family (free-node splines) achieves a strictly better constant
+$c_* < c_k$ but pays with class-level certification hardness
+(Theorem~\ref{thm:capacity-tradeoff}, item~(i)); (iii) all Regime-1
+families compile through the same LUT extraction with the same de~Boor
+guarantee---the spectrum collapses to a single IR node, which is why
+the compiler's verification cost is architecture-independent once the
+family is Regime-1.
+
+\begin{table}[t]
+\centering
+\caption{Activation-class verification spectrum (regimes of
+Theorem~\ref{thm:trichotomy} instantiated; certificate constants from
+{\S}\ref{sec:cross_domain} and {\S}\ref{sec:capacity}).}
+\label{tab:spectrum}
+\footnotesize
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Activation family} & \textbf{Regime} & \textbf{Verification} &
+\textbf{Certificate constant} & \textbf{Deployed} \\
+\midrule
+ReLU / piecewise-linear (kink) & 2 & O(1), no finite DA cert. &
+--- ($M_2 = \infty$) & 0/16 Z3 (E41) \\
+SiLU / GELU ($C^\infty$) & 1 & polynomial & $c_2 = 1/8$ (sharp) & 512/512 \\
+B-spline (order $k$, SVNN) & 1 & polynomial & $c_k$ (sharp, de~Boor) & 512/512 \\
+Chebyshev (polynomial) & 1 & polynomial & $c_k$ (Markov $5.4\times$ loose) & 496/512 \\
+Fourier (bounded basis) & 1 & polynomial & analytic $M_2$ & 512/512 \\
+Wavelet (bounded basis) & 1 & polynomial & analytic $M_2$ & 512/512 \\
+Free-node piecewise-linear & 2* & $c_*$-hard (class level) & $c_* < c_k$ (width) & numeric (E-T8) \\
+Product gates (coupled) & 3 & NP-hard (3-SAT) & --- & 0/16 \\
+$e^x$-type (domain-dependent) & 4 & reachability-dependent & --- & --- \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+{\scriptsize $2^{*}$: pointwise rate-2 recoverable (kink clustering) but
+certificate-free; the class-level width constant $c_*$ makes optimal
+certification NP-hard-level ({\S}\ref{sec:capacity},
+Theorem~\ref{thm:capacity-tradeoff}). All Regime-1 families compile via
+LUT extraction to the same BsplineLUT IR node (E60/E61).}
+\end{table}
+
+The spectrum is \emph{complete} for the standard activation zoo: the
+four regimes partition it exhaustively by the trichotomy
+(Theorem~\ref{thm:trichotomy}), and the certificate constants are
+either sharp ($c_k$), analytic (Fourier/Wavelet $M_2$), or absent
+(Regimes 2--4). This is a complete verification-complexity
+classification of activation families under LUT compilation---to our
+knowledge, the only one covering the certificate-constant dimension.
+
+\vspace{4pt}
 \subsection{Necessity, First Lattice}
 \label{sec:necessity-first}
 
@@ -212,6 +276,37 @@ decomposition (Theorem~\ref{thm:generalization}) and the minimax rate
 (Theorem~\ref{thm:compile_aware_minimax}) hold without contractivity
 (E68, $\gamma = [15.4, 5.3] > 1$).
 \end{theorem}
+
+\vspace{2pt}
+\begin{lemma}[Class-Width Barrier for Kink Classes]
+\label{lem:kink_class_width}
+Let $\mathcal{T}$ be the class of tent functions
+$f_\tau(x) = \max(0, 1 - |x - \tau|/\delta)$ with arbitrary kink
+location $\tau \in [a,b]$ (Lipschitz-1, unbounded second variation).
+Then for any $N$-node grid, the minimax interpolation error over
+$\mathcal{T}$ is $\geq c\,(b-a)/N$ for an absolute constant $c > 0$:
+the \emph{class-level} width is first-order, even though every single
+member $f_\tau$ is rate-2 recoverable by kink-clustered nodes. Hence
+Regime-2 gates are excluded from $(P2)$ in the class sense---no
+per-function rate argument can exhibit this, which is why the naive
+single-function argument fails ({\S}\ref{sec:trichotomy},
+necessity item).
+\end{lemma}
+
+\vspace{2pt}
+\noindent\textit{Proof.}
+Take $N$ members $\{f_{\tau_j}\}$ with kinks separated by
+$\Delta = (b-a)/N$. Any two members differ in $\ell_\infty$ by at
+least $\min_j |f_{\tau_i}(x) - f_{\tau_j}(x)| \geq \Delta$ at the
+midpoint between adjacent kinks (slope $1/\delta \geq 1$ region; for
+$\delta \leq \Delta$ the tent peaks are disjoint). A $2\varepsilon$-packing
+with $\varepsilon = \Delta/2$ therefore exists, and any algorithm
+depending only on the node values incurs minimax error at least
+$\varepsilon = (b-a)/(2N)$ (standard packing bound; the same
+first-order width $c/N$ holds for the Lipschitz class by the classical
+theory~\cite{pinkus1985width}). Numerical confirmation (E66):
+measured rate exponent $-1.03$ for the shifted-kink family, matching
+$c/N$ (vs.\ $-2.04$ for Regime-1 classes). $\square$
 
 \vspace{2pt}
 \noindent\textit{Proof sketch.}
