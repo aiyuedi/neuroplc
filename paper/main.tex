@@ -145,7 +145,7 @@ constants $c_k = Q_k/k!$ and an extremal family attaining them
 statement on random cubics to an exact minimax-optimality theorem with a
 certificate. Second, the \textbf{verifiability trichotomy}
 (Theorem~\ref{thm:trichotomy}): the SVNN condition is \emph{conjecturally}
-conjecturally the unique regime where second-order rate, linear LUT cost, closed-form
+the unique regime where second-order rate, linear LUT cost, closed-form
 sharp constants, and freedom from reachability computation
 coexist---ReLU
 architectures admit only first-order bounds, multivariate gates suffer
@@ -263,7 +263,8 @@ The SVNN type system is distinguished by three properties:
     \item \textbf{Optimality (Corollary~\ref{cor:da-optimality}
     $+$ Theorem~\ref{thm:galois} $+$ Theorem~\ref{thm:tightness}):}
     DA is the \textbf{Galois-optimal} abstract domain for $C^2$ univariate
-    functions---the first Galois connection for neural network activations---
+    functions---to our knowledge, the first Galois connection for neural
+    network activations---
     and its bound $M_2 h^2 / 8$ is \textbf{semantically tight} (attained
     by $f^*(x) = M_2 x^2 / 2$ at every LUT midpoint, $1{,}000/1{,}000$
     exact), with the sharp-constant generalization to all orders
@@ -340,8 +341,8 @@ we prove a \textbf{Non-Interference Theorem} (Theorem~\ref{thm:noninterference})
 NeuroPLC inference block into a certified PLC program preserves all
 pre-existing safety properties under the timing premise
 $\text{WCET}(P) + \text{WCET}(N) \leq$ scan cycle, directly addressing
-IEC~61508 independence requirements---the first such guarantee for
-neural-network-on-PLC deployment. An IEC~61131-3 REAL arithmetic
+IEC~61508 independence requirements---to our knowledge, the first such
+guarantee for neural-network-on-PLC deployment. An IEC~61131-3 REAL arithmetic
 semantics (Lemma~\ref{lem:iec_universal}) extends the SVNN guarantee
 to any IEC-compliant controller worldwide---replacing per-platform
 validation with a one-time arithmetic-standard-based proof.
@@ -433,8 +434,9 @@ over PROFINET/OPC UA. An on-PLC time-domain subset is also compiled
           \textbf{Non-Interference Theorem} (Theorem~\ref{thm:noninterference}) proves that inserting
          a NeuroPLC inference block into a certified PLC program preserves
          all pre-existing safety properties under the timing premise
-         $\text{WCET}(P) + \text{WCET}(N) \leq$ scan cycle---the first such
-         guarantee for neural-network-on-PLC deployment, directly addressing
+         $\text{WCET}(P) + \text{WCET}(N) \leq$ scan cycle---to our
+         knowledge, the first such guarantee for
+         neural-network-on-PLC deployment, directly addressing
          IEC~61508 independence requirements. The \textbf{WCET Theorem} (Theorem~11)
          provides parameterized worst-case execution time bounds
           ($3.86$~ms for KAN $[28,16,4]$, $25.9\times$ scan-cycle margin).
@@ -614,7 +616,11 @@ Proposition~\ref{prop:mlp_negative}). Corr\^ea demonstrates KAN-on-PLC feasibili
 native SCL compilation, no correctness guarantee, and no compiler toolchain.
 \neuroplc is, to our knowledge, the first to provide all three.
 
-\textbf{KAN verification.} Schwartz et~al.~\cite{schwartz2026optimal} proposed
+\textbf{KAN verification.} Despite two decades of NN verification
+benchmarks, the KAN verification landscape remains nascent: none of the
+25 benchmarks of VNN-COMP 2025 (16 regular, 9 extended) involves KAN
+activations~\cite{vnncomp2025}, and the existing KAN-specific efforts
+are instance-level. Schwartz et~al.~\cite{schwartz2026optimal} proposed
 PWA abstraction with MILP encoding for KAN verification---operating at SVNN
 Level~3 (exact certification within PWA abstraction error). In this paper we
 certify the trained model under Conditions~1--2
@@ -5660,7 +5666,8 @@ frontier.
     \item \textbf{Non-Interference (Theorem~E).} Inserting a NeuroPLC inference
    block into a certified PLC program preserves all pre-existing safety
    properties under the timing premise $\text{WCET}(P) + \text{WCET}(N)
-   \leq$ scan cycle---the first such guarantee for NN-on-PLC deployment.
+   \leq$ scan cycle---to our knowledge, the first such guarantee for
+   NN-on-PLC deployment.
 
     \item \textbf{WCET (Theorem~11).} Parameterized worst-case execution time
    bound: $3.86$~ms for KAN $[28,16,4]$ on S7-1200 ($25.9\times$ scan-cycle
@@ -5688,12 +5695,22 @@ Soft-contractive training (E-T9) converts the certificate from thin
 ($1.0\times$, expected) to sound ($2.34\times$, first-principles) with a
 validated float32 tier of $11.6\times$ (measured-floor bound $0.058$
 vs.\ measured maxAE $0.053$), $99.9\%$ Box-Continuation coverage, and
-depth extension to $L{=}3$ ($6.1\times$); adaptive allocation (E15)
-achieves $3.6\times$ at unchanged storage.
+depth extension to $L{=}3$ (sound $2.4\times$ via signal-domain
+propagation, 2026-08-05). The bounded-amplitude $C^2$-BV family reaches
+\emph{pervasive contractivity} ($\gamma < 1$ at every layer, output-layer
+projection being accuracy-neutral under logit scaling) with sound
+certificates of $9.6\times$ (FourierKAN, L0-direct configuration) and
+$4.0\times$ (WaveletKAN)---a full-chain, wide-coverage guarantee;
+adaptive allocation (E15) achieves $3.6\times$ at unchanged storage.
 
 \vspace{4pt}
-\noindent\textbf{Open directions.} Mechanized proof of the IR type soundness
-theorem in Coq/Lean, physical PLC WCET measurement (all current timing
+\noindent\textbf{Open directions.} We mechanized the core SVNN type system,
+the repaired Galois connection, and the abstract type-soundness statement
+in Coq~9.1 ({\S}\ref{app:coq}, \texttt{code/coq/}, compiled and
+verified 2026-08-06); extending the mechanization to the full
+type-soundness theorem and completing the three admitted
+algebraic sub-lemmas of the balanced-allocation proof remain open.
+Physical PLC WCET measurement (all current timing
 evidence is simulation-based via PLCSIM Advanced and Z3 SMT), and online fine-tuning
 on PLC hardware remain for future work. The type-theoretic framework
 established here---defining well-typedness conditions for certifiable
