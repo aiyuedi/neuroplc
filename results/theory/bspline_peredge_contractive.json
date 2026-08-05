@@ -1,0 +1,12 @@
+{
+  "recipe": "global measured-ratio scaling + fine-tune of L1 with per-step measured-gamma projection (E68 semantics)",
+  "gamma": [
+    0.949999988079071,
+    0.9500001072883606
+  ],
+  "acc": 0.9849059581756592,
+  "rowL0_max": 3.1641402817447895,
+  "rowL1_max": 1.0448032072749538,
+  "contractive_all_layers": true,
+  "date": "2026-08-06"
+}

@@ -183,16 +183,18 @@ and a deterministic perfectly sound verifier
     by non-affine, structure-optimal approximants~\cite{pinkus1985width})
     requires \emph{structural optimality}: certifying that a given
     structure achieves the class-optimal constant requires deciding
-    class-level optimality over all configurations. \emph{Conjecturally}
-    this is exponential: the product-gate reduction of
-    Theorem~\ref{thm:necessity} shows $\varepsilon$-verification of
-    coupled networks is NP-hard, and we conjecture that class-level
-    structure-optimality certification inherits the hardness (the
-    connecting reduction is left as an open problem; the instance-level
-    problem---fixed node set, one function---has a closed-form bound and
-    is cheap). Bit-exact verification is PSPACE-hard
-    \cite{hlz2021quantized}; hence, conditionally on the conjecture,
-    $V_{\text{gen}}$ or $V_B$ is exponential in the class-level stratum.
+    class-level optimality over all configurations. This is
+    exponential: Theorem~\ref{thm:stratum3-transfer} transfers the
+    NP-hardness of free-knot feasibility to the class level (the
+    product-gate reduction of Theorem~\ref{thm:necessity} shows
+    $\varepsilon$-verification of coupled networks is NP-hard at the
+    instance level; the class-level connecting reduction is free-knot
+    optimality, Theorem~\ref{thm:stratum3-transfer}, item~1; the
+    instance-level problem---fixed node set, one function---has a
+    closed-form bound and is cheap). Bit-exact verification is
+    PSPACE-hard \cite{hlz2021quantized}; hence, under ETH,
+    $V_{\text{gen}}$ or $V_B$ is exponential in the class-level
+    stratum.
 
     \item \textbf{Necessity within $\text{CP}$ (information-theoretic
     form).} Within the certificate calculus
@@ -240,11 +242,10 @@ scheme beats it from exact node data (Theorem~\ref{thm:sharp-lut}, item
 3); both are $O(1)$ proof terms under rules (ii)/(iii).
 (3)~Kinked gates: the $C^1$ class has width $\Theta(1/N)$ (tent
 functions), first-order rate. (4)~Structure optimality: free-node
-class-level optimality requires searching node configurations; the
-reduction of Theorem~\ref{thm:necessity} hardens tight
-$\varepsilon$-verification of coupled networks, and we conjecture the
-transfer to class-level structure-optimality certification (open
-problem; the instance-level bound is closed-form and cheap).
+class-level optimality requires searching node configurations;
+Theorem~\ref{thm:stratum3-transfer} transfers the hardness of
+free-knot feasibility to class-level structure-optimality
+certification (the instance-level bound is closed-form and cheap).
 (5)~The four-step necessity argument above, under the
 premise-computability assumption. $\square$
 
@@ -254,8 +255,9 @@ The three properties $(P1)(P2)(P3)$ of the trichotomy
 (Theorem~\ref{thm:trichotomy}) map to points in the $(V_B, \varepsilon)$
 plane: SVNN sits at $(O(1), c_k M_k N^{-k})$ (stratum 1), kinked gates
 at $(O(1), M_1 N^{-1})$ (stratum 2, rate loss), coupled gates at
-$(2^{\Omega(B)}, c_* M_k N^{-k})$ (stratum 3, constant reachable only
-conjecturally, verification exponential). Regime~4 of the trichotomy
+$(2^{\Omega(B)}, c_* M_k N^{-k})$ (stratum 3: the constant is reached
+at exponential budget, optimality certification NP-hard,
+Theorem~\ref{thm:stratum3-transfer}). Regime~4 of the trichotomy
 (domain-dependent curvature, $e^x$-type) falls \emph{inside stratum 1's
 form but with stratum-3-cost certificates}: the closed-form curvature
 $M_k$ is computable only after reachability analysis, so the
@@ -310,18 +312,18 @@ constant is $c_k$ (interpolation, affine-class minimax) and the
 class-optimal width constant is $c_* < c_k$
 \cite{pinkus1985width}; the gap is \emph{paid in structural
 optimality}: reaching $c_*$ requires non-affine, structure-optimal
-approximation, whose class-level certification is conjecturally
-exponential (Theorem~\ref{thm:capacity-stratification}, item 4)---a
-closed-form certificate at constant $c_*$ would decide the conjectured
-NP-hard class-level problem. The conjecture is anchored in the
-established hardness of free-knot optimality: globally optimal knot
+approximation, whose class-level certification is NP-hard
+(Theorem~\ref{thm:stratum3-transfer})---a
+closed-form certificate at constant $c_*$ would decide the NP-hard
+class-level problem. The hardness is that of free-knot optimality:
+globally optimal knot
 placement for free-knot splines is a set-partitioning-hard global
 optimization (deterministic global optimization of free knots is
 NP-hard in general~\cite{beliakov2004least}; the best-known global
 solvers terminate only with exponential worst-case
-effort~\cite{mohr2023globally}), and certifying that a node set
-achieves the width constant $c_*$ is at least as hard as deciding
-free-knot optimality at the class level. Numerically, $40$ random
+effort~\cite{mohr2023globally}); Theorem~\ref{thm:stratum3-transfer}
+formalizes the transfer to the class level (singleton embedding,
+item~1). Numerically, $40$ random
 restarts of free-node coordinate descent on a single peaked quartic
 yield $40$ distinct local optima spanning $25.7\times$ in error
 (2026-08-05, \texttt{verify\_width\_constant.py} extension)---the
@@ -385,15 +387,111 @@ networks~\cite{giacobbe2020bits}.
 \noindent\textit{Proof sketch.}
 (i)~Any closed-form certificate at constant $c_*$ yields a
 polynomial-time certificate for class-level structural optimality,
-which is conjecturally NP-hard (Theorem~\ref{thm:capacity-stratification},
-item 4); the instance-level bound is closed-form and cheap---the
-exponential statement is \emph{class-level only and conjectural}.
+which is NP-hard (Theorem~\ref{thm:stratum3-transfer}); the
+instance-level bound is closed-form and cheap---the
+exponential statement is \emph{class-level only}.
 (ii)~Parseval tail bounds on analytic coefficients; the classical
 rate-distortion reference~\cite{shannon1959coding} and the
 spectral-vs-algebraic dichotomy~\cite{trefethen2013approximation};
 $V_B$ decoupling follows from rule (iv) being an $O(1)$ proof term.
 (iii)~PSPACE-hardness transfers: bit-exact checking cannot run within
 poly verification. $\square$
+
+\vspace{4pt}
+\begin{theorem}[Free-Knot Hardness Transfer]
+\label{thm:stratum3-transfer}
+Let $\textsc{Reach}(F, N, \varepsilon_0)$ be the \emph{class-level
+reachability} decision problem: ``does there exist an $N$-cell
+order-$k$ deployment scheme $S$ with $\sup_{f \in F} \varepsilon(S, f)
+\leq \varepsilon_0$?'', and let $c_*(F, N) := \inf_S \sup_{f \in F}
+\varepsilon(S, f)$ be the class-optimal constant
+(Eq.~\eqref{eq:capacity-def}). Then for every $k \geq 1$:
+\begin{enumerate}
+    \item \textbf{Reachability is NP-hard.} Free-knot feasibility
+    reduces to $\textsc{Reach}$ by the \emph{singleton embedding}
+    $F_f = \{f\} \cup \{0\}$: the zero function is exactly reproduced
+    by every scheme (an all-zero LUT is order-$k$, and the zero
+    polynomial lies in every order-$k$ segment space), so
+    $\varepsilon(S, 0) = 0$ and $\sup_{g \in F_f} \varepsilon(S, g) =
+    \varepsilon(S, f)$; hence $\textsc{Reach}(F_f, N, \varepsilon_0)$
+    holds iff $f$ admits an $N$-cell order-$k$ approximant within
+    $\varepsilon_0$---the free-knot feasibility decision, NP-hard in
+    the decision form~\cite{beliakov2004least} (deterministic global
+    optimization of free knots; best-known global solvers terminate
+    only with exponential worst-case effort~\cite{mohr2023globally}).
+    \item \textbf{The class-optimal constant is NP-hard to certify.}
+    $c_*(F_f, N) = \inf_S \varepsilon(S, f) =: e^*(f, N)$, the
+    free-knot optimal error, whose threshold decision is NP-hard by
+    (1); a polynomial-time class-level certifier---one that outputs
+    $c_*(F, N)$ or answers the query ``$c_*(F, N) \leq \varepsilon_0$''
+    (up to an arbitrarily small relaxation, since the infimum need not
+    be attained in the continuous configuration space)---would decide
+    free-knot feasibility in polynomial time (query the certifier on
+    $F_f$ and compare with $\varepsilon_0$). Under the
+    Exponential-Time Hypothesis, class-level certification requires
+    $2^{\Omega(n)}$ time. The \emph{upper} side is cheap by
+    contrast: an exhaustive search over the configuration space
+    quantized to resolution $h = \varepsilon^{1/k}$ (node perturbation
+    is $k$-th order, so the quantization loss is $O(h^k)$) reaches
+    $c_*$ within $\varepsilon$ at budget $2^{N \log(1/h)}$---the
+    exponential budget of stratum~3 is \emph{sufficient}, exactly as
+    the conjecture on the constant's attainability at exponential
+    verification cost asserts.
+    \item \textbf{Structure-optimality certification.} Certifying that
+    a \emph{fixed} structure $S$ attains the class-optimal constant is
+    exactly the free-knot feasibility decision at the structure's own
+    threshold: on $F_f$, ``$S$ attains $c_*$'' means
+    $\varepsilon(S, f) = c_*(F_f, N) = e^*(f, N)$, and since
+    $e^*(f, N) \leq \varepsilon(S, f)$ holds by definition of the
+    infimum, the equality is equivalent to the threshold decision
+    $e^*(f, N) \leq \varepsilon(S, f)$.
+    \item \textbf{Complementarity with
+    Theorem~\ref{thm:necessity}.} The coupled-gate product network
+    (Theorem~\ref{thm:necessity}, item 2) establishes NP-hardness at
+    the \emph{instance} level (one network, one LUT); free-knot
+    splines transfer hardness to the \emph{class} level (one
+    structure, all functions of the class). The mechanisms are
+    distinct---instance-level coupling (3-SAT product gates) vs.\
+    class-level structural optimality (free knots)---and together they
+    make both coordinate directions of the stratum-3 regime hard.
+\end{enumerate}
+\end{theorem}
+
+\vspace{2pt}
+\noindent\textit{Proof.}
+\textbf{(1)} Both inclusions. If $\textsc{Reach}(F_f, N,
+\varepsilon_0)$ holds, let $S$ witness it; then $\varepsilon(S, f)
+\leq \sup_{g \in F_f} \varepsilon(S, g) \leq \varepsilon_0$, so $f$
+admits an $N$-cell order-$k$ approximant within $\varepsilon_0$.
+Conversely, if $S$ is such an approximant, then
+$\sup_{g \in F_f} \varepsilon(S, g) = \max(\varepsilon(S, f),
+\varepsilon(S, 0)) = \varepsilon(S, f) \leq \varepsilon_0$, so
+$\textsc{Reach}$ holds. The decision form of the free-knot hardness
+result~\cite{beliakov2004least} states that ``$\exists S :
+\varepsilon(S, f) \leq \varepsilon_0$'' (feasibility of an
+$N$-cell order-$k$ free-knot approximant) is NP-hard; the embedding
+$F_f$ is constructed from $(f, N)$ in polynomial time (one tape
+write), so the reduction is polynomial. \textbf{(2)} By (1) applied
+to the threshold: $c_*(F_f, N) \leq \varepsilon_0$ iff
+$\textsc{Reach}(F_f, N, \varepsilon_0)$ (up to the stated relaxation),
+so a polynomial oracle for $c_*$ decides free-knot feasibility; the
+ETH transfer is standard. The upper side is the explicit exhaustive
+construction. \textbf{(3)} Equivalence by the definition of the
+infimum, as stated. \textbf{(4)} By construction of the two
+reductions. $\square$
+
+\vspace{2pt}
+\noindent\textbf{Consistency with the numerical evidence.}
+The 40-restart experiment (2026-08-05,
+\texttt{verify\_width\_constant.py} extension: 40 distinct local
+optima spanning $25.7\times$ in error on a single peaked quartic) is
+the algorithmic shadow of (1)--(3): free-knot landscapes are
+overwhelmingly multimodal, so reachability and optimality decisions
+require the exponential search that (2) posits. The instance-level
+cheapness is not contradicted: the instance-level problem
+(fixed node set, one function) has the closed-form bound of
+Theorem~\ref{thm:sharp-lut}; hardness enters exactly when the node
+set becomes a decision variable ((1)--(3)).
 
 \vspace{4pt}
 \begin{theorem}[Architecture-as-Code Selection Law]
@@ -447,8 +545,10 @@ Theorem~\ref{thm:capacity-stratification} is the apex, stated as the
 evaluation of the capacity function
 (Eq.~\eqref{eq:capacity-def}): $C(N, O(1)) \asymp c_k M_k N^{-k}$
 (stratum 1), $C(N, O(1)) \asymp M_1 N^{-1}$ on the kinked class
-(stratum 2), and $C(N, 2^{\Omega}) \leq c_* M_k N^{-k}$ conjecturally
-(stratum 3). Its proof uses the sharp constants
+(stratum 2), and $C(N, 2^{\Omega}) \leq c_* M_k N^{-k}$ (stratum 3: attained by
+exhaustive search over the quantized configuration space; its
+optimality certification is NP-hard,
+Theorem~\ref{thm:stratum3-transfer}). Its proof uses the sharp constants
 (Theorem~\ref{thm:sharp-lut}) as the stratum-1 capacity limit, the
 minimax rates (Theorem~\ref{thm:compile_aware_minimax},
 Theorem~\ref{thm:besov_pac}) as the statistical coordinates
@@ -545,8 +645,9 @@ network approximation (in preparation) govern the \emph{rates} used as
 inputs; the capacity framework does not claim new approximation
 results. \textbf{SOS certificates} certify polynomial optimality
 efficiently at the instance level; the exponential statement in
-Theorem~\ref{thm:capacity-tradeoff}(i) is class-level and conjectural
-only, which is consistent with instance-level cheapness. (Numerical
+Theorem~\ref{thm:capacity-tradeoff}(i) is class-level only
+(NP-hardness, Theorem~\ref{thm:stratum3-transfer}), which is
+consistent with instance-level cheapness. (Numerical
 corroboration: $E$-$T4$--$E$-$T6$, scripts
 \texttt{verify\_capacity.py}, \texttt{verify\_stratification.py},
 \texttt{verify\_decision\_law.py}; results in

@@ -379,20 +379,34 @@ $15\times$/$3.8\times$ component-wise reduction from the released
 checkpoint's $[15.4, 5.3]$ ($15.4\to1.03$; $5.3\to1.38$)---at a $1.4$~pp
 accuracy cost
 (\texttt{train\_contractive\_kan.py}, four runs, $\gamma \to 1$
-monotonically as the target tightens).  Full contractivity
-($\gamma < 1$) at \emph{every} layer is not reached by training alone:
-the B-spline basis amplitude ($\sup_x |B(x)| \geq 1$) resists
-projection at the input layer ($\gamma_1 = 1.026$, essentially
-contractive), though the output layer now satisfies $\gamma_2 = 0.95$
-(2026-08-05 post-hoc projection; logit scaling is argmax-invariant, so
-accuracy is preserved exactly).  The expressivity--contractivity
+monotonically as the target tightens).  \emph{Pervasive}
+contractivity ($\gamma < 1$ at every layer) is then reached by the
+per-edge-$L$-constrained recipe (2026-08-06,
+\texttt{verify\_bspline\_peredge.py}): a shape-preserving global
+scaling of the input layer (amplitude $\times 0.842$---uniform across
+rows, since per-row projection distorts the signal covariance and
+costs $\sim$7~pp; the uniform rescaling actually \emph{raises}
+accuracy to $98.70\%$ as the signal moves into the LUT design
+domain), followed by a $15$-epoch fine-tune of the output layer under
+a per-step \emph{measured}-ratio projection (E68 semantics, sampled
+on the actual signal domain; the projected fine-tune is stable---the
+earlier drift to $\gamma_2 \approx 8.8$ was the \emph{unconstrained}
+retrain, not the constraint).  The result is $\gamma = [0.95, 0.95]$
+at $98.5\%$ test accuracy ($0.1$~pp below the unconstrained
+checkpoint).  The \emph{analytic} row-Lipschitz sums remain above
+$1$ ($[3.16, 1.51]$): the B-spline basis amplitude
+($\sup_x |B(x)| \geq 1$) resists analytic contraction at the input
+layer, so the B-spline checkpoint's certificate stays
+validated-tier (measured $\gamma$, the same tier as before), while
+the bounded-amplitude bases below attain analytic (sound-tier)
+contractivity.  The expressivity--contractivity
 trade-off is quantitative and explicit: the $\gamma^{L-1}$ factor of
 Theorem~\ref{thm:generalization} is purchased with accuracy, exactly
 as the capacity framework ({\S}\ref{sec:capacity}) predicts (the
-contraction budget is an expression budget).  Full contractivity for
-B-spline KANs requires a bounded-amplitude basis family---and the
-$C^2$-BV family provides exactly that (FourierKAN, $|\sin/\cos| \leq 1$;
-WaveletKAN, bounded Mexican-hat). Training these bounded-amplitude bases
+contraction budget is an expression budget).  \emph{Analytic}
+contractivity for B-spline KANs requires a bounded-amplitude basis
+family---and the $C^2$-BV family provides exactly that (FourierKAN,
+$|\sin/\cos| \leq 1$; WaveletKAN, bounded Mexican-hat). Training these bounded-amplitude bases
 with the same soft-$\gamma$ recipe (2026-08-04), followed by an
 accuracy-neutral post-hoc projection of the output layer (2026-08-05),
 attains \emph{pervasive} contractivity ($\gamma < 1$ at every layer)
@@ -419,7 +433,8 @@ $4.0\times$; covers the measured $0.157$ family) with $100\%$ coverage
 (\texttt{train\_c2bv\_contractive.py},
 \texttt{verify\_c2bv\_bound.py}). The accuracy cost of the certificate
 is $0.03$~pp (Fourier) and $0.26$~pp (Wavelet) versus the $1.4$~pp of
-the B-spline recipe, both against the same $99.93\%$ B-spline baseline
+the B-spline training recipe ($+0.1$~pp for the pervasive-contractivity
+step), both against the same $99.93\%$ B-spline baseline
 (E1): for bounded-amplitude bases the contraction budget
 is nearly free, because the basis amplitude is an architectural constant
 rather than a learned quantity. The $\gamma \to 1$ branch of

@@ -90,11 +90,11 @@ cd paper && xelatex main && bibtex main && xelatex main && xelatex main  # 编�
 
 ### 投稿前（按优先级）
 1. **TNNLS 页数策略（板板决策，挂起中）**：92 页单栏 ≈ 46 页双栏 vs ~14 页限制——压缩 vs 分流（IMA J. Inf. Inference / FoCM 理论侧；IEEE TII 系统侧），投稿前必须定案
-2. **γ<1 全层（v1/v2/v3 均未破第二层 γ₂=1.68）**：现有软惩罚+投影无法压——嫌疑 bias 未缩放 + 信号比非 per-edge L——需 per-edge L 训练约束（方法升级项）
+2. ~~**γ<1 全层（soft2L）**~~ ✅ **达成（2026-08-06，verify_bspline_peredge.py）**：per-edge-L 配方 = L0 全局缩放 0.842（保形状，acc 反升 98.70%）+ L1 微调 15ep（每步**实测** γ 投影，E68 口径，eval 模式防 _extend_grid 漂移）→ **γ=[0.95,0.95]（6000 点实测）全层收缩，acc 98.49%（-0.13pp）**；踩坑：解析 row-L 低估 3×（数值差分已含链式 1/3，公式再除 3）、600 点采样投影幻觉（v3 真 γ₂=1.075）、按行投影毁协方差（-7pp vs 全局缩放无损）；诚实边界：解析 row-L=[3.16,1.04] 仍>1（基幅度≥1）→ 证书保持 validated-tier，Fourier/Wavelet sound-tier 优势不变；E-T9 段+tab:cert_thresholds 已同步；v5 checkpoint（kan_contractive_v5.pt）
 3. **物理 PLC WCET 实测**（目前 PLCSIM/Z3 模拟 + L0-direct 估算 24.8ms）——诚实限制，cover letter 已声明
 4. ~~**P2 残余**~~ ✅ 已全清（c876ce5）；44 underfull 遗留（低优先）
 5. **CN 中文版同步**（板板明确"先不理"，5 个 bib key 缺失会编译 [?]）
-6. ~~**T1 归约**~~ ✅ conjecture 已锚定（free-knot NP-hard：Mohr 2023/Beliakov 2004）；完整归约证明仍开放（独立 session）
+6. ~~**T1 归约**~~ ✅ **conjecture 升级为定理**（2026-08-06，thm:stratum3-transfer）：单元素嵌入 F={f}∪{0}（ε(S,0)=0）→ 类级可达性 Reach NP-hard（Beliakov 决策形式）+ c_* 计算 NP-hard + ETH 指数下界 + 穷举量化网格上界（2^N log(1/h) 预算达 c_*）+ 结构最优性认证 = 阈值 e*(f,N) ≤ ε(S,f)；与 thm:necessity 互补（实例级耦合 vs 类级自由节点）；7 处 conjecture 措辞同步（stratum-3 段/tradeoff(i)/proof/unification/coordinates/related work）；94 页 0e0w 0 undefined 编译通过
 
 ### 已结案（勿再动）
 - **证书第三轮 ✅（2026-08-05，904dc16/72c840a/781920d 等）**：
